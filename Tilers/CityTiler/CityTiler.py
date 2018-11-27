@@ -152,9 +152,13 @@ def from_3dcitydb(cursor, outputDir):
 
 
 def kd_tree(points, maxPoints, depth=0):
-    # TODO: maybe store hierarchy?
+    # The module argument of 2 (in the next line) hard-wires the fact that
+    # this kd_tree is in fact a 2D_tree.
     axis = depth % 2
 
+    # Within the sorting criteria point[1] refers to the centroid of the
+    # bounding boxes of the buildings. And thus, depending on the value of
+    # axis, we alternatively sort on the X or Y coordinate of those centroids:
     sPoints = sorted(points, key=lambda point: point[1][axis])
     median = len(sPoints) // 2
     lPoints = sPoints[:median]
