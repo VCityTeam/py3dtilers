@@ -10,6 +10,7 @@ from py3dtiles import TriangleSoup, GlTF, B3dm, BatchTableHierarchy
 import json
 import itertools
 
+
 def ParseCommandLine():
     # arg parse
     descr = '''TODO.'''
@@ -66,9 +67,11 @@ def OpenDataBase(configuration):
 
     return cursor
 
+
 def parseBox2D(string):
     # 'BOX(1 2, 3 4)' -> [[1,2],[3,4]]
     return [[float(coord) for coord in point.split(' ')] for point in string[4:-1].split(',')]
+
 
 def from_3dcitydb(cursor, outputDir):
     # Get all buildings
@@ -150,7 +153,6 @@ def from_3dcitydb(cursor, outputDir):
     f.close()
 
 
-
 def kd_tree(points, maxPoints, depth=0):
     # The module argument of 2 (in the next line) hard-wires the fact that
     # this kd_tree is in fact a 2D_tree.
@@ -171,6 +173,7 @@ def kd_tree(points, maxPoints, depth=0):
         tiles.append(lPoints)
         tiles.append(rPoints)
     return tiles
+
 
 def create_tile(cursor, buildingIds, offset):
     hierarchy = {}
@@ -249,6 +252,7 @@ def create_tile(cursor, buildingIds, offset):
 
     gltf = GlTF.from_binary_arrays(arrays, np.identity(4).flatten('F'))
     return B3dm.from_glTF(gltf, bt)
+
 
 if __name__ == '__main__':
     cursor = OpenDataBase(ParseCommandLine())
