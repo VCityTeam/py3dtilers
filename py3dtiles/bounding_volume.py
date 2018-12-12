@@ -20,12 +20,31 @@ class BoundingVolume(ThreeDTilesNotion):
             sys.exit(1)
         self.add_property_from_array(volume_type, array)
 
+    def is_box(self):
+        return 'box' in self.header
+
+    def set_box(self, box):
+        if "region" in self.header:
+            print('Warning: overwriting existing region with a box.')
+            del self.header["region"]
+        if "sphere" in self.header:
+            print('Warning: overwriting existing sphere with a box.')
+            del self.header["sphere"]
+        if "box" in self.header:
+            print('Warning: overwriting existing box with a new one.')
+        self.header["box"] = box
+
+    def get_box(self):
+        if not self.is_box():
+            print('Requiring the box of a non box bounding volume')
+            sys.exit(1)
+        return self.header["box"]
+
     def prepare_for_json(self):
         defined = 0
         if "box" in self.header:
             defined += 1
-            if not len(self.header["box"]) == 12:
-                print("A box BoundingVolume must have eactly 12 items.")
+            if not self.header["box"].is_valid():
                 sys.exit(1)
         if "region" in self.header:
             defined += 1

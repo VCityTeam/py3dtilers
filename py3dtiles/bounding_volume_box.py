@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
-import numpy as np
+import numpy
 from py3dtiles import ThreeDTilesNotion
 
+# In order to prevent the appearance of ghost newline characters ("\n")
+# when printing a numpy.array (mainly self.header['array'] in this file):
+numpy.set_printoptions(linewidth=200)
 
 class BoundingVolumeBox(ThreeDTilesNotion):
     """
@@ -28,21 +31,19 @@ class BoundingVolumeBox(ThreeDTilesNotion):
     """
     def __init__(self):
         super().__init__()
-        self.header["array"] = None
-
-    def __str__(self):
-        return str(self.header["array"])
+        self.header['array'] = None
 
     def set_from_list(self, array):
-        self.header["array"] = np.array([float(i) for i in array], dtype=np.float)
+        self.header["array"] = numpy.array([float(i) for i in array],
+                                           dtype=numpy.float)
 
     def get_corners(self):
         """
         :return: the corners of box as a list
         """
-        if not 'array' in self.header:
-            print("Undefined Bounding Volume Box has no corners.")
+        if not self.is_valid():
             sys.exit(1)
+
         center      = self.header["array"][0: 3: 1]
         x_half_axis = self.header["array"][3: 6: 1]
         y_half_axis = self.header["array"][6: 9: 1]
@@ -53,18 +54,18 @@ class BoundingVolumeBox(ThreeDTilesNotion):
         z_axis = z_half_axis * 2
 
         # The eight cornering points of the box
-        tmp   = np.subtract(center,x_half_axis)
-        tmp   = np.subtract(tmp,   y_half_axis)
+        tmp   = numpy.subtract(center,x_half_axis)
+        tmp   = numpy.subtract(tmp,   y_half_axis)
 
-        o     = np.subtract(tmp,   z_half_axis)
-        ox    = np.add(o, x_axis)
-        oy    = np.add(o, y_axis)
-        oxy   = np.add(o, np.add(x_axis, y_axis))
+        o     = numpy.subtract(tmp,   z_half_axis)
+        ox    = numpy.add(o, x_axis)
+        oy    = numpy.add(o, y_axis)
+        oxy   = numpy.add(o, numpy.add(x_axis, y_axis))
 
-        oz    = np.add(o, z_axis)
-        oxz   = np.add(oz, x_axis)
-        oyz   = np.add(oz, y_axis)
-        oxyz  = np.add(oz, np.add(x_axis, y_axis))
+        oz    = numpy.add(o, z_axis)
+        oxz   = numpy.add(oz, x_axis)
+        oyz   = numpy.add(oz, y_axis)
+        oxyz  = numpy.add(oz, numpy.add(x_axis, y_axis))
 
         return [o, ox, oy, oxy, oz, oxz, oyz, oxyz]
 
@@ -81,17 +82,17 @@ class BoundingVolumeBox(ThreeDTilesNotion):
         z_min = min( c[2] for c in corners)
         z_max = max( c[2] for c in corners)
 
-        new_center = np.array([(x_min + x_max) / 2,
+        new_center = numpy.array([(x_min + x_max) / 2,
                                (y_min + y_max) / 2,
                                (z_min + z_max) / 2])
-        new_x_half_axis = np.array([(x_max - x_min) / 2, 0, 0])
-        new_y_half_axis = np.array([0, (y_max - y_min) / 2, 0])
-        new_z_half_axis = np.array([0, 0, (z_max - z_min) / 2])
+        new_x_half_axis = numpy.array([(x_max - x_min) / 2, 0, 0])
+        new_y_half_axis = numpy.array([0, (y_max - y_min) / 2, 0])
+        new_z_half_axis = numpy.array([0, 0, (z_max - z_min) / 2])
 
-        return np.concatenate((new_center,
-                               new_x_half_axis,
-                               new_y_half_axis,
-                               new_z_half_axis))
+        return numpy.concatenate((new_center,
+                                  new_x_half_axis,
+                                  new_y_half_axis,
+                                  new_z_half_axis))
 
     def add(self, other):
         """
@@ -101,7 +102,8 @@ class BoundingVolumeBox(ThreeDTilesNotion):
         not the smallest one (due to its alignment with the coordinate axis).
         :param other: another box bounding volume to be added with this one
         """
-        if not 'array' in self.header:
+        if not self.is_defined():
+            # Then it is safe to overwrite
             self.header["array"] = other.header["array"]
             return
 
@@ -113,19 +115,43 @@ class BoundingVolumeBox(ThreeDTilesNotion):
         z_min = min( c[2] for c in corners)
         z_max = max( c[2] for c in corners)
 
-        new_center = np.array([(x_min + x_max) / 2,
-                               (y_min + y_max) / 2,
-                               (z_min + z_max) / 2])
-        new_x_half_axis = np.array([(x_max - x_min) / 2, 0, 0])
-        new_y_half_axis = np.array([0, (y_max - y_min) / 2, 0])
-        new_z_half_axis = np.array([0, 0, (z_max - z_min) / 2])
+        new_center = numpy.array([(x_min + x_max) / 2,
+                                  (y_min + y_max) / 2,
+                                  (z_min + z_max) / 2])
+        new_x_half_axis = numpy.array([(x_max - x_min) / 2, 0, 0])
+        new_y_half_axis = numpy.array([0, (y_max - y_min) / 2, 0])
+        new_z_half_axis = numpy.array([0, 0, (z_max - z_min) / 2])
 
         result = BoundingVolumeBox()
-        result.array = np.concatenate((new_center,
-                                       new_x_half_axis,
-                                       new_y_half_axis,
-                                       new_z_half_axis))
+        result.array = numpy.concatenate((new_center,
+                                          new_x_half_axis,
+                                          new_y_half_axis,
+                                          new_z_half_axis))
         return result
+
+    def is_defined(self):
+        if 'array' not in self.header:
+            return False
+        if not isinstance(self.header['array'], numpy.ndarray):
+            return False
+        return True
+
+    def is_valid(self):
+        if not self.is_defined():
+            print('Warning: Bounding Volume Box is not defined.')
+            return False
+        if not self.header['array'].ndim == 1:
+            print('Warning: Bounding Volume Box has wrong dimensions.')
+            return False
+        if not self.header['array'].shape[0] == 12:
+            print('Warning: Bounding Volume Box must have 12 elements.')
+            return False
+        return True
+
+    def prepare_for_json(self):
+        if not self.is_valid():
+            print('Warning: invalid Bounding Volume Box cannot be prepared.')
+            sys.exit(1)
 
 
 if __name__ == '__main__':
@@ -134,14 +160,14 @@ if __name__ == '__main__':
     # Getting canonical first example
     box.set_from_list([2,3,4,  2,0,0,  0,3,0,  0,0,4])
     print("This aligned box and its canonical one should be identical:")
-    print("         original: ", box)
+    print("         original: ", box.header['array'])
     print("        canonical: ", box.get_canonical())
 
     # Getting canonical second example
     box.set_from_list([0,0,0,  1,1,0,  -1,1,0,  0,0,1])
     print("But when considering a rotated cube of size 2, the canonical",
           "fitting box is different:")
-    print("         original: ", box)
+    print("         original: ", box.header['array'])
     print("        canonical: ", box.get_canonical())
 
     # Adding volumes
@@ -149,8 +175,8 @@ if __name__ == '__main__':
     other = BoundingVolumeBox()
     other.set_from_list([9,9,9,  1,0,0,  0,1,0,  0,0,1])
     print("Consider the two following box bounding volumes:")
-    print("    first: ", box)
-    print("   second: ", other)
+    print("    first: ", box.header['array'])
+    print("   second: ", other.header['array'])
 
     fitting_volume = box.add(other)
     print("When added we get the cube centered at (5,5,5) and with a 5 size:")

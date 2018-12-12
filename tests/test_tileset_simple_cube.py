@@ -1,41 +1,87 @@
 import unittest
 import numpy as np
-from py3dtiles import B3dm, GlTF, TriangleSoup
+from py3dtiles import B3dm, GlTF, TriangleSoup, TileSet, TileForReal
 
-class TestTileBuilder(unittest.TestCase):
+
+class TestTileBuilder(unittest.TestCase, object):
+
+    @staticmethod
+    def build_cuboid_as_binary_triangles_array(org_x, org_y, org_z, dx, dy, dz):
+        # Vertices order is such that normals are pointing outwards of the cube.
+        # Each face of the cube is made of two triangles.
+        return [
+            # Lower face (parallel to Ox-Oy plane i.e. horizontal)
+            [np.array([org_x + dx, org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x     , org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z     ], dtype=np.float32)],
+            [np.array([org_x,      org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x,      org_y + dy, org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z     ], dtype=np.float32)],
+            # Upper face (parallel to Ox-Oy plane i.e. horizontal)
+            [np.array([org_x,      org_y,      org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y,      org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32)],
+            [np.array([org_x,      org_y + dy, org_z + dz], dtype=np.float32),
+             np.array([org_x,      org_y,      org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32)],
+            # Side face parallel to the Ox-Oz plane (vertical),
+            [np.array([org_x,      org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y,      org_z + dz], dtype=np.float32)],
+            [np.array([org_x,      org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y,      org_z + dz], dtype=np.float32),
+             np.array([org_x,      org_y,      org_z + dz], dtype=np.float32)],
+            # Other side face parallel to the Ox-Oz plane,
+            [np.array([org_x,      org_y + dy, org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z     ], dtype=np.float32)],
+            [np.array([org_x,      org_y + dy, org_z     ], dtype=np.float32),
+             np.array([org_x,      org_y + dy, org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32)],
+            # Side face parallel to the Oy-Oz plane (vertical)
+            [np.array([org_x,      org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x,      org_y,      org_z + dz], dtype=np.float32),
+             np.array([org_x,      org_y + dy, org_z + dz], dtype=np.float32)],
+            [np.array([org_x,      org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x,      org_y + dy, org_z + dz], dtype=np.float32),
+             np.array([org_x,      org_y + dy, org_z     ], dtype=np.float32)],
+            # Other side face parallel to the Oy-Oz plane (vertical)
+            [np.array([org_x + dx, org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32),
+             np.array([org_x + dx, org_y,      org_z + dz], dtype=np.float32)],
+            [np.array([org_x + dx, org_y,      org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z     ], dtype=np.float32),
+             np.array([org_x + dx, org_y + dy, org_z + dz], dtype=np.float32)],
+        ]
 
     def test_build(self):
+        # Define a TriangleSoup setting up some geometry
         ts = TriangleSoup()
-        trianglesArray = [[
-           [ np.array([ 36.99783, 234.92761, 176.9191 ], dtype=float),
-             np.array([ 40.09393, 237.59793, 190.9191 ], dtype=float),
-             np.array([ 50.99783, 254.92761, 208.97176], dtype=float) ]
-        ]]
-        ts.triangles = trianglesArray
-        positions = ts.getPositionArray()
-        normals = ts.getNormalArray()
-        # Box is [[minX, minY, minZ],[maxX, maxY, maxZ]] expressed as floats (not binaires):
-        box = [[float(i) for i in j] for j in ts.getBbox()]
-        center = [(box[0][i] + box[1][i]) / 2 for i in range(0,3)]
-        xAxis = [box[1][0] - box[0][0], 0,                     0]
-        yAxis = [0,                     box[1][1] - box[0][1], 0]
-        zAxis = [0,                     0,                     box[1][2] - box[0][2]]
-        bounding_volume = [ round(x, 3) for x in center + xAxis + yAxis + zAxis ]
-                            
-        ## print("aaaaaaaaaaaaaaaaaaaaaaaaaaaa", bounding_volume)
-        arrays = [{
-            'position': positions,
-            'normal': normals,
-            'bbox': box
-        }]
+        triangles = TestTileBuilder.build_cuboid_as_binary_triangles_array(
+                                    -178.1, -12.845, 300.0, 100., 200., 300.)
+        triangles.extend(
+                    TestTileBuilder.build_cuboid_as_binary_triangles_array(
+                                      -8.1, -1.8, 300.0, 200., 300., 100.) )
+        ts.triangles = [ triangles ]
 
-        transform = np.array([
-            [1, 0, 0, 1842015.125],
-            [0, 1, 0, 5177109.25],
-            [0, 0, 1, 247.87364196777344],
-            [0, 0, 0, 1]], dtype=float)
-        # translation : 1842015.125, 5177109.25, 247.87364196777344
-        transform = transform.flatten('F')
+        # Define a tile that will hold the geometry
+        tile = TileForReal()
+        tile.set_bounding_volume(ts.getBoxBoundingVolumeAlongAxis())
+
+        # Build a tile content (with B3dm formatting) out of the geometry
+        # held in the TriangleSoup:
+        arrays = [{
+            'position': ts.getPositionArray(),
+            'normal':   ts.getNormalArray(),
+            'bbox':     ts.getBboxAsFloat()
+        }]
+        transform = np.identity(4).flatten('F')
         glTF = GlTF.from_binary_arrays(arrays, transform)
-        t = B3dm.from_glTF(glTF)
-        t.save_as("junko_test_tile_1.b3dm")
+        tile_content = B3dm.from_glTF(glTF)
+        tile.set_content(tile_content)
+
+        # Define the tileset that will hold the (single) tile
+        tile_set = TileSet()
+        tile_set.add_tile(tile)
+        tile_set.add_asset_extras("Py3dTiles TestTileBuilder example.")
+        tile_set.write_to_directory('junk')

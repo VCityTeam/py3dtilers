@@ -2,11 +2,25 @@ import numpy as np
 import math
 import struct
 from .earcut import earcut
+from py3dtiles import BoundingVolume, BoundingVolumeBox
 
 
 class TriangleSoup:
     def __init__(self):
-        self.triangles = []
+        # self.triangles[0] is the mandatory list of arrays of vertices
+        # constituting the triangles i.e. something of the form
+        #   [
+        #     [np.array([0., 0., 0.], dtype=np.float32),   # First triangle
+        #      np.array([1., 0., 0.], dtype=np.float32),
+        #      np.array([1., 1., 0.], dtype=np.float32)],
+        #     [np.array([0., 0., 1.], dtype=np.float32),   # Second triangle
+        #      np.array([1., 0., 1.], dtype=np.float32),
+        #      np.array([1., 1., 1.], dtype=np.float32)],
+        #      ...                                         # More triangles
+        #   ]
+        # self.triangles[1 + index] are the optional lists of user data
+        # attributes associated to each of the vertices of TriangleSoup.
+        self.triangles = list()
 
     @staticmethod
     def from_wkb_multipolygon(wkb, associatedData=[]):
@@ -61,7 +75,7 @@ class TriangleSoup:
 
         Returns
         -------
-        Binary array of vertice positions
+        Binary array of vertices' positions
         """
 
         verticeTriangles = self.triangles[0]
@@ -119,6 +133,45 @@ class TriangleSoup:
         mins = np.array([np.min(t, 0) for t in self.triangles[0]])
         maxs = np.array([np.max(t, 0) for t in self.triangles[0]])
         return [np.min(mins, 0), np.max(maxs, 0)]
+
+    def getBboxAsFloat(self):
+        """
+        :return: an array [[minX, minY, minZ],[maxX, maxY, maxZ]] where
+                 the respective boundaries are represented as floats (this
+                 is to be opposed to getBbox that returns np.float32).
+        """
+        return [[float(i) for i in j] for j in self.getBbox()]
+
+    def getBoxBoundingVolumeAlongAxis(self):
+        """
+        :return: in the 3DTiles specifications, a box bounding volume is
+                 defined as an array of 12 numbers with the following
+                 semantic:
+                   - The first three elements define the x, y, and z values
+                     for the center of the box.
+                   - The next three elements (with indices 3, 4, and 5) define
+                     the x axis direction and half-length.
+                   - The next three elements (with indices 6, 7, and 8) define
+                     the y axis direction and half-length.
+                   - The last three elements (indices 9, 10, and 11) define
+                     the z axis direction and half-length."
+                 Because the bounding volume is computed out of the bounding
+                 box its axis are defined along the coordinate axis (hence the
+                 bounding box might be bigger than necessary). In order to
+                 find the optimal (smallest one) bounding volume one would
+                 have to use more advanced methods for example a principal
+                 component analysis...
+        """
+        box = self.getBboxAsFloat()
+        center = [(box[0][i] + box[1][i]) / 2 for i in range(0, 3)]
+        xAxis = [box[1][0] - box[0][0], 0., 0.]
+        yAxis = [0., box[1][1] - box[0][1], 0.]
+        zAxis = [0., 0., box[1][2] - box[0][2]]
+        bounding_box = BoundingVolumeBox()
+        bounding_box.set_from_list(center + xAxis + yAxis + zAxis)
+        result = BoundingVolume()
+        result.set_box(bounding_box)
+        return result
 
 
 def faceAttributeToArray(triangles):

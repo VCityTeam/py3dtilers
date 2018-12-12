@@ -2,7 +2,7 @@
 import sys
 import json
 import numpy
-from py3dtiles import Extension, SchemaValidators
+from py3dtiles import Extension, SchemaValidators, Tile
 
 
 class ThreeDTilesNotion(object):
@@ -66,6 +66,11 @@ class ThreeDTilesNotion(object):
                 if isinstance(obj, ThreeDTilesNotion):
                     obj.prepare_for_json()
                     return obj.header
+                if isinstance(obj, Tile):
+                    return "Tiles are in fact tile contents!!!"
+                # Numpy arrays entries require an ad hoc treatment
+                if isinstance(obj, numpy.ndarray):
+                    return obj.tolist()
                 # Let the base class default method raise the TypeError
                 return json.JSONEncoder.default(self, obj)
 
