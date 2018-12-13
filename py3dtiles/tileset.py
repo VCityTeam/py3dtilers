@@ -91,18 +91,21 @@ class TileSet(ThreeDTilesNotion):
         target_dir = pathlib.Path(directory).expanduser()
         pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
 
-        # Write the TileSet
+        # Prior to writing the TileSet, the future location of the enclosed
+        # Tile's content (set as their respective TileContent uri) must be
+        # specified:
+        all_tiles = self.attributes["root"].get_descendants()
+        for index, tile in enumerate(all_tiles):
+            tile.set_content_uri(os.path.join('tiles',
+                                              f'{index}.b3dm'))
+
+        # Proceed with the writing of the TileSet per se:
         pathlib.Path(target_dir, 'tiles').mkdir(parents=True, exist_ok=True)
         tileset_file = open(os.path.join(target_dir, 'tileset.json'), 'w')
         tileset_file.write(self.to_json())
         tileset_file.close()
 
-        # Proceed with writing the tiles content and first specify them where
-        # they should be written.
-        all_tiles = self.attributes["root"].get_descendants()
+        # Terminate with the writing of the tiles content:
         for index, tile in enumerate(all_tiles):
-            tile.set_content_uri(os.path.join(directory,
-                                              'tiles',
-                                              f'{index}.b3dm'))
-            tile.write_content()
+            tile.write_content(directory)
 

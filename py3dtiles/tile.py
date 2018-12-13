@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-from .threedtiles_notion import ThreeDTilesNotion
 from .bounding_volume import BoundingVolume
-
+from .threedtiles_notion import ThreeDTilesNotion
+from .tile_content import TileContent
 
 class Tile(ThreeDTilesNotion):
 
@@ -17,16 +17,6 @@ class Tile(ThreeDTilesNotion):
         # Some possible valid properties left un-delt with
         # viewerRequestVolume
         # self.attributes["transform"] = None
-
-
-        # A TileContent has an uri property that can be defined (when the
-        # owning TileSet is serialized) as the path name of the file holding
-        # the corresponding Tile content. Since, for the time being, the
-        # TileContent class is not yet defined we use (in a kludgy way) this
-        # Tile class to carry that duty. :(
-        # FIXME: create the TileContent class and remove the following undue
-        # property from this class
-        self.content_pathname = None
 
     def set_transform(self, transform):
         """
@@ -42,15 +32,26 @@ class Tile(ThreeDTilesNotion):
         return self.attributes["boundingVolume"]
 
     def set_content(self, content):
+        if self.attributes["content"]:
+            print('Warning: overwriting existing Tile content.')
         self.attributes["content"] = content
+
+    def get_content(self):
+        return self.attributes["content"]
 
     def set_geometric_error(self, error):
         self.attributes["geometricError"] = error
 
     def set_content_uri(self, uri):
-        # FIXME: refer to above comment concerning content_pathname and
-        #        remove this method.
-        self.content_pathname = uri
+        if not 'content' in self.attributes:
+            self.set_content (TileContent())
+        self.attributes["content"].set_uri(uri)
+
+    def get_content_uri(self):
+        if not 'content' in self.attributes:
+            print('Tile with unset content.')
+            sys.exit(1)
+        return self.attributes["content"].get_uri()
 
     def add_child(self, tile):
         self.attributes["children"].append(tile)
@@ -99,29 +100,36 @@ class Tile(ThreeDTilesNotion):
             self.attributes["content"] = {"uri":
               "Dummy content set by py3dtiles:ThreeDTilesNotion:prepare_for_json()"}
 
-    def write_content(self):
+    def write_content(self, directory):
         """
-        Write (or overwrite) the tile _content_ to the filename designated by
-        content_pathname kludgy property. Note that it is the responsibility
-        of the owning Tileset to
-          - set up the content_pathname
-          - to deal with the Tile (because the Tile information is serialized
-            within the TileSet)
+        Write (or overwrite) the tile _content_ to the directory specified
+        as parameter and withing the relative filename designated by
+        the tile's content uri. Note that it is the responsibility of the
+        owning TileSet to
+          - set those uris
+          - to explicitly invoke write_content() (this is to be opposed with
+            the Tile attributes which get serialized when recursing on the
+            TileSet attributes)
+            :param directory: the target directory
         """
-        if not self.content_pathname:
-            print("A content_pathname is required")
+        file_name = self.get_content_uri()
+        if not file_name:
+            print("An uri is mandatory for writing Tile content.")
             sys.exit(1)
+        file_name = os.path.join(directory, file_name)
 
-        # Make sure the output directory exists
-        target_dir = os.path.dirname(self.content_pathname)
+        # Make sure the output directory exists (note that target_dir may
+        # be a sub-directory of 'directory' because the uri might hold its
+        # own path):
+        target_dir = os.path.dirname(file_name)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
 
         # Write the tile content of this tile:
-        content = self.attributes["content"]
+
         # The following is ad-hoc code for the currently existing b3dm class.
-        # FIXME: have the future TileContent classe have a write method
+        # FIXME: have the future TileContent class have a write method
         # and simplify the following code accordingly.
-        content_file = open(self.content_pathname, 'wb')
-        content_file.write(content.to_array())
+        content_file = open(file_name, 'wb')
+        content_file.write(self.get_content().to_array())
         content_file.close()
