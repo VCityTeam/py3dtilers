@@ -19,6 +19,13 @@ class TileSet(ThreeDTilesNotion):
     def set_geometric_error(self, error):
         self.attributes["geometricError"] = error
 
+    def set_transform(self, transform):
+        """
+        :param transform: a flattened transformation matrix
+        :return:
+        """
+        self.attributes["root"].set_transform(transform)
+
     def set_root_tile(self, tile):
         if not isinstance(tile, Tile):
             print('Root tile must be of type...Tile.')

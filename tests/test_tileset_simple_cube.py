@@ -82,6 +82,12 @@ class TestTileBuilder(unittest.TestCase, object):
 
         # Define the tileset that will hold the (single) tile
         tile_set = TileSet()
+        # Hardwiring :-( this tileset to the city of Lyon in EPSG:3946 refer to
+        # https://epsg.io/map#srs=3946&x=1841276.446781&y=5172616.229943&z=14&layer=streets
+        tile_set.set_transform([1, 0, 0, 0,
+                                0, 1, 0, 0,
+                                0, 0, 1, 0,
+                                1841276.4464434995, 5172616.229383407, 0, 1])
         tile_set.add_tile(tile)
         tile_set.add_asset_extras("Py3dTiles TestTileBuilder example.")
         tile_set.write_to_directory('junk')
