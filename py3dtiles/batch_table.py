@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 import json
-from py3dtiles import ThreeDTilesNotion
+from .threedtiles_notion import ThreeDTilesNotion
 
 class BatchTable(ThreeDTilesNotion):
     """

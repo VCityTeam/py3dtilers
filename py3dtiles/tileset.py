@@ -3,7 +3,9 @@
 import sys
 import os
 import pathlib
-from py3dtiles import ThreeDTilesNotion, TileForReal, BoundingVolumeBox
+from .threedtiles_notion import ThreeDTilesNotion
+from .real_tile import TileForReal
+from .bounding_volume_box import BoundingVolumeBox
 
 
 class TileSet(ThreeDTilesNotion):
@@ -11,9 +13,7 @@ class TileSet(ThreeDTilesNotion):
     def __init__(self):
         super().__init__()
         # FIXME: make assert a 3DTilesNotion
-        self.header["asset"] = {"version": "1.0",
-                                "gltfUpAxis": "Z"} #FIXME: not part of standard
-                                                   # Refer to issue 30
+        self.header["asset"] = {"version": "1.0"}
         self.header["geometricError"] = None
         self.header["root"] = TileForReal()
 
@@ -74,7 +74,7 @@ class TileSet(ThreeDTilesNotion):
             if not bounding_volume.is_box():
                 print('Dropping child with non box bounding volume.')
                 continue
-            bounding_box.add(bounding_volume.get_box())
+            bounding_box.add(bounding_volume)
         self.header["root"].set_bounding_volume(bounding_box)
 
     def write_to_directory(self, directory):

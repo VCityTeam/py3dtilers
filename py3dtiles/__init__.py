@@ -4,7 +4,7 @@
 from .schema_validators import SchemaValidators
 from .extension import Extension
 # When Tile becomes a ThreeDTilesNotion move this line afterwards
-from .tile import Tile
+from .tile_content import TileContent
 from .threedtiles_notion import ThreeDTilesNotion
 from .b3dm import B3dm
 from .batch_table import BatchTable
@@ -33,7 +33,7 @@ __all__ = ['B3dm',
            'GlTF', 
            'Pnts',
            'TileForReal', 
-           'Tile', 
+           'TileContent',
            'TileReader', 
            'TileSet',
            'ThreeDTilesNotion',

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-from py3dtiles import ThreeDTilesNotion
-from py3dtiles import BoundingVolume
+from .threedtiles_notion import ThreeDTilesNotion
+from .bounding_volume import BoundingVolume
 
 
 class TileForReal(ThreeDTilesNotion):
@@ -95,6 +95,9 @@ class TileForReal(ThreeDTilesNotion):
             # by adding a "children" entry followed by an empty list. In such
             # case just remove that header entry:
             del self.header["children"]
+        if not self.header["content"]:
+            self.header["content"] = {"uri":
+              "Dummy content set by py3dtiles:ThreeDTilesNotion:prepare_for_json()"}
 
     def write_content(self):
         """

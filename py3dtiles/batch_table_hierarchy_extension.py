@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from py3dtiles import Extension, ThreeDTilesNotion
+from .extension import Extension
+from .threedtiles_notion import ThreeDTilesNotion
 
 
 class BatchTableHierarchy(Extension, ThreeDTilesNotion):

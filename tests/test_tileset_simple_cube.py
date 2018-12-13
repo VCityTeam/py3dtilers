@@ -62,7 +62,7 @@ class TestTileBuilder(unittest.TestCase, object):
         triangles.extend(
                     TestTileBuilder.build_cuboid_as_binary_triangles_array(
                                       -8.1, -1.8, 300.0, 200., 300., 100.) )
-        ts.triangles = [ triangles ]
+        ts.triangles = [triangles]
 
         # Define a tile that will hold the geometry
         tile = TileForReal()

@@ -2,7 +2,8 @@ import numpy as np
 import math
 import struct
 from .earcut import earcut
-from py3dtiles import BoundingVolume, BoundingVolumeBox
+from .bounding_volume import BoundingVolume
+from .bounding_volume_box import BoundingVolumeBox
 
 
 class TriangleSoup:
@@ -169,9 +170,7 @@ class TriangleSoup:
         zAxis = [0., 0., box[1][2] - box[0][2]]
         bounding_box = BoundingVolumeBox()
         bounding_box.set_from_list(center + xAxis + yAxis + zAxis)
-        result = BoundingVolume()
-        result.set_box(bounding_box)
-        return result
+        return bounding_box
 
 
 def faceAttributeToArray(triangles):

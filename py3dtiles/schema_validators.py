@@ -43,7 +43,9 @@ class SchemaValidators:
             for key, schema_file_name in {
                 'BatchTable':          'batchTable.schema.json',
                 'BatchTableHierarchy': '3DTILES_batch_table_hierarchy.json',
-                'BoundingVolume':      'boundingVolume.schema.json',
+                'BoundingVolumeBox':   'boundingVolume.schema.json',
+                'BoundingVolumeRegion':'boundingVolume.schema.json',
+                'BoundingVolumeSphere':'boundingVolume.schema.json',
                 'TileForReal':         'tile.schema.json',
                 'TileSet':             'tileset.schema.json'
                 }.items():
@@ -107,12 +109,14 @@ class SchemaValidators:
     def append_schema_from_file(self, key, file_name):
         """
         Register an extension
+        :param key: the name of the class (implementing ThreeDTilesNotion)
+               to be used as access key to retrieve the associated validator.
         :param file_name: file holding the schema to be added to the
-                the list of already registered schemas
-                Warning: when the schema uses references ($ref entries) to
-                other external schemas, those schema must be encountered in the
-                SAME directory as the scheme itself (otherwise the schema
-                reference resolver has no clue on where to find the sub-schemas)
+               the list of already registered schemas
+               Warning: when the schema uses references ($ref entries) to
+               other external schemas, those schema must be encountered in the
+               SAME directory as the scheme itself (otherwise the schema
+               reference resolver has no clue on where to find the sub-schemas)
         :return: None
         """
         if not os.path.isfile(file_name):
@@ -133,22 +137,24 @@ class SchemaValidators:
             sys.exit(1)
 
         if title in self.schemas:
-            print(f'Already present extension {title}.')
-            print(f'WARNING: overwriting extension {title}.')
-            del self.schemas[title]
+            if not key in 'BoundingVolume':
+                # This is a legitimate case where some classes share the same validator
+                pass
+            else:
+                print(f'Class {key} already has schema named {title}.')
+                sys.exit(1)
+        else:
+            validator = jsonschema.Draft4Validator(schema, resolver = self.resolver)
 
-        validator = jsonschema.Draft4Validator(schema, resolver = self.resolver)
-
-        try:
-            # In order to validate the schema itself we still need to
-            # provide a dummy json item
-            dummy_item = self.get_dummy_item(title)
-            validator.validate(dummy_item)
-        except jsonschema.exceptions.SchemaError:
-            print(f'Invalid schema {title}')
-            sys.exit(1)
-        self.schemas[title] = {'schema': schema,
-                               'validator': validator}
+            try:
+                # In order to validate the schema itself we still need to
+                # provide a dummy json item
+                dummy_item = self.get_dummy_item(title)
+                validator.validate(dummy_item)
+            except jsonschema.exceptions.SchemaError:
+                print(f'Invalid schema {title}')
+                sys.exit(1)
+            self.schemas[title] = {'schema': schema, 'validator': validator}
         self.class_names[key] = title
 
     def get_validator(self, class_name_key):

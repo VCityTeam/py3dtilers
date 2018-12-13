@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import unittest
-from py3dtiles import BoundingVolume, HelperTest, TileForReal
+from py3dtiles import BoundingVolumeBox, HelperTest, TileForReal
 
 
 class Test_Tile(unittest.TestCase):
@@ -17,9 +17,8 @@ class Test_Tile(unittest.TestCase):
         """
         Programmatically define a tile (which illustrates the API).
         """
-        bv = BoundingVolume()
-        bv.add_property_from_array('box',
-                                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        bv = BoundingVolumeBox()
+        bv.set_from_list([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
         tile = TileForReal()
         tile.set_bounding_volume(bv)
         tile.set_geometric_error(3.14159)

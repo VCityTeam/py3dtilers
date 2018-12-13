@@ -2,7 +2,9 @@
 import sys
 import json
 import numpy
-from py3dtiles import Extension, SchemaValidators, Tile
+from .extension import Extension
+from .schema_validators import SchemaValidators
+from .tile_content import TileContent
 
 
 class ThreeDTilesNotion(object):
@@ -66,8 +68,8 @@ class ThreeDTilesNotion(object):
                 if isinstance(obj, ThreeDTilesNotion):
                     obj.prepare_for_json()
                     return obj.header
-                if isinstance(obj, Tile):
-                    return "Tiles are in fact tile contents!!!"
+                if isinstance(obj, TileContent):
+                    return {"uri": "Dummy content: ThreeDTilesNotion:to_json()"}
                 # Numpy arrays entries require an ad hoc treatment
                 if isinstance(obj, numpy.ndarray):
                     return obj.tolist()
