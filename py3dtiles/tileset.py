@@ -4,7 +4,7 @@ import sys
 import os
 import pathlib
 from .threedtiles_notion import ThreeDTilesNotion
-from .real_tile import TileForReal
+from .tile import Tile
 from .bounding_volume_box import BoundingVolumeBox
 
 
@@ -12,16 +12,15 @@ class TileSet(ThreeDTilesNotion):
 
     def __init__(self):
         super().__init__()
-        # FIXME: make assert a 3DTilesNotion
         self.attributes["asset"] = {"version": "1.0"}
         self.attributes["geometricError"] = None
-        self.attributes["root"] = TileForReal()
+        self.attributes["root"] = Tile()
 
     def set_geometric_error(self, error):
         self.attributes["geometricError"] = error
 
     def set_root_tile(self, tile):
-        if not isinstance(tile, TileForReal):
+        if not isinstance(tile, Tile):
             print('Root tile must be of type...Tile.')
             sys.exit(1)
         if 'root' in self.attributes:
@@ -29,7 +28,7 @@ class TileSet(ThreeDTilesNotion):
         self.attributes["root"] = tile
 
     def add_tile(self, tile):
-        if not isinstance(tile, TileForReal):
+        if not isinstance(tile, Tile):
             print('Add_tile requires a Tile argument.')
             sys.exit(1)
         self.attributes["root"].add_child(tile)

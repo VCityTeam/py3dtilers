@@ -12,7 +12,7 @@ from .bounding_volume import BoundingVolume
 from .bounding_volume_box import BoundingVolumeBox
 from .feature_table import Feature
 from .gltf import GlTF
-from .real_tile import TileForReal
+from .tile import Tile
 from .tileset import TileSet
 from .helper_test import HelperTest
 from .pnts import Pnts
@@ -31,7 +31,7 @@ __all__ = ['B3dm',
            'Feature', 
            'GlTF', 
            'Pnts',
-           'TileForReal', 
+           'Tile',
            'TileContent',
            'TileReader', 
            'TileSet',

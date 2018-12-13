@@ -5,7 +5,7 @@ from .threedtiles_notion import ThreeDTilesNotion
 from .bounding_volume import BoundingVolume
 
 
-class TileForReal(ThreeDTilesNotion):
+class Tile(ThreeDTilesNotion):
 
     def __init__(self):
         super().__init__()
@@ -23,7 +23,7 @@ class TileForReal(ThreeDTilesNotion):
         # owning TileSet is serialized) as the path name of the file holding
         # the corresponding Tile content. Since, for the time being, the
         # TileContent class is not yet defined we use (in a kludgy way) this
-        # TileForReal class to carry that duty. :(
+        # Tile class to carry that duty. :(
         # FIXME: create the TileContent class and remove the following undue
         # property from this class
         self.content_pathname = None

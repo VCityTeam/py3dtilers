@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import unittest
-from py3dtiles import BoundingVolumeBox, HelperTest, TileForReal, TileSet
+from py3dtiles import BoundingVolumeBox, HelperTest, Tile, TileSet
 
 
 class Test_TileSet(unittest.TestCase):
@@ -22,7 +22,7 @@ class Test_TileSet(unittest.TestCase):
         tile_set = TileSet()
         bounding_volume = BoundingVolumeBox()
         bounding_volume.set_from_list([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        root_tile = TileForReal()
+        root_tile = Tile()
         root_tile.set_bounding_volume(bounding_volume)
         root_tile.set_geometric_error(3.14159)
         tile_set.set_root_tile(root_tile)

@@ -46,7 +46,7 @@ class SchemaValidators:
                 'BoundingVolumeBox':   'boundingVolume.schema.json',
                 'BoundingVolumeRegion':'boundingVolume.schema.json',
                 'BoundingVolumeSphere':'boundingVolume.schema.json',
-                'TileForReal':         'tile.schema.json',
+                'Tile':                'tile.schema.json',
                 'TileSet':             'tileset.schema.json'
                 }.items():
                 schema_path_name = os.path.join('py3dtiles/jsonschemas',

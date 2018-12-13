@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from py3dtiles import B3dm, GlTF, TriangleSoup, TileSet, TileForReal
+from py3dtiles import B3dm, GlTF, TriangleSoup, TileSet, Tile
 
 
 class TestTileBuilder(unittest.TestCase, object):
@@ -65,7 +65,7 @@ class TestTileBuilder(unittest.TestCase, object):
         ts.triangles = [triangles]
 
         # Define a tile that will hold the geometry
-        tile = TileForReal()
+        tile = Tile()
         tile.set_bounding_volume(ts.getBoxBoundingVolumeAlongAxis())
 
         # Build a tile content (with B3dm formatting) out of the geometry
