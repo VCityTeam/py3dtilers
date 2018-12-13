@@ -5,6 +5,7 @@ from .bounding_volume import BoundingVolume
 from .threedtiles_notion import ThreeDTilesNotion
 from .tile_content import TileContent
 
+
 class Tile(ThreeDTilesNotion):
 
     def __init__(self):
@@ -97,8 +98,7 @@ class Tile(ThreeDTilesNotion):
             # case just remove that attributes entry:
             del self.attributes["children"]
         if not self.attributes["content"]:
-            self.attributes["content"] = {"uri":
-              "Dummy content set by py3dtiles:ThreeDTilesNotion:prepare_for_json()"}
+            del self.attributes["content"]
 
     def write_content(self, directory):
         """
