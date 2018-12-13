@@ -76,7 +76,7 @@ class Test_BatchTableHierarchy(unittest.TestCase):
         # to make sure that the extension is really validated. If bt.validate()
         # is still true then the validation didn't check the extension and
         # hence the test must fail.
-        bth.header['instancesLength'] = -1
+        bth.attributes['instancesLength'] = -1
         if bt.validate(quiet=True):
             self.fail()
 

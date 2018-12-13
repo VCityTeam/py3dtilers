@@ -9,14 +9,14 @@ class TileForReal(ThreeDTilesNotion):
 
     def __init__(self):
         super().__init__()
-        self.header["boundingVolume"] = None
-        self.header["geometricError"] = None
-        self.header["refine"] = "ADD"
-        self.header["content"] = None
-        self.header["children"] = list()
+        self.attributes["boundingVolume"] = None
+        self.attributes["geometricError"] = None
+        self.attributes["refine"] = "ADD"
+        self.attributes["content"] = None
+        self.attributes["children"] = list()
         # Some possible valid properties left un-delt with
         # viewerRequestVolume
-        # self.header["transform"] = None
+        # self.attributes["transform"] = None
 
 
         # A TileContent has an uri property that can be defined (when the
@@ -33,19 +33,19 @@ class TileForReal(ThreeDTilesNotion):
         :param transform: a flattened transformation matrix
         :return:
         """
-        self.header["transform"] = [round(float(e), 3) for e in transform]
+        self.attributes["transform"] = [round(float(e), 3) for e in transform]
 
     def set_bounding_volume(self, bounding_volume):
-        self.header["boundingVolume"] = bounding_volume
+        self.attributes["boundingVolume"] = bounding_volume
 
     def get_bounding_volume(self):
-        return self.header["boundingVolume"]
+        return self.attributes["boundingVolume"]
 
     def set_content(self, content):
-        self.header["content"] = content
+        self.attributes["content"] = content
 
     def set_geometric_error(self, error):
-        self.header["geometricError"] = error
+        self.attributes["geometricError"] = error
 
     def set_content_uri(self, uri):
         # FIXME: refer to above comment concerning content_pathname and
@@ -53,10 +53,10 @@ class TileForReal(ThreeDTilesNotion):
         self.content_pathname = uri
 
     def add_child(self, tile):
-        self.header["children"].append(tile)
+        self.attributes["children"].append(tile)
 
     def has_children(self):
-        if 'children' in self.header and self.header["children"]:
+        if 'children' in self.attributes and self.attributes["children"]:
             return True
         return False
 
@@ -68,11 +68,11 @@ class TileForReal(ThreeDTilesNotion):
         if not self.has_children():
             print("Warning: should have checked for existing children first?")
             # It could be that prepare_for_json() did some wipe out:
-            if not 'header' in self.header:
+            if not 'children' in self.attributes:
                 return list()
 
         descendants = list()
-        for child in self.header["children"]:
+        for child in self.attributes["children"]:
             # Add the child...
             descendants.append(child)
             # and if (and only if) they are grand-children then recurse
@@ -81,22 +81,22 @@ class TileForReal(ThreeDTilesNotion):
         return descendants
 
     def prepare_for_json(self):
-        if not self.header["boundingVolume"]:
+        if not self.attributes["boundingVolume"]:
             print("Warning: defaulting Tile's unset 'Bounding Volume'.")
             # FIXME: what would be a decent default ?!
-            self.header["boundingVolume"] = BoundingVolume()
-        if not self.header["geometricError"]:
+            self.attributes["boundingVolume"] = BoundingVolume()
+        if not self.attributes["geometricError"]:
             print("Warning: defaulting Tile's unset 'Geometric Error'.")
             # FIXME: what would be a decent default ?!
             self.set_geometric_error(500.0)
-        if not self.header["children"]:
+        if not self.attributes["children"]:
             # The children list exists indeed (for technical reasons) yet it
             # happens to be still empty. This would pollute the json output
             # by adding a "children" entry followed by an empty list. In such
-            # case just remove that header entry:
-            del self.header["children"]
-        if not self.header["content"]:
-            self.header["content"] = {"uri":
+            # case just remove that attributes entry:
+            del self.attributes["children"]
+        if not self.attributes["content"]:
+            self.attributes["content"] = {"uri":
               "Dummy content set by py3dtiles:ThreeDTilesNotion:prepare_for_json()"}
 
     def write_content(self):
@@ -118,7 +118,7 @@ class TileForReal(ThreeDTilesNotion):
             os.makedirs(target_dir)
 
         # Write the tile content of this tile:
-        content = self.header["content"]
+        content = self.attributes["content"]
         # The following is ad-hoc code for the currently existing b3dm class.
         # FIXME: have the future TileContent classe have a write method
         # and simplify the following code accordingly.

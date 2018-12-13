@@ -17,11 +17,11 @@ class BatchTableHierarchy(Extension, ThreeDTilesNotion):
         '''
         self._class_to_index = {}
 
-        self.header['classes'] = list()
-        self.header['instancesLength'] = 0
-        self.header['classIds'] = list()
-        self.header['parentCounts'] = list()
-        self.header['parentIds'] = list()
+        self.attributes['classes'] = list()
+        self.attributes['instancesLength'] = 0
+        self.attributes['classIds'] = list()
+        self.attributes['parentCounts'] = list()
+        self.attributes['parentIds'] = list()
 
     def add_class(self, class_name, property_names):
         """
@@ -30,7 +30,7 @@ class BatchTableHierarchy(Extension, ThreeDTilesNotion):
                               properties (attributes) defining this class
         :return: None
         """
-        self.header['classes'].append({
+        self.attributes['classes'].append({
             'name': class_name,
             'length': 0,
             'instances': {property_name: []
@@ -48,12 +48,12 @@ class BatchTableHierarchy(Extension, ThreeDTilesNotion):
         :param parent_indexes: indexes of the parent(s)
         """
         index = self._class_to_index[class_name]
-        my_class = self.header['classes'][index]
+        my_class = self.attributes['classes'][index]
         my_class['length'] += 1
         for property in my_class['instances']:
             my_class['instances'][property].append(properties[property])
-        self.header['instancesLength'] += 1
-        self.header['classIds'].append(index)
-        self.header['parentCounts'].append(len(parent_indexes))
-        self.header['parentIds'].extend(parent_indexes)
+        self.attributes['instancesLength'] += 1
+        self.attributes['classIds'].append(index)
+        self.attributes['parentCounts'].append(len(parent_indexes))
+        self.attributes['parentIds'].extend(parent_indexes)
 

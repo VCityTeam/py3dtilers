@@ -4,7 +4,6 @@ import json
 import numpy
 from .extension import Extension
 from .schema_validators import SchemaValidators
-from .tile_content import TileContent
 
 
 class ThreeDTilesNotion(object):
@@ -17,10 +16,10 @@ class ThreeDTilesNotion(object):
     def __init__(self):
         if not ThreeDTilesNotion.validators:
             ThreeDTilesNotion.validators = SchemaValidators()
-        self.header = dict()
+        self.attributes = dict()
 
     def add_property_from_array(self, property_name, array):
-        self.header[property_name] = array
+        self.attributes[property_name] = array
 
     def prepare_for_json(self):
         return
@@ -29,12 +28,12 @@ class ThreeDTilesNotion(object):
         if not isinstance(extension, Extension):
             print(f'{extension} instance is not of type Extension')
             sys.exit(1)
-        if 'extensions' not in self.header:
-            self.header['extensions'] = dict()
-        self.header['extensions'][extension.get_extension_name()] = extension
+        if 'extensions' not in self.attributes:
+            self.attributes['extensions'] = dict()
+        self.attributes['extensions'][extension.get_extension_name()] = extension
 
     def has_extensions(self):
-        return 'extensions' in self.header
+        return 'extensions' in self.attributes
 
     def validate(self, item=None, *, quiet=False):
         """
@@ -56,7 +55,7 @@ class ThreeDTilesNotion(object):
                 print(f'Invalid item for schema {class_name_key}')
             return False
         if self.has_extensions():
-            for extension in self.header['extensions'].values():
+            for extension in self.attributes['extensions'].values():
                 if not extension.validate():
                     return False
         return True
@@ -67,9 +66,7 @@ class ThreeDTilesNotion(object):
             def default(self, obj):
                 if isinstance(obj, ThreeDTilesNotion):
                     obj.prepare_for_json()
-                    return obj.header
-                if isinstance(obj, TileContent):
-                    return {"uri": "Dummy content: ThreeDTilesNotion:to_json()"}
+                    return obj.attributes
                 # Numpy arrays entries require an ad hoc treatment
                 if isinstance(obj, numpy.ndarray):
                     return obj.tolist()
@@ -77,7 +74,7 @@ class ThreeDTilesNotion(object):
                 return json.JSONEncoder.default(self, obj)
 
         self.prepare_for_json()
-        result = json.dumps(self.header,
+        result = json.dumps(self.attributes,
                             separators=(',', ':'),
                             cls=JSONEncoder)
         return result
@@ -86,7 +83,7 @@ class ThreeDTilesNotion(object):
         """
         :return: the notion encoded as an array of binaries
         """
-        # First encode the header as a json string
+        # First encode the concerned attributes as a json string
         as_json = self.to_json()
         # and make sure it respects a mandatory 4-byte alignement (refer e.g.
         # to batch table documentation)

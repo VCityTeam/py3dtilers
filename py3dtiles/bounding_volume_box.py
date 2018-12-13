@@ -5,7 +5,7 @@ from .threedtiles_notion import ThreeDTilesNotion
 from .bounding_volume import BoundingVolume
 
 # In order to prevent the appearance of ghost newline characters ("\n")
-# when printing a numpy.array (mainly self.header['box'] in this file):
+# when printing a numpy.array (mainly self.attributes['box'] in this file):
 numpy.set_printoptions(linewidth=200)
 
 class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
@@ -32,13 +32,13 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
     """
     def __init__(self):
         super().__init__()
-        self.header['box'] = None
+        self.attributes['box'] = None
 
     def is_box(self):
         return True
 
     def set_from_list(self, array):
-        self.header["box"] = numpy.array([float(i) for i in array],
+        self.attributes["box"] = numpy.array([float(i) for i in array],
                                          dtype=numpy.float)
 
     def get_corners(self):
@@ -48,10 +48,10 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
         if not self.is_valid():
             sys.exit(1)
 
-        center      = self.header["box"][0: 3: 1]
-        x_half_axis = self.header["box"][3: 6: 1]
-        y_half_axis = self.header["box"][6: 9: 1]
-        z_half_axis = self.header["box"][9:12: 1]
+        center      = self.attributes["box"][0: 3: 1]
+        x_half_axis = self.attributes["box"][3: 6: 1]
+        y_half_axis = self.attributes["box"][6: 9: 1]
+        z_half_axis = self.attributes["box"][9:12: 1]
 
         x_axis = x_half_axis * 2
         y_axis = y_half_axis * 2
@@ -108,7 +108,7 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
         """
         if not self.is_defined():
             # Then it is safe to overwrite
-            self.header["box"] = other.header["box"]
+            self.attributes["box"] = other.attributes["box"]
             return
 
         corners = self.get_corners() + other.get_corners()
@@ -134,9 +134,9 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
         return result
 
     def is_defined(self):
-        if 'box' not in self.header:
+        if 'box' not in self.attributes:
             return False
-        if not isinstance(self.header['box'], numpy.ndarray):
+        if not isinstance(self.attributes['box'], numpy.ndarray):
             return False
         return True
 
@@ -144,10 +144,10 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
         if not self.is_defined():
             print('Warning: Bounding Volume Box is not defined.')
             return False
-        if not self.header['box'].ndim == 1:
+        if not self.attributes['box'].ndim == 1:
             print('Warning: Bounding Volume Box has wrong dimensions.')
             return False
-        if not self.header['box'].shape[0] == 12:
+        if not self.attributes['box'].shape[0] == 12:
             print('Warning: Bounding Volume Box must have 12 elements.')
             return False
         return True
@@ -164,14 +164,14 @@ if __name__ == '__main__':
     # Getting canonical first example
     box.set_from_list([2,3,4,  2,0,0,  0,3,0,  0,0,4])
     print("This aligned box and its canonical one should be identical:")
-    print("         original: ", box.header['box'])
+    print("         original: ", box.attributes['box'])
     print("        canonical: ", box.get_canonical())
 
     # Getting canonical second example
     box.set_from_list([0,0,0,  1,1,0,  -1,1,0,  0,0,1])
     print("But when considering a rotated cube of size 2, the canonical",
           "fitting box is different:")
-    print("         original: ", box.header['box'])
+    print("         original: ", box.attributes['box'])
     print("        canonical: ", box.get_canonical())
 
     # Adding volumes
@@ -179,8 +179,8 @@ if __name__ == '__main__':
     other = BoundingVolumeBox()
     other.set_from_list([9,9,9,  1,0,0,  0,1,0,  0,0,1])
     print("Consider the two following box bounding volumes:")
-    print("    first: ", box.header['box'])
-    print("   second: ", other.header['box'])
+    print("    first: ", box.attributes['box'])
+    print("   second: ", other.attributes['box'])
 
     fitting_volume = box.add(other)
     print("When added we get the cube centered at (5,5,5) and with a 5 size:")

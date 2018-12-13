@@ -3,13 +3,15 @@
 import numpy as np
 from enum import Enum
 from abc import ABC, abstractmethod
+from .threedtiles_notion import ThreeDTilesNotion
 
-
-class TileContent(ABC):
+class TileContent(ABC, ThreeDTilesNotion):
 
     def __init__(self):
+        super().__init__()
         self.header = None
         self.body = None
+        self.attributes["uri"] = "Dummy content set by TileContent:__init__()"
 
     def to_array(self):
         self.sync()

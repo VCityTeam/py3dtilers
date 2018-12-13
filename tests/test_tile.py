@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import unittest
 from py3dtiles import BoundingVolumeBox, HelperTest, TileForReal
 
@@ -30,6 +29,7 @@ class Test_Tile(unittest.TestCase):
     def test_build_sample_and_validate(self):
         if not self.build_sample().validate():
             self.fail()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,9 +3,8 @@
 # Note: order matters and must respect the dependency (e.g. inheritance) tree
 from .schema_validators import SchemaValidators
 from .extension import Extension
-# When Tile becomes a ThreeDTilesNotion move this line afterwards
-from .tile_content import TileContent
 from .threedtiles_notion import ThreeDTilesNotion
+from .tile_content import TileContent
 from .b3dm import B3dm
 from .batch_table import BatchTable
 from .batch_table_hierarchy_extension import BatchTableHierarchy
