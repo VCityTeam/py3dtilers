@@ -89,7 +89,7 @@ class TestTileBuilder(unittest.TestCase, object):
         tile_content = B3dm.from_glTF(glTF)
         tile.set_content(tile_content)
 
-        # Define the tileset that will hold the (single) tile
+        # Define the TileSet that will hold the (single) tile
         tile_set = TileSet()
         # Hardwiring :-( a translation of this TileSet to the coordinates of
         # the city of Lyon in EPSG:3946 refer to
