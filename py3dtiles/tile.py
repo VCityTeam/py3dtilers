@@ -26,6 +26,9 @@ class Tile(ThreeDTilesNotion):
         """
         self.attributes["transform"] = [round(float(e), 3) for e in transform]
 
+    def get_transform(self):
+        return self.attributes["transform"]
+
     def set_bounding_volume(self, bounding_volume):
         self.attributes["boundingVolume"] = bounding_volume
 

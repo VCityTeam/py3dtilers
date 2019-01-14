@@ -6,9 +6,10 @@ from .bounding_volume import BoundingVolume
 
 # In order to prevent the appearance of ghost newline characters ("\n")
 # when printing a numpy.array (mainly self.attributes['box'] in this file):
-numpy.set_printoptions(linewidth=200)
+numpy.set_printoptions(linewidth=500)
 
-class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
+
+class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume, object):
     """
     A box bounding volume as defined in the 3DTiles specifications i.e. an
     array of 12 numbers that define an oriented bounding box:
@@ -34,16 +35,117 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
         super().__init__()
         self.attributes['box'] = None
 
+    def get_center(self):
+        return self.attributes["box"][0: 3: 1]
+
+    def translate(self, offset):
+        """
+        Translate the box center with the given offset "vector"
+        :param offset: the 3D vector by which the box should be translated
+        """
+        for i in range(0,3):
+            self.attributes["box"][i] += offset[i]
+
+    def transform(self, transform):
+        """
+        Apply the provided transformation matrix (4x4) to the box
+        :param transform: transformation matrix (4x4) to be applied
+        """
+        # FIXME: the following code only uses the first three coordinates
+        # of the transformation matrix (and basically ignores the fourth
+        # column of transform). This looks like some kind of mistake...
+        rotation = numpy.array([ transform[0:3],
+                                 transform[4:7],
+                                 transform[8:11]])
+
+        center      = self.attributes["box"][0: 3: 1]
+        x_half_axis = self.attributes["box"][3: 6: 1]
+        y_half_axis = self.attributes["box"][6: 9: 1]
+        z_half_axis = self.attributes["box"][9:12: 1]
+
+        # Apply the rotation part to each element
+        new_center = rotation.dot(center)
+        new_x_half_axis = rotation.dot(x_half_axis)
+        new_y_half_axis = rotation.dot(y_half_axis)
+        new_z_half_axis = rotation.dot(z_half_axis)
+        self.attributes["box"] = numpy.concatenate((new_center,
+                                                    new_x_half_axis,
+                                                    new_y_half_axis,
+                                                    new_z_half_axis))
+        offset = numpy.array(transform[12:15])
+        self.translate(offset)
+
+    @staticmethod
+    def get_box_array_from_point(points):
+        """
+        :param points: a list of 3D points
+        :return: the smallest box (as an array, as opposed to a
+                BoundingVolumeBox instance) that encloses the given list of
+                (3D) points and that is parallel to the coordinate axis.
+        """
+        return BoundingVolumeBox.get_box_array_from_mins_maxs(
+            [ min(c[0] for c in points),
+              min(c[1] for c in points),
+              min(c[2] for c in points),
+              max(c[0] for c in points),
+              max(c[1] for c in points),
+              max(c[2] for c in points) ])
+
+    @staticmethod
+    def get_box_array_from_mins_maxs(mins_maxs):
+        """
+        :param mins_maxs: the list [x_min, y_min, z_min, x_max, y_max, z_max]
+                          that is the boundaries of the box along each
+                          coordinate axis
+        :return: the smallest box (as an array, as opposed to a
+                BoundingVolumeBox instance) that encloses the given list of
+                (3D) points and that is parallel to the coordinate axis.
+        """
+        x_min = mins_maxs[0]
+        x_max = mins_maxs[3]
+        y_min = mins_maxs[1]
+        y_max = mins_maxs[4]
+        z_min = mins_maxs[2]
+        z_max = mins_maxs[5]
+
+        new_center = numpy.array([(x_min + x_max) / 2,
+                               (y_min + y_max) / 2,
+                               (z_min + z_max) / 2])
+        new_x_half_axis = numpy.array([(x_max - x_min) / 2, 0, 0])
+        new_y_half_axis = numpy.array([0, (y_max - y_min) / 2, 0])
+        new_z_half_axis = numpy.array([0, 0, (z_max - z_min) / 2])
+
+        return numpy.concatenate((new_center,
+                                  new_x_half_axis,
+                                  new_y_half_axis,
+                                  new_z_half_axis))
+
     def is_box(self):
         return True
 
-    def set_from_list(self, array):
-        self.attributes["box"] = numpy.array([float(i) for i in array],
-                                         dtype=numpy.float)
+    def set_from_list(self, box_list):
+        self.attributes["box"] = numpy.array([float(i) for i in box_list],
+                                             dtype=numpy.float)
+
+    def set_from_array(self, box_array):
+        self.attributes["box"] = box_array
+
+    def set_from_points(self, points):
+        self.attributes["box"] = \
+                            BoundingVolumeBox.get_box_array_from_point(points)
+
+    def set_from_mins_maxs(self, mins_maxs):
+        """
+        :param mins_maxs: the list [x_min, y_min, z_min, x_max, y_max, z_max]
+                          that is the boundaries of the box along each
+                          coordinate axis
+        """
+        self.attributes["box"] = \
+            BoundingVolumeBox.get_box_array_from_mins_maxs(mins_maxs)
 
     def get_corners(self):
         """
-        :return: the corners of box as a list
+        :return: the corners (3D points) of the box as a list
         """
         if not self.is_valid():
             sys.exit(1)
@@ -73,30 +175,12 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
 
         return [o, ox, oy, oxy, oz, oxz, oyz, oxyz]
 
-    def get_canonical(self):
+    def get_canonical_as_array(self):
         """
-        :return: the smallest enclosing box that is parallel to the
-                 coordinate axis
+        :return: the smallest enclosing box (as an array) that is parallel
+                 to the coordinate axis
         """
-        corners = self.get_corners()
-        x_min = min( c[0] for c in corners)
-        x_max = max( c[0] for c in corners)
-        y_min = min( c[1] for c in corners)
-        y_max = max( c[1] for c in corners)
-        z_min = min( c[2] for c in corners)
-        z_max = max( c[2] for c in corners)
-
-        new_center = numpy.array([(x_min + x_max) / 2,
-                               (y_min + y_max) / 2,
-                               (z_min + z_max) / 2])
-        new_x_half_axis = numpy.array([(x_max - x_min) / 2, 0, 0])
-        new_y_half_axis = numpy.array([0, (y_max - y_min) / 2, 0])
-        new_z_half_axis = numpy.array([0, 0, (z_max - z_min) / 2])
-
-        return numpy.concatenate((new_center,
-                                  new_x_half_axis,
-                                  new_y_half_axis,
-                                  new_z_half_axis))
+        return BoundingVolumeBox.get_box_array_from_point(self.get_corners())
 
     def add(self, other):
         """
@@ -112,26 +196,7 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume):
             return
 
         corners = self.get_corners() + other.get_corners()
-        x_min = min( c[0] for c in corners)
-        x_max = max( c[0] for c in corners)
-        y_min = min( c[1] for c in corners)
-        y_max = max( c[1] for c in corners)
-        z_min = min( c[2] for c in corners)
-        z_max = max( c[2] for c in corners)
-
-        new_center = numpy.array([(x_min + x_max) / 2,
-                                  (y_min + y_max) / 2,
-                                  (z_min + z_max) / 2])
-        new_x_half_axis = numpy.array([(x_max - x_min) / 2, 0, 0])
-        new_y_half_axis = numpy.array([0, (y_max - y_min) / 2, 0])
-        new_z_half_axis = numpy.array([0, 0, (z_max - z_min) / 2])
-
-        result = BoundingVolumeBox()
-        result.array = numpy.concatenate((new_center,
-                                          new_x_half_axis,
-                                          new_y_half_axis,
-                                          new_z_half_axis))
-        return result
+        self.set_from_points(corners)
 
     def is_defined(self):
         if 'box' not in self.attributes:
@@ -165,14 +230,14 @@ if __name__ == '__main__':
     box.set_from_list([2,3,4,  2,0,0,  0,3,0,  0,0,4])
     print("This aligned box and its canonical one should be identical:")
     print("         original: ", box.attributes['box'])
-    print("        canonical: ", box.get_canonical())
+    print("        canonical: ", box.get_canonical_as_array())
 
     # Getting canonical second example
     box.set_from_list([0,0,0,  1,1,0,  -1,1,0,  0,0,1])
     print("But when considering a rotated cube of size 2, the canonical",
           "fitting box is different:")
     print("         original: ", box.attributes['box'])
-    print("        canonical: ", box.get_canonical())
+    print("        canonical: ", box.get_canonical_as_array())
 
     # Adding volumes
     box.set_from_list([1,1,1,  1,0,0,  0,1,0,  0,0,1])

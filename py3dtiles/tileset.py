@@ -3,6 +3,7 @@
 import sys
 import os
 import pathlib
+import copy
 from .threedtiles_notion import ThreeDTilesNotion
 from .tile import Tile
 from .bounding_volume_box import BoundingVolumeBox
@@ -76,7 +77,10 @@ class TileSet(ThreeDTilesNotion):
 
         bounding_box = BoundingVolumeBox()
         for child in self.attributes["root"].get_descendants():
-            bounding_volume = child.get_bounding_volume()
+            # FIXME have the transform method return a new object and
+            # define another method to apply_transform in place
+            bounding_volume = copy.deepcopy(child.get_bounding_volume())
+            bounding_volume.transform(child.get_transform())
             if not bounding_volume.is_box():
                 print('Dropping child with non box bounding volume.')
                 continue

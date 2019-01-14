@@ -35,8 +35,6 @@ class TileContent(ABC, ThreeDTilesNotion):
         self.header.sync(self.body)
 
     def set_uri(self, uri):
-        if self.attributes["uri"]:
-            print(f'Warning: overwriting existing TileContent uri: {self.attributes["uri"]} ')
         self.attributes["uri"] = uri
 
     def get_uri(self):
