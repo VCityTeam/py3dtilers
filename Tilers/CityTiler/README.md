@@ -22,7 +22,7 @@ In order to display the results produced by the quick installation steps below,
  2. Configure `Tilers/CityTiler/CityTilerDBConfig.yml` (out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
  3. from the home directory of the git 
     ```
-    python Tilers/CityTiler/CityTiler.py Tilers/CityTiler/CityTilerDBConfig.yml 
+    python Tilers/CityTiler/CityTiler.py --with_BTH Tilers/CityTiler/CityTilerDBConfig.yml 
     ```
     that will create a `junk` ouput directory holding the tile set.
 
