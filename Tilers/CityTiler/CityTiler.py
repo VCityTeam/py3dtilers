@@ -53,13 +53,13 @@ def create_tile_content(cursor, buildingIds, offset, args):
                           0, 0,  0, 1])
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
-    bt = BatchTable()
-
+    # When required attach a BatchTable with its optional extensions
     if args.with_BTH:
         bth = create_batch_table_hierachy(cursor, buildingIds, args)
-        # WIP: the following line is temporary until the add_extension is effective
-        bt = bth
-        # FIXME bt.add_extension(bth)
+        bt = BatchTable()
+        bt.add_extension(bth)
+    else:
+        bt = None
 
     # Eventually wrap the geometries together with the optional
     # BatchTableHierarchy within a B3dm:
