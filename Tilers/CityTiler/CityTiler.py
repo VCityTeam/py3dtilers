@@ -79,6 +79,10 @@ def from_3dcitydb(cursor, args):
     buildings = Buildings()
     for t in cursor.fetchall():
         id = t[0]
+        if not t[1]:
+            print("Warning: droping building with id ", id)
+            print("         because its 'cityobject.envelope' is not defined.")
+            continue
         box = t[1]
         buildings.append(Building(id, box))
 
