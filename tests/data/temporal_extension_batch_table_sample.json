@@ -1,0 +1,6 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of a Batch Table",
+  "startDates": ["2018-01-01", "2028-02-02", "2038-03-03"],
+  "endDates":   ["2019-01-01", "2029-02-02", "2039-03-03"],
+  "featureIds": ["1", "2", "3"]
+}

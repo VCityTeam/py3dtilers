@@ -2,7 +2,7 @@
 
 import json
 import unittest
-from py3dtiles import BatchTable, BatchTableHierarchy, HelperTest
+from py3dtiles import BatchTableHierarchy, HelperTest
 from tests.test_batch_table import Test_Batch
 
 

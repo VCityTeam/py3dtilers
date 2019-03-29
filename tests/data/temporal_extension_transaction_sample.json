@@ -1,0 +1,10 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of Transcation",
+  "id": 0,
+  "startDate": "2018-01-01",
+  "endDate": "2019-01-01",
+  "type": "insert",
+  "tags": ["heightened"],
+  "oldFeatures": ["some-id", "some-other-id"],
+  "newFeatures": ["a given id", "another given id"]
+}

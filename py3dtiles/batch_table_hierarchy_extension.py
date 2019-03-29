@@ -13,7 +13,7 @@ class BatchTableHierarchy(Extension, ThreeDTilesNotion):
         ThreeDTilesNotion.__init__(self)
 
         '''
-        List of the _indexes_ of the class (types) used by this BAH.
+        List of the _indexes_ of the class (types) used by this BTH.
         '''
         self._class_to_index = {}
 

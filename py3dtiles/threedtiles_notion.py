@@ -18,6 +18,13 @@ class ThreeDTilesNotion(object):
             ThreeDTilesNotion.validators = SchemaValidators()
         self.attributes = dict()
 
+    @classmethod
+    @property
+    def schema_validator(cls):
+        if not cls.validators:
+            cls.validators = SchemaValidators()
+        return cls.validators
+
     def add_property_from_array(self, property_name, array):
         self.attributes[property_name] = array
 

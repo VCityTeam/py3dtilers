@@ -13,7 +13,8 @@ class Test_Bounding_Volume(unittest.TestCase):
         if not helper.check():
             self.fail()
 
-    def build_box_sample(self):
+    @classmethod
+    def build_box_sample(cls):
         bounding_volume_box = BoundingVolumeBox()
         bounding_volume_box.set_from_list(
                                       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])

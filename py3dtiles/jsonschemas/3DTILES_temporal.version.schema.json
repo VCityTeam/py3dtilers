@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "3DTILES_temporal.version.schema.json",
+  "title": "3DTILES_temporal_version extension",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Version identifier",
+      "type": "number"
+    },
+    "startDate": {
+      "description": "Start date of the version",
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "description": "End date of the version",
+      "type": "string",
+      "format": "date"
+    },
+    "name": {
+      "description": "Version name",
+      "type": "string"
+    },
+    "versionMembers": {
+      "description": "Array of Features Ids composing the version (stored in the 3DTILES_temporal extension of the batch table)",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

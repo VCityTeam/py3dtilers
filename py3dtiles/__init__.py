@@ -12,6 +12,12 @@ from .bounding_volume import BoundingVolume
 from .bounding_volume_box import BoundingVolumeBox
 from .feature_table import Feature
 from .gltf import GlTF
+from .temporal_extension_batch_table import TemporalBatchTable
+from .temporal_extension_bounding_volume import TemporalBoundingVolume
+from .temporal_extension_tileset import TemporalTileSet
+from .temporal_extension_transaction import TemporalTransaction
+from .temporal_extension_version import TemporalVersion
+from .temporal_extension_version_transition import TemporalVersionTransition
 from .tile import Tile
 from .tileset import TileSet
 from .helper_test import HelperTest
@@ -31,6 +37,12 @@ __all__ = ['B3dm',
            'Feature', 
            'GlTF', 
            'Pnts',
+           'TemporalBatchTable', 
+           'TemporalBoundingVolume', 
+           'TemporalTileSet', 
+           'TemporalTransaction', 
+           'TemporalVersion', 
+           'TemporalVersionTransition', 
            'Tile',
            'TileContent',
            'TileReader', 

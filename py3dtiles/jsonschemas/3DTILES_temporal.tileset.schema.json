@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "3DTILES_temporal.tileset.schema.json",
+  "title": "3DTILES_temporal_tileset extension",
+  "type": "object",
+  "description": "Specifies the Versions, Versions Transitions and Transactions properties of the 3DTILES_temporal extension",
+  "properties": {
+    "startDate": {
+      "description": "Start date of existence of the tileset in the real world",
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "description": "End date of existence of the tileset in the real world",
+      "type": "string",
+      "format": "date"
+    },
+    "versions": {
+      "description": "Versions of the city",
+      "type": "array",
+      "items": {"$ref": "3DTILES_temporal.version.schema.json"}
+    },
+    "versionTransitions": {
+      "description": "Transitions between versions of the city",
+      "type": "array",
+      "items": {"$ref": "3DTILES_temporal.versionTransition.schema.json"}
+    },
+    "transactions": {
+      "description": "Transactions between features",
+      "type": "array",
+      "items": {"$ref": "3DTILES_temporal.transaction.schema.json"}
+    }
+  }
+}

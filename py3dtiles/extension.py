@@ -2,6 +2,9 @@ import sys
 
 
 class Extension(object):
+    """
+    An instance of some ExtensionType.
+    """
     def __init__(self, name = None):
         self.name = name
 

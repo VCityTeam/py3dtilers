@@ -27,7 +27,13 @@ class Tile(ThreeDTilesNotion):
         self.attributes["transform"] = [round(float(e), 3) for e in transform]
 
     def get_transform(self):
-        return self.attributes["transform"]
+        if 'transform' in self.attributes:
+            return self.attributes["transform"]
+        print("Warning: defaulting the transformation matrix for a Tile.")
+        return [1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0]
 
     def set_bounding_volume(self, bounding_volume):
         self.attributes["boundingVolume"] = bounding_volume
@@ -94,13 +100,14 @@ class Tile(ThreeDTilesNotion):
             print("Warning: defaulting Tile's unset 'Geometric Error'.")
             # FIXME: what would be a decent default ?!
             self.set_geometric_error(500.0)
-        if not self.attributes["children"]:
+        if 'children' in self.attributes and not self.attributes["children"]:
             # The children list exists indeed (for technical reasons) yet it
             # happens to be still empty. This would pollute the json output
             # by adding a "children" entry followed by an empty list. In such
             # case just remove that attributes entry:
             del self.attributes["children"]
-        if not self.attributes["content"]:
+        if 'content' in self.attributes and not self.attributes["content"]:
+            # Refer to children related above comment (mutatis mutandis):
             del self.attributes["content"]
 
     def write_content(self, directory):

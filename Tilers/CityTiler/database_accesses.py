@@ -26,7 +26,7 @@ from tree_with_children_and_parent import TreeWithChildrenAndParent
 def open_data_base(args):
     with open(args.db_config_path, 'r') as db_config_file:
         try:
-            db_config = yaml.load(db_config_file)
+            db_config = yaml.load(db_config_file, Loader=yaml.FullLoader)
             db_config_file.close()
         except:
             print('ERROR: ', sys.exec_info()[0])

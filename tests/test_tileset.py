@@ -12,7 +12,8 @@ class Test_TileSet(unittest.TestCase):
         if not helper.check():
             self.fail()
 
-    def build_sample(self):
+    @classmethod
+    def build_sample(cls):
         """
         Programmatically define a tileset sample encountered in the
         TileSet json header specification cf

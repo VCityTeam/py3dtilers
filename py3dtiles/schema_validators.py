@@ -4,6 +4,9 @@ import sys
 import json
 import jsonschema
 
+from .threedtiles_core_schemas import ThreeDTilesCoreSchemas
+from .batch_table_hierarchy_extension_schemas import BatchTableHierarchySchemas
+from .temporal_extension_schemas import TemporalExtensionSchemas
 
 class SchemaValidators:
     """
@@ -40,85 +43,16 @@ class SchemaValidators:
             base_uri = 'file://' + os.path.abspath(relative_dir) + '/'
             self.resolver = jsonschema.RefResolver(base_uri, None)
 
-            for key, schema_file_name in {
-                'BatchTable':          'batchTable.schema.json',
-                'BatchTableHierarchy': '3DTILES_batch_table_hierarchy.json',
-                'BoundingVolumeBox':   'boundingVolume.schema.json',
-                'BoundingVolumeRegion':'boundingVolume.schema.json',
-                'BoundingVolumeSphere':'boundingVolume.schema.json',
-                'Tile':                'tile.schema.json',
-                'TileSet':             'tileset.schema.json'
-                }.items():
-                schema_path_name = os.path.join('py3dtiles/jsonschemas',
-                                                schema_file_name)
-                self.append_schema_from_file(key, schema_path_name)
+            self.register_schema_with_sample_list(ThreeDTilesCoreSchemas())
+            self.register_schema_with_sample_list(BatchTableHierarchySchemas())
+            self.register_schema_with_sample_list(TemporalExtensionSchemas())
 
-    def get_dummy_item(self, title):
-        """
-        Retrieve a dummy (as simple as possible to validate) json item
-        corresponding to the title
-        :param title: the title (i.e. the header name "title" within the
-                      schema) of the designated schema.
-        :return: the constructed dummy json item
-        """
-        if title == "3DTILES_batch_table_hierarchy extension":
-            return \
-            {
-                "classes" : [],
-                "instancesLength" : 0,
-                "classIds" : [],
-                "parentCounts" : [],
-                "parentIds" : []
-            }
+    def register_schema_with_sample_list(self, schema_with_sample_list):
+        for schema_with_sample in schema_with_sample_list:
+            self.register_schema_with_sample(schema_with_sample)
 
-        if title == "Batch Table":
-            return \
-            {
-                "ids":[1, 2]
-            }
-
-        if title == "Bounding Volume":
-            return \
-            {
-                "box": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-            }
-
-        if title == "Tile":
-            return \
-            {
-                "geometricError": 3.14159,
-                "boundingVolume": {
-                    "box": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                }
-            }
-        if title == "Tileset":
-            return \
-                {
-                    "asset": {"version": "1.0"},
-                    "geometricError": 3.14159,
-                    "root": {
-                        "boundingVolume": {
-                            "box": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                        },
-                        "geometricError": 3.14159
-                    }
-                }
-
-        return None
-
-    def append_schema_from_file(self, key, file_name):
-        """
-        Register an extension
-        :param key: the name of the class (implementing ThreeDTilesNotion)
-               to be used as access key to retrieve the associated validator.
-        :param file_name: file holding the schema to be added to the
-               the list of already registered schemas
-               Warning: when the schema uses references ($ref entries) to
-               other external schemas, those schema must be encountered in the
-               SAME directory as the scheme itself (otherwise the schema
-               reference resolver has no clue on where to find the sub-schemas)
-        :return: None
-        """
+    def register_schema_with_sample(self, schema_with_sample):
+        file_name = schema_with_sample.get_schema_file_path()
         if not os.path.isfile(file_name):
             print(f'No such file as {file_name}')
             sys.exit(1)
@@ -136,21 +70,22 @@ class SchemaValidators:
             print('Schema argument misses a title. Dropping extension.')
             sys.exit(1)
 
+        key = schema_with_sample.get_key()
         if title in self.schemas:
             if not key in 'BoundingVolume':
-                # This is a legitimate case where some classes share the same validator
+                # This is a legitimate case where some classes share the
+                # same validator
                 pass
             else:
                 print(f'Class {key} already has schema named {title}.')
                 sys.exit(1)
         else:
-            validator = jsonschema.Draft4Validator(schema, resolver = self.resolver)
+            validator = jsonschema.Draft7Validator(schema, resolver = self.resolver)
 
             try:
-                # In order to validate the schema itself we still need to
-                # provide a dummy json item
-                dummy_item = self.get_dummy_item(title)
-                validator.validate(dummy_item)
+                # Strangely enough, in order to validate the schema itself, we
+                # do need to provide a sample complying with the json format:
+                validator.validate(schema_with_sample.get_sample())
             except jsonschema.exceptions.SchemaError:
                 print(f'Invalid schema {title}')
                 sys.exit(1)

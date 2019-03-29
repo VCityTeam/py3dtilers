@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "3DTILES_temporal.boundingVolume.schema.json",
+  "title": "3DTILES_temporal_bounding_volume extension",
+  "type": "object",
+  "description": "Specifies the properties of 3DTILES_temporal extension stored in the bounding volume",
+  "properties": {
+    "startDate": {
+      "description": "Left bound of the bounding time interval",
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "description": "Right bound of the bounding time interval",
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

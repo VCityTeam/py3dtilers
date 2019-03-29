@@ -19,8 +19,18 @@ In order to display the results produced by the quick installation steps below,
 
 ## Quick installation notes
  1. Install py3Dtiles
- 2. Configure `Tilers/CityTiler/CityTilerDBConfig.yml` (out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
- 3. from the home directory of the git 
+    ```
+    virtualenv -p python3 venv
+    source venv/bin/activate
+    pip install -e .
+    python setup.py install
+    ``` 
+ 2. Install the tiler specific dependency:
+    ```
+    pip install pyyaml
+    ```
+ 3. Configure `Tilers/CityTiler/CityTilerDBConfig.yml` (out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
+ 4. from the home directory of the git 
     ```
     python Tilers/CityTiler/CityTiler.py --with_BTH Tilers/CityTiler/CityTilerDBConfig.yml 
     ```
