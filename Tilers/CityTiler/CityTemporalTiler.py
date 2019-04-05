@@ -38,12 +38,12 @@ def ParseCommandLine():
     return parser.parse_args()
 
 
-def create_tile_content(cursor, buildingIds, offset, args):
+def create_tile_content(cursor, buildingIds, offset, cli_args):
     """
     :param offset: the offset (a a 3D "vector" of floats) by which the
                    geographical coordinates should be translated (the
                    computation is done at the GIS level)
-    :type args: CLI arguments as obtained with an ArgumentParser. Used to
+    :type cli_args: CLI arguments as obtained with an ArgumentParser. Used to
                 determine whether to define attach an optional
                 BatchTable or possibly a BatchTableHierachy
     :rtype: a TileContent in the form a B3dm.
@@ -66,8 +66,8 @@ def create_tile_content(cursor, buildingIds, offset, args):
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
     # When required attach a BatchTable with its optional extensions
-    if args.with_BTH:
-        bth = create_batch_table_hierachy(cursor, buildingIds, args)
+    if cli_args.with_BTH:
+        bth = create_batch_table_hierachy(cursor, buildingIds, cli_args)
         bt = BatchTable()
         bt.add_extension(bth)
     else:
@@ -78,9 +78,10 @@ def create_tile_content(cursor, buildingIds, offset, args):
     return B3dm.from_glTF(gltf, bt)
 
 
-def from_3dcitydb(cursor, args):
+def from_3dcitydb(cursor, cli_args):
     """
-    :type args: CLI arguments as obtained with an ArgumentParser.
+    :param cursor: a database access cursor
+    :param cli_args: CLI arguments as obtained with an ArgumentParser.
     """
 
     # Retrieve all the buildings encountered in the 3DCityDB database together
@@ -90,13 +91,13 @@ def from_3dcitydb(cursor, args):
                    "WHERE building.id=building.building_root_id")
     buildings = Buildings()
     for t in cursor.fetchall():
-        id = t[0]
+        building_id = t[0]
         if not t[1]:
-            print("Warning: droping building with id ", id)
+            print("Warning: droping building with id ", building_id)
             print("         because its 'cityobject.envelope' is not defined.")
             continue
         box = t[1]
-        buildings.append(Building(id, box))
+        buildings.append(Building(building_id, box))
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(buildings, 20)
@@ -109,7 +110,7 @@ def from_3dcitydb(cursor, args):
         # Construct the tile content and attach it to the new Tile:
         ids = tuple([building.getId() for building in tile_buildings])
         centroid = tile_buildings.getCentroid()
-        tile_content_b3dm = create_tile_content(cursor, ids, centroid, args)
+        tile_content_b3dm = create_tile_content(cursor, ids, centroid, cli_args)
         tile.set_content(tile_content_b3dm)
 
         # The current new tile bounding volume shall be a box enclosing the
@@ -191,23 +192,66 @@ class Node(object):
 
     def __init__(self, **kwargs):
         # Attributes that will be dynamically added by the Json parsing
-        # self.id : an integer used as Node identifier (local to a single
-        #           Graph file)
-        # self.globalid: an string (global) identifier used as Node identifier
-        #                valid across a set of Graph files
+        # An integer used as Node identifier (local to a single Graph file)
+        self.id = None
+        # A string used as (global) Node identifier i.e. valid across a 
+        # set of Graph files
+        self.globalid = None
         self.__dict__ = kwargs
+
+        # When blending various graphs (respectively loaded from different
+        # graph files), the nodes shared among such graphs (as designated
+        # with their globalid) need to be reconciled. For some nodes (
+        # (e.g. for nodes that are loaded when a previous node with
+        # the same globalid already existed) the self.id (relative to a
+        # file) will thus be lost. In order to help traceability (read
+        # debugging) of the nodes, we keep the original file identifiers
+        # in the following attribute:
+        self.file_ids = ''
 
         self.creation_date = None
         self.deletion_date = None
-        # The list of nodes which are the source of an edge that this
-        # adjacent with this node (this node being the target of that edge).
-        # As such, those nodes come before in time and thus ancestors:
-        self.ancestors = list()
-        # The list of nodes which are the target of an edge that this
-        # adjacent with this node (this node being the source of that edge).
-        # As such, those nodes come after in time and thus descendants:
-        self.descendants = list()
+
+        # Design note: we had the choice to either store the ancestor nodes
+        # or to store the "ancestor edges" (that is edges that have this
+        # node as target). Both choices have their respective drawbacks.
+        # When storing the nodes and we need the information attached to
+        # the edges we need to retrieve those edges (and the cost of retrieving
+        # an edge out of its adjacent vertices is not constant in graph size).
+        # And when storing the edges, retrieving the ancestors requires a
+        # (constant time) walk on those edges.
+        # Note that storing both is always risky because we must keep them
+        # "aligned" (in sync).
+        # We chose to store edges to keep the computation complexity constant.
+        # The list of edges that have this node as target:
+        self.ancestor_edges = list()
+
+        # A list of edges which have this node a source. The targets of those
+        # edges are thus nodes that come after in time which make them
+        # descendants:
+        self.descendant_edges = list()
+
         self.status = Node.Status.unknown
+        self.set_hapax(self.get_time_stamp())
+
+    def __str__(self):
+        ret_str = f'Node: {self.globalid} (id: {self.id})\n'
+        ret_str += f'  Creation date: {self.creation_date} \n'
+        ret_str += f'  Deletion date: {self.deletion_date} \n'
+        ret_str += f'  Status: {self.status} \n'
+        if self.ancestor_edges:
+            ret_str += f'  Ancestors: '
+            for ancestor in self.get_ancestors():
+                ret_str += ancestor.globalid + ', '
+            ret_str += '\n'
+        if self.descendant_edges:
+            ret_str += f'  Descendants: '
+            for descendant in self.get_descendants():
+                ret_str += descendant.globalid + ', '
+            ret_str += '\n'
+        if self.file_ids != '':
+            ret_str += f'  file_ids: {self.file_ids}\n'
+        return ret_str
 
     def is_unknown(self):
         if self.status == Node.Status.unknown:
@@ -235,7 +279,9 @@ class Node(object):
         return False
 
     def assert_status_coherence(self):
-        if not self.ancestors and not self.descendants:
+        ancestors = self.get_ancestors()
+        descendants = self.get_descendants()
+        if not ancestors and not descendants:
             if self.is_unknown():
                 # No information and nothing to assert
                 return
@@ -245,12 +291,12 @@ class Node(object):
             else:
                 print("Only a hapax has neither ancestors nor descendants.")
                 sys.exit(1)
-        if self.ancestors and not self.descendants:
+        if ancestors and not descendants:
             if self.is_unknown():
                 print("Should have been an end prior to having ancestors.")
                 sys.exit(1)
             return
-        if not self.ancestors and self.descendants:
+        if not ancestors and descendants:
             if self.is_unknown():
                 print("Should have been a start prior to having descendants.")
                 sys.exit(1)
@@ -272,7 +318,6 @@ class Node(object):
         """
         When the given time_stamp is earlier than the current value of
         the node creation_date then set the creation_date with that value
-        :param node: the concerned node
         :param time_stamp: the time stamp that should be set when it is earlier
         :return: None
         """
@@ -284,7 +329,7 @@ class Node(object):
 
     def set_creation_date_recursive(self, time_stamp):
         self.set_creation_date_if_earlier(time_stamp)
-        for descendant in self.descendants:
+        for descendant in self.get_descendants():
             descendant.set_creation_date_recursive(time_stamp)
 
     def set_deletion_date_if_later(self, time_stamp):
@@ -295,16 +340,49 @@ class Node(object):
             self.deletion_date = time_stamp
 
     def get_ancestors(self):
-        return self.ancestors
+        return [edge.ancestor for edge in self.ancestor_edges]
 
-    def add_ancestors(self, ancestor_list):
-        self.ancestors += ancestor_list
+    def add_ancestor_edge(self, ancestor_edge):
+        if not ancestor_edge:
+            return
+        self.ancestor_edges.append(ancestor_edge)
+        if self.is_hapax():
+            self.set_end()
+        elif self.is_start():
+            self.set_link()
 
-    def get_direct_descendants(self):
-        return self.descendants
+    def add_ancestor_edges(self, ancestor_edges_list):
+        for edge in ancestor_edges_list:
+            self.add_ancestor_edge(edge)
 
-    def add_descendants(self, descendant_list):
-        self.descendants += descendant_list
+    def get_ancestor_edges(self):
+        return self.ancestor_edges
+
+    def get_descendants(self):
+        """
+        :return: the list of the direct descendants (no recursion done)
+        """
+        return [edge.descendant for edge in self.descendant_edges]
+
+    def add_descendant_edge(self, descendant_edge):
+        if not descendant_edge:
+            return
+        self.descendant_edges.append(descendant_edge)
+        if self.is_hapax():
+            self.set_start()
+        elif self.is_end():
+            self.set_link()
+
+    def add_descendant_edges(self, descendant_edge_list):
+        for edge in descendant_edge_list:
+            self.add_descendant_edge(edge)
+
+    def get_descendant_edges(self):
+        return self.descendant_edges
+
+    def disconnect_adjacent_edges(self):
+        self.ancestor_edges = list()
+        self.descendant_edges = list()
 
     def set_hapax(self, time_stamp):
         if not self.is_unknown():
@@ -321,9 +399,9 @@ class Node(object):
         self.deletion_date = time_stamp
         self.assert_status_coherence()
 
-    def set_start(self, time_stamp = None):
-        if self.is_hapax():
-            print("Failed to convert a hapax into being a start.")
+    def set_start(self, time_stamp=None):
+        if not self.is_unknown() and not self.is_hapax():
+            print("Failed to define as start.")
             sys.exit(1)
         if self.is_end():
             print("Failed to convert an end into being a start.")
@@ -332,25 +410,27 @@ class Node(object):
             print("Failed to convert a link into being a start.")
             sys.exit(1)
         self.status = Node.Status.start
-        if self.creation_date:
-            print("This newly converted start already had a creation_date.")
-            sys.exit(1)
         if time_stamp:
+            if self.creation_date:
+                print("Warning: overwriting a creation_date of a new start.")
             self.creation_date = time_stamp
         self.assert_status_coherence()
 
-    def set_end(self, time_stamp):
-        if self.is_hapax():
-            print("Failed to convert a hapax to being an end.")
-            sys.exit(1)
-        if not self.is_unknown():
+    def set_end(self, time_stamp=None):
+        if not self.is_unknown() and not self.is_hapax():
             print("Failed to define as end.")
             sys.exit(1)
-        self.status = Node.Status.end
-        if self.deletion_date:
-            print("This newly converted end already had a deletion_date.")
+        if self.is_start():
+            print("Failed to convert a start into being a end.")
             sys.exit(1)
-        self.deletion_date = time_stamp
+        if self.is_link():
+            print("Failed to convert a link into being an end.")
+            sys.exit(1)
+        self.status = Node.Status.end
+        if time_stamp:
+            if self.deletion_date:
+                print("Warning: overwriting a creation_date of a new end.")
+            self.deletion_date = time_stamp
         self.assert_status_coherence()
 
     def set_link(self):
@@ -364,17 +444,63 @@ class Node(object):
 
 
 class Edge(object):
+
     def __init__(self, **kwargs):
         # Attributes that will be dynamically added by the Json parsing
-        # self.id : an integer used as Node identifier (local to a single
-        #           Graph file)
-        # self.source: an integer designating a source Node
-        # self.target: an integer designating a target Node
-        # self.comment: a string documenting the transition from source to
-        #               target
+        # An integer used as Node identifier (local to a single Graph file)
+        self.id = None
+        # An integer index designating the source Node
+        self.source = None
+        # An integer index designating the target Node
+        self.target = None
+        # A string among 'replace', 'create' and 'delete'
+        self.type = None
+        # A sting that, when type is 'replace', is among 'fused', 'modified',
+        # 're-ided' and 'subdivided'
+        self.tags = None
         self.__dict__ = kwargs
 
+        # Refer to Node.file_ids eponymous attribute for comments:
+        self.file_ids = ''
+        # The Node with self.source as identifier
+        self.ancestor = None
+        # The Node with self.target as identifier
+        self.descendant = None
+
+    def set_ancestor(self, ancestor_node):
+        self.ancestor = ancestor_node
+        if ancestor_node:
+            ancestor_node.add_descendant_edge(self)
+
+    def get_ancestor(self):
+        return self.ancestor
+
+    def set_descendant(self, descendant_node):
+        self.descendant = descendant_node
+        if descendant_node:
+            descendant_node.add_ancestor_edge(self)
+
+    def get_descendant(self):
+        return self.descendant
+
+    def is_replace(self):
+        if self.type == 'replace':
+            return True
+        return False
+
+    def is_unchanged(self):
+        if self.is_replace() and self.tags == 'unchanged':
+            return True
+        return False
+
+    def is_modified(self):
+        if self.is_replace() and self.tags == 'modified':
+            return True
+        return False
+
+
 class Graph(object):
+
     def __init__(self, nodes=None, edges=None):
         if not nodes:
             self.nodes = list()
@@ -386,68 +512,167 @@ class Graph(object):
             self.edges = edges
 
     def extend_with_subgraph(self, sub_graph):
-        self.nodes += sub_graph.nodes
-        self.edges += sub_graph.edges
+        # Concerning the nodes of sub_graph we have two possibilities
+        # - the node with corresponding globalid already exists in this
+        #   graph in which case we need the edges to point to it
+        # - the nodes is new (i.e. the node does not correspond to and existing
+        #   node with the same globalid within this graph) and we need to
+        #   pour/add in this graph
 
-    def get_ancestors(self, node):
-        """
-        Retrieve the ancestor (nodes) of the considered node i.e. the nodes
-        that are the source of the edges that have the considered node as
-        target
-        :param node: the node of which we are looking the ancestors for
-        :return: a list of ancestor nodes (without duplicates
-        """
-        # There can be multiple edges between a given source node and a given
-        # destination node:
-        multiple_ancestors = [e.source for e in self.edges
-                              if e.target.globalid == node.globalid]
-        # Simplify the list by removing duplicates
-        ancestors = list(set(multiple_ancestors))
-        return ancestors
+        # The dictionary having the sub_graph node index as key and this
+        # graph node as value
+        for node in sub_graph.nodes:
+            existing_node = self.find_node(node.globalid)
+            if existing_node:
+                # We need to rewire the edges to the already existing node
+                ancestor_edges = node.get_ancestor_edges()
+                if ancestor_edges:
+                    for edge in ancestor_edges:
+                        edge.set_descendant(existing_node)
+                    existing_node.add_ancestor_edges(ancestor_edges)
 
-    def reconstruct_ancestors_graph(self, time_stamp):
-        latest_nodes = [n for n in self.nodes
-                        if n.get_time_stamp() == time_stamp]
-        for n in latest_nodes:
-            # The inquiry towards past and future is asymmetrical because we
-            # swipe from future to past
-            ancestors = self.get_ancestors(n)
-            descendants = n.get_direct_descendants()
-            if not ancestors and not descendants:
-                # This node had no future and no past was found. It is thus
-                # isolated in history:
-                n.set_hapax(time_stamp)
-                continue
-            if ancestors:
-                # We found ancestors: inform them of this new descendant
-                for ancestor in ancestors:
-                    ancestor.add_descendants([n])
-                    ancestor.set_deletion_date_if_later(time_stamp)
-                    ancestor.set_start()
-                    ancestor.assert_status_coherence()
-                n.add_ancestors(ancestors)
-            if descendants:
-                for descendant in descendants:
-                    # The descendants should already know about the existence of
-                    # the present node as being their ancestor (since this
-                    # information should have been discovered at the previous
-                    # round i.e. when those descendants where looking for their
-                    # own ancestor). Assert this is the case:
-                    if n not in descendant.get_ancestors():
-                        print("Some descendants don't know their ancestor!?")
-                        sys.exit(1)
-                    # We are thus left with informing them of the time_stamp
-                    descendant.set_creation_date_recursive(time_stamp)
-                    descendant.assert_status_coherence()
-            if ancestors and not descendants:
-                n.set_end(time_stamp)
-                continue
-            if not ancestors and descendants:
-                n.set_start(time_stamp)
-                continue
-            # We are left with the case
-            #   len(ancestors) != 0 and len(descendants) != 0
-            n.set_link()
+                descendant_edges = node.get_descendant_edges()
+                if descendant_edges:
+                    for edge in descendant_edges:
+                        edge.set_ancestor(existing_node)
+                    existing_node.add_descendant_edges(descendant_edges)
+
+                # Keep a trace of the identification of the nodes
+                existing_node.file_ids += f'{node.id}, '
+            else:
+                # No edge rewiring required. We simply need to add the
+                # new sub-graph node to the this graph and change its
+                # id to avoid id collisions:
+                node.file_ids += f'{node.id}, '
+                node.id = len(self.nodes) + 1
+                self.nodes.append(node)
+
+        # All sub-graph edges (rewired or not) must be kept and thus get
+        # poured/blended within this graph:
+        for new_edge in sub_graph.edges:
+            new_edge.file_ids += f'{new_edge.id}, '
+            new_edge.id = len(self.edges) + 1
+            self.edges.append(new_edge)
+
+    def add_node(self, new_node):
+        self.nodes.append(new_node)
+
+    def find_node(self, globalid):
+        """
+        Retrieve, when it exists, the node with the given globalid
+        :param globalid: the global id that is looked for
+        :return: the node with globalid when found, None otherwise
+        """
+        encountered = [node for node in self.nodes if node.globalid == globalid]
+        if len(encountered) == 0:
+            return None
+        elif len(encountered) == 1:
+            return encountered[0]
+        else:
+            print(f'Many nodes with same globalid: {globalid}')
+            pprint(vars(encountered))
+            sys.exit()
+
+    def delete_node(self, node, deep_assert=False):
+        """
+        Assert this node has no adjacent edge that it knows about and delete
+        it from the graph.
+        :param node: the node to be removed
+        :param deep_assert: when true, assert that no other edge of the graph
+                            (that the node wouldn't know about) is pointing to
+                            the argument node
+        :return: True when properly deleted, sys.exit() otherwiwe
+        """
+        if node.get_ancestors() or node.get_descendants():
+            print('Cannot delete following node with ancestors or descendants')
+            pprint(vars(node))
+            sys.exit()
+        if deep_assert:
+            for edge in self.edges:
+                if edge.get_ancestor() == node or edge.get_descendant() == node:
+                    print('Cannot delete following node:')
+                    pprint(vars(node))
+                    print('   because it is refered by following edge:')
+                    pprint(vars(edge))
+                    sys.exit()
+        if node not in self.nodes:
+            print('Cannot delete following node:')
+            pprint(vars(node))
+            print('   because it is not in the graph nodes.')
+            sys.exit()
+        self.nodes.remove(node)
+        return True
+
+    def delete_edge(self, edge, deep_assert=False):
+        """
+        Assert this edge has no adjacent node (that it knows about) and delete
+        it from the graph.
+        :param edge: the edge to be removed
+        :param deep_assert: when true, assert that no other node of the graph
+                            (that the edge wouldn't know about) is pointing to
+                            the argument edge
+        :return: True when properly deleted, sys.exit() otherwiwe
+        """
+        if edge.get_ancestor() or edge.get_descendant():
+            print('Cannot delete following edge with an ancestor or descendant')
+            pprint(vars(edge))
+            sys.exit()
+        if deep_assert:
+            for node in self.nodes:
+                if edge in node.get_ancestor_edges():
+                    print('Cannot delete following edge:')
+                    pprint(vars(edge))
+                    print('   because it is an ancestor edge of following node:')
+                    pprint(vars(node))
+                    sys.exit()
+                if edge in node.get_descendant_edges():
+                    print('Cannot delete following edge:')
+                    pprint(vars(edge))
+                    print('   because it is a descendant edge of following node:')
+                    pprint(vars(node))
+                    sys.exit()
+        self.edges.remove(edge)
+        return True
+
+    def collapse_edge_and_remove_ancestor(self, edge):
+        """
+        Collapse the given edge that is
+         - take all the ancestor edges of the ancestor of the argument edge
+           and make them ancestor edges of the descendant of that argument edge
+         - remove the argument edge from the list of ancestor_edges
+         - remove the argument edge from the graph
+         - set the start date of the descendant of the argument edge as being
+           the start date of the ancestor of the argument edge
+        :param edge: the edge that should be removed
+        :return: True when edge removed, sys.exit() otherwise
+        """
+
+        ancestor = edge.get_ancestor()
+        descendant = edge.get_descendant()
+        ancestor_edges = ancestor.get_ancestor_edges()
+
+        # Rewire the ancestor_edges to the descendant
+        if ancestor_edges:
+            for ancestor_edge in ancestor_edges:
+                ancestor_edge.set_descendant(descendant)
+            # Conversely, let the descendant now about its new ancestor edges
+            descendant.add_ancestor_edges(ancestor_edges)
+
+        # Disconnect the ancestor node from all its adjacent edges
+        ancestor.disconnect_adjacent_edges()
+
+        # We must now proceed with isolating/un-connecting the edge
+        edge.set_ancestor(None)
+        edge.set_descendant(None)
+        descendant.get_ancestor_edges().remove(edge)
+
+        # Both the ancestor node and the edge to be collapsed are now isolated
+        # from the graph. We can proceed with their removal:
+        self.delete_node(ancestor, True)
+        self.delete_edge(edge, True)
+
+        return True
+
 
 class GraphMLDecoder(json.JSONDecoder):
     def __init__(self):
@@ -456,18 +681,24 @@ class GraphMLDecoder(json.JSONDecoder):
     def dict_to_object(self, dct):
         if 'id' in dct and 'globalid' in dct:
             return Node(**dct)
-        if 'id' in dct and 'source' in dct and 'target' in dct and 'comment' in dct:
+        if      'id'     in dct \
+            and 'source' in dct \
+            and 'target' in dct \
+            and 'type'   in dct \
+            and 'tags'   in dct:
             return Edge(**dct)
         return dct
 
 
-def process_temporal_data(args):
-    graph = Graph()
+def process_temporal_data(cli_args):
+    graph = None
+    print("Loading nodes and edges of files: ")
     # Deserialize the temporal (sub) graphs to constitute the general graph
-    for temporal_graph_filename in args.temporal_graph:
+    for temporal_graph_filename in cli_args.temporal_graph:
         with open(temporal_graph_filename, 'r') as temporal_graph_file:
             temporal_graph = json.loads(temporal_graph_file.read(),
                                         cls=GraphMLDecoder)
+
         current_nodes = temporal_graph['nodes']
         # Because the Json GraphML we parse is produced with boost::ptree's
         # write_json method that is well known for not conforming to Json
@@ -488,81 +719,37 @@ def process_temporal_data(args):
         # references (as python objects):
         for edge in current_edges:
             if isinstance(edge.source, str):
-                edge.source = current_nodes[int(edge.source)]
+                edge.set_ancestor(current_nodes[int(edge.source)])
             if isinstance(edge.target, str):
-                edge.target = current_nodes[int(edge.target)]
-        # Eventually we can poor the current graph with the other graphs
-        graph.extend_with_subgraph(Graph(current_nodes, current_edges))
+                edge.set_descendant(current_nodes[int(edge.target)])
 
-    # Retrieve, out of the node's global identifier, an ordered (from oldest
-    # to most recent) list of time stamps (where the oldest time stamp is
-    # weeded out):
-    time_stamps_set = set()
-    for node in graph.nodes:
-        time_stamps_set.add(node.get_time_stamp())
-    time_stamps = list(time_stamps_set)
-    time_stamps.sort()
-
-    # We iterate on the time stamps (minus the oldest) in order to
-    # reconstruct the objects (building) historical (highly non connected)
-    # graph. We start from the most recent time stamp and proceed towards
-    # the past. Note that the oldest time stamp is removed because the graph
-    # reconstruction algorithm is based on the edges (and thus runs as many
-    # times as they are time stamps intervals)
-    for time_stamp in reversed(time_stamps[1:]):
-        graph.reconstruct_ancestors_graph(time_stamp)
-
-    # Among the nodes with the first time stamp, there could be
-    #  - some hapaxes (that where not discovered previously as being some
-    #    ancestor of a later time stamp,
-    #  - some starts that must inform their descendants of their creation_date
-    # Deal with those cases
-    origin_time_stamp = time_stamps[0]
-    recent_nodes = [n for n in graph.nodes
-                     if n.get_time_stamp() == origin_time_stamp]
-    for node in recent_nodes:
-        if node.is_unknown():
-            # The nodes, with the first time stamp, that are left without a
-            # stated status are hapaxes and must be labeled as such:
-            node.set_hapax(origin_time_stamp)
-        elif node.is_start():
-            descendants = node.get_direct_descendants()
-            if not descendants:
-                print("Starting node with origin time stamp and no descendants")
-                pprint(vars(node))
-                sys.exit(1)
-            for descendant in descendants:
-                # The descendants should already know about the existence of
-                # the present node as being their ancestor (since this
-                # information should have been discovered at the previous
-                # round i.e. when those descendants where looking for their
-                # own ancestor). Assert this is the case:
-                if node not in descendant.get_ancestors():
-                    print("Some descendants don't know their ancestor!?")
-                    sys.exit(1)
-                # We are thus left with informing them of the time_stamp
-                descendant.set_creation_date_recursive(origin_time_stamp)
-                descendant.assert_status_coherence()
+        # Eventually we can pour/blend the current graph with the central
+        # graph
+        new_sub_graph = Graph(current_nodes, current_edges)
+        if not graph:
+            graph = new_sub_graph
         else:
-            # All other cases are pathological:
-            print("The following node with origin time stamp is buggy:")
-            pprint(vars(node))
-            sys.exit(1)
+            graph.extend_with_subgraph(new_sub_graph)
+        print("   ", temporal_graph_filename, ": done.")
+    print("Loading of files: done.")
+    print("Graph connectivity reconstruction: done.")
 
-    # Collect the buildings by singling out their respective lineage
-    lineage_nodes = list()
+    # FIXME FIXME ancestor.set_deletion_date_if_later(time_stamp)
+    # FIXME FIXME descendant.set_creation_date_recursive(time_stamp)
+    #                 descendant.assert_status_coherence()
+
+    print("Simplifying the graph: collapsing unchanged edges.")
+    for edge in graph.edges:
+        if edge.is_modified():
+            graph.collapse_edge_and_remove_ancestor(edge)
+
+    # DEBUG
     for node in graph.nodes:
         if node.is_unknown():
             print("A node with unknown status was found:")
             pprint(vars(node))
             sys.exit(1)
-        if node.is_link() or node.is_start():
-            # Link and start nodes are part of an historical lineage
-            # that must have an end. We will save the associated
-            # information by considering the corresponding end node
-            continue
-        pprint(vars(node))
-        lineage_nodes.append(node)
+        print(node)
 
 
 if __name__ == '__main__':
