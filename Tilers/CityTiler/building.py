@@ -3,7 +3,7 @@ from py3dtiles import BoundingVolumeBox
 
 class Building(object):
 
-    def __init__(self, id, box_in):
+    def __init__(self, database_id=None, box_in=None):
         """
         :param id: given identifier
         :param box_2D: the maximum extents of the geometry a returned by a
@@ -13,7 +13,26 @@ class Building(object):
                         * 1, 2 and 3 are the respective minimum of X, Y and Z
                         * 4, 5 and 6 are the respective maximum of X, Y and Z
         """
-        self.id = id
+
+        # The identifier of the database
+        self.database_id = None
+
+        # The City GML identifier (out of the "original" CityGML data file)
+        self.gml_id = None
+
+        # A Bounding Volume Box object
+        self.box = None
+
+        # The centroid of the box
+        self.centroid = None
+
+        if database_id:
+            self.set_database_id(database_id)
+        if box_in:
+            self.set_box(box_in)
+
+    def set_box(self, box_in):
+        # Realize the following convertion:
         # 'BOX3D(1 2 3, 4 5 6)' -> [[1, 2, 3], [4, 5, 6]]
         box_parsed = [[float(coord) for coord in point.split(' ')]
                                     for point in box_in[6:-1].split(',')]
@@ -31,8 +50,17 @@ class Building(object):
                          (y_min + y_max) / 2.0,
                          (z_min + z_max) / 2.0]
 
-    def getId(self):
-        return self.id
+    def set_database_id(self, id):
+        self.database_id = id
+
+    def get_database_id(self):
+        return self.database_id
+
+    def set_gml_id(self, gml_id):
+        self.gml_id = gml_id
+
+    def get_gml_id(self):
+        return self.gml_id
 
     def getCentroid(self):
         return self.centroid
@@ -54,7 +82,10 @@ class Buildings:
         return iter(self.buildings)
 
     def __getitem__(self, item):
-        return Buildings(self.buildings.__getitem__(item))
+        if isinstance(item, slice):
+            return Buildings(self.buildings.__getitem__(item))
+        # item is then an int type:
+        return self.buildings.__getitem__(item)
 
     def append(self, building):
         self.buildings.append(building)

@@ -1,14 +1,10 @@
 import sys
 import yaml
-import itertools
 import psycopg2
 import psycopg2.extras
 
-from py3dtiles import BatchTableHierarchy
 from py3dtiles import TriangleSoup
-
-from tree_with_children_and_parent import TreeWithChildrenAndParent
-
+from building import Building, Buildings
 
 # ##### Notes on the 3DCityDB database general structure
 
@@ -23,8 +19,9 @@ from tree_with_children_and_parent import TreeWithChildrenAndParent
 #   - the cityobject table contains both the thematic_surface and
 #     the building objects
 
-def open_data_base(args):
-    with open(args.db_config_path, 'r') as db_config_file:
+
+def open_data_base(db_config_file_path):
+    with open(db_config_file_path, 'r') as db_config_file:
         try:
             db_config = yaml.load(db_config_file, Loader=yaml.FullLoader)
             db_config_file.close()
@@ -66,8 +63,78 @@ def open_data_base(args):
     return cursor
 
 
+def open_data_bases(db_config_file_paths):
+    cursors = list()
+    for file_path in db_config_file_paths:
+        cursors.append(open_data_base(file_path))
+    return cursors
+
+
+def get_buildings_from_3dcitydb(cursor, buildings=None):
+    """
+    :param cursor: a database access cursor
+    :param buildings: an optional list of objects with a get_gmlid() method
+                      (that returns the (city)gml identifier of a building
+                      object that should be encountered in the database) that
+                      should be seeked in the database. When this list is
+                      is empty all the buildings encountered in the database
+                      are returned.
+    :return: the list of the buildings that were retrieved in the 3DCityDB
+             database, each building being decorated with its database
+             identifier as well as its 3D bounding box (as retrieved in the.
+             database)
+    """
+    if not buildings:
+        no_input_buildings = True
+        # No specific building were seeked. We thus retrieve all the ones
+        # we can find in the database:
+        query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
+                "FROM building JOIN cityobject ON building.id=cityobject.id "+\
+                "WHERE building.id=building.building_root_id"
+    else:
+        no_input_buildings = False
+        building_gmlids = [n.get_gml_id() for n in buildings]
+        building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
+        query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
+                "FROM building JOIN cityobject ON building.id=cityobject.id "+\
+                "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " "\
+                "AND building.id=building.building_root_id"
+    cursor.execute(query)
+
+    if no_input_buildings:
+        buildings = Buildings()
+    else:
+        index_in_buildings = 0
+
+    for t in cursor.fetchall():
+        building_id = t[0]
+        if not t[1]:
+            print("Warning: building with id ", building_id)
+            print("         has no 'cityobject.envelope'.")
+            if no_input_buildings:
+                print("     Dropping this building (downstream trouble ?)")
+                continue
+            print("     Exiting (is the database corrupted ?)")
+            sys.exit(1)
+        box = t[1]
+        if no_input_buildings:
+            new_building = Building(building_id, box)
+            buildings.append(new_building)
+            continue
+        # WARNING: we here make the strong assumption that the query response
+        # will preserve the order of the ids passed in the query !
+        building = buildings[index_in_buildings]
+        building.set_database_id(building_id)
+        building.set_box(box)
+        index_in_buildings += 1
+    return buildings
+
+
 def retrieve_geometries(cursor, buildingIds, offset):
     """
+    :param cursor: a database access cursor
+    :param buildings: an list of (city)gml identifier corresponding to
+                      building objects.
     :param offset: the offset (a a 3D "vector" of floats) by which the
                    geographical coordinates should be translated (the
                    computation is done at the GIS level)
@@ -94,7 +161,7 @@ def retrieve_geometries(cursor, buildingIds, offset):
     cursor.execute(
         "SELECT building.id "
         "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                        WHERE building_root_id IN %s", (buildingIds,))
+        "                     WHERE building_root_id IN %s ", (buildingIds,))
 
     subBuildingIds = tuple([t[0] for t in cursor.fetchall()])
 
@@ -128,142 +195,3 @@ def retrieve_geometries(cursor, buildingIds, offset):
             })
 
     return arrays
-
-
-def retrieve_buildings_and_sub_parts(cursor, buildingIds, classes, hierarchy):
-    """
-    :type classes: new classes are appended
-    """
-    # ##### Walk on the building and
-    #   - collect buildings': id, glm-id and class
-    #   - collect the names of used classes (i.e. the types of user data)
-    #   - collect the hierarchical information
-    buildindsAndSubParts = []
-
-    cursor.execute(
-        "SELECT building.id, building_parent_id,"
-        "       cityobject.gmlid, cityobject.objectclass_id "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                        WHERE building_root_id IN %s", (buildingIds,))
-    for t in cursor.fetchall():
-        buildindsAndSubParts.append(
-            {'internalId': t[0], 'gmlid': t[2], 'class': t[3]})
-        hierarchy.addNodeToParent(t[0], t[1])
-        # Note: set.add() does nothing when the added element is already
-        # present in the set
-        classes.add(t[3])
-    return buildindsAndSubParts
-
-def retrieve_geometric_instances(cursor, buildingIds, classes, hierarchy):
-    """
-    :type classes: new classes are appended
-    """
-    # ##### Collect the same information as for buildings but this time
-    # for surface geometries (geometrical object) that is
-    #   - collect surface geometries': id, glm-id and class
-    #   - collect the names of used classes (i.e. the types of user data)
-    #   - collect the hierarchical information
-
-    # First retrieve all the concerned (geometrical) objects identifiers:
-    # 3DCityDB's Building table regroups both the buildings mixed with their
-    # building's sub-divisions (Building is an "abstraction" from which
-    # inherits concrete building class as well building-subdivisions (parts).
-    # We must first collect all the buildings and their parts:
-    cursor.execute(
-        "SELECT building.id "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                        WHERE building_root_id IN %s", (buildingIds,))
-
-    subBuildingIds = tuple([t[0] for t in cursor.fetchall()])
-
-    # Then proceed with collecting the required information for those objects:
-    geometricInstances = []
-    cursor.execute(
-        "SELECT cityobject.id, cityobject.gmlid, "
-        "       thematic_surface.building_id, thematic_surface.objectclass_id, "
-        "ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) "
-        "FROM surface_geometry JOIN thematic_surface "
-        "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id "
-        "JOIN cityobject ON thematic_surface.id=cityobject.id "
-        "WHERE thematic_surface.building_id IN %s "
-        "GROUP BY surface_geometry.root_id, cityobject.id, cityobject.gmlid, "
-        "        thematic_surface.building_id, thematic_surface.objectclass_id",
-        (subBuildingIds,))
-    # In the above request we won't collect the geometry. However we still
-    # retrieve it in order to disregard the instances without geometry. This
-    # is because
-    #   - we need the BTH data indexes to match the geometrical data indexes
-    #   - when building (verb) the gltf (held in the B3dm) geometries we
-    #     had to drop instances without geometrical content...
-    for t in cursor.fetchall():
-        if t[4] is None:
-            # Some thematic surface may have no geometry (due to a cityGML
-            # exporter bug?): simply ignore them.
-            continue
-        geometricInstances.append(
-            {'internalId': t[0], 'gmlid': t[1], 'class': t[3]})
-        hierarchy.addNodeToParent(t[0], t[2])
-        classes.add(t[3])
-
-    return geometricInstances
-
-def create_batch_table_hierachy(cursor, buildingIds, args):
-    """
-    :type args: CLI arguments as obtained with an ArgumentParser. Used to
-                determine whether to define attach an optional
-                BatchTable or possibly a BatchTableHierachy
-    :rtype: a TileContent in the form a B3dm.
-    """
-
-    resulting_bth = BatchTableHierarchy()
-
-    # The constructed BatchTableHierarchy encodes the semantics of two
-    # categories of objects:
-    #  - non geometrical objects (building header gathering sub-buildings...)
-    #  - the geometrical objects per se
-    # We collect the information associated to those two categories separately:
-    classes = set()
-    hierarchy = TreeWithChildrenAndParent()
-    buildindsAndSubParts = retrieve_buildings_and_sub_parts(cursor,
-                                                            buildingIds,
-                                                            classes,
-                                                            hierarchy)
-    geometricInstances = retrieve_geometric_instances(cursor,
-                                                      buildingIds,
-                                                      classes,
-                                                      hierarchy)
-
-    # ##### Retrieve the class names
-    classDict = {}
-    cursor.execute("SELECT id, classname FROM objectclass")
-    for t in cursor.fetchall():
-        # TODO: allow custom fields to be added (here + in queries)
-        classDict[t[0]] = (t[1], ['gmlid'])
-
-    # ###### All the upstream information is now retrieved from the DataBase
-    # and we can proceed with the construction of the BTH
-
-    # Within the BTH, create each required classes (as types)
-    for c in classes:
-        resulting_bth.add_class(classDict[c][0], classDict[c][1])
-
-    # Build the positioning index within the constructed BatchTableHierarchy
-    objectPosition = {}
-    for i, (obj) in enumerate(itertools.chain(geometricInstances,
-                                              buildindsAndSubParts)):
-        object_id = obj['internalId']
-        objectPosition[object_id] = i
-
-    # Eventually insert objects (with geometries and without geometry)
-    # associated (semantic) information. Notice that each type of object
-    # (with geometries and without geometry) has its respective class
-    # attributes)
-    for obj in itertools.chain(geometricInstances,
-                               buildindsAndSubParts):
-        object_id = obj['internalId']
-        resulting_bth.add_class_instance(
-            classDict[obj['class']][0],
-            obj,
-            [objectPosition[id] for id in hierarchy.getParents(object_id)])
-
-    return resulting_bth

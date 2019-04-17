@@ -9,168 +9,11 @@ from pprint import pprint
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from building import Building, Buildings
+from temporal_building import TemporalBuilding
+from building import Buildings
 from kd_tree import kd_tree
-from database_accesses import open_data_base, retrieve_geometries, \
-    create_batch_table_hierachy
-
-debug_mode = True
-
-def ParseCommandLine():
-    # arg parse
-    descr = '''A small utility that build a 3DTiles tileset out of 
-               - temporal data of the buildings
-               - the content of a 3DCityDB database.'''
-    parser = argparse.ArgumentParser(description=descr)
-    parser.add_argument('--db_config_path',
-                        nargs='?',
-                        default='CityTilerDBConfig.yml',
-                        type=str,
-
-                        help='Path to the database configuration file')
-    parser.add_argument('--temporal_graph',
-                        nargs='+',
-                        type=str,
-                        help='GraphML-Json temporal data filename(s)')
-    parser.add_argument('--with_BTH',
-                        dest='with_BTH',
-                        action='store_true',
-                        help='Adds a Batch Table Hierachy when defined')
-    return parser.parse_args()
-
-
-def create_tile_content(cursor, building_ids, offset, cli_args):
-    """
-    :param cursor: a database access cursor
-
-    :param offset: the offset (a a 3D "vector" of floats) by which the
-                   geographical coordinates should be translated (the
-                   computation is done at the GIS level)
-    :type cli_args: CLI arguments as obtained with an ArgumentParser. Used to
-                determine whether to define attach an optional
-                BatchTable or possibly a BatchTableHierachy
-    :rtype: a TileContent in the form a B3dm.
-    """
-    arrays = retrieve_geometries(cursor, building_ids, offset)
-
-    # GlTF uses a y-up coordinate system whereas the geographical data (stored
-    # in the 3DCityDB database) uses a z-up coordinate system convention. In
-    # order to comply with Gltf we thus need to realize a z-up to y-up
-    # coordinate transform for the data to respect the glTF convention. This
-    # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
-    # client side when using (displaying) the data.
-    # Refer to the note concerning the recommended data workflow
-    #    https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
-    # for more details on this matter.
-    transform = np.array([1, 0, 0, 0,
-                          0, 0, -1, 0,
-                          0, 1, 0, 0,
-                          0, 0, 0, 1])
-    gltf = GlTF.from_binary_arrays(arrays, transform)
-
-    # When required attach a BatchTable with its optional extensions
-    if cli_args.with_BTH:
-        bth = create_batch_table_hierachy(cursor, building_ids, cli_args)
-        bt = BatchTable()
-        bt.add_extension(bth)
-    else:
-        bt = None
-
-    # Eventually wrap the geometries together with the optional
-    # BatchTableHierarchy within a B3dm:
-    return B3dm.from_glTF(gltf, bt)
-
-
-def from_3dcitydb(cursor, cli_args):
-    """
-    :param cursor: a database access cursor
-    :param cli_args: CLI arguments as obtained with an ArgumentParser.
-    """
-
-    # Retrieve all the buildings encountered in the 3DCityDB database together
-    # with their 3D bounding box.
-    cursor.execute("SELECT building.id, BOX3D(cityobject.envelope) "
-                   "FROM building JOIN cityobject ON building.id=cityobject.id "
-                   "WHERE building.id=building.building_root_id")
-    buildings = Buildings()
-    for t in cursor.fetchall():
-        building_id = t[0]
-        if not t[1]:
-            print("Warning: droping building with id ", building_id)
-            print("         because its 'cityobject.envelope' is not defined.")
-            continue
-        box = t[1]
-        buildings.append(Building(building_id, box))
-
-    # Lump out buildings in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(buildings, 20)
-
-    tileset = TileSet()
-    for tile_buildings in pre_tiles:
-        tile = Tile()
-        tile.set_geometric_error(500)
-
-        # Construct the tile content and attach it to the new Tile:
-        ids = tuple([building.getId() for building in tile_buildings])
-        centroid = tile_buildings.getCentroid()
-        tile_content_b3dm = create_tile_content(cursor, ids, centroid, cli_args)
-        tile.set_content(tile_content_b3dm)
-
-        # The current new tile bounding volume shall be a box enclosing the
-        # buildings withheld in the considered tile_buildings:
-        bounding_box = BoundingVolumeBox()
-        for building in tile_buildings:
-            bounding_box.add(building.getBoundingVolumeBox())
-
-        # The Tile Content returned by the above call to create_tile_content()
-        # (refer to the usage of the centroid/offset third argument) uses
-        # coordinates that are local to the centroid (considered as a
-        # referential system within the chosen geographical coordinate system).
-        # Yet the above computed bounding_box was set up based on
-        # coordinates that are relative to the chosen geographical coordinate
-        # system. We thus need to align the Tile Content to the
-        # BoundingVolumeBox of the Tile by "adjusting" to this change of
-        # referential:
-        bounding_box.translate([- centroid[i] for i in range(0, 3)])
-        tile.set_bounding_volume(bounding_box)
-
-        # The transformation matrix for the tile is limited to a translation
-        # to the centroid (refer to the offset realized by the
-        # create_tile_content() method).
-        # Note: the geographical data (stored in the 3DCityDB) uses a z-up
-        #       referential convention. When building the B3dm/gltf, and in
-        #       order to comply to the y-up gltf convention) it was necessary
-        #       (look for the definition of the `transform` matrix when invoking
-        #       `GlTF.from_binary_arrays(arrays, transform)` in the
-        #        create_tile_content() method) to realize a z-up to y-up
-        #        coordinate transform. The Tile is not aware on this z-to-y
-        #        rotation (when writing the data) followed by the invert y-to-z
-        #        rotation (when reading the data) that only concerns the gltf
-        #        part of the TileContent.
-        tile.set_transform([1, 0, 0, 0,
-                            0, 1, 0, 0,
-                            0, 0, 1, 0,
-                            centroid[0], centroid[1], centroid[2], 1])
-
-        # Eventually we can add the newly build tile to the tile set:
-        tileset.add_tile(tile)
-
-    # Note: we don't need to explicitly adapt the TileSet's root tile
-    # bounding volume, because TileSet::write_to_directory() already
-    # takes care of this synchronisation.
-
-    # A shallow attempt at providing some traceability on where the resulting
-    # data set comes from:
-    cursor.execute('SELECT inet_client_addr()')
-    server_ip = cursor.fetchone()[0]
-    cursor.execute('SELECT current_database()')
-    database_name = cursor.fetchone()[0]
-    origin = f'This tileset is the result of Py3DTiles {__file__} script '
-    origin += f'run with data extracted from database {database_name} '
-    origin += f' obtained from server {server_ip}.'
-    tileset.add_asset_extras(origin)
-
-    return tileset
+from database_accesses import open_data_bases, retrieve_geometries, \
+                              get_buildings_from_3dcitydb
 
 
 class Node(object):
@@ -382,6 +225,12 @@ class Node(object):
 
     def get_time_stamp(self):
         return int(self.globalid.split('::')[0])
+
+    def get_local_id(self):
+        return self.globalid.split('::')[1]
+
+    def get_global_id(self):
+        return self.globalid
 
     def get_deletion_date(self):
         return self.deletion_date
@@ -913,232 +762,482 @@ class GraphMLDecoder(json.JSONDecoder):
         return dct
 
 
-def reconstruct_graph_connectivity(cli_args):
-    graph = None
-    print("Reconstructing graph: ")
-    print("   Loading nodes and edges of files: ")
-    # Deserialize the temporal (sub) graphs to constitute the general graph
-    for temporal_graph_filename in cli_args.temporal_graph:
-        with open(temporal_graph_filename, 'r') as temporal_graph_file:
-            temporal_graph = json.loads(temporal_graph_file.read(),
-                                        cls=GraphMLDecoder)
+class TemporalGraph(Graph):
 
-        current_nodes = temporal_graph['nodes']
-        # Because the Json GraphML we parse is produced with boost::ptree's
-        # write_json method that is well known for not conforming to Json
-        # (integers are serialized as strings i.e. enclosed with double quotes)
-        # we need to "fix" things after the Json parser is run
-        for node in current_nodes:
-            if isinstance(node.id, str):
-                node.id = int(node.id)
+    def __init__(self, cli_args):
+        Graph.__init__(self)
+        self.cli_args = cli_args
 
-        current_edges = temporal_graph['edges']
-        # Edges id must also be type fixed (refer above to current_nodes)
-        for edge in current_edges:
-            if isinstance(edge.id, str):
-                edge.id = int(edge.id)
+    def extract_time_stamps(self):
+        """
+        :return: the ordered (from oldest to most recent) list of time stamps
+                 as extracted from the node's global identifiers.
+        """
+        time_stamps_set = set()
+        for node in self.nodes:
+            time_stamps_set.add(node.get_time_stamp())
+        time_stamps = list(time_stamps_set)
+        time_stamps.sort()
+        return time_stamps
 
-        # Additionally we need to replace the node indexes (integer) loaded
-        # as source and target (with the Json type fix) to their corresponding
-        # references (as python objects):
-        for edge in current_edges:
-            if isinstance(edge.source, str):
-                edge.set_ancestor(current_nodes[int(edge.source)])
-            if isinstance(edge.target, str):
-                edge.set_descendant(current_nodes[int(edge.target)])
+    def get_nodes_with_time_stamp(self, time_stamp):
+        if isinstance(time_stamp, str):
+            time_stamp = int(time_stamp)
+        return [n for n in self.nodes if n.get_time_stamp() == time_stamp]
 
-        # Eventually we can pour/blend the current graph with the central
-        # graph
-        new_sub_graph = Graph(current_nodes, current_edges)
-        if not graph:
-            graph = new_sub_graph
-        else:
-            graph.extend_with_subgraph(new_sub_graph)
-        print("   ", temporal_graph_filename, ": done.")
-    print("  Loading of files: done.")
-    print("Graph reconstruction: done.")
-    return graph
+    def reconstruct_connectivity(self, debug_mode=True):
+        if debug_mode:
+            print("Reconstructing graph: ")
+            print("   Loading nodes and edges of files: ")
+        # Deserialize the temporal (sub) graphs to constitute the general graph
+        for temporal_graph_filename in self.cli_args.temporal_graph:
+            with open(temporal_graph_filename, 'r') as temporal_graph_file:
+                temporal_graph = json.loads(temporal_graph_file.read(),
+                                            cls=GraphMLDecoder)
 
+            current_nodes = temporal_graph['nodes']
+            # Because the Json GraphML we parse is produced with boost::ptree's
+            # write_json method that is well known for not conforming to Json
+            # (integers are serialized as strings i.e. enclosed with double quotes)
+            # we need to "fix" things after the Json parser is run
+            for node in current_nodes:
+                if isinstance(node.id, str):
+                    node.id = int(node.id)
 
-def simplify_graph(graph, debug_mode=False):
-    print("Simplifying the graph:")
-    # At this point we have lineage information at hand in the form of the
-    # reconstructed graph. We still have to simplify that graph in order
-    # to re-interpret the available lineages at the level of the objects
-    # (the buildings in this application). For example if the building B_1 is
-    # present for year Y1, Y2 and Y3 and the land-print (geometry) of the
-    # building remains unchanged during those years (same geometry) then
-    # we can abstract such a situation by stating (in a 3DTiles temporal
-    # framework) that building B_1 has a creation date of Y1 and a deletion
-    # date of Y3. In other terms we simplified the sub-graph
-    #                 unchanged               unchanged
-    #     [B_1, Y1] ------------> [B_1, Y2] -------------> [B_1, Y3]
-    # to be reduced to a single node/vertex
-    #                           [B_1, Y1-Y3]
-    # For more complicated cases (e.g. when the geometry gets modified), the
-    # simplified graph will still posses edges that will need to be
-    # represented (within the resulting tileset) as (3DTiles) temporal
-    # transactions.
-    #
-    # In the following simplification process note that we iterate over
-    # the time stamps in order to apply some graph simplification (empirical)
-    # rules. When doing so we start from the past (oldest time stamps) and
-    # proceed towards the future (the most recent time stamps). The reason
-    # for this past to future time oriented sweeping process (as opposed to
-    # random order or from future to past) is to obtain a simplified graph
-    # that keeps the most recent building geometries (and removes the oldest
-    # nodes i.e. the most ancient building geometries). The assumption behind
-    # such time stamp sweeping strategy is that most recent city descriptions
-    # are also the most detailed.
+            current_edges = temporal_graph['edges']
+            # Edges id must also be type fixed (refer above to current_nodes)
+            for edge in current_edges:
+                if isinstance(edge.id, str):
+                    edge.id = int(edge.id)
 
-    # Retrieve, out of the node's global identifier, an ordered (from oldest
-    # to most recent) list of time stamps (where the oldest time stamp is
-    # weeded out):
-    time_stamps_set = set()
-    for node in graph.nodes:
-        time_stamps_set.add(node.get_time_stamp())
-    time_stamps = list(time_stamps_set)
-    time_stamps.sort()
+            # Additionally we need to replace the node indexes (integer) loaded
+            # as source and target (with the Json type fix) to their corresponding
+            # references (as python objects):
+            for edge in current_edges:
+                if isinstance(edge.source, str):
+                    edge.set_ancestor(current_nodes[int(edge.source)])
+                if isinstance(edge.target, str):
+                    edge.set_descendant(current_nodes[int(edge.target)])
 
-    # Note that the relative order of application of the following
-    # simplification strategies (labeled as stages) does matter. In particular
-    #  - collapsing unchanged/re-ided 1 to 1 edges should NOT be realized
-    #    prior to collapsing fusion edges, but
-    #  - collapsing unchanged/re-ided 1 to 1 edges MUST be realized prior to
-    #    collapsing subdivision edges
-    # The above constraints on relative order leave a single ordering
-    # possibility that is thus used below.
+            # Eventually we can append the current graph:
+            if not self.nodes:
+                Graph.__init__(self, current_nodes, current_edges)
+            else:
+                self.extend_with_subgraph(Graph(current_nodes, current_edges))
+            if debug_mode:
+                print("   ", temporal_graph_filename, ": done.")
+        if debug_mode:
+            print("  Loading of files: done.")
+            print("Graph reconstruction: done.")
 
 
+    def simplify(self, debug_mode=False):
+        print("Simplifying the graph:")
+        # At this point we have lineage information at hand in the form of the
+        # reconstructed graph. We still have to simplify that graph in order
+        # to re-interpret the available lineages at the level of the objects
+        # (the buildings in this application). For example if the building B_1 is
+        # present for year Y1, Y2 and Y3 and the land-print (geometry) of the
+        # building remains unchanged during those years (same geometry) then
+        # we can abstract such a situation by stating (in a 3DTiles temporal
+        # framework) that building B_1 has a creation date of Y1 and a deletion
+        # date of Y3. In other terms we simplified the sub-graph
+        #                 unchanged               unchanged
+        #     [B_1, Y1] ------------> [B_1, Y2] -------------> [B_1, Y3]
+        # to be reduced to a single node/vertex
+        #                           [B_1, Y1-Y3]
+        # For more complicated cases (e.g. when the geometry gets modified), the
+        # simplified graph will still posses edges that will need to be
+        # represented (within the resulting tileset) as (3DTiles) temporal
+        # transactions.
+        #
+        # In the following simplification process note that we iterate over
+        # the time stamps in order to apply some graph simplification (empirical)
+        # rules. When doing so we start from the past (oldest time stamps) and
+        # proceed towards the future (the most recent time stamps). The reason
+        # for this past to future time oriented sweeping process (as opposed to
+        # random order or from future to past) is to obtain a simplified graph
+        # that keeps the most recent building geometries (and removes the oldest
+        # nodes i.e. the most ancient building geometries). The assumption behind
+        # such time stamp sweeping strategy is that most recent city descriptions
+        # are also the most detailed.
 
-    print("  Stage 0: collapsing unchanged/re-ided 1 to 1 edges.")
-    initial_number_one_to_one_edges = \
-        len([ e for e in graph.edges if e.are_adjecent_nodes_one_to_one() \
-                               and (e.is_unchanged() or e.is_re_ided())])
-    number_deleted_edges = 0
-    one_to_one_number = 0
-    to_remove = graph.edges.copy()
-    for edge in to_remove:
-        if not edge.are_adjecent_nodes_one_to_one():
-            continue
-        if edge.is_unchanged() or edge.is_re_ided():
-            graph.collapse_edge_and_remove_ancestor(edge, debug_mode)
-            one_to_one_number +=1
-            print(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges} ',
-                  end='\r')
-    print(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges}')
-    graph.display_characteristics('    ')
+        time_stamps = self.extract_time_stamps()
 
-    print("  Stage 1: collapsing fusion edges.")
-    print("    Initial number of fusion edges: ",
-          len([ e for e in graph.edges if e.is_fusion()]))
-    for time_stamp in time_stamps:
-        current_nodes = [n for n in graph.nodes
-                        if n.get_time_stamp() == time_stamp]
-        for node in current_nodes:
-            if not node.are_all_ancestor_edges_fusion_typed():
+        # Note that the relative order of application of the following
+        # simplification strategies (labeled as stages) does matter. In particular
+        #  - collapsing unchanged/re-ided 1 to 1 edges should NOT be realized
+        #    prior to collapsing fusion edges, but
+        #  - collapsing unchanged/re-ided 1 to 1 edges MUST be realized prior to
+        #    collapsing subdivision edges
+        # The above constraints on relative order leave a single ordering
+        # possibility that is thus used below.
+
+        if debug_mode:
+            print("  Stage 0: collapsing unchanged/re-ided 1 to 1 edges.")
+        initial_number_one_to_one_edges = \
+            len([ e for e in self.edges if e.are_adjecent_nodes_one_to_one() \
+                                   and (e.is_unchanged() or e.is_re_ided())])
+        one_to_one_number = 0
+        to_remove = self.edges.copy()
+        for edge in to_remove:
+            if not edge.are_adjecent_nodes_one_to_one():
                 continue
-            if not node.do_all_ancestor_nodes_share_same_date():
-                continue
-            # We can proceed with the collapsal of all fusion edges
-            node.set_creation_date(node.get_ancestors()[0].get_creation_date())
-            # We need to freeze the list of edges to be dealt with (as opposed
-            # to using e.g. "for ancestor_edge in node.get_ancestor_edges()")
-            # because the operator used within the loop possibly modifies
-            # that list by adding new edges (that we don't want to delete)
-            # on the fly:
-            ancestor_edges = node.get_ancestor_edges().copy()
-            for ancestor_edge in ancestor_edges:
-                graph.collapse_edge_and_remove_ancestor(ancestor_edge,
-                                                        debug_mode)
-    number_fusion_edges_left = len([ e for e in graph.edges if e.is_fusion()])
-    if number_fusion_edges_left:
-        print("    Remaining number of (un-removed) fusion edges : ",
-              number_fusion_edges_left)
-    else:
-        print("    All removed.")
-
-    print("  Stage 2: collapsing subdivision edges.")
-    initial_number_fusion_edges = \
-        len([ e for e in graph.edges if e.is_subdivided()])
-    number_deleted_edges = 0
-    print( f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
-           end='\r')
-    for time_stamp in time_stamps:
-        current_nodes = [n for n in graph.nodes
-                        if n.get_time_stamp() == time_stamp]
-        for node in current_nodes:
-            if not node.are_all_descendant_edges_subdivision_typed():
-                continue
-            if not node.do_all_descendant_nodes_share_same_date():
-                continue
-            ancestor_edges = node.get_ancestor_edges()
-            if len(ancestor_edges) > 1:
-                # The proper/clean way of dealing with a subdivided node that
-                # has more thatn one ancestors is not yet established. For
-                # the time being we thus leave such a situation untouched.
-                continue
-
-            # Whether the is no ancestor at all or only one we shall proceed
-            # with the "split" of all subdivision edges. For both cases we
-            # shall propagate the creation date:
-            for descendant_node in node.get_descendants():
-                descendant_node.set_creation_date(node.get_creation_date())
-
-            if len(ancestor_edges) == 0:
-                # Because we already propagated the creation date of the node
-                # (to its descendants), the set of the descendants capture all
-                # the geometry for the current time stamp. We can thus get
-                # git of the present node and all the sub-division edges
-                # without loss of information (in fact this sub-division was
-                # not a geometrical one but a logical one).
-                for descendant_edge in node.get_descendant_edges().copy():
-                    graph.disconnect_edge(descendant_edge)
-                    graph.delete_edge(descendant_edge, True)
-                    number_deleted_edges +=1
-                    print(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
-                        end='\r')
-
-                # We can proceed with the removal of the node:
-                graph.delete_node(node, debug_mode)
-
-            else:   # This means there is a single ancestor edge
-                # We shall re-label all the sub-divided edges that we deal
-                # with (below) as 'modified' so when we build the corresponding
-                # transaction we have a trace that this was a sub-division case
-                # with modification:
-                for descendant_edge in node.get_descendant_edges():
-                    descendant_edge.set_modified()
-                ancestor_edge = ancestor_edges[0]
-                if not ancestor_edge.is_modified():
-                    print("All non modified edges should have been collapsed.")
-                    print("Yet, the following edge is not:")
-                    pprint(vars(ancestor_edge))
-                    print("Exiting")
-                    sys.exit(1)
-                graph.split_edge_and_remove_descendant(ancestor_edge,
-                                                       debug_mode)
-                number_deleted_edges += 1
-                print(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
+            if edge.is_unchanged() or edge.is_re_ided():
+                self.collapse_edge_and_remove_ancestor(edge, debug_mode)
+                one_to_one_number +=1
+                print(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges} ',
                       end='\r')
+        if debug_mode:
+            print(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges}')
+            self.display_characteristics('    ')
 
-    number_edges_left = len([ e for e in graph.edges if e.is_subdivided()])
-    if number_edges_left:
-        print("    Remaining number of (un-removed) subdivision edges : ",
-              number_edges_left)
+        # ############################
+        if debug_mode:
+            print("  Stage 1: collapsing fusion edges.")
+        initial_number_fusion_edges = \
+            len([ e for e in self.edges if e.is_fusion()])
+        for time_stamp in time_stamps:
+            current_nodes = self.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_ancestor_edges_fusion_typed():
+                    continue
+                if not node.do_all_ancestor_nodes_share_same_date():
+                    continue
+                # We can proceed with the collapsal of all fusion edges
+                node.set_creation_date(node.get_ancestors()[0].get_creation_date())
+                # We need to freeze the list of edges to be dealt with (as opposed
+                # to using e.g. "for ancestor_edge in node.get_ancestor_edges()")
+                # because the operator used within the loop possibly modifies
+                # that list by adding new edges (that we don't want to delete)
+                # on the fly:
+                ancestor_edges = node.get_ancestor_edges().copy()
+                for ancestor_edge in ancestor_edges:
+                    self.collapse_edge_and_remove_ancestor(ancestor_edge,
+                                                            debug_mode)
+                number_fusion_edges_left = \
+                    len([ e for e in self.edges if e.is_fusion()])
+                if debug_mode:
+                    print(f'    Number of fusion edges: {number_fusion_edges_left} / {initial_number_fusion_edges} ',
+                    end='\r')
+        if debug_mode:
+            print(f'    Number of fusion edges: {number_fusion_edges_left} / {initial_number_fusion_edges} ')
+
+        # #######################
+        if debug_mode:
+            print("  Stage 2: collapsing subdivision edges.")
+
+        initial_number_fusion_edges = \
+            len([ e for e in self.edges if e.is_subdivided()])
+        number_deleted_edges = 0
+        print( f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
+               end='\r')
+        for time_stamp in time_stamps:
+            current_nodes = self.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_descendant_edges_subdivision_typed():
+                    continue
+                if not node.do_all_descendant_nodes_share_same_date():
+                    continue
+                ancestor_edges = node.get_ancestor_edges()
+                if len(ancestor_edges) > 1:
+                    # The proper/clean way of dealing with a subdivided node that
+                    # has more thatn one ancestors is not yet established. For
+                    # the time being we thus leave such a situation untouched.
+                    continue
+
+                # Whether the is no ancestor at all or only one we shall proceed
+                # with the "split" of all subdivision edges. For both cases we
+                # shall propagate the creation date:
+                for descendant_node in node.get_descendants():
+                    descendant_node.set_creation_date(node.get_creation_date())
+
+                if len(ancestor_edges) == 0:
+                    # Because we already propagated the creation date of the node
+                    # (to its descendants), the set of the descendants capture all
+                    # the geometry for the current time stamp. We can thus get
+                    # git of the present node and all the sub-division edges
+                    # without loss of information (in fact this sub-division was
+                    # not a geometrical one but a logical one).
+                    for descendant_edge in node.get_descendant_edges().copy():
+                        self.disconnect_edge(descendant_edge)
+                        self.delete_edge(descendant_edge, True)
+                        number_deleted_edges +=1
+                        print(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
+                            end='\r')
+
+                    # We can proceed with the removal of the node:
+                    self.delete_node(node, debug_mode)
+
+                else:   # This means there is a single ancestor edge
+                    # We shall re-label all the sub-divided edges that we deal
+                    # with (below) as 'modified' so when we build the corresponding
+                    # transaction we have a trace that this was a sub-division case
+                    # with modification:
+                    for descendant_edge in node.get_descendant_edges():
+                        descendant_edge.set_modified()
+                    ancestor_edge = ancestor_edges[0]
+                    if not ancestor_edge.is_modified():
+                        print("All non modified edges should have been collapsed.")
+                        print("Yet, the following edge is not:")
+                        pprint(vars(ancestor_edge))
+                        print("Exiting")
+                        sys.exit(1)
+                    self.split_edge_and_remove_descendant(ancestor_edge,
+                                                           debug_mode)
+                    number_deleted_edges += 1
+                    print(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}',
+                          end='\r')
+
+        number_edges_left = len([ e for e in self.edges if e.is_subdivided()])
+        if debug_mode:
+            if number_edges_left:
+                print("    Remaining number of (un-removed) subdivision edges : ",
+                      number_edges_left)
+            else:
+                print("    All removed.")
+
+            print("Simplifying the graph: done.")
+
+debug_mode = True
+
+def ParseCommandLine():
+    # arg parse
+    descr = '''A small utility that build a 3DTiles temporal tileset out of 
+               - temporal data of the buildings
+               - the content of a 3DCityDB databases.'''
+    parser = argparse.ArgumentParser(description=descr)
+    parser.add_argument('--db_config_path',
+                        nargs='+',
+                        default='CityTilerDBConfig.yml',
+                        type=str,
+                        help='Path(es) to the database configuration file(s)')
+    parser.add_argument('--time_stamps',
+                        nargs='+',
+                        type=str,
+                        help='Time stamps (corresponding to each database)')
+    parser.add_argument('--temporal_graph',
+                        nargs='+',
+                        type=str,
+                        help='GraphML-Json temporal data filename(s)')
+    parser.add_argument('--with_BTH',
+                        dest='with_BTH',
+                        action='store_true',
+                        help='Adds a Batch Table Hierachy when defined')
+    result = parser.parse_args()
+
+    if len(result.db_config_path) <= 1:
+        print("Only a single database configuration file was provided.")
+        print("This is highly suspect since temporal comparisons require at")
+        print("lest to time-stamps and thus two databases (one for each).")
+        print("Exiting.")
+        sys.exit(1)
     else:
-        print("    All removed.")
+        # When there is more than one database there should be as
+        # as many time stamps as databases (because each time stamp
+        # corresponds to a database:
+        if not result.time_stamps:
+            # How come the nargs+ doesn't deal with this case ?
+            print("There must be as many time-stamps as databases.")
+            print("Provide time-stamps with the --time_stamps option.")
+            sys.exit(1)
+        if len(result.db_config_path) != len(result.time_stamps):
+            print("Mismatching number of databases vs time-stamps:")
+            print(" - databases (configurations): ", result.db_config_path)
+            print(" - timestamps: ", result.time_stamps)
+            print("Exiting.")
+            sys.exit(1)
+    return result
 
-    print("Simplifying the graph: done.")
 
-def process_temporal_data(cli_args):
+
+
+# def get_buildings_from_3dcitydb(cursor, graph_nodes):
+#     """
+#     :param cursor: a database access cursor
+#     :return: a list of all the buildings encountered in the 3DCityDB database
+#              together with their 3D bounding box.
+#     """
+#     building_gmlids = [n.get_local_id() for n in graph_nodes]
+#     building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
+#     query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
+#             "FROM building JOIN cityobject ON building.id=cityobject.id " + \
+#             "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " " \
+#             "AND building.id=building.building_root_id"
+#     cursor.execute(query)
+#
+#     buildings = Buildings()
+#     node_list_index = 0
+#     for t in cursor.fetchall():
+#         building_id = t[0]
+#         if not t[1]:
+#             print("Warning: droping building with id ", building_id)
+#             print("         because its 'cityobject.envelope' is not defined.")
+#             continue
+#         box = t[1]
+#         # WARNING: we here make the strong assumption that the query response
+#         # will preserve the order of the ids passed in the query !
+#         new_building = TemporalBuilding(
+#                           building_id,
+#                           box,
+#                           nodes[node_list_index].get_creation_date(),
+#                           nodes[node_list_index].get_deletion_date())
+#         buildings.append(new_building)
+#         node_list_index += 1
+#     return buildings
+
+
+def create_tile_content(cursors, buildings, offset):
+    """
+    :param cursors: a dictionary with a timestamp as key and database cursors
+                    as values
+    :param buildings: a Buildings object
+    :param offset: the offset (a a 3D "vector" of floats) by which the
+                   geographical coordinates should be translated (the
+                   computation is done at the GIS level)
+    :rtype: a TileContent in the form a B3dm.
+    """
+    # We have to fan out the retrieval of the geometries (because buildings
+    # belong to different databases)
+
+    time_stamped_buildings = dict()
+    for time_stamp in cursors.keys():
+        time_stamped_buildings[time_stamp] = list()
+    for building in buildings:
+        time_stamped_buildings[building.get_time_stamp()].append(building)
+
+    arrays = []
+    for time_stamp, buildings in time_stamped_buildings.items():
+        if not buildings:
+            continue
+        building_database_ids = tuple(
+            [building.get_database_id() for building in buildings])
+        arrays.extend(retrieve_geometries(cursors[time_stamp],
+                                          building_database_ids,
+                                          offset))
+
+    # GlTF uses a y-up coordinate system whereas the geographical data (stored
+    # in the 3DCityDB database) uses a z-up coordinate system convention. In
+    # order to comply with Gltf we thus need to realize a z-up to y-up
+    # coordinate transform for the data to respect the glTF convention. This
+    # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
+    # client side when using (displaying) the data.
+    # Refer to the note concerning the recommended data workflow
+    #    https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+    # for more details on this matter.
+    transform = np.array([1, 0, 0, 0,
+                          0, 0, -1, 0,
+                          0, 1, 0, 0,
+                          0, 0, 0, 1])
+    gltf = GlTF.from_binary_arrays(arrays, transform)
+
+    # Eventually wrap the geometries together within a B3dm:
+    return B3dm.from_glTF(gltf)
+
+
+def from_3dcitydb(cursors, buildings):
+    """
+    :param cursors: a dictionary with a timestamp as key and database cursors
+                    as values
+    :param buildings: a Buildings object
+    """
+    # Lump out buildings in pre_tiles based on a 2D-Tree technique:
+    if debug_mode:
+        print('Launching the 2D-Tree sorting:', end='', flush=True)
+    pre_tiles = kd_tree(buildings, 20)
+    if debug_mode:
+        print(' done.', flush=True)
+
+    tileset = TileSet()
+    for debug_index, tile_buildings in enumerate(pre_tiles):
+        if debug_mode:
+            print(f'Creating tile {debug_index} / {len(pre_tiles)}',
+                  end='\r',
+                  flush=True)
+        tile = Tile()
+        tile.set_geometric_error(500)
+
+        # Construct the tile content and attach it to the new Tile:
+        centroid = tile_buildings.getCentroid()
+        tile_content_b3dm = create_tile_content(cursors,
+                                                tile_buildings,
+                                                centroid)
+        tile.set_content(tile_content_b3dm)
+
+        # The current new tile bounding volume shall be a box enclosing the
+        # buildings withheld in the considered tile_buildings:
+        bounding_box = BoundingVolumeBox()
+        for building in tile_buildings:
+            bounding_box.add(building.getBoundingVolumeBox())
+
+        # The Tile Content returned by the above call to create_tile_content()
+        # (refer to the usage of the centroid/offset third argument) uses
+        # coordinates that are local to the centroid (considered as a
+        # referential system within the chosen geographical coordinate system).
+        # Yet the above computed bounding_box was set up based on
+        # coordinates that are relative to the chosen geographical coordinate
+        # system. We thus need to align the Tile Content to the
+        # BoundingVolumeBox of the Tile by "adjusting" to this change of
+        # referential:
+        bounding_box.translate([- centroid[i] for i in range(0, 3)])
+        tile.set_bounding_volume(bounding_box)
+
+        # The transformation matrix for the tile is limited to a translation
+        # to the centroid (refer to the offset realized by the
+        # create_tile_content() method).
+        # Note: the geographical data (stored in the 3DCityDB) uses a z-up
+        #       referential convention. When building the B3dm/gltf, and in
+        #       order to comply to the y-up gltf convention) it was necessary
+        #       (look for the definition of the `transform` matrix when invoking
+        #       `GlTF.from_binary_arrays(arrays, transform)` in the
+        #        create_tile_content() method) to realize a z-up to y-up
+        #        coordinate transform. The Tile is not aware on this z-to-y
+        #        rotation (when writing the data) followed by the invert y-to-z
+        #        rotation (when reading the data) that only concerns the gltf
+        #        part of the TileContent.
+        tile.set_transform([1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            centroid[0], centroid[1], centroid[2], 1])
+
+        # Eventually we can add the newly build tile to the tile set:
+        tileset.add_tile(tile)
+
+    if debug_mode:
+        print(f'Creating tile {debug_index} / {len(pre_tiles)}: done.')
+
+    # Note: we don't need to explicitly adapt the TileSet's root tile
+    # bounding volume, because TileSet::write_to_directory() already
+    # takes care of this synchronisation.
+
+    # A shallow attempt at providing some traceability on where the resulting
+    # data set comes from:
+    cursor.execute('SELECT inet_client_addr()')
+    server_ip = cursor.fetchone()[0]
+    cursor.execute('SELECT current_database()')
+    database_name = cursor.fetchone()[0]
+    origin = f'This tileset is the result of Py3DTiles {__file__} script '
+    origin += f'run with data extracted from database {database_name} '
+    origin += f' obtained from server {server_ip}.'
+    tileset.add_asset_extras(origin)
+
+    return tileset
+
+
+
+if __name__ == '__main__':
+
     #FIXME: this variable shadows the global one. Consider using only
     #       the global one since the following local one is to transmitted
     #       to methods like Node::add_descendant_edge()
     debug_mode = True
-    graph = reconstruct_graph_connectivity(cli_args)
+
+    cli_args = ParseCommandLine()
+
+    graph = TemporalGraph(cli_args)
+    graph.reconstruct_connectivity(debug_mode)
     graph.display_characteristics()
-    simplify_graph(graph, debug_mode)
+    graph.simplify(debug_mode)
     graph.display_characteristics()
 
     if not debug_mode:
@@ -1152,11 +1251,31 @@ def process_temporal_data(cli_args):
         for edge in graph.edges:
             pprint(vars(edge))
 
+    # TODO: make a test asserting the coherence between
+    # graph.extract_time_stamps() and cli_args.time_stamps
 
-if __name__ == '__main__':
-    args = ParseCommandLine()
-    process_temporal_data(args)
-    # cursor = open_data_base(args)
-    # tileset = from_3dcitydb(cursor, args)
-    # cursor.close()
-    # tileset.write_to_directory('junk')
+    cursors = open_data_bases(cli_args.db_config_path)
+    time_stamped_cursors = dict()
+    for index in range(len(cursors)):
+        time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
+
+    all_buildings = Buildings()
+    for index, time_stamp in enumerate(cli_args.time_stamps):
+        cursor = cursors[index]
+        nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        buildings = Buildings()
+        for node in nodes:
+            new_building = TemporalBuilding()
+            new_building.set_creation_date(node.get_creation_date())
+            new_building.set_deletion_date(node.get_deletion_date())
+            new_building.set_temporal_id(node.get_global_id())
+            new_building.set_gml_id(node.get_local_id())
+            buildings.append(new_building)
+        extracted_buildings = get_buildings_from_3dcitydb(cursor, buildings)
+        all_buildings.extend(extracted_buildings.buildings)
+
+    tile_set = from_3dcitydb(time_stamped_cursors, all_buildings)
+    for cursor in cursors:
+        cursor.close()
+    tile_set.write_to_directory('junk')
+

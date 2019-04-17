@@ -4,9 +4,10 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from building import Building, Buildings
 from kd_tree import kd_tree
-from database_accesses import open_data_base, retrieve_geometries, create_batch_table_hierachy
+from database_accesses import open_data_base, retrieve_geometries,\
+                              get_buildings_from_3dcitydb
+from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
 def ParseCommandLine():
@@ -55,7 +56,7 @@ def create_tile_content(cursor, buildingIds, offset, args):
 
     # When required attach a BatchTable with its optional extensions
     if args.with_BTH:
-        bth = create_batch_table_hierachy(cursor, buildingIds, args)
+        bth = create_batch_table_hierarchy(cursor, buildingIds)
         bt = BatchTable()
         bt.add_extension(bth)
     else:
@@ -71,20 +72,7 @@ def from_3dcitydb(cursor, args):
     :type args: CLI arguments as obtained with an ArgumentParser.
     """
 
-    # Retrieve all the buildings encountered in the 3DCityDB database together
-    # with their 3D bounding box.
-    cursor.execute("SELECT building.id, BOX3D(cityobject.envelope) "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "WHERE building.id=building.building_root_id")
-    buildings = Buildings()
-    for t in cursor.fetchall():
-        id = t[0]
-        if not t[1]:
-            print("Warning: droping building with id ", id)
-            print("         because its 'cityobject.envelope' is not defined.")
-            continue
-        box = t[1]
-        buildings.append(Building(id, box))
+    buildings = get_buildings_from_3dcitydb(cursor)
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(buildings, 20)
@@ -95,7 +83,7 @@ def from_3dcitydb(cursor, args):
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        ids = tuple([building.getId() for building in tile_buildings])
+        ids = tuple([building.get_database_id() for building in tile_buildings])
         centroid = tile_buildings.getCentroid()
         tile_content_b3dm = create_tile_content(cursor, ids, centroid, args)
         tile.set_content(tile_content_b3dm)
@@ -159,7 +147,7 @@ def from_3dcitydb(cursor, args):
 
 if __name__ == '__main__':
     args = ParseCommandLine()
-    cursor = open_data_base(args)
+    cursor = open_data_base(args.db_config_path)
     tileset = from_3dcitydb(cursor, args)
     cursor.close()
     tileset.write_to_directory('junk')
