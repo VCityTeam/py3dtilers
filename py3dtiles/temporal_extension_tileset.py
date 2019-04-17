@@ -2,6 +2,7 @@
 import sys
 from .extension import Extension
 from .threedtiles_notion import ThreeDTilesNotion
+from .temporal_extension_transaction import TemporalTransaction
 
 
 class TemporalTileSet(Extension, ThreeDTilesNotion):
@@ -32,6 +33,9 @@ class TemporalTileSet(Extension, ThreeDTilesNotion):
         self.attributes['transactions'] = transactions
 
     def append_transaction(self, transaction):
+        if not isinstance(transaction, TemporalTransaction):
+            print('Append_transaction requires a transaction argument.')
+            sys.exit(1)
         self.attributes['transactions'].append(transaction)
 
     def set_versions(self, versions):

@@ -21,8 +21,14 @@ class TemporalBuilding(Building):
     def set_creation_date(self, creation_date):
         self.creation_date = creation_date
 
+    def get_creation_date(self):
+        return self.creation_date
+
     def set_deletion_date(self, deletion_date):
         self.deletion_date = deletion_date
+
+    def get_deletion_date(self):
+        return self.deletion_date
 
     def set_temporal_id(self, temporal_id):
         self.temporal_id = temporal_id
