@@ -357,11 +357,7 @@ if __name__ == '__main__':
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = build_temporal_tile_set(graph)
-
-    # FIXME FIXME FIXME WE DON4T NEED THIS SYNC!
-    temporal_tile_set.sync_with_children(tile_set)
     tile_set.add_extension(temporal_tile_set)
-
 
     tile_set.write_to_directory('junk')
 
