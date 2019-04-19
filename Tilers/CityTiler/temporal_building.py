@@ -11,24 +11,24 @@ class TemporalBuilding(Building):
         """
         Building.__init__(self)
         # The date at which the building was constructed
-        self.creation_date = None
+        self.start_date = None
         # The date at which the building was destructed
-        self.deletion_date = None
+        self.end_date = None
         # A string used as (global) Node identifier i.e. valid across a
         # set of citygml databases
         self.temporal_id = None
 
-    def set_creation_date(self, creation_date):
-        self.creation_date = creation_date
+    def set_start_date(self, start_date):
+        self.start_date = start_date
 
-    def get_creation_date(self):
-        return self.creation_date
+    def get_start_date(self):
+        return self.start_date
 
-    def set_deletion_date(self, deletion_date):
-        self.deletion_date = deletion_date
+    def set_end_date(self, end_date):
+        self.end_date = end_date
 
-    def get_deletion_date(self):
-        return self.deletion_date
+    def get_end_date(self):
+        return self.end_date
 
     def set_temporal_id(self, temporal_id):
         self.temporal_id = temporal_id

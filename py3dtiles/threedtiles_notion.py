@@ -42,6 +42,24 @@ class ThreeDTilesNotion(object):
     def has_extensions(self):
         return 'extensions' in self.attributes
 
+    def get_extensions(self):
+        if not self.has_extensions():
+            return list()
+        return self.attributes['extensions'].values()
+
+    def get_extension(self, extension_name):
+        if not self.has_extensions():
+            print('No extension present. Exiting.')
+            sys.exit(1)
+        if not extension_name in self.attributes['extensions']:
+            print(f'No extension with name {extension_name}. Exiting.')
+            sys.exit(1)
+        return self.attributes['extensions'][extension_name]
+
+    def sync_extensions(self, owner):
+        for extension in self.get_extensions():
+            extension.sync_with_children(owner)
+
     def validate(self, item=None, *, quiet=False):
         """
         Validate the item (python object) against the json schema associated

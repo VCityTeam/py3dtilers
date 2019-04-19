@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
-from .extension import Extension
 from .threedtiles_notion import ThreeDTilesNotion
 
 
-class TemporalVersionTransition(Extension, ThreeDTilesNotion):
+class TemporalVersionTransition(ThreeDTilesNotion):
     """
     Temporal Version Transition is an element of the Temporal TileSet extension.
     """
 
     def __init__(self):
-        Extension.__init__(self, '3DTILES_temporal_version_transition')
         ThreeDTilesNotion.__init__(self)
 
         self.attributes['name'] = None

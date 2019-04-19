@@ -45,8 +45,8 @@ class Node(object):
         # in the following attribute:
         self.file_ids = ''
 
-        self.creation_date = None
-        self.deletion_date = None
+        self.start_date = None
+        self.end_date = None
 
         # Design note: we had the choice to either store the ancestor nodes
         # or to store the "ancestor edges" (that is edges that have this
@@ -72,8 +72,8 @@ class Node(object):
 
     def __str__(self):
         ret_str = f'Node: {self.globalid} (id: {self.id})\n'
-        ret_str += f'  Creation date: {self.creation_date} \n'
-        ret_str += f'  Deletion date: {self.deletion_date} \n'
+        ret_str += f'  Starting date: {self.start_date} \n'
+        ret_str += f'  Ending date: {self.end_date} \n'
         ret_str += f'  Status: {self.status} \n'
         if self.ancestor_edges:
             ret_str += f'  Ancestors: '
@@ -185,12 +185,12 @@ class Node(object):
         if len(ancestors) < 2:
             # We need at least two ancestors for them to have matching dates
             return False
-        creation_date = ancestors[0].creation_date
-        deletion_date = ancestors[0].deletion_date
+        start_date = ancestors[0].get_start_date()
+        end_date = ancestors[0].get_end_date()
         for ancestor in ancestors[1:]:
-            if not ancestor.creation_date == creation_date:
+            if not ancestor.get_start_date() == start_date:
                 return False
-            if not ancestor.deletion_date == deletion_date:
+            if not ancestor.get_end_date() == end_date:
                 return False
         return True
 
@@ -204,12 +204,12 @@ class Node(object):
         if len(descendants) < 2:
             # We need at least two descendants for them to have matching dates
             return False
-        creation_date = descendants[0].creation_date
-        deletion_date = descendants[0].deletion_date
+        start_date = descendants[0].get_start_date()
+        end_date = descendants[0].get_end_date()
         for descendant in descendants[1:]:
-            if not descendant.creation_date == creation_date:
+            if not descendant.get_start_date() == start_date:
                 return False
-            if not descendant.deletion_date == deletion_date:
+            if not descendant.get_end_date() == end_date:
                 return False
         return True
 
@@ -222,30 +222,30 @@ class Node(object):
     def get_global_id(self):
         return self.globalid
 
-    def get_deletion_date(self):
-        return self.deletion_date
+    def get_end_date(self):
+        return self.end_date
 
-    def set_deletion_date(self, time_stamp):
-        self.deletion_date = time_stamp
+    def set_end_date(self, time_stamp):
+        self.end_date = time_stamp
 
-    def get_creation_date(self):
-        return self.creation_date
+    def get_start_date(self):
+        return self.start_date
 
-    def set_creation_date(self, time_stamp):
-        self.creation_date = time_stamp
+    def set_start_date(self, time_stamp):
+        self.start_date = time_stamp
 
     def set_creation_date_if_earlier(self, time_stamp):
         """
         When the given time_stamp is earlier than the current value of
-        the node creation_date then set the creation_date with that value
+        the node start_date then set the start_date with that value
         :param time_stamp: the time stamp that should be set when it is earlier
         :return: None
         """
-        if not self.creation_date:
-            self.creation_date = time_stamp
+        if not self.start_date:
+            self.start_date = time_stamp
             return
-        if time_stamp < self.creation_date:
-            self.creation_date = time_stamp
+        if time_stamp < self.start_date:
+            self.start_date = time_stamp
 
     def set_creation_date_recursive(self, time_stamp):
         self.set_creation_date_if_earlier(time_stamp)
@@ -253,11 +253,11 @@ class Node(object):
             descendant.set_creation_date_recursive(time_stamp)
 
     def set_deletion_date_if_later(self, time_stamp):
-        if not self.deletion_date:
-            self.deletion_date = time_stamp
+        if not self.end_date:
+            self.end_date = time_stamp
             return
-        if time_stamp > self.deletion_date:
-            self.deletion_date = time_stamp
+        if time_stamp > self.end_date:
+            self.end_date = time_stamp
 
     def get_ancestors(self):
         return [edge.ancestor for edge in self.ancestor_edges]
@@ -319,14 +319,14 @@ class Node(object):
             print("Failing to promote as hapax from status: ", self.status)
             sys.exit(1)
         self.status = Node.Status.hapax
-        if self.creation_date:
-            print("This newly converted hapax already had a creation_date.")
+        if self.start_date:
+            print("This newly converted hapax already had a start_date.")
             sys.exit(1)
-        self.creation_date = time_stamp
-        if self.deletion_date:
-            print("This newly converted hapax already had a deletion_date.")
+        self.start_date = time_stamp
+        if self.end_date:
+            print("This newly converted hapax already had a end_date.")
             sys.exit(1)
-        self.deletion_date = time_stamp
+        self.end_date = time_stamp
         self.assert_status_coherence()
 
     def set_start(self, time_stamp=None):
@@ -341,9 +341,9 @@ class Node(object):
             sys.exit(1)
         self.status = Node.Status.start
         if time_stamp:
-            if self.creation_date:
-                print("Warning: overwriting a creation_date of a new start.")
-            self.creation_date = time_stamp
+            if self.start_date:
+                print("Warning: overwriting a start_date of a new start.")
+            self.start_date = time_stamp
         self.assert_status_coherence()
 
     def set_end(self, time_stamp=None):
@@ -358,9 +358,9 @@ class Node(object):
             sys.exit(1)
         self.status = Node.Status.end
         if time_stamp:
-            if self.deletion_date:
-                print("Warning: overwriting a creation_date of a new end.")
-            self.deletion_date = time_stamp
+            if self.end_date:
+                print("Warning: overwriting a start_date of a new end.")
+            self.end_date = time_stamp
         self.assert_status_coherence()
 
     def set_link(self):
@@ -879,6 +879,9 @@ class TemporalGraph(Graph):
             if not edge.are_adjacent_nodes_one_to_one():
                 continue
             if edge.is_unchanged() or edge.is_re_ided():
+                ancestor = edge.get_ancestor()
+                descendant = edge.get_descendant()
+                descendant.set_start_date(ancestor.get_start_date())
                 self.collapse_edge_and_remove_ancestor(edge, debug_mode)
                 one_to_one_number +=1
                 debug_msg_ne(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges} ')
@@ -898,8 +901,8 @@ class TemporalGraph(Graph):
                     continue
                 if not node.do_all_ancestor_nodes_share_same_date():
                     continue
-                # We can proceed with the collapsal of all fusion edges
-                node.set_creation_date(node.get_ancestors()[0].get_creation_date())
+                # We can proceed with the collapsing of all fusion edges
+                node.set_start_date(node.get_ancestors()[0].get_start_date())
                 # We need to freeze the list of edges to be dealt with (as opposed
                 # to using e.g. "for ancestor_edge in node.get_ancestor_edges()")
                 # because the operator used within the loop possibly modifies
@@ -943,7 +946,7 @@ class TemporalGraph(Graph):
                 # with the "split" of all subdivision edges. For both cases we
                 # shall propagate the creation date:
                 for descendant_node in node.get_descendants():
-                    descendant_node.set_creation_date(node.get_creation_date())
+                    descendant_node.set_start_date(node.get_start_date())
 
                 if len(ancestor_edges) == 0:
                     # Because we already propagated the creation date of the node

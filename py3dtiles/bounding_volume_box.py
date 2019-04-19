@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import numpy
+import copy
 from .threedtiles_notion import ThreeDTilesNotion
 from .bounding_volume import BoundingVolume
 
@@ -221,6 +222,39 @@ class BoundingVolumeBox(ThreeDTilesNotion, BoundingVolume, object):
         if not self.is_valid():
             print('Warning: invalid Bounding Volume Box cannot be prepared.')
             sys.exit(1)
+
+    @classmethod
+    def get_children(cls, owner):
+        children_bv = list()
+        for child in owner.get_children():
+            bounding_volume = child.get_bounding_volume()
+            if not bounding_volume:
+                print(f'This child {child} has no bounding volume.')
+                print('Exiting')
+                sys.exit(1)
+            children_bv.append(bounding_volume)
+        return children_bv
+
+    def sync_with_children(self, owner):
+        if not owner.has_children():
+            # We consider that whatever information is present it is the
+            # proper one (in other terms: when no sub-boxes are present
+            # then the owner is leaf tile and we have nothing to update)
+            return
+        # We reset to some dummy state of this Bounding Volume Box so we
+        # can add up in place the boxes of the owner's children
+        self.set_from_list([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        print("Warning: overwriting box bounding volume.")
+        for child in owner.get_children():
+            # FIXME have the transform method return a new object and
+            # define another method to apply_transform in place
+            bounding_volume = copy.deepcopy(child.get_bounding_volume())
+            bounding_volume.transform(child.get_transform())
+            if not bounding_volume.is_box():
+                print('Dropping child with non box bounding volume.')
+                continue
+            self.add(bounding_volume)
+        self.sync_extensions(owner)
 
 
 if __name__ == '__main__':

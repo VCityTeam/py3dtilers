@@ -71,7 +71,7 @@ class Tile(ThreeDTilesNotion):
             return True
         return False
 
-    def get_descendants(self):
+    def get_children(self):
         """
         :return: the recursive (across the children tree) list of the children
                  tiles
@@ -88,8 +88,30 @@ class Tile(ThreeDTilesNotion):
             descendants.append(child)
             # and if (and only if) they are grand-children then recurse
             if child.has_children():
-                descendants.extend(child.get_descendants())
+                descendants.extend(child.get_children())
         return descendants
+
+    def sync_with_children(self):
+        if not self.has_children():
+            # We consider that whatever information is present it is the
+            # proper one (in other terms: when they are no sub-tiles this tile
+            # is a leaf-tile and thus is has no synchronization to do)
+            return
+        for child in self.get_children():
+            child.sync_with_children()
+
+        # The information that depends on (is defined by) the children
+        # nodes is limited to be bounding volume.
+        bounding_volume = self.get_bounding_volume()
+        if not bounding_volume:
+            print('This Tile has no bounding volume: exiting.')
+            sys.exit(1)
+        if not bounding_volume.is_box():
+            print("Don't know how to sync non box bounding volume.")
+            sys.exit(1)
+        bounding_volume.sync_with_children(self)
+
+        self.sync_extensions(self)
 
     def prepare_for_json(self):
         if not self.attributes["boundingVolume"]:

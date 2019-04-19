@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
-from .extension import Extension
 from .threedtiles_notion import ThreeDTilesNotion
 
 
-class TemporalVersion(Extension, ThreeDTilesNotion):
+class TemporalVersion(ThreeDTilesNotion):
     """
     Temporal Version is an element of the Temporal TileSet extension.
     """
 
     def __init__(self):
-        Extension.__init__(self, '3DTILES_temporal_version')
         ThreeDTilesNotion.__init__(self)
 
         self.attributes['id'] = None

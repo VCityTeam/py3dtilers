@@ -1,18 +1,17 @@
 import argparse
 import numpy as np
 import sys
-from pprint import pprint
 
-from py3dtiles import B3dm, BatchTable
+from py3dtiles import B3dm, GlTF, Tile
+from py3dtiles import BatchTable, TemporalBatchTable
 from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
-from py3dtiles import GlTF
-from py3dtiles import Tile, TileSet, TemporalTileSet
-from py3dtiles import TemporalTransaction
+from py3dtiles import TileSet, TemporalTileSet
+from py3dtiles import TemporalTransaction, temporal_extract_bounding_dates
 
 from temporal_utils import debug_msg, debug_msg_ne
 from temporal_graph import TemporalGraph
-
 from temporal_building import TemporalBuilding
+
 from building import Buildings
 from kd_tree import kd_tree
 from database_accesses import open_data_bases, retrieve_geometries, \
@@ -112,26 +111,16 @@ def create_tile_content(cursors, buildings, offset):
                           0, 0, 0, 1])
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
-    # Eventually wrap the geometries together within a B3dm:
-    return B3dm.from_glTF(gltf)
-
-
-def extract_bounding_dates(buildings):
-    """
-    :param buildings: a set (Buildings object) of buildings
-    :return: the earliest creation date and the latest deletion dates found
-             among the given buildings
-    """
-    # Initialize with whatever value
-    creation_date = buildings[0].get_creation_date()
-    deletion_date = buildings[0].get_deletion_date()
+    temporal_bt = TemporalBatchTable()
     for building in buildings:
-        if building.get_creation_date() < creation_date:
-            creation_date = building.get_creation_date()
-        if building.get_deletion_date() > deletion_date:
-            deletion_date = building.get_deletion_date()
-    return {'creation_date': creation_date, 'deletion_date': deletion_date}
+        temporal_bt.append_feature_id(building.get_temporal_id())
+        temporal_bt.append_start_date(building.get_start_date())
+        temporal_bt.append_end_date(building.get_end_date())
+    bt = BatchTable()
+    bt.add_extension(temporal_bt)
 
+    # Eventually wrap the geometries together within a B3dm:
+    return B3dm.from_glTF(gltf, bt)
 
 def from_3dcitydb(cursors, buildings):
     """
@@ -164,6 +153,13 @@ def from_3dcitydb(cursors, buildings):
         for building in tile_buildings:
             bounding_box.add(building.getBoundingVolumeBox())
 
+        # Deal with the temporal extension of of Bounding Volume Box
+        temporal_bv = TemporalBoundingVolume()
+        bounding_dates = temporal_extract_bounding_dates(tile_buildings)
+        temporal_bv.set_start_date(bounding_dates['start_date'])
+        temporal_bv.set_end_date(bounding_dates['end_date'])
+        bounding_box.add_extension(temporal_bv)
+
         # The Tile Content returned by the above call to create_tile_content()
         # (refer to the usage of the centroid/offset third argument) uses
         # coordinates that are local to the centroid (considered as a
@@ -174,11 +170,6 @@ def from_3dcitydb(cursors, buildings):
         # BoundingVolumeBox of the Tile by "adjusting" to this change of
         # referential:
         bounding_box.translate([- centroid[i] for i in range(0, 3)])
-        temporal_bv = TemporalBoundingVolume()
-        bounding_dates = extract_bounding_dates(tile_buildings)
-        temporal_bv.set_start_date(bounding_dates['creation_date'])
-        temporal_bv.set_end_date(bounding_dates['deletion_date'])
-        bounding_box.add_extension(temporal_bv)
         tile.set_bounding_volume(bounding_box)
 
         # The transformation matrix for the tile is limited to a translation
@@ -240,14 +231,15 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors):
         buildings = Buildings()
         for node in nodes:
             new_building = TemporalBuilding()
-            new_building.set_creation_date(node.get_creation_date())
-            new_building.set_deletion_date(node.get_deletion_date())
+            new_building.set_start_date(node.get_start_date())
+            new_building.set_end_date(node.get_end_date())
             new_building.set_temporal_id(node.get_global_id())
             new_building.set_gml_id(node.get_local_id())
             buildings.append(new_building)
         extracted_buildings = get_buildings_from_3dcitydb(cursor, buildings)
         resulting_buildings.extend(extracted_buildings.buildings)
     return resulting_buildings
+
 
 def build_temporal_tile_set(graph):
     # ####### We are left with transposing the information carried by the
@@ -261,8 +253,8 @@ def build_temporal_tile_set(graph):
         ancestor = edge.get_ancestor()
         descendant = edge.get_descendant()
         transaction.set_id('dummy_id_for_modified_edge_case')
-        transaction.set_start_date(ancestor.get_deletion_date())
-        transaction.set_end_date(descendant.get_creation_date())
+        transaction.set_start_date(ancestor.get_end_date())
+        transaction.set_end_date(descendant.get_start_date())
         transaction.set_type('replace')
         transaction.append_tag('modified')
         transaction.append_old_feature(ancestor.get_global_id())
@@ -288,8 +280,8 @@ def build_temporal_tile_set(graph):
             # We here make the assumption that all ancestor nodes all share
             # the same deletion date for the following code to make sense:
             some_ancestor = node.get_ancestors()[0]
-            transaction.set_start_date(some_ancestor.get_deletion_date())
-            transaction.set_end_date(node.get_creation_date())
+            transaction.set_start_date(some_ancestor.get_end_date())
+            transaction.set_end_date(node.get_start_date())
 
             for ancestor in node.get_ancestors():
                 transaction.append_tag('fusion')
@@ -315,8 +307,8 @@ def build_temporal_tile_set(graph):
             # We here make the assumption that all descendant nodes all share
             # the same deletion date for the following code to make sense:
             some_descendant = node.get_descendants()[0]
-            transaction.set_end_date(some_descendant.get_creation_date())
-            transaction.set_start_date(node.get_deletion_date())
+            transaction.set_end_date(some_descendant.get_start_date())
+            transaction.set_start_date(node.get_end_date())
 
             for descendant in node.get_descendants():
                 transaction.append_tag('subdivision')
@@ -338,25 +330,38 @@ if __name__ == '__main__':
     graph.display_characteristics('   ')
     graph.simplify(display_characteristics=True)
     debug_msg("")
-    # graph.print_nodes_and_edges()
+    graph.print_nodes_and_edges()
 
-    # #### Extract the information form the databases
-    # TODO: make a test asserting the coherence between
-    # graph.extract_time_stamps() and cli_args.time_stamps
+    # Just making sure the time stamps information is coherent between
+    # their two sources that is the set of difference files and the command
+    # line arguments
+    cli_time_stamps_as_ints = [ int(ts) for ts in cli_args.time_stamps]
+    if not graph.extract_time_stamps() == cli_time_stamps_as_ints:
+        print('Command line and difference files time stamps not aligned.')
+        print("Exiting")
+        sys.exit(1)
+
+    # Extract the information form the databases
     cursors = open_data_bases(cli_args.db_config_path)
     time_stamped_cursors = dict()
     for index in range(len(cursors)):
         time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
-
     all_buildings = combine_nodes_with_buildings_from_3dcitydb(graph, cursors)
 
-    # #### Construct the temporal tile set:
+    # Construct the temporal tile set
     tile_set = from_3dcitydb(time_stamped_cursors, all_buildings)
-
     [cursor.close() for cursor in cursors] # We are done with the databases
 
+    tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+
+    # Build and attach a TemporalTileSet extension
     temporal_tile_set = build_temporal_tile_set(graph)
+
+    # FIXME FIXME FIXME WE DON4T NEED THIS SYNC!
+    temporal_tile_set.sync_with_children(tile_set)
     tile_set.add_extension(temporal_tile_set)
+
 
     tile_set.write_to_directory('junk')
 

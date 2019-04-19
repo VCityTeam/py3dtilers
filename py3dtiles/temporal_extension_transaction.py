@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import sys
-from .extension import Extension
 from .threedtiles_notion import ThreeDTilesNotion
 
 
-class TemporalTransaction(Extension, ThreeDTilesNotion):
+class TemporalTransaction(ThreeDTilesNotion):
     """
     Temporal Transaction is an element of the Temporal TileSet extension.
     """
-
     def __init__(self):
-        Extension.__init__(self, '3DTILES_temporal_transaction')
         ThreeDTilesNotion.__init__(self)
 
         self.attributes['id'] = None

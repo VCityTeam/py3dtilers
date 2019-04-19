@@ -10,7 +10,7 @@ class TemporalBatchTable(Extension, ThreeDTilesNotion):
     """
 
     def __init__(self):
-        Extension.__init__(self, '3DTILES_temporal_batch_table')
+        Extension.__init__(self, '3DTILES_temporal')
         ThreeDTilesNotion.__init__(self)
 
         self.attributes['startDates'] = list()
@@ -35,11 +35,11 @@ class TemporalBatchTable(Extension, ThreeDTilesNotion):
     def append_end_date(self, date):
         self.attributes['endDates'].append(date)
 
-    def set_featureIds(self, ids):
+    def set_feature_ids(self, ids):
         if not isinstance(ids, list):
             print("Setting featureIds requires a list argument.")
             sys.exit(1)
         self.attributes['featureIds'] = ids
 
-    def append_featureId(self, id):
+    def append_feature_id(self, id):
         self.attributes['featureIds'].append(id)

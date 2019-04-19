@@ -18,6 +18,7 @@ from .temporal_extension_tileset import TemporalTileSet
 from .temporal_extension_transaction import TemporalTransaction
 from .temporal_extension_version import TemporalVersion
 from .temporal_extension_version_transition import TemporalVersionTransition
+from .temporal_extension_utils import temporal_extract_bounding_dates
 from .tile import Tile
 from .tileset import TileSet
 from .helper_test import HelperTest
@@ -43,6 +44,7 @@ __all__ = ['B3dm',
            'TemporalTransaction', 
            'TemporalVersion', 
            'TemporalVersionTransition', 
+           'temporal_extract_bounding_dates', 
            'Tile',
            'TileContent',
            'TileReader', 

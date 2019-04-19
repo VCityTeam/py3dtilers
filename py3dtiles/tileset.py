@@ -3,10 +3,8 @@
 import sys
 import os
 import pathlib
-import copy
 from .threedtiles_notion import ThreeDTilesNotion
 from .tile import Tile
-from .bounding_volume_box import BoundingVolumeBox
 
 
 class TileSet(ThreeDTilesNotion):
@@ -25,7 +23,7 @@ class TileSet(ThreeDTilesNotion):
         :param transform: a flattened transformation matrix
         :return:
         """
-        self.attributes["root"].set_transform(transform)
+        self.get_root_tile().set_transform(transform)
 
     def set_root_tile(self, tile):
         if not isinstance(tile, Tile):
@@ -35,11 +33,14 @@ class TileSet(ThreeDTilesNotion):
             print("Warning: overwriting root tile.")
         self.attributes["root"] = tile
 
+    def get_root_tile(self):
+        return self.attributes["root"]
+
     def add_tile(self, tile):
         if not isinstance(tile, Tile):
             print('Add_tile requires a Tile argument.')
             sys.exit(1)
-        self.attributes["root"].add_child(tile)
+        self.get_root_tile().add_child(tile)
 
     def add_asset_extras(self, comment):
         """
@@ -59,33 +60,28 @@ class TileSet(ThreeDTilesNotion):
         if not self.attributes["geometricError"]:
             print("Warning: defaulting TileSet's unset 'Geometric Error'.")
             self.set_geometric_error(500.0) # FIXME: chose a decent default
-        if not self.attributes["root"]:
+        if not self.get_root_tile():
             print('A TileSet must have a root entry')
             sys.exit(1)
 
-    def sync(self):
+    def sync_with_children(self):
         """
         Synchronize the TileSet (e.g. the root tile bounding volume) with
         the tiles that it holds.
         """
+        # TODO FIXME: the following code makes the (generally) wrong
+        # assumption that the tile hierarchy happens to be flat (that is
+        # expect for the root tile, no other tile contains children sub-tiles).
+        # In order to fix this code we must walk on the tree of tiles
+        # (probably with a depth-first method) and obtain a bottom up
+        # update of the (tile) nodes...
+
         if 'root' not in self.attributes:
             print('TileSet has not root Tile.')
             sys.exit(1)
 
-        if self.attributes["root"].get_bounding_volume():
-            print('Warning: overwriting bounding volume of root Tile.')
-
-        bounding_box = BoundingVolumeBox()
-        for child in self.attributes["root"].get_descendants():
-            # FIXME have the transform method return a new object and
-            # define another method to apply_transform in place
-            bounding_volume = copy.deepcopy(child.get_bounding_volume())
-            bounding_volume.transform(child.get_transform())
-            if not bounding_volume.is_box():
-                print('Dropping child with non box bounding volume.')
-                continue
-            bounding_box.add(bounding_volume)
-        self.attributes["root"].set_bounding_volume(bounding_box)
+        self.get_root_tile().sync_with_children()
+        self.sync_extensions(self)
 
     def write_to_directory(self, directory):
         """
@@ -96,7 +92,7 @@ class TileSet(ThreeDTilesNotion):
         :param directory: the target directory name
         """
         # Make sure the TileSet is aligned with its children Tiles.
-        self.sync()
+        self.sync_with_children()
 
         # Create the output directory
         target_dir = pathlib.Path(directory).expanduser()
@@ -105,7 +101,7 @@ class TileSet(ThreeDTilesNotion):
         # Prior to writing the TileSet, the future location of the enclosed
         # Tile's content (set as their respective TileContent uri) must be
         # specified:
-        all_tiles = self.attributes["root"].get_descendants()
+        all_tiles = self.get_root_tile().get_children()
         for index, tile in enumerate(all_tiles):
             tile.set_content_uri(os.path.join('tiles',
                                               f'{index}.b3dm'))
