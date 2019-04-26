@@ -95,16 +95,20 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
         no_input_buildings = False
         building_gmlids = [n.get_gml_id() for n in buildings]
         building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
-        query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
+        query = "SELECT building.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
                 "FROM building JOIN cityobject ON building.id=cityobject.id "+\
                 "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " "\
                 "AND building.id=building.building_root_id"
     cursor.execute(query)
 
     if no_input_buildings:
-        buildings = Buildings()
+        result_buildings = Buildings()
     else:
-        index_in_buildings = 0
+        # We need to deal with the fact that the answer will (generically)
+        # not preserve the order of the objects that was given to the query
+        buildings_with_gmlid_key = dict()
+        for building in buildings:
+            buildings_with_gmlid_key[building.gml_id] = building
 
     for t in cursor.fetchall():
         building_id = t[0]
@@ -119,14 +123,12 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
         box = t[1]
         if no_input_buildings:
             new_building = Building(building_id, box)
-            buildings.append(new_building)
-            continue
-        # WARNING: we here make the strong assumption that the query response
-        # will preserve the order of the ids passed in the query !
-        building = buildings[index_in_buildings]
-        building.set_database_id(building_id)
-        building.set_box(box)
-        index_in_buildings += 1
+            result_buildings.append(new_building)
+        else:
+            gml_id = t[2]
+            building = buildings_with_gmlid_key[gml_id]
+            building.set_database_id(building_id)
+            building.set_box(box)
     return buildings
 
 
@@ -158,40 +160,46 @@ def retrieve_geometries(cursor, buildingIds, offset):
     # with their building's sub-divisions (Building is an "abstraction"
     # from which inherits concrete building class as well building-subdivisions
     # a.k.a. parts) we must first collect all the buildings and their parts:
-    cursor.execute(
-        "SELECT building.id "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                     WHERE building_root_id IN %s ", (buildingIds,))
 
-    subBuildingIds = tuple([t[0] for t in cursor.fetchall()])
+    building_ids_arg = str(buildingIds).replace(',)',')')
 
-    # Collect the (so called) surface geometries:
-    cursor.execute(
-        "SELECT ST_AsBinary(ST_Multi(ST_Collect("
-        "            ST_Translate(surface_geometry.geometry, -%s, -%s, -%s)))) "
-        "FROM surface_geometry JOIN thematic_surface "
-        "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id "
-        "JOIN cityobject ON thematic_surface.id=cityobject.id "
-        "WHERE thematic_surface.building_id IN %s "
-        "GROUP BY surface_geometry.root_id, cityobject.id, cityobject.gmlid, "
-        "        thematic_surface.building_id, thematic_surface.objectclass_id",
-        (offset[0], offset[1], offset[2], subBuildingIds,))
+    query = \
+        "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " +\
+        "ST_Translate(surface_geometry.geometry, " + \
+        str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
+        ")))) " + \
+        "FROM surface_geometry JOIN thematic_surface " + \
+        "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+        "JOIN building ON thematic_surface.building_id = building.id " + \
+        "WHERE building.building_root_id IN " + building_ids_arg + " " +\
+        "GROUP BY building.building_root_id "
+    cursor.execute(query)
+
+    # Deal with the reordering of the retrieved geometries
+    buildings_with_gmlid_key = dict()
+    for t in cursor.fetchall():
+        building_root_id = t[0]
+        geom_as_string = t[1]
+        if geom_as_string is None:
+            # Some thematic surface may have no geometry (due to a cityGML
+            # exporter bug?): simply ignore them.
+            print("Warning: no valid geometry in database.")
+            sys.exit(1)
+        geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+        if len(geom.triangles[0]) == 0:
+            print("Warning: empty geometry (no geometry) from the database.")
+            sys.exit(1)
+        buildings_with_gmlid_key[building_root_id] = geom
 
     # Package the geometries within a data structure that the
     # GlTF.from_binary_arrays() function (see below) expects to consume:
     arrays = []
-    for t in cursor.fetchall():
-        if t[0] is None:
-            # Some thematic surface may have no geometry (due to a cityGML
-            # exporter bug?): simply ignore them.
-            continue
-        geom = TriangleSoup.from_wkb_multipolygon(t[0])
-        # Objects without triangulated geometries are simply dropped out:
-        if len(geom.triangles[0]) != 0:
-            arrays.append({
-                'position': geom.getPositionArray(),
-                'normal': geom.getNormalArray(),
-                'bbox': [[float(i) for i in j] for j in geom.getBbox()]
-            })
+    for incoming_id in buildingIds:
+        geom = buildings_with_gmlid_key[incoming_id]
+        arrays.append({
+            'position': geom.getPositionArray(),
+            'normal': geom.getNormalArray(),
+            'bbox': [[float(i) for i in j] for j in geom.getBbox()]
+        })
 
     return arrays

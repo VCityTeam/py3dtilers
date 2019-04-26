@@ -9,7 +9,7 @@ from py3dtiles import TileSet, TemporalTileSet
 from py3dtiles import TemporalTransaction, temporal_extract_bounding_dates
 
 from temporal_utils import debug_msg, debug_msg_ne
-from temporal_graph import TemporalGraph
+from temporal_graph import TemporalGraph, Edge
 from temporal_building import TemporalBuilding
 
 from building import Buildings
@@ -87,11 +87,11 @@ def create_tile_content(cursors, buildings, offset):
         time_stamped_buildings[building.get_time_stamp()].append(building)
 
     arrays = []
-    for time_stamp, buildings in time_stamped_buildings.items():
-        if not buildings:
+    for time_stamp, yearly_buildings in time_stamped_buildings.items():
+        if not yearly_buildings:
             continue
         building_database_ids = tuple(
-            [building.get_database_id() for building in buildings])
+            [building.get_database_id() for building in yearly_buildings])
         arrays.extend(retrieve_geometries(cursors[time_stamp],
                                           building_database_ids,
                                           offset))
@@ -112,10 +112,14 @@ def create_tile_content(cursors, buildings, offset):
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
     temporal_bt = TemporalBatchTable()
-    for building in buildings:
-        temporal_bt.append_feature_id(building.get_temporal_id())
-        temporal_bt.append_start_date(building.get_start_date())
-        temporal_bt.append_end_date(building.get_end_date())
+
+    for time_stamp, yearly_buildings in time_stamped_buildings.items():
+        if not yearly_buildings:
+            continue
+        for building in yearly_buildings:
+            temporal_bt.append_feature_id(building.get_temporal_id())
+            temporal_bt.append_start_date(building.get_start_date())
+            temporal_bt.append_end_date(building.get_end_date())
     bt = BatchTable()
     bt.add_extension(temporal_bt)
 
@@ -130,7 +134,7 @@ def from_3dcitydb(cursors, buildings):
     """
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     debug_msg_ne('2D-Tree sorting: launching')
-    pre_tiles = kd_tree(buildings, 20)
+    pre_tiles = kd_tree(buildings, 200)
     debug_msg('2D-Tree sorting: done.    ')
 
     tileset = TileSet()
@@ -236,6 +240,8 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors):
             new_building.set_temporal_id(node.get_global_id())
             new_building.set_gml_id(node.get_local_id())
             buildings.append(new_building)
+        if not buildings:
+            continue
         extracted_buildings = get_buildings_from_3dcitydb(cursor, buildings)
         resulting_buildings.extend(extracted_buildings.buildings)
     return resulting_buildings
@@ -249,9 +255,11 @@ def build_temporal_tile_set(graph):
     for edge in graph.edges:
         if not edge.is_modified():
             continue
-        transaction = TemporalTransaction()
+        if not edge.are_adjacent_nodes_one_to_one():
+            continue
         ancestor = edge.get_ancestor()
         descendant = edge.get_descendant()
+        transaction = TemporalTransaction()
         transaction.set_id('dummy_id_for_modified_edge_case')
         transaction.set_start_date(ancestor.get_end_date())
         transaction.set_end_date(descendant.get_start_date())
@@ -261,12 +269,36 @@ def build_temporal_tile_set(graph):
         transaction.append_new_feature(descendant.get_global_id())
         temporal_tile_set.append_transaction(transaction)
 
-    # ####### The fusion case
+    # ######## Re-qualifying modified-fusion or modified-subdivision
+    # When they are many modified edges adjacent to a single node
+    # then this indicates that such edges were incompletely labeled
+    # since they miss the tags 'subdivision' or 'fused' in addition
+    # to the modified one. In other terms we encountered a combination
+    # of subdivision (or fusion) with a modification.
+    # In such a case we re-qualify those edges and let the next stage
+    # (fused and subdivision edge transactions) treat them:
     time_stamps = graph.extract_time_stamps()
     for time_stamp in time_stamps:
         current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
         for node in current_nodes:
-            if not node.are_all_ancestor_edges_fusion_typed():
+            if not node.are_all_ancestor_edges_of_type(Edge.Tag.modified):
+                continue
+            for ancestor_edge in node.get_ancestor_edges():
+                ancestor_edge.append_tag(Edge.Tag.fused)
+
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_descendant_edges_of_type(Edge.Tag.modified):
+                continue
+            for descendant_edge in node.get_descendant_edges():
+                descendant_edge.append_tag(Edge.Tag.subdivided)
+
+    # ####### The fusion case
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
                 continue
 
             transaction = TemporalTransaction()
@@ -283,9 +315,14 @@ def build_temporal_tile_set(graph):
             transaction.set_start_date(some_ancestor.get_end_date())
             transaction.set_end_date(node.get_start_date())
 
+            transaction.append_tag('fusion')
             for ancestor in node.get_ancestors():
-                transaction.append_tag('fusion')
                 transaction.append_old_feature(ancestor.get_global_id())
+            for ancestor_edge in node.get_ancestor_edges():
+                if ancestor_edge.is_modified():
+                    transaction.set_id('dummy_id_for_fusion_modified_case')
+                    transaction.append_tag('modified')
+                    break
 
             temporal_tile_set.append_transaction(transaction)
 
@@ -293,7 +330,7 @@ def build_temporal_tile_set(graph):
     for time_stamp in time_stamps:
         current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
         for node in current_nodes:
-            if not node.are_all_descendant_edges_subdivision_typed():
+            if not node.are_all_descendant_edges_of_type(Edge.Tag.subdivided):
                 continue
 
             transaction = TemporalTransaction()
@@ -310,9 +347,15 @@ def build_temporal_tile_set(graph):
             transaction.set_end_date(some_descendant.get_start_date())
             transaction.set_start_date(node.get_end_date())
 
+            transaction.append_tag('subdivision')
             for descendant in node.get_descendants():
-                transaction.append_tag('subdivision')
                 transaction.append_new_feature(descendant.get_global_id())
+
+            for descendant_edge in node.get_descendant_edges():
+                if descendant_edge.is_modified():
+                    transaction.set_id('dummy_id_for_division_modified_case')
+                    transaction.append_tag('modified')
+                    break
 
             temporal_tile_set.append_transaction(transaction)
 
@@ -327,19 +370,21 @@ if __name__ == '__main__':
     graph = TemporalGraph(cli_args)
     graph.reconstruct_connectivity()
     debug_msg("Reconstructed graph characteristics:")
+    # graph.print_nodes_and_edges()
     graph.display_characteristics('   ')
     graph.simplify(display_characteristics=True)
     debug_msg("")
-    graph.print_nodes_and_edges()
+    # graph.print_nodes_and_edges()
 
     # Just making sure the time stamps information is coherent between
     # their two sources that is the set of difference files and the command
     # line arguments
     cli_time_stamps_as_ints = [ int(ts) for ts in cli_args.time_stamps]
-    if not graph.extract_time_stamps() == cli_time_stamps_as_ints:
-        print('Command line and difference files time stamps not aligned.')
-        print("Exiting")
-        sys.exit(1)
+    for extracted_time_stamp in graph.extract_time_stamps():
+        if not extracted_time_stamp in cli_time_stamps_as_ints:
+            print('Command line and difference files time stamps not aligned.')
+            print("Exiting")
+            sys.exit(1)
 
     # Extract the information form the databases
     cursors = open_data_bases(cli_args.db_config_path)

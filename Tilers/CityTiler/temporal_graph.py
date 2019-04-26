@@ -147,21 +147,22 @@ class Node(object):
             print("a link but a: ", self.status)
             sys.exit(1)
 
-    def are_all_ancestor_edges_fusion_typed(self):
+    def are_all_ancestor_edges_of_type(self, edge_type):
         """
         :return: True when they are at least two ancestor edges and all
-                 ancestor edges are fusion edges. False otherwise.
+                 ancestor edges are of the provided parameter (edge) type.
+                 False otherwise.
         """
         ancestor_edges = self.get_ancestor_edges()
         if len(ancestor_edges) < 2:
             # We need at least two edges for them to be the same
             return False
         for edge in ancestor_edges:
-            if not edge.is_fusion():
+            if not edge.is_of_type(edge_type):
                 return False
         return True
 
-    def are_all_descendant_edges_subdivision_typed(self):
+    def are_all_descendant_edges_of_type(self, edge_type):
         """
         :return: True when they are at least two descendant edges and all
                  descendant edges are subdivision edges. False otherwise.
@@ -171,7 +172,7 @@ class Node(object):
             # We need at least two edges for them to be the same
             return False
         for edge in descendant_edges:
-            if not edge.is_subdivided():
+            if not edge.is_of_type(edge_type):
                 return False
         return True
 
@@ -374,6 +375,18 @@ class Node(object):
 
 
 class Edge(object):
+    @unique
+    class Tag(Enum):
+        """
+        The edges whose type is 'replace' are further distinguished with
+        tags that are specified with this enum Class.
+        """
+        unknown = 1
+        fused = 2
+        modified = 3
+        re_ided = 4
+        subdivided = 5
+        unchanged = 6
 
     def __init__(self, **kwargs):
         # Attributes that will be dynamically added by the Json parsing
@@ -385,8 +398,9 @@ class Edge(object):
         self.target = None
         # A string among 'replace', 'create' and 'delete'
         self.type = None
-        # A string that, when type is 'replace', is among 'fused', 'modified',
-        # 're-ided', 'subdivided' and 'unchanged'.
+        # A list of tags specified with the Edge.Tag enum. Note that is
+        # is a list because some combinations (like being a fusion edge
+        # and at the same time a modified edge) must be possible
         self.tags = None
         self.__dict__ = kwargs
 
@@ -396,6 +410,61 @@ class Edge(object):
         self.ancestor = None
         # The Node with self.target as identifier
         self.descendant = None
+
+    def __str__(self):
+        ret_str = f'Edge: {self.id} (file ids: {self.file_ids})\n'
+        ret_str += f'  Ancestor: {self.ancestor.globalid}'
+        ret_str += f' (id: {self.ancestor.id})\n'
+        ret_str += f'  Descendant: {self.descendant.globalid}'
+        ret_str += f' (id: {self.descendant.id})\n'
+        ret_str += f'  Tags: {self.tags}\n'
+        return ret_str
+
+    def is_tag_in_tags(self, tag_to_test):
+        return any(tag_to_test == tag for tag in self.tags)
+
+    def is_replace(self):
+        if self.type == 'replace':
+            return True
+        return False
+
+    def is_unchanged(self):
+        if self.is_replace() and self.is_tag_in_tags(Edge.Tag.unchanged):
+            return True
+        return False
+
+    def is_subdivided(self):
+        if self.is_replace() and self.is_tag_in_tags(Edge.Tag.subdivided):
+            return True
+        return False
+
+    def is_re_ided(self):
+        if self.is_replace() and self.is_tag_in_tags(Edge.Tag.re_ided):
+            return True
+        return False
+
+    def is_modified(self):
+        if self.is_replace() and self.is_tag_in_tags(Edge.Tag.modified):
+            return True
+        return False
+
+    def is_fusion(self):
+        if self.is_replace() and self.is_tag_in_tags(Edge.Tag.fused):
+            return True
+        return False
+
+    def is_of_type(self, edge_tag):
+        if edge_tag == Edge.Tag.unchanged and self.is_unchanged():
+            return True
+        if edge_tag == Edge.Tag.subdivided and self.is_subdivided():
+            return True
+        if edge_tag == Edge.Tag.re_ided and self.is_re_ided():
+            return True
+        if edge_tag == Edge.Tag.modified and self.is_modified():
+            return True
+        if edge_tag == Edge.Tag.fused and self.is_fusion():
+            return True
+        return False
 
     def set_ancestor(self, ancestor_node):
         self.ancestor = ancestor_node
@@ -413,41 +482,19 @@ class Edge(object):
     def get_descendant(self):
         return self.descendant
 
-    def is_replace(self):
-        if self.type == 'replace':
-            return True
-        return False
-
-    def is_unchanged(self):
-        if self.is_replace() and self.tags == 'unchanged':
-            return True
-        return False
-
-    def is_subdivided(self):
-        if self.is_replace() and self.tags == 'subdivided':
-            return True
-        return False
-
-    def is_re_ided(self):
-        if self.is_replace() and self.tags == 're-ided':
-            return True
-        return False
-
-    def is_modified(self):
-        if self.is_replace() and self.tags == 'modified':
-            return True
-        return False
+    def set_tag_from_string(self, tag):
+        """
+        :param tag: a string corresponding to an Edge.Tag value
+        """
+        self.tags = list()
+        self.tags.append(Edge.Tag[tag])
 
     def set_modified(self):
         self.type = 'replace'
-        self.tags = 'modified'
+        self.append_tag(Edge.Tag.modified)
 
-    def is_fusion(self):
-        if not self.is_replace():
-            return False
-        if self.tags == 'fused':
-            return True
-        return False
+    def append_tag(self, tag):
+        self.tags.append(tag)
 
     def are_adjacent_nodes_one_to_one(self):
         """
@@ -486,7 +533,7 @@ class Graph(object):
         # The dictionary having the sub_graph node index as key and this
         # graph node as value
         for node in sub_graph.nodes:
-            existing_node = self.find_node(node.globalid)
+            existing_node = self.find_node_from_global_id(node.globalid)
             if existing_node:
                 # We need to rewire the edges to the already existing node
                 ancestor_edges = node.get_ancestor_edges()
@@ -519,7 +566,7 @@ class Graph(object):
     def add_node(self, new_node):
         self.nodes.append(new_node)
 
-    def find_node(self, globalid):
+    def find_node_from_global_id(self, globalid):
         """
         Retrieve, when it exists, the node with the given globalid
         :param globalid: the global id that is looked for
@@ -532,6 +579,24 @@ class Graph(object):
             return encountered[0]
         else:
             print(f'Many nodes with same globalid: {globalid}')
+            pprint(vars(encountered))
+            sys.exit()
+
+    @classmethod
+    def find_node_from_id(cls, list_of_nodes, id):
+        """
+        Retrieve, when it exists, the node with the given id
+        :param list_of_nodes: the list of nodes that should we inquired
+        :param id: the id that is looked for
+        :return: the node with id when found, None otherwise
+        """
+        encountered = [node for node in list_of_nodes if node.id == id]
+        if len(encountered) == 0:
+            return None
+        elif len(encountered) == 1:
+            return encountered[0]
+        else:
+            print(f'Many nodes with same id: {id}')
             pprint(vars(encountered))
             sys.exit()
 
@@ -744,7 +809,7 @@ class Graph(object):
             print(node)
 
         for edge in self.edges:
-            pprint(vars(edge))
+            print(edge)
 
 class GraphMLDecoder(json.JSONDecoder):
     def __init__(self):
@@ -758,7 +823,21 @@ class GraphMLDecoder(json.JSONDecoder):
             and 'target' in dct \
             and 'type'   in dct \
             and 'tags'   in dct:
-            return Edge(**dct)
+            edge = Edge(**dct)
+            # Because the Json deserializer will make edge.tags a string
+            # (as opposed to a list), and because we found it messy to
+            # fix that in the Edge constructor, we "fix" things here.
+            # That is we manually convert the tags value that was set
+            # (as a string) into a list with and Edge.Tag
+            if edge.tags == 're-ided':
+                # This is special case is due to the fact that an enum
+                # name of re-ided is not possible (is in interpreted as
+                # a minus operation (between re and ided) in the definition
+                # of the enum
+                edge.set_tag_from_string('re_ided')
+            else:
+                edge.set_tag_from_string(edge.tags)
+            return edge
         return dct
 
 
@@ -814,9 +893,11 @@ class TemporalGraph(Graph):
             # references (as python objects):
             for edge in current_edges:
                 if isinstance(edge.source, str):
-                    edge.set_ancestor(current_nodes[int(edge.source)])
+                    edge.set_ancestor(Graph.find_node_from_id(
+                        current_nodes, int(edge.source)))
                 if isinstance(edge.target, str):
-                    edge.set_descendant(current_nodes[int(edge.target)])
+                    edge.set_descendant(Graph.find_node_from_id(
+                        current_nodes, int(edge.target)))
 
             # Eventually we can append the current graph:
             if not self.nodes:
@@ -826,6 +907,33 @@ class TemporalGraph(Graph):
             debug_msg("   " + temporal_graph_filename + ": done.")
         debug_msg("  Loading of files: done.")
         debug_msg("Graph reconstruction: done.")
+
+    def remove_replicate_descendant_edges(self, node):
+        """
+        When two nodes have multiple adjacent edges (that there exists at least
+        two edges that are adjacent to same two nodes) then wish to remove the
+        replicates in order to leave a single edge.
+        This method considers all the descendant edges of the provided
+        argument node, looks for replicates and removes them.
+        :param node: the considered node
+        :return: the number of edges that were removed
+        """
+        number_removed_edges = 0
+        seen_node = set()
+        for descendant_edge in node.get_descendant_edges():
+            descendant = descendant_edge.get_descendant()
+            descendant_id = descendant.get_global_id()
+            if descendant_id in seen_node:
+                # This is a replicate edge that we trash.
+                self.disconnect_edge(descendant_edge)
+                # Note that we don't need to inspect for other nodes "knowing"
+                # (refering to) that edge because we knew both its endpoints
+                # that disconnecting the edge got those nodes informed
+                self.delete_edge(descendant_edge, False)
+                number_removed_edges +=1
+            else:
+                seen_node.add(descendant_id)
+        return number_removed_edges
 
     def simplify(self, display_characteristics=False):
         debug_msg("Simplifying the graph:")
@@ -860,6 +968,17 @@ class TemporalGraph(Graph):
 
         time_stamps = self.extract_time_stamps()
 
+        debug_msg("  Stage 0: removing duplicate edges.")
+        duplicates = 0
+        for time_stamp in time_stamps:
+            current_nodes = self.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                duplicates += self.remove_replicate_descendant_edges(node)
+        if duplicates:
+            debug_msg(f'    Number of removed duplicates edges: {duplicates}')
+        else:
+            debug_msg('    No duplicates edges found.')
+
         # Note that the relative order of application of the following
         # simplification strategies (labeled as stages) does matter. In particular
         #  - collapsing unchanged/re-ided 1 to 1 edges should NOT be realized
@@ -869,7 +988,7 @@ class TemporalGraph(Graph):
         # The above constraints on relative order leave a single ordering
         # possibility that is thus used below.
 
-        debug_msg("  Stage 0: collapsing unchanged/re-ided 1 to 1 edges.")
+        debug_msg("  Stage 1: collapsing unchanged/re-ided 1 to 1 edges.")
         initial_number_one_to_one_edges = \
             len([ e for e in self.edges if e.are_adjacent_nodes_one_to_one() \
                                    and (e.is_unchanged() or e.is_re_ided())])
@@ -891,13 +1010,14 @@ class TemporalGraph(Graph):
             self.display_characteristics('       ')
 
         # ############################
-        debug_msg("  Stage 1: collapsing fusion edges.")
+        debug_msg("  Stage 2: collapsing fusion edges.")
         initial_number_fusion_edges = \
             len([ e for e in self.edges if e.is_fusion()])
+        fusion_edges_number = 0
         for time_stamp in time_stamps:
             current_nodes = self.get_nodes_with_time_stamp(time_stamp)
             for node in current_nodes:
-                if not node.are_all_ancestor_edges_fusion_typed():
+                if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
                     continue
                 if not node.do_all_ancestor_nodes_share_same_date():
                     continue
@@ -914,7 +1034,8 @@ class TemporalGraph(Graph):
                                                             debug_mode)
                 number_fusion_edges_left = \
                     len([ e for e in self.edges if e.is_fusion()])
-                fusion_edges_number = initial_number_fusion_edges - number_fusion_edges_left
+                fusion_edges_number = initial_number_fusion_edges \
+                                      - number_fusion_edges_left
                 debug_msg_ne(f'    Number of fusion edges: {fusion_edges_number} / {initial_number_fusion_edges} ')
         debug_msg(f'    Number of fusion edges: {fusion_edges_number} / {initial_number_fusion_edges} ')
         if display_characteristics:
@@ -922,7 +1043,7 @@ class TemporalGraph(Graph):
             self.display_characteristics('       ')
 
         # #######################
-        debug_msg("  Stage 2: collapsing subdivision edges.")
+        debug_msg("  Stage 3: collapsing subdivision edges.")
 
         initial_number_fusion_edges = \
             len([ e for e in self.edges if e.is_subdivided()])
@@ -931,7 +1052,8 @@ class TemporalGraph(Graph):
         for time_stamp in time_stamps:
             current_nodes = self.get_nodes_with_time_stamp(time_stamp)
             for node in current_nodes:
-                if not node.are_all_descendant_edges_subdivision_typed():
+                if not node.are_all_descendant_edges_of_type(
+                        Edge.Tag.subdivided):
                     continue
                 if not node.do_all_descendant_nodes_share_same_date():
                     continue
