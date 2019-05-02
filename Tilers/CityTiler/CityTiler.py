@@ -75,7 +75,7 @@ def from_3dcitydb(cursor, args):
     buildings = get_buildings_from_3dcitydb(cursor)
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(buildings, 20)
+    pre_tiles = kd_tree(buildings, 200)
 
     tileset = TileSet()
     for tile_buildings in pre_tiles:

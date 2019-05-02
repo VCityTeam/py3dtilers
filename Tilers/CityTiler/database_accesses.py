@@ -129,7 +129,10 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
             building = buildings_with_gmlid_key[gml_id]
             building.set_database_id(building_id)
             building.set_box(box)
-    return buildings
+    if no_input_buildings:
+        return result_buildings
+    else:
+        return buildings
 
 
 def retrieve_geometries(cursor, buildingIds, offset):
