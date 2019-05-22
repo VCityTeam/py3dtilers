@@ -150,4 +150,5 @@ if __name__ == '__main__':
     cursor = open_data_base(args.db_config_path)
     tileset = from_3dcitydb(cursor, args)
     cursor.close()
+    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     tileset.write_to_directory('junk')
