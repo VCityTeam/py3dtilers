@@ -27,8 +27,10 @@ def ParseCommandLine():
     return parser.parse_args()
 
 
-def create_tile_content(cursor, buildingIds, offset, args):
+def create_tile_content(cursor, buildings, args):
     """
+    :param cursor: a database access cursor
+    :param buildings: the buildings of the tile.
     :param offset: the offset (a a 3D "vector" of floats) by which the
                    geographical coordinates should be translated (the
                    computation is done at the GIS level)
@@ -37,6 +39,11 @@ def create_tile_content(cursor, buildingIds, offset, args):
                 BatchTable or possibly a BatchTableHierachy
     :rtype: a TileContent in the form a B3dm.
     """
+
+    # Get building ids and the centroid of the tile which is the offset
+    buildingIds = tuple([building.get_database_id() for building in buildings])
+    offset = buildings.getCentroid()
+
     arrays = retrieve_geometries(cursor, buildingIds, offset)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
@@ -54,13 +61,19 @@ def create_tile_content(cursor, buildingIds, offset, args):
                           0, 0,  0, 1])
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
-    # When required attach a BatchTable with its optional extensions
+    # Create a batch table and add the database ID of each building to it
+    bt = BatchTable()
+
+    databseIds = []
+    for building in buildings:
+        databseIds.append(building.get_database_id())
+
+    bt.add_property_from_array("cityobject.database_id", databseIds)
+
+    # When required attach an extension to the batch table
     if args.with_BTH:
         bth = create_batch_table_hierarchy(cursor, buildingIds)
-        bt = BatchTable()
         bt.add_extension(bth)
-    else:
-        bt = None
 
     # Eventually wrap the geometries together with the optional
     # BatchTableHierarchy within a B3dm:
@@ -83,9 +96,7 @@ def from_3dcitydb(cursor, args):
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        ids = tuple([building.get_database_id() for building in tile_buildings])
-        centroid = tile_buildings.getCentroid()
-        tile_content_b3dm = create_tile_content(cursor, ids, centroid, args)
+        tile_content_b3dm = create_tile_content(cursor, tile_buildings, args)
         tile.set_content(tile_content_b3dm)
 
         # The current new tile bounding volume shall be a box enclosing the
@@ -103,6 +114,7 @@ def from_3dcitydb(cursor, args):
         # system. We thus need to align the Tile Content to the
         # BoundingVolumeBox of the Tile by "adjusting" to this change of
         # referential:
+        centroid = tile_buildings.getCentroid()
         bounding_box.translate([- centroid[i] for i in range(0,3)])
         tile.set_bounding_volume(bounding_box)
 
