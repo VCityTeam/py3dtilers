@@ -18,7 +18,7 @@ def ParseCommandLine():
     parser.add_argument('db_config_path',
                         nargs='?',
                         default='CityTilerDBConfig.yml',
-                        type=str,
+                        type=str,  # why precise this if it is the default config ?
                         help='Path to the database configuration file')
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
@@ -149,16 +149,16 @@ def from_3dcitydb(cursor, args):
     server_ip = cursor.fetchone()[0]
     cursor.execute('SELECT current_database()')
     database_name = cursor.fetchone()[0]
-    origin  = f'This tileset is the result of Py3DTiles {__file__} script '
-    origin += f'run with data extracted from database {database_name} '
-    origin += f' obtained from server {server_ip}.'
+    origin  = 'This tileset is the result of Py3DTiles {__file__} script '
+    origin += 'run with data extracted from database {database_name} '
+    origin += ' obtained from server {server_ip}.'
     tileset.add_asset_extras(origin)
 
     return tileset
 
 
 if __name__ == '__main__':
-    args = ParseCommandLine()
+    args = ParseCommandLine()  # args is a NameSpace object instance
     cursor = open_data_base(args.db_config_path)
     tileset = from_3dcitydb(cursor, args)
     cursor.close()
