@@ -85,7 +85,8 @@ def from_3dcitydb(cursor, args):
     :type args: CLI arguments as obtained with an ArgumentParser.
     """
 
-    buildings = get_buildings_from_3dcitydb(cursor)
+    # buildings = get_buildings_from_3dcitydb(cursor)
+    reliefs = get_reliefs_from_3dcitydb(cursor)
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(buildings, 200)
@@ -157,10 +158,20 @@ def from_3dcitydb(cursor, args):
     return tileset
 
 
-if __name__ == '__main__':
+def main():
+    """
+    :return: no return value
+
+    this function create a repository name "junk" were tilesets are
+    stored.
+    """
     args = ParseCommandLine()  # args is a NameSpace object instance
-    cursor = open_data_base(args.db_config_path)
+    cursor = open_data_base(args.db_config_path)  # cursor is a psycopg2 object returned by cursor() method
     tileset = from_3dcitydb(cursor, args)
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     tileset.write_to_directory('junk')
+
+
+if __name__ == '__main__':
+    main()

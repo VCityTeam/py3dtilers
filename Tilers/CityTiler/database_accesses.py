@@ -1,3 +1,28 @@
+"""
+Notes on the 3DCityDB database general structure
+
+The data is organised in the following way in the database:
+
+### for buildings
+  - the building table contains the "abstract" building
+    subdivisions (building, building part)
+  - the thematic_surface table contains all the surface objects (wall,
+    roof, floor), with links to the building object it belongs to
+    and the geometric data in the surface_geometry table
+  - the surface_geometry table contains the geometry of the surface
+    (and volumic too for some reason) objects
+  - the cityobject table contains both the thematic_surface and
+    the building objects
+
+### for reliefs
+  - the relief_feature table contains the complex relief objects which are composed
+    by individual components that can be of different types - TIN/raster etc.)
+  - the relief_component table contains individual relief components
+  - the relief_feat_to_rel_comp table establishes a link between individual components and
+    their "parent" which is a more complex relief object
+"""
+
+
 import sys
 import yaml
 import psycopg2
@@ -5,19 +30,6 @@ import psycopg2.extras
 
 from py3dtiles import TriangleSoup
 from building import Building, Buildings
-
-# ##### Notes on the 3DCityDB database general structure
-
-# The data is organised in the following way in the database:
-#   - the building table contains the "abstract" building
-#     subdivisions (building, building part)
-#   - the thematic_surface table contains all the surface objects (wall,
-#     roof, floor), with links to the building object it belongs to
-#     and the geometric data in the surface_geometry table
-#   - the surface_geometry table contains the geometry of the surface
-#     (and volumic too for some reason) objects
-#   - the cityobject table contains both the thematic_surface and
-#     the building objects
 
 
 def open_data_base(db_config_file_path):
@@ -133,6 +145,39 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
         return result_buildings
     else:
         return buildings
+
+
+def get_reliefs_from_3dcitydb(cursor, reliefs=None):
+    """
+    :param cursor: a database access cursor
+    :param reliefs: an optional list of objects with a get_gmlid() method
+                      (that returns the (city)gml identifier of a relief
+                      object that should be encountered in the database) that
+                      should be seeked in the database. When this list is
+                      is empty all the reliefs encountered in the database
+                      are returned.
+
+    :return: the list of the reliefs that were retrieved in the 3DCityDB
+             database, each relief being decorated with its database
+             identifier as well as its 3D bounding box (as retrieved in the.
+             database)
+    """
+    if not reliefs:
+        no_input_reliefs = True
+        # No specific building were seeked. We thus retrieve all the ones
+        # we can find in the database:
+        query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
+                "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"
+
+    else:
+        no_input_reliefs = False
+        relief_gmlids = [n.get_gml_id() for n in reliefs]
+        relief_gmlids_as_string = "('" + "', '".join(relief_gmlids) + "')"
+        query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
+                "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id" + \
+                "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
+
+    cursor.execute(query)
 
 
 def retrieve_geometries(cursor, buildingIds, offset):
