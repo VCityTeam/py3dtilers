@@ -162,7 +162,7 @@ def main():
     """
     :return: no return value
 
-    this function create a repository name "junk" were tilesets are
+    this function creates a repository named "junk" were tilesets are
     stored.
     """
     args = ParseCommandLine()  # args is a NameSpace object instance
