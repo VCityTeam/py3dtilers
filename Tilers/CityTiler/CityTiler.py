@@ -85,11 +85,11 @@ def from_3dcitydb(cursor, args):
     :type args: CLI arguments as obtained with an ArgumentParser.
     """
 
-    buildings = get_buildings_from_3dcitydb(cursor)
-    # reliefs = get_reliefs_from_3dcitydb(cursor)
+    cityobjects = get_buildings_from_3dcitydb(cursor)
+    cityobjects.extend(get_reliefs_from_3dcitydb(cursor))
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(buildings, 200)
+    pre_tiles = kd_tree(cityobjects, 200)
 
     tileset = TileSet()
     for tile_buildings in pre_tiles:
