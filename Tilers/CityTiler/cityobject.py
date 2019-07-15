@@ -1,7 +1,7 @@
 from py3dtiles import BoundingVolumeBox
 
 
-class Building(object):
+class CityObject(object):
 
     def __init__(self, database_id=None, box_in=None):
         """

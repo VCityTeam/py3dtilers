@@ -29,7 +29,7 @@ import psycopg2
 import psycopg2.extras
 
 from py3dtiles import TriangleSoup
-from building import Building, Buildings
+from cityobject import CityObject, CityObjects
 
 
 def open_data_base(db_config_file_path):
@@ -114,7 +114,7 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
     cursor.execute(query)
 
     if no_input_buildings:
-        result_buildings = Buildings()
+        result_buildings = CityObjects()
     else:
         # We need to deal with the fact that the answer will (generically)
         # not preserve the order of the objects that was given to the query
@@ -134,7 +134,7 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
             sys.exit(1)
         box = t[1]
         if no_input_buildings:
-            new_building = Building(building_id, box)
+            new_building = CityObject(building_id, box)
             result_buildings.append(new_building)
         else:
             gml_id = t[2]
