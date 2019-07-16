@@ -82,19 +82,15 @@ def open_data_bases(db_config_file_paths):
     return cursors
 
 
-def get_buildings_from_3dcitydb(cursor, buildings=None):
+def sql_query_buildings_from_3dcitydb(cursor, buildings=None):
     """
     :param cursor: a database access cursor
     :param buildings: an optional list of objects with a get_gmlid() method
                       (that returns the (city)gml identifier of a building
                       object that should be encountered in the database) that
-                      should be seeked in the database. When this list is
-                      is empty all the buildings encountered in the database
-                      are returned.
-    :return: the list of the buildings that were retrieved in the 3DCityDB
-             database, each building being decorated with its database
-             identifier as well as its 3D bounding box (as retrieved in the.
-             database)
+                      should be seeked in the database.
+
+    :return: no return value
     """
     if not buildings:
         no_input_buildings = True
@@ -112,42 +108,10 @@ def get_buildings_from_3dcitydb(cursor, buildings=None):
                 "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " "\
                 "AND building.id=building.building_root_id"
     cursor.execute(query)
-
-    if no_input_buildings:
-        result_buildings = CityObjects()
-    else:
-        # We need to deal with the fact that the answer will (generically)
-        # not preserve the order of the objects that was given to the query
-        buildings_with_gmlid_key = dict()
-        for building in buildings:
-            buildings_with_gmlid_key[building.gml_id] = building
-
-    for t in cursor.fetchall():
-        building_id = t[0]
-        if not t[1]:
-            print("Warning: building with id ", building_id)
-            print("         has no 'cityobject.envelope'.")
-            if no_input_buildings:
-                print("     Dropping this building (downstream trouble ?)")
-                continue
-            print("     Exiting (is the database corrupted ?)")
-            sys.exit(1)
-        box = t[1]
-        if no_input_buildings:
-            new_building = CityObject(building_id, box)
-            result_buildings.append(new_building)
-        else:
-            gml_id = t[2]
-            building = buildings_with_gmlid_key[gml_id]
-            building.set_database_id(building_id)
-            building.set_box(box)
-    if no_input_buildings:
-        return result_buildings
-    else:
-        return buildings
+    return no_input_buildings
 
 
-def get_reliefs_from_3dcitydb(cursor, reliefs=None):
+def sql_query_reliefs_from_3dcitydb(cursor, reliefs=None):
     """
     :param cursor: a database access cursor
     :param reliefs: an optional list of objects with a get_gmlid() method
@@ -157,10 +121,7 @@ def get_reliefs_from_3dcitydb(cursor, reliefs=None):
                       is empty all the reliefs encountered in the database
                       are returned.
 
-    :return: the list of the reliefs that were retrieved in the 3DCityDB
-             database, each relief being decorated with its database
-             identifier as well as its 3D bounding box (as retrieved in the.
-             database)
+    :return: no return value
     """
     if not reliefs:
         no_input_reliefs = True
@@ -178,6 +139,64 @@ def get_reliefs_from_3dcitydb(cursor, reliefs=None):
                 "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
 
     cursor.execute(query)
+    return no_input_reliefs
+
+
+def retrieve_objects(cursor, buildings=None, reliefs=None):
+    """
+
+    :param cursor: a database access cursor
+    :param objects: an optional list of objects with a get_gmlid() method
+                      (that returns the (city)gml identifier of an object
+                      that should be encountered in the database) that
+                      should be seeked in the database. When this list is
+                      is empty all the objects encountered in the database
+                      are returned.
+
+    :return: the list of the objects that were retrieved in the 3DCityDB
+             database, each object being decorated with its database
+             identifier as well as its 3D bounding box (as retrieved in the.
+             database)
+    """
+    no_input_buildings = sql_query_buildings_from_3dcitydb(cursor, buildings)
+    no_input_reliefs = sql_query_reliefs_from_3dcitydb(cursor, reliefs)
+
+    no_input_objects = no_input_buildings and no_input_reliefs
+
+    if no_input_objects:
+        result_objects = CityObjects()
+    else:
+        # We need to deal with the fact that the answer will (generically)
+        # not preserve the order of the objects that was given to the query
+        objects_with_gmlid_key = dict()
+        for building in buildings:
+            objects_with_gmlid_key[building.gml_id] = building
+        for relief in reliefs:
+            objects_with_gmlid_key[relief.gml_id] = relief
+
+    for t in cursor.fetchall():
+        object_id = t[0]
+        if not t[1]:
+            print("Warning: object with id ", object_id)
+            print("         has no 'cityobject.envelope'.")
+            if no_input_objects:
+                print("     Dropping this object (downstream trouble ?)")
+                continue
+            print("     Exiting (is the database corrupted ?)")
+            sys.exit(1)
+        box = t[1]
+        if no_input_objects:
+            new_object = CityObject(object_id, box)
+            result_objects.append(new_object)
+        else:
+            gml_id = t[2]
+            object = objects_with_gmlid_key[gml_id]
+            object.set_database_id(object_id)
+            object.set_box(box)
+    if no_input_objects:
+        return result_objects
+    else:
+        return buildings + reliefs
 
 
 def retrieve_geometries(cursor, buildingIds, offset):
