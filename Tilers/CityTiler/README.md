@@ -3,7 +3,7 @@
  - [Developer's/Design notes](DesignNotes.md)
  
 ### Debugging temporary notes
-In order to display the results produced by the quick installation steps below,
+Once [installed and ran](Install.md) and in order to 3D visulalize the results produced by the Tilers you might
  - install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples
    and point the resulting junk directory holding the produced tileset
      cd 3d-tiles-samples
