@@ -1,4 +1,8 @@
-## Debugging temporary notes
+### See also
+ - [Installation notes](Install.md)
+ - [Developer's/Design notes](DesignNotes.md)
+ 
+### Debugging temporary notes
 In order to display the results produced by the quick installation steps below,
  - install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples
    and point the resulting junk directory holding the produced tileset
@@ -17,76 +21,6 @@ In order to display the results produced by the quick installation steps below,
      http://localhost:8080/examples/Demo.html
    
 
-## Quick installation notes
- 1. Install py3Dtiles
-    ```
-    virtualenv -p python3 venv
-    source venv/bin/activate
-    pip install -e .
-    python setup.py install
-    ``` 
- 2. Install the tiler specific dependency:
-    ```
-    pip install pyyaml
-    ```
- 3. Configure `Tilers/CityTiler/CityTilerDBConfig.yml` (out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
- 4. from the home directory of the git
-    * in order to run the CityTiler
-      ```
-      python Tilers/CityTiler/CityTiler.py --with_BTH Tilers/CityTiler/CityTilerDBConfig.yml 
-      ```
-      that (buy default) will create a `junk` ouput directory holding the resulting tile set,
-    * in order to run the City**Temporal**Tiler you will first need to obtain the so called [evolution difference files](https://github.com/MEPP-team/RICT/tree/master/ShellScripts/computeLyonCityEvolution) between various temporal vintages. Let us assume such difference files were computed (e.g. with [computeLyonCityEvolution.sh](https://github.com/MEPP-team/RICT/blob/master/ShellScripts/computeLyonCityEvolution/computeLyonCityEvolution.sh)) in between three time stamps (2009, 20912, 2015) and for two buroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes 
-      ```
-      python Tilers/CityTiler/CityTemporalTiler.py                 \
-      --db_config_path Tilers/CityTiler/CityTilerDBConfig2009.yml  \
-                       Tilers/CityTiler/CityTilerDBConfig2012.yml  \
-                       Tilers/CityTiler/CityTilerDBConfig2015.yml  \
-      --time_stamp 2009 2012 2015                                  \
-      --temporal_graph LYON_1ER_2009-2012/DifferencesAsGraph.json  \
-                       LYON_1ER_2012-2015/DifferencesAsGraph.json  \
-                       LYON_2EME_2009-2012/DifferencesAsGraph.json \
-                       LYON_2EME_2012-2015/DifferencesAsGraph.json
-      ```
-
-## Data source information
-The CityTiler script requires some understanding of the 3DCity-DB data model.
-CityTiler currently only extracts the surface data for LoD2 buildings.
-As a consequence (in a form of disclaimer) the method used by CityTIler may not work for every CityGML file, since there seems to be multiple ways for storing the same information. 
-3DCity-DB data is organised in the following way:
- * the `building` table contains the "abstract" building subdivisions (building, building part)
-* the `thematic_surface` table contains all the surface objects (wall, roof, floor), with links to the building object it belongs to and the geometric data in the `surface_geometry` table
-* The `surface_geometry` table contains the geometry of the surface (and volumic for some reason) objects
-* The `cityobject` table contains both the `thematic_surface` and the building objects
-
-CityTiler "algorithm" goes
- - starting with the ids of the building we want to export, we select the abstract building objects that are descendant of the buildings.
-```sql
-cursor.execute("SELECT building.id, building_parent_id, cityobject.gmlid, cityobject.objectclass_id FROM building
-JOIN cityobject ON building.id=cityobject.id WHERE building_root_id IN %s", (buildingIds,))
-```
- - Then, using the ids of all the abstract building parts, we select all the surface objects that are linked to these building parts. Since the geometric surfaces are also organised in a hierarchy (to each thematic surface corresponds a tree of surface geometries), we need to group them into a single geometry.
-```sql
-cursor.execute("SELECT cityobject.id, cityobject.gmlid, thematic_surface.building_id,
-thematic_surface.objectclass_id, ST_AsBinary(ST_Multi(ST_Collect(ST_Translate(
-surface_geometry.geometry, -1845500, -5176100, 0)))) FROM surface_geometry
-JOIN thematic_surface ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id
-JOIN cityobject ON thematic_surface.id=cityobject.id WHERE thematic_surface.building_id
-IN %s GROUP BY surface_geometry.root_id, cityobject.id, cityobject.gmlid,
-thematic_surface.building_id, thematic_surface.objectclass_id", (subBuildingIds,))
-```
-In more readable pseudocode: 
-```sql
-SELECT id, gmlid, building_id, objectclass_id, group(geometry) FROM surface_geometry 
-JOIN thematic_surface ON root_id=lod2_multi_surface_id # lod2_multi_surface_id only points on the root of the geometry tree
-JOIN cityobject ON id
-WHERE building_id IN [abstract building parts list]
-GROUP BY root_id
-```
-Once we have all this information, we just need to put it in a batch table using py3dtiles.
-
-Note: the above description [originates here](https://github.com/MEPP-team/RICT/blob/master/Doc/Devel/Design/DesignNote018.md)
-
-## Credentials
+### Credentials
 This tiler original code is due to Jeremy Gaillard (and was realized
 when working at LIRIS, University of Lyon, France)
