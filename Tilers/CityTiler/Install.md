@@ -41,8 +41,9 @@ From the home directory of your py3dtiles git clone, run
 ```
 (venv) python Tilers/CityTiler/CityTiler.py --with_BTH Tilers/CityTiler/CityTilerDBConfig.yml 
 ```
-By default this will create a `junk` ouput directory holding the resulting tile set.
-
+By default this command will create a `junk` ouput directory holding both 
+ * the resulting tile set file (with the .json extension) and 
+ * a `tiles` folder containing the associated set of `.b3dm` files
 
 #### 5/ Running the temporal version City**Temporal**Tiler
 In order to run the City**Temporal**Tiler you will first need to obtain the so called [evolution difference files](https://github.com/MEPP-team/RICT/tree/master/ShellScripts/computeLyonCityEvolution) between various temporal vintages. Let us assume such difference files were computed (e.g. with [computeLyonCityEvolution.sh](https://github.com/MEPP-team/RICT/blob/master/ShellScripts/computeLyonCityEvolution/computeLyonCityEvolution.sh)) in between three time stamps (2009, 20912, 2015) and for two buroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes 
@@ -57,3 +58,10 @@ python Tilers/CityTiler/CityTemporalTiler.py                   \
                    LYON_2EME_2009-2012/DifferencesAsGraph.json \
                    LYON_2EME_2012-2015/DifferencesAsGraph.json
 ```
+
+### Developer's note
+If you happen to modify the core of py3dtiles (that is any file in the `py3dtiles/py3dtiles/` subdirectory) then prior to running any script using Py3DTiles (e.g. a Tiler or export_tileset) you will need to re-install Py3DTiles for changes to be considered. The commands are then
+```
+pip uninstall py3dtiles     # Just to avoid pycache trouble
+pin install ./py3dtiles     # Equivalent of `pip install -e .`
+``` 
