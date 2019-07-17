@@ -23,7 +23,7 @@ def ParseCommandLine():
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
                         action='store_true',
-                        help='Adds a Batch Table Hierachy when defined')
+                        help='Adds a Batch Table Hierarchy when defined')
     return parser.parse_args()
 
 
