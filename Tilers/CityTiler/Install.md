@@ -1,18 +1,38 @@
 ## CityTiler quick installation notes
 
- 1. Install py3Dtiles
+#### 1/ Checkout the temporary (until the ad-hoc PR gets accepted) fork [Oslandia' Py3dTiles](https://github.com/Oslandia/py3dtiles)
     ```
-    virtualenv -p python3 venv
-    source venv/bin/activate
-    pip install -e .
-    python setup.py install
+    $ git clone https://github.com/MEPP-team/py3dtiles.git
+    $ mv py3dtiles/ py3dtiles.git
+    $ cd py3dtiles.git
+    $ git checkout Tiler
+    ```
+
+#### 2/ Install py3Dtiles (refer to [original install notes](docs/install.rst))
+    ```
+    $ virtualenv -p python3 venv
+    $ source venv/bin/activate
+    (venv) pip install -e .
+    (venv) python setup.py install
+    (venv) pip install pytest pytest-benchmark # Optional testing
+    (venv) pytest                              # Optional testing
     ``` 
- 2. Install the tiler specific dependency:
-    ```
-    pip install pyyaml
-    ```
- 3. Configure `Tilers/CityTiler/CityTilerDBConfig.yml` (out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
- 4. from the home directory of the git
+ 
+#### 3/ Install the tilers' specific dependency
+```
+(venv) pip install pyyaml
+```
+    
+#### 4/ Configure the database description file 
+```
+(venv) pushd  Tilers/CityTiler
+(venv) cp CityTilerDBConfigReference.yml CityTilerDBMyConfig.yml
+```
+
+`Tilers/CityTiler/CityTilerDBConfig.yml`
+(out of Tilers/CityTiler/CityTilerDBConfigReference.yml` 
+
+#### 5/ from the home directory of the git
     * in order to run the CityTiler
       ```
       python Tilers/CityTiler/CityTiler.py --with_BTH Tilers/CityTiler/CityTilerDBConfig.yml 
