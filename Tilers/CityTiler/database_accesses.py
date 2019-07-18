@@ -82,15 +82,18 @@ def open_data_bases(db_config_file_paths):
     return cursors
 
 
-def sql_query_buildings_from_3dcitydb(cursor, buildings=None):
+def get_buildings_objects_from_3dcitydb(cursor, buildings):
     """
     :param cursor: a database access cursor
-    :param buildings: an optional list of objects with a get_gmlid() method
+    :param buildings: a list of objects with a get_gmlid() method
                       (that returns the (city)gml identifier of a building
                       object that should be encountered in the database) that
                       should be seeked in the database.
 
-    :return: no return value
+    :return: the list of the buildings that were retrieved in the 3DCityDB
+             database, each building being decorated with its database
+             identifier as well as its 3D bounding box (as retrieved in the.
+             database)
     """
     if not buildings:
         no_input_buildings = True
@@ -107,25 +110,61 @@ def sql_query_buildings_from_3dcitydb(cursor, buildings=None):
                 "FROM building JOIN cityobject ON building.id=cityobject.id "+\
                 "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " "\
                 "AND building.id=building.building_root_id"
+
     cursor.execute(query)
-    return no_input_buildings
+
+    if no_input_buildings:
+        result_buildings = CityObjects()
+    else:
+        # We need to deal with the fact that the answer will (generically)
+        # not preserve the order of the objects that was given to the query
+        buildings_with_gmlid_key = dict()
+        for building in buildings:
+            buildings_with_gmlid_key[building.gml_id] = building
+
+    for t in cursor.fetchall():
+        building_id = t[0]
+        if not t[1]:
+            print("Warning: building with id ", building_id)
+            print("         has no 'cityobject.envelope'.")
+            if no_input_buildings:
+                print("     Dropping this building (downstream trouble ?)")
+                continue
+            print("     Exiting (is the database corrupted ?)")
+            sys.exit(1)
+        box = t[1]
+        if no_input_buildings:
+            new_building = CityObject(building_id, box)
+            result_buildings.append(new_building)
+        else:
+            gml_id = t[2]
+            building = buildings_with_gmlid_key[gml_id]
+            building.set_database_id(building_id)
+            building.set_box(box)
+    if no_input_buildings:
+        return result_buildings
+    else:
+        return buildings
 
 
-def sql_query_reliefs_from_3dcitydb(cursor, reliefs=None):
+def get_reliefs_objects_from_3dcitydb(cursor, reliefs):
     """
     :param cursor: a database access cursor
-    :param reliefs: an optional list of objects with a get_gmlid() method
+    :param reliefs: a list of objects with a get_gmlid() method
                       (that returns the (city)gml identifier of a relief
                       object that should be encountered in the database) that
                       should be seeked in the database. When this list is
                       is empty all the reliefs encountered in the database
                       are returned.
 
-    :return: no return value
+    :return: the list of the reliefs that were retrieved in the 3DCityDB
+             database, each building being decorated with its database
+             identifier as well as its 3D bounding box (as retrieved in the.
+             database)
     """
     if not reliefs:
         no_input_reliefs = True
-        # No specific building were seeked. We thus retrieve all the ones
+        # No specific relief were seeked. We thus retrieve all the ones
         # we can find in the database:
         query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
                 "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"
@@ -139,18 +178,58 @@ def sql_query_reliefs_from_3dcitydb(cursor, reliefs=None):
                 "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
 
     cursor.execute(query)
-    return no_input_reliefs
+
+    if no_input_reliefs:
+        result_reliefs = CityObjects()
+    else:
+        # We need to deal with the fact that the answer will (generically)
+        # not preserve the order of the objects that was given to the query
+        reliefs_with_gmlid_key = dict()
+        for relief in reliefs:
+            reliefs_with_gmlid_key[relief.gml_id] = relief
+
+    for t in cursor.fetchall():
+        relief_id = t[0]
+        if not t[1]:
+            print("Warning: relief with id ", relief_id)
+            print("         has no 'cityobject.envelope'.")
+            if no_input_reliefs:
+                print("     Dropping this relief (downstream trouble ?)")
+                continue
+            print("     Exiting (is the database corrupted ?)")
+            sys.exit(1)
+        box = t[1]
+        if no_input_reliefs:
+            new_relief = CityObject(relief_id, box)
+            result_reliefs.append(new_relief)
+        else:
+            gml_id = t[2]
+            relief = reliefs_with_gmlid_key[gml_id]
+            relief.set_database_id(relief_id)
+            relief.set_box(box)
+    if no_input_reliefs:
+        return result_reliefs
+    else:
+        return reliefs
 
 
-def retrieve_objects(cursor, buildings=None, reliefs=None):
+def retrieve_objects(cursor, buildings=list(), reliefs=list()):
     """
 
     :param cursor: a database access cursor
-    :param objects: an optional list of objects with a get_gmlid() method
-                      (that returns the (city)gml identifier of an object
+    :param buildings: an optional list of buildings (CityObject class instances)
+                        with get_gmlid(), set_database_id and set_box methods
+                      (that returns the (city)gml identifier of a building object
                       that should be encountered in the database) that
                       should be seeked in the database. When this list is
-                      is empty all the objects encountered in the database
+                      is empty all the buildings encountered in the database
+                      are returned.
+    :param reliefs: an optional list of reliefs (CityObject class instances)
+                        with get_gmlid(), set_database_id and set_box methods
+                      (that returns the (city)gml identifier of a relief object
+                      that should be encountered in the database) that
+                      should be seeked in the database. When this list is
+                      is empty all the reliefss encountered in the database
                       are returned.
 
     :return: the list of the objects that were retrieved in the 3DCityDB
@@ -158,77 +237,26 @@ def retrieve_objects(cursor, buildings=None, reliefs=None):
              identifier as well as its 3D bounding box (as retrieved in the.
              database)
     """
-    no_input_buildings = sql_query_buildings_from_3dcitydb(cursor, buildings)
-    no_input_reliefs = sql_query_reliefs_from_3dcitydb(cursor, reliefs)
 
-    no_input_objects = no_input_buildings and no_input_reliefs
+    cityobjects = get_buildings_objects_from_3dcitydb(cursor,
+                                                      buildings).extend(get_reliefs_objects_from_3dcitydb(cursor,
+                                                                                                          reliefs))
 
-    if no_input_objects:
-        result_objects = CityObjects()
-    else:
-        # We need to deal with the fact that the answer will (generically)
-        # not preserve the order of the objects that was given to the query
-        objects_with_gmlid_key = dict()
-        for building in buildings:
-            objects_with_gmlid_key[building.gml_id] = building
-        for relief in reliefs:
-            objects_with_gmlid_key[relief.gml_id] = relief
-
-    for t in cursor.fetchall():
-        object_id = t[0]
-        if not t[1]:
-            print("Warning: object with id ", object_id)
-            print("         has no 'cityobject.envelope'.")
-            if no_input_objects:
-                print("     Dropping this object (downstream trouble ?)")
-                continue
-            print("     Exiting (is the database corrupted ?)")
-            sys.exit(1)
-        box = t[1]
-        if no_input_objects:
-            new_object = CityObject(object_id, box)
-            result_objects.append(new_object)
-        else:
-            gml_id = t[2]
-            object = objects_with_gmlid_key[gml_id]
-            object.set_database_id(object_id)
-            object.set_box(box)
-    if no_input_objects:
-        return result_objects
-    else:
-        return buildings + reliefs
+    return cityobjects
 
 
-def retrieve_geometries(cursor, buildingIds, offset):
+def get_buildings_geo_from_3dcitydb(cursor, building_ids, offset):
     """
     :param cursor: a database access cursor
-    :param buildings: an list of (city)gml identifier corresponding to
+    :param building_ids: an list of (city)gml identifier corresponding to
                       building objects.
     :param offset: the offset (a a 3D "vector" of floats) by which the
                    geographical coordinates should be translated (the
                    computation is done at the GIS level)
-    :rtype: a TileContent in the form a B3dm.
+
+    :return: no return value
     """
-
-    # ##### Collect the necessary information from a 3DCityDB database:
-
-    # The data is organised in the following way in the database:
-    #   - the building table contains the "abstract" building
-    #     subdivisions (building, building part)
-    #   - the thematic_surface table contains all the surface objects (wall,
-    #     roof, floor), with links to the building object it belongs to
-    #     and the geometric data in the surface_geometry table
-    #   - the surface_geometry table contains the geometry of the surface
-    #     (and volumic too for some reason) objects
-    #   - the cityobject table contains both the thematic_surface and
-    #     the building objects
-
-    # Because the 3DCityDB's Building table regroups both the buildings mixed
-    # with their building's sub-divisions (Building is an "abstraction"
-    # from which inherits concrete building class as well building-subdivisions
-    # a.k.a. parts) we must first collect all the buildings and their parts:
-
-    building_ids_arg = str(buildingIds).replace(',)',')')
+    building_ids_arg = str(building_ids).replace(',)', ')')
 
     query = \
         "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " +\
@@ -261,7 +289,7 @@ def retrieve_geometries(cursor, buildingIds, offset):
     # Package the geometries within a data structure that the
     # GlTF.from_binary_arrays() function (see below) expects to consume:
     arrays = []
-    for incoming_id in buildingIds:
+    for incoming_id in building_ids:
         geom = buildings_with_gmlid_key[incoming_id]
         arrays.append({
             'position': geom.getPositionArray(),
@@ -270,3 +298,94 @@ def retrieve_geometries(cursor, buildingIds, offset):
         })
 
     return arrays
+
+
+def get_reliefs_geo_from_3dcitydb(cursor, relief_ids, offset):
+    """
+    :param cursor: a database access cursor
+    :param relief_ids: an list of (city)gml identifier corresponding to
+                      building objects.
+    :param offset: the offset (a a 3D "vector" of floats) by which the
+                   geographical coordinates should be translated (the
+                   computation is done at the GIS level)
+
+    :return: no return value
+    """
+    relief_ids = str(relief_ids).replace(',)', ')')
+
+    query = \
+        "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect( " + \
+        "ST_Translate(surface_geometry.geometry, " + \
+        str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
+        ")))) " + \
+        "FROM surface_geometry JOIN relief_feature " + \
+        "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+        "JOIN building ON relief_feature.id = surface_geometry.id " + \
+        "GROUP BY relief_feature.id "
+    cursor.execute(query)
+
+    # Deal with the reordering of the retrieved geometries
+    reliefs_with_gmlid_key = dict()
+    for t in cursor.fetchall():
+        relief_root_id = t[0]
+        geom_as_string = t[1]
+        if geom_as_string is None:
+            # Some thematic surface may have no geometry (due to a cityGML
+            # exporter bug?): simply ignore them.
+            print("Warning: no valid geometry in database.")
+            sys.exit(1)
+        geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+        if len(geom.triangles[0]) == 0:
+            print("Warning: empty geometry (no geometry) from the database.")
+            sys.exit(1)
+        reliefs_with_gmlid_key[relief_root_id] = geom
+
+    # Package the geometries within a data structure that the
+    # GlTF.from_binary_arrays() function (see below) expects to consume:
+    arrays = []
+    for incoming_id in relief_ids:
+        geom = reliefs_with_gmlid_key[incoming_id]
+        arrays.append({
+            'position': geom.getPositionArray(),
+            'normal': geom.getNormalArray(),
+            'bbox': [[float(i) for i in j] for j in geom.getBbox()]
+        })
+
+    return arrays
+
+
+def retrieve_geometries(cursor, building_ids, relief_ids, offset):
+    """
+    :param cursor: a database access cursor
+    :param building_ids: an list of (city)gml identifier corresponding to
+                      building objects.
+    :param relief_ids: an list of (city)gml identifier corresponding to
+                      relief objects.
+    :param offset: the offset (a a 3D "vector" of floats) by which the
+                   geographical coordinates should be translated (the
+                   computation is done at the GIS level)
+    :rtype: a TileContent in the form a B3dm.
+    """
+
+    # ##### Collect the necessary information from a 3DCityDB database:
+
+    # The data is organised in the following way in the database:
+    #   - the building table contains the "abstract" building
+    #     subdivisions (building, building part)
+    #   - the thematic_surface table contains all the surface objects (wall,
+    #     roof, floor), with links to the building object it belongs to
+    #     and the geometric data in the surface_geometry table
+    #   - the surface_geometry table contains the geometry of the surface
+    #     (and volumic too for some reason) objects
+    #   - the cityobject table contains both the thematic_surface and
+    #     the building objects
+
+    # Because the 3DCityDB's Building table regroups both the buildings mixed
+    # with their building's sub-divisions (Building is an "abstraction"
+    # from which inherits concrete building class as well building-subdivisions
+    # a.k.a. parts) we must first collect all the buildings and their parts:
+
+    buildings_arrays = get_buildings_geo_from_3dcitydb(cursor, building_ids, offset)
+    reliefs_arrays = get_buildings_geo_from_3dcitydb(cursor, relief_ids, offset)
+
+    return buildings_arrays + reliefs_arrays

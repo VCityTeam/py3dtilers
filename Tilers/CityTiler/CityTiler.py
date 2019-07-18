@@ -6,7 +6,8 @@ from py3dtiles import Tile, TileSet
 
 from kd_tree import kd_tree
 from database_accesses import open_data_base, retrieve_geometries,\
-                              get_buildings_from_3dcitydb
+                              retrieve_objects
+
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
@@ -27,24 +28,23 @@ def ParseCommandLine():
     return parser.parse_args()
 
 
-def create_tile_content(cursor, buildings, args):
+def create_tile_content(cursor, cityobjects, args):
     """
     :param cursor: a database access cursor
-    :param buildings: the buildings of the tile.
-    :param offset: the offset (a a 3D "vector" of floats) by which the
-                   geographical coordinates should be translated (the
-                   computation is done at the GIS level)
+    :param cityobjects: the cityobjects of the tile.
+
     :type args: CLI arguments as obtained with an ArgumentParser. Used to
                 determine whether to define attach an optional
                 BatchTable or possibly a BatchTableHierachy
+
     :rtype: a TileContent in the form a B3dm.
     """
 
-    # Get building ids and the centroid of the tile which is the offset
-    buildingIds = tuple([building.get_database_id() for building in buildings])
-    offset = buildings.getCentroid()
+    # Get cityobjects ids and the centroid of the tile which is the offset
+    cityobjectIds = tuple([cityobject.get_database_id() for cityobject in cityobjects])
+    offset = cityobjects.getCentroid()
 
-    arrays = retrieve_geometries(cursor, buildingIds, offset)
+    arrays = retrieve_geometries(cursor, cityobjectIds, offset)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -84,26 +84,27 @@ def from_3dcitydb(cursor, args):
     """
     :type args: CLI arguments as obtained with an ArgumentParser.
     """
+    cityobjects = retrieve_objects(cursor)
 
-    cityobjects = get_buildings_from_3dcitydb(cursor)
-    cityobjects.extend(get_reliefs_from_3dcitydb(cursor))
+    if not cityobjects:
+        raise ValueError("The database does not contain any object")
 
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(cityobjects, 200)
 
     tileset = TileSet()
-    for tile_buildings in pre_tiles:
+    for tile_cityobjects in pre_tiles:
         tile = Tile()
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        tile_content_b3dm = create_tile_content(cursor, tile_buildings, args)
+        tile_content_b3dm = create_tile_content(cursor, tile_cityobjects, args)
         tile.set_content(tile_content_b3dm)
 
         # The current new tile bounding volume shall be a box enclosing the
-        # buildings withheld in the considered tile_buildings:
+        # buildings withheld in the considered tile_cityobjects:
         bounding_box = BoundingVolumeBox()
-        for building in tile_buildings:
+        for building in tile_cityobjects:
             bounding_box.add(building.getBoundingVolumeBox())
 
         # The Tile Content returned by the above call to create_tile_content()
@@ -115,7 +116,7 @@ def from_3dcitydb(cursor, args):
         # system. We thus need to align the Tile Content to the
         # BoundingVolumeBox of the Tile by "adjusting" to this change of
         # referential:
-        centroid = tile_buildings.getCentroid()
+        centroid = tile_cityobjects.getCentroid()
         bounding_box.translate([- centroid[i] for i in range(0,3)])
         tile.set_bounding_volume(bounding_box)
 
