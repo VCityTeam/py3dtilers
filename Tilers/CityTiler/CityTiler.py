@@ -7,7 +7,6 @@ from py3dtiles import Tile, TileSet
 from kd_tree import kd_tree
 from database_accesses import open_data_base, retrieve_geometries,\
                               retrieve_objects
-
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
@@ -16,35 +15,47 @@ def ParseCommandLine():
     descr = '''A small utility that build a 3DTiles tileset out of the content
                of a 3DCityDB database.'''
     parser = argparse.ArgumentParser(description=descr)
+
+    # adding positional arguments
     parser.add_argument('db_config_path',
                         nargs='?',
                         default='CityTilerDBConfig.yml',
                         type=str,  # why precise this if it is the default config ?
-                        help='Path to the database configuration file')
+                        help='path to the database configuration file')
+
+    parser.add_argument('object_type',
+                        nargs='?',
+                        default='building',
+                        type=str,
+                        choices=['building', 'relief'],
+                        help='identify the object type to seek in the database')
+
+    # adding optional arguments
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
                         action='store_true',
                         help='Adds a Batch Table Hierachy when defined')
+
     return parser.parse_args()
 
 
 def create_tile_content(cursor, cityobjects, args):
     """
-    :param cursor: a database access cursor
+    :param cursor: a database access cursor.
     :param cityobjects: the cityobjects of the tile.
-
-    :type args: CLI arguments as obtained with an ArgumentParser. Used to
-                determine whether to define attach an optional
-                BatchTable or possibly a BatchTableHierachy
+    :param args: CLI arguments as obtained with an ArgumentParser. Used to
+                determine the type of cityobjects manipulated, and wether
+                to define attach an optional BatchTable or possibly a
+                BatchTableHierachy.
 
     :rtype: a TileContent in the form a B3dm.
     """
 
     # Get cityobjects ids and the centroid of the tile which is the offset
-    cityobjectIds = tuple([cityobject.get_database_id() for cityobject in cityobjects])
+    cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
     offset = cityobjects.getCentroid()
 
-    arrays = retrieve_geometries(cursor, cityobjectIds, offset)
+    arrays = retrieve_geometries(cursor, cityobject_ids, offset, args)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -64,15 +75,15 @@ def create_tile_content(cursor, cityobjects, args):
     # Create a batch table and add the database ID of each building to it
     bt = BatchTable()
 
-    databseIds = []
-    for building in buildings:
-        databseIds.append(building.get_database_id())
+    database_ids = []
+    for cityobject in cityobjects:
+        database_ids.append(cityobject.get_database_id())
 
-    bt.add_property_from_array("cityobject.database_id", databseIds)
+    bt.add_property_from_array("cityobject.database_id", database_ids)
 
     # When required attach an extension to the batch table
-    if args.with_BTH:
-        bth = create_batch_table_hierarchy(cursor, buildingIds)
+    if args.object_type == 'building' and args.with_BTH:
+        bth = create_batch_table_hierarchy(cursor, cityobject_ids)
         bt.add_extension(bth)
 
     # Eventually wrap the geometries together with the optional
@@ -82,14 +93,18 @@ def create_tile_content(cursor, cityobjects, args):
 
 def from_3dcitydb(cursor, args):
     """
-    :type args: CLI arguments as obtained with an ArgumentParser.
+    :param cursor: a database access cursor.
+    :param args: CLI arguments as obtained with an ArgumentParser.
+
+    :return: a tileset.
     """
-    cityobjects = retrieve_objects(cursor)
+    cityobjects = retrieve_objects(cursor, args)
 
     if not cityobjects:
-        raise ValueError("The database does not contain any object")
+        raise ValueError(f'The database does not contain any {args.object_type} object')
 
-    # Lump out buildings in pre_tiles based on a 2D-Tree technique:
+
+    # Lump out objects in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(cityobjects, 200)
 
     tileset = TileSet()
@@ -151,9 +166,9 @@ def from_3dcitydb(cursor, args):
     server_ip = cursor.fetchone()[0]
     cursor.execute('SELECT current_database()')
     database_name = cursor.fetchone()[0]
-    origin  = 'This tileset is the result of Py3DTiles {__file__} script '
-    origin += 'run with data extracted from database {database_name} '
-    origin += ' obtained from server {server_ip}.'
+    origin = f'This tileset is the result of Py3DTiles {__file__} script '
+    origin += f'run with data extracted from database {database_name} '
+    origin += f' obtained from server {server_ip}.'
     tileset.add_asset_extras(origin)
 
     return tileset
@@ -163,15 +178,18 @@ def main():
     """
     :return: no return value
 
-    this function create a repository name "junk" were tilesets are
+    this function creates a repository name "junk_objecttype" were the tileset is
     stored.
     """
-    args = ParseCommandLine()  # args is a NameSpace object instance
-    cursor = open_data_base(args.db_config_path)  # cursor is a psycopg2 object returned by cursor() method
+    args = ParseCommandLine()
+    cursor = open_data_base(args.db_config_path)
     tileset = from_3dcitydb(cursor, args)
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    tileset.write_to_directory('junk')
+    if args.object_type == "building":
+        tileset.write_to_directory('junk_buildings')
+    elif args.object_type == "relief":
+        tileset.write_to_directory('junk_reliefs')
 
 
 if __name__ == '__main__':
