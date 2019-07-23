@@ -47,7 +47,7 @@ By default this command will create a `junk` ouput directory holding both
  
 *Note that the tiler must be launched from the root of py3dtiles, because of [this assumption](https://github.com/MEPP-team/py3dtiles/blob/Tiler/py3dtiles/schema_with_sample.py#L48). Otherwise you will get an error in the form `Unfound schema file batchTable.schema.json`*
 
-#### 5/ Running the temporal version City**Temporal**Tiler
+#### 5b/ Running the temporal version City**Temporal**Tiler
 In order to run the City**Temporal**Tiler you will first need to obtain the so called [evolution difference files](https://github.com/MEPP-team/RICT/tree/master/ShellScripts/computeLyonCityEvolution) between various temporal vintages. Let us assume such difference files were computed (e.g. with [computeLyonCityEvolution.sh](https://github.com/MEPP-team/RICT/blob/master/ShellScripts/computeLyonCityEvolution/computeLyonCityEvolution.sh)) in between three time stamps (2009, 2012, 2015) and for two boroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes **from the home directory**:
 ```
 python Tilers/CityTiler/CityTemporalTiler.py                   \
