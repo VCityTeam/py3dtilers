@@ -38,13 +38,13 @@ class CityMBuildings(CityMCityObjects):
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def set_bth():
-        CityMBuildings.with_bth = True
+    @classmethod
+    def set_bth(cls):
+        cls.with_bth = True
 
-    @staticmethod
-    def is_bth_set():
-        return CityMBuildings.with_bth
+    @classmethod
+    def is_bth_set(cls):
+        return cls.with_bth
 
     @staticmethod
     def sql_query_objects(buildings):

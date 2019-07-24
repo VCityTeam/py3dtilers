@@ -45,7 +45,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
     """
     :param cursor: a database access cursor.
     :param cityobjects: the cityobjects of the tile.
-    :param objects_type: a class name between existing objects classes existing.
+    :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
 
     :rtype: a TileContent in the form a B3dm.
@@ -93,7 +93,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
 def from_3dcitydb(cursor, objects_type):
     """
     :param cursor: a database access cursor.
-    :param objects_type: a class name between existing objects classes existing.
+    :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
 
     :return: a tileset.

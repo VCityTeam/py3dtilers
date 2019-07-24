@@ -121,7 +121,8 @@ class CityMCityObjects:
                 centroid[1] / len(self),
                 centroid[2] / len(self)]
 
-    def sql_query_objects(self):
+    @staticmethod
+    def sql_query_objects():
         """
         Virtual method: all CityMCityObjects and childs classes instances should 
         implement this method.
@@ -134,7 +135,7 @@ class CityMCityObjects:
     def retrieve_objects(cursor, objects_type, cityobjects=list()):
         """
         :param cursor: a database access cursor.
-        :param objects_type: a class name between existing objects classes existing.
+        :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
 
         :param cityobjects: a list of objects_type type object that should be sought
@@ -185,7 +186,8 @@ class CityMCityObjects:
         else:
             return cityobjects
 
-    def sql_query_geometries(self):
+    @staticmethod
+    def sql_query_geometries():
         """
         Virtual method: all CityMCityObjects and childs classes instances should 
         implement this method.
@@ -203,7 +205,7 @@ class CityMCityObjects:
         :param offset: the offset (a 3D "vector" of floats) by which the
                        geographical coordinates should be translated (the
                        computation is done at the GIS level).
-        :param objects_type: a class name between existing objects classes existing.
+        :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
 
         :rtype: a TileContent in the form a B3dm.
