@@ -11,7 +11,7 @@ def kd_tree(cityobjects, maxNumCityMCityObjects, depth=0):
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
     sCityMCityObjects = CityMCityObjects(
                     sorted(cityobjects,
-                    key=lambda building: building.getCentroid()[axis]))
+                    key=lambda building: building.get_centroid()[axis]))
     median = len(sCityMCityObjects) // 2
     lCityMCityObjects = sCityMCityObjects[:median]
     rCityMCityObjects = sCityMCityObjects[median:]

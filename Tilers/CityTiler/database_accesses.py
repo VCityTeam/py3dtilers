@@ -1,26 +1,5 @@
 """
-Notes on the 3DCityDB database general structure
-
-The data is organised in the following way in the database:
-
-### for buildings
-  - the building table contains the "abstract" building
-    subdivisions (building, building part)
-  - the thematic_surface table contains all the surface objects (wall,
-    roof, floor), with links to the building object it belongs to
-    and the geometric data in the surface_geometry table
-
-### for reliefs
-  - the relief_feature table contains the complex relief objects which are composed
-    by individual components that can be of different types - TIN/raster etc.)
-  - the relief_component table contains individual relief components
-  - the relief_feat_to_rel_comp table establishes a link between individual components and
-    their "parent" which is a more complex relief object
-
-### for all objects
-  - the cityobject table contains information about all the objects
-  - the surface_geometry table contains the geometry of all objects
-
+Functions used to open the database.
 """
 
 
@@ -41,11 +20,11 @@ def open_data_base(db_config_file_path):
             sys.exit()
 
     # Check that db configuration is well defined
-    if (   ("PG_HOST" not in db_config)
-        or ("PG_USER" not in db_config)
-        or ("PG_NAME" not in db_config)
-        or ("PG_PORT" not in db_config)
-        or ("PG_PASSWORD" not in db_config)):
+    if (("PG_HOST" not in db_config)
+            or ("PG_USER" not in db_config)
+            or ("PG_NAME" not in db_config)
+            or ("PG_PORT" not in db_config)
+            or ("PG_PASSWORD" not in db_config)):
         print(("ERROR: Database is not properly defined in '{0}', please refer to README.md"
               .format(args.db_config_path)))
         sys.exit()

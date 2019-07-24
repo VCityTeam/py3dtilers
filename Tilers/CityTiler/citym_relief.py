@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Notes on the 3DCityDB database structure
+
+The data is organised in the following way in the database:
+
+- the relief_feature table contains the complex relief objects which are composed
+by individual components that can be of different types - TIN/raster etc.)
+- the relief_component table contains individual relief components
+- the relief_feat_to_rel_comp table establishes a link between individual components and
+their "parent" which is a more complex relief object
+
+- the cityobject table contains information about all the objects
+- the surface_geometry table contains the geometry of all objects
+"""
+
+
 from citym_cityobject import CityMCityObject, CityMCityObjects
 
 
@@ -12,7 +28,7 @@ class CityMRelief(CityMCityObject):
 
 class CityMReliefs(CityMCityObjects):
     """
-    Implementation of the Digital Terrain Model (DTM) objects from the CityGML model.
+    A decorated list of CityMRelief type objects.
     """
     def __init__(self):
         super().__init__()
@@ -20,9 +36,11 @@ class CityMReliefs(CityMCityObjects):
     @staticmethod
     def sql_query_objects(reliefs):
         """
+        :param reliefs: a list of CityMRelief type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
 
-        :param reliefs:
-        :return:
+        :return: a string containing the right sql query that should be executed.
         """
         if not reliefs:
             # No specific reliefs were sought. We thus retrieve all the ones
@@ -42,8 +60,10 @@ class CityMReliefs(CityMCityObjects):
     @staticmethod
     def sql_query_geometries(offset, reliefs_ids=None):
         """
-        reliefs_ids is unused
-        :return:
+        reliefs_ids is unused but is given in argument to preserve the same structure
+        as the sql_query_geometries method of parent class CityMCityObject.
+
+        :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of reliefs
         query = \

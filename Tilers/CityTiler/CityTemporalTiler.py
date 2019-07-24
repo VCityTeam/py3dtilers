@@ -145,7 +145,7 @@ def from_3dcitydb(cursors, buildings):
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        centroid = tile_buildings.getCentroid()
+        centroid = tile_buildings.get_centroid()
         tile_content_b3dm = create_tile_content(cursors,
                                                 tile_buildings,
                                                 centroid)
@@ -155,7 +155,7 @@ def from_3dcitydb(cursors, buildings):
         # buildings withheld in the considered tile_buildings:
         bounding_box = BoundingVolumeBox()
         for building in tile_buildings:
-            bounding_box.add(building.getBoundingVolumeBox())
+            bounding_box.add(building.get_bounding_volume_box())
 
         # Deal with the temporal extension of of Bounding Volume Box
         temporal_bv = TemporalBoundingVolume()

@@ -12,11 +12,11 @@ from database_accesses import open_data_base
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
-def ParseCommandLine():
+def parse_command_line():
     # arg parse
-    descr = '''A small utility that build a 3DTiles tileset out of the content
+    text = '''A small utility that build a 3DTiles tileset out of the content
                of a 3DCityDB database.'''
-    parser = argparse.ArgumentParser(description=descr)
+    parser = argparse.ArgumentParser(description=text)
 
     # adding positional arguments
     parser.add_argument('db_config_path',
@@ -45,14 +45,14 @@ def create_tile_content(cursor, cityobjects, objects_type):
     """
     :param cursor: a database access cursor.
     :param cityobjects: the cityobjects of the tile.
-    :param objects_type: FIXME
+    :param objects_type: a class name between existing objects classes existing.
+                        For example, objects_type can be "CityMBuilding".
 
     :rtype: a TileContent in the form a B3dm.
     """
-
     # Get cityobjects ids and the centroid of the tile which is the offset
     cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
-    offset = cityobjects.getCentroid()
+    offset = cityobjects.get_centroid()
 
     arrays = CityMCityObjects.retrieve_geometries(cursor, cityobject_ids, offset, objects_type)
 
@@ -93,11 +93,11 @@ def create_tile_content(cursor, cityobjects, objects_type):
 def from_3dcitydb(cursor, objects_type):
     """
     :param cursor: a database access cursor.
-    :param objects_type: FIXME
+    :param objects_type: a class name between existing objects classes existing.
+                        For example, objects_type can be "CityMBuilding".
 
     :return: a tileset.
     """
-
     cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
     if not cityobjects:
@@ -119,7 +119,7 @@ def from_3dcitydb(cursor, objects_type):
         # buildings withheld in the considered tile_cityobjects:
         bounding_box = BoundingVolumeBox()
         for building in tile_cityobjects:
-            bounding_box.add(building.getBoundingVolumeBox())
+            bounding_box.add(building.get_bounding_volume_box())
 
         # The Tile Content returned by the above call to create_tile_content()
         # (refer to the usage of the centroid/offset third argument) uses
@@ -130,7 +130,7 @@ def from_3dcitydb(cursor, objects_type):
         # system. We thus need to align the Tile Content to the
         # BoundingVolumeBox of the Tile by "adjusting" to this change of
         # referential:
-        centroid = tile_cityobjects.getCentroid()
+        centroid = tile_cityobjects.get_centroid()
         bounding_box.translate([- centroid[i] for i in range(0,3)])
         tile.set_bounding_volume(bounding_box)
 
@@ -180,7 +180,7 @@ def main():
     this function creates a repository name "junk_objecttype" where the tileset is
     stored.
     """
-    args = ParseCommandLine()
+    args = parse_command_line()
     cursor = open_data_base(args.db_config_path)
 
     if args.object_type == "building":
