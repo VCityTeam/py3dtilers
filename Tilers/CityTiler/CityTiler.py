@@ -5,6 +5,9 @@ from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
 from kd_tree import kd_tree
+from citym_cityobject import CityMCityObjects
+from citym_building import CityMBuildings
+from citym_relief import CityMReliefs
 from database_accesses import open_data_base, retrieve_geometries,\
                               retrieve_objects
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
@@ -39,14 +42,11 @@ def ParseCommandLine():
     return parser.parse_args()
 
 
-def create_tile_content(cursor, cityobjects, args):
+def create_tile_content(cursor, cityobjects, objects_type):
     """
     :param cursor: a database access cursor.
     :param cityobjects: the cityobjects of the tile.
-    :param args: CLI arguments as obtained with an ArgumentParser. Used to
-                determine the type of cityobjects manipulated, and wether
-                to define attach an optional BatchTable or possibly a
-                BatchTableHierachy.
+    :param objects_type: FIXME
 
     :rtype: a TileContent in the form a B3dm.
     """
@@ -55,7 +55,7 @@ def create_tile_content(cursor, cityobjects, args):
     cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
     offset = cityobjects.getCentroid()
 
-    arrays = retrieve_geometries(cursor, cityobject_ids, offset, args)
+    arrays = CityMCityObjects.retrieve_geometries(cursor, cityobject_ids, offset, objects_type)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -82,7 +82,7 @@ def create_tile_content(cursor, cityobjects, args):
     bt.add_property_from_array("cityobject.database_id", database_ids)
 
     # When required attach an extension to the batch table
-    if args.object_type == 'building' and args.with_BTH:
+    if objects_type == CityMBuildings and CityMBuildings.is_bth_set():
         bth = create_batch_table_hierarchy(cursor, cityobject_ids)
         bt.add_extension(bth)
 
@@ -91,17 +91,18 @@ def create_tile_content(cursor, cityobjects, args):
     return B3dm.from_glTF(gltf, bt)
 
 
-def from_3dcitydb(cursor, args):
+def from_3dcitydb(cursor, objects_type):
     """
     :param cursor: a database access cursor.
-    :param args: CLI arguments as obtained with an ArgumentParser.
+    :param objects_type: FIXME
 
     :return: a tileset.
     """
-    cityobjects = retrieve_objects(cursor, args)
+
+    cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
     if not cityobjects:
-        raise ValueError(f'The database does not contain any {args.object_type} object')
+        raise ValueError(f'The database does not contain any {objects_type} object')
 
 
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
@@ -113,7 +114,7 @@ def from_3dcitydb(cursor, args):
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        tile_content_b3dm = create_tile_content(cursor, tile_cityobjects, args)
+        tile_content_b3dm = create_tile_content(cursor, tile_cityobjects, objects_type)
         tile.set_content(tile_content_b3dm)
 
         # The current new tile bounding volume shall be a box enclosing the
@@ -183,13 +184,21 @@ def main():
     """
     args = ParseCommandLine()
     cursor = open_data_base(args.db_config_path)
-    tileset = from_3dcitydb(cursor, args)
+
+    if args.object_type == "building":
+        objects_type = CityMBuildings
+        if args.with_BTH:
+            CityMBuildings.set_bth()
+    else:
+        objects_type = CityMReliefs
+        
+    tileset = from_3dcitydb(cursor, objects_type)
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     if args.object_type == "building":
-        tileset.write_to_directory('junk_buildings')
+        tileset.write_to_directory('profile_buildings')
     elif args.object_type == "relief":
-        tileset.write_to_directory('junk_reliefs')
+        tileset.write_to_directory('profile_reliefs')
 
 
 if __name__ == '__main__':

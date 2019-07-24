@@ -147,68 +147,6 @@ def get_buildings_objects_from_3dcitydb(cursor, buildings):
         return buildings
 
 
-def get_reliefs_objects_from_3dcitydb(cursor, reliefs):
-    """
-    :param cursor: a database access cursor
-    :param reliefs: a list of CityMCityObject type object that should be sought
-                    in the database. When this list is empty all the reliefs
-                    encountered in the database are returned.
-
-    :return: a CityMCityObjects type object containing the reliefs that were retrieved
-            in the 3DCityDB database, each building being decorated with its database
-            identifier as well as its 3D bounding box (as retrieved in the database).
-    """
-    if not reliefs:
-        no_input_reliefs = True
-        # No specific relief were sought. We thus retrieve all the ones
-        # we can find in the database:
-        query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
-                "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"
-
-    else:
-        no_input_reliefs = False
-        relief_gmlids = [n.get_gml_id() for n in reliefs]
-        relief_gmlids_as_string = "('" + "', '".join(relief_gmlids) + "')"
-        query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
-                "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id" + \
-                "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
-
-    cursor.execute(query)
-
-    if no_input_reliefs:
-        result_reliefs = CityMCityObjects()
-    else:
-        # We need to deal with the fact that the answer will (generically)
-        # not preserve the order of the objects that was given to the query
-        reliefs_with_gmlid_key = dict()
-        for relief in reliefs:
-            reliefs_with_gmlid_key[relief.gml_id] = relief
-
-    for t in cursor.fetchall():
-        relief_id = t[0]
-        if not t[1]:
-            print("Warning: relief with id ", relief_id)
-            print("         has no 'cityobject.envelope'.")
-            if no_input_reliefs:
-                print("     Dropping this relief (downstream trouble ?)")
-                continue
-            print("     Exiting (is the database corrupted ?)")
-            sys.exit(1)
-        box = t[1]
-        if no_input_reliefs:
-            new_relief = CityMCityObject(relief_id, box)
-            result_reliefs.append(new_relief)
-        else:
-            gml_id = t[2]
-            relief = reliefs_with_gmlid_key[gml_id]
-            relief.set_database_id(relief_id)
-            relief.set_box(box)
-    if no_input_reliefs:
-        return result_reliefs
-    else:
-        return reliefs
-
-
 def retrieve_objects(cursor, args, cityobjects=list()):
     """
 
@@ -226,9 +164,6 @@ def retrieve_objects(cursor, args, cityobjects=list()):
 
     if args.object_type == "building":
         cityobjects = get_buildings_objects_from_3dcitydb(cursor, cityobjects)
-
-    elif args.object_type == "relief":
-        cityobjects = get_reliefs_objects_from_3dcitydb(cursor, cityobjects)
 
     return cityobjects
 
