@@ -186,7 +186,7 @@ class CityMCityObjects:
     @staticmethod
     def retrieve_geometries(cursor, cityobject_ids, offset, objects_type):
         """
-        FIXME
+        FIXME  
         :param cursor:
         :param cityobject_ids:
         :param offset:
