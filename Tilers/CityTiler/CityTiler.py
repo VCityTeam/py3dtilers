@@ -5,21 +5,34 @@ from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
 from kd_tree import kd_tree
-from database_accesses import open_data_base, retrieve_geometries,\
-                              get_buildings_from_3dcitydb
+from citym_cityobject import CityMCityObjects
+from citym_building import CityMBuildings
+from citym_relief import CityMReliefs
+from database_accesses import open_data_base
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
-def ParseCommandLine():
+def parse_command_line():
     # arg parse
-    descr = '''A small utility that build a 3DTiles tileset out of the content
+    text = '''A small utility that build a 3DTiles tileset out of the content
                of a 3DCityDB database.'''
-    parser = argparse.ArgumentParser(description=descr)
+    parser = argparse.ArgumentParser(description=text)
+
+    # adding positional arguments
     parser.add_argument('db_config_path',
                         nargs='?',
                         default='CityTilerDBConfig.yml',
+                        type=str,  # why precise this if it is the default config ?
+                        help='path to the database configuration file')
+
+    parser.add_argument('object_type',
+                        nargs='?',
+                        default='building',
                         type=str,
-                        help='Path to the database configuration file')
+                        choices=['building', 'relief'],
+                        help='identify the object type to seek in the database')
+
+    # adding optional arguments
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
                         action='store_true',
@@ -27,24 +40,20 @@ def ParseCommandLine():
     return parser.parse_args()
 
 
-def create_tile_content(cursor, buildings, args):
+def create_tile_content(cursor, cityobjects, objects_type):
     """
-    :param cursor: a database access cursor
-    :param buildings: the buildings of the tile.
-    :param offset: the offset (a a 3D "vector" of floats) by which the
-                   geographical coordinates should be translated (the
-                   computation is done at the GIS level)
-    :type args: CLI arguments as obtained with an ArgumentParser. Used to
-                determine whether to define attach an optional
-                BatchTable or possibly a BatchTableHierachy
+    :param cursor: a database access cursor.
+    :param cityobjects: the cityobjects of the tile.
+    :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be "CityMBuilding".
+
     :rtype: a TileContent in the form a B3dm.
     """
+    # Get cityobjects ids and the centroid of the tile which is the offset
+    cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
+    offset = cityobjects.get_centroid()
 
-    # Get building ids and the centroid of the tile which is the offset
-    buildingIds = tuple([building.get_database_id() for building in buildings])
-    offset = buildings.getCentroid()
-
-    arrays = retrieve_geometries(cursor, buildingIds, offset)
+    arrays = CityMCityObjects.retrieve_geometries(cursor, cityobject_ids, offset, objects_type)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -64,15 +73,15 @@ def create_tile_content(cursor, buildings, args):
     # Create a batch table and add the database ID of each building to it
     bt = BatchTable()
 
-    databseIds = []
-    for building in buildings:
-        databseIds.append(building.get_database_id())
+    database_ids = []
+    for cityobject in cityobjects:
+        database_ids.append(cityobject.get_database_id())
 
-    bt.add_property_from_array("cityobject.database_id", databseIds)
+    bt.add_property_from_array("cityobject.database_id", database_ids)
 
     # When required attach an extension to the batch table
-    if args.with_BTH:
-        bth = create_batch_table_hierarchy(cursor, buildingIds)
+    if objects_type == CityMBuildings and CityMBuildings.is_bth_set():
+        bth = create_batch_table_hierarchy(cursor, cityobject_ids)
         bt.add_extension(bth)
 
     # Eventually wrap the geometries together with the optional
@@ -80,30 +89,36 @@ def create_tile_content(cursor, buildings, args):
     return B3dm.from_glTF(gltf, bt)
 
 
-def from_3dcitydb(cursor, args):
+def from_3dcitydb(cursor, objects_type):
     """
-    :type args: CLI arguments as obtained with an ArgumentParser.
+    :param cursor: a database access cursor.
+    :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be "CityMBuilding".
+
+    :return: a tileset.
     """
+    cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
-    buildings = get_buildings_from_3dcitydb(cursor)
+    if not cityobjects:
+        raise ValueError(f'The database does not contain any {objects_type} object')
 
-    # Lump out buildings in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(buildings, 200)
+    # Lump out objects in pre_tiles based on a 2D-Tree technique:
+    pre_tiles = kd_tree(cityobjects, 200)
 
     tileset = TileSet()
-    for tile_buildings in pre_tiles:
+    for tile_cityobjects in pre_tiles:
         tile = Tile()
         tile.set_geometric_error(500)
 
         # Construct the tile content and attach it to the new Tile:
-        tile_content_b3dm = create_tile_content(cursor, tile_buildings, args)
+        tile_content_b3dm = create_tile_content(cursor, tile_cityobjects, objects_type)
         tile.set_content(tile_content_b3dm)
 
         # The current new tile bounding volume shall be a box enclosing the
-        # buildings withheld in the considered tile_buildings:
+        # buildings withheld in the considered tile_cityobjects:
         bounding_box = BoundingVolumeBox()
-        for building in tile_buildings:
-            bounding_box.add(building.getBoundingVolumeBox())
+        for building in tile_cityobjects:
+            bounding_box.add(building.get_bounding_volume_box())
 
         # The Tile Content returned by the above call to create_tile_content()
         # (refer to the usage of the centroid/offset third argument) uses
@@ -114,7 +129,7 @@ def from_3dcitydb(cursor, args):
         # system. We thus need to align the Tile Content to the
         # BoundingVolumeBox of the Tile by "adjusting" to this change of
         # referential:
-        centroid = tile_buildings.getCentroid()
+        centroid = tile_cityobjects.get_centroid()
         bounding_box.translate([- centroid[i] for i in range(0,3)])
         tile.set_bounding_volume(bounding_box)
 
@@ -149,7 +164,7 @@ def from_3dcitydb(cursor, args):
     server_ip = cursor.fetchone()[0]
     cursor.execute('SELECT current_database()')
     database_name = cursor.fetchone()[0]
-    origin  = f'This tileset is the result of Py3DTiles {__file__} script '
+    origin = f'This tileset is the result of Py3DTiles {__file__} script '
     origin += f'run with data extracted from database {database_name} '
     origin += f' obtained from server {server_ip}.'
     tileset.add_asset_extras(origin)
@@ -157,10 +172,32 @@ def from_3dcitydb(cursor, args):
     return tileset
 
 
-if __name__ == '__main__':
-    args = ParseCommandLine()
+def main():
+    """
+    :return: no return value
+
+    this function creates a repository name "junk_objecttype" where the tileset is
+    stored.
+    """
+    args = parse_command_line()
     cursor = open_data_base(args.db_config_path)
-    tileset = from_3dcitydb(cursor, args)
+
+    if args.object_type == "building":
+        objects_type = CityMBuildings
+        if args.with_BTH:
+            CityMBuildings.set_bth()
+    else:
+        objects_type = CityMReliefs
+        
+    tileset = from_3dcitydb(cursor, objects_type)
+
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    tileset.write_to_directory('junk')
+    if args.object_type == "building":
+        tileset.write_to_directory('profile_buildings')
+    elif args.object_type == "relief":
+        tileset.write_to_directory('profile_reliefs')
+
+
+if __name__ == '__main__':
+    main()

@@ -87,3 +87,13 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# PyCharm
+.idea/
+
+# 3DTimes
+junk/
+junk_buildings/
+junk_reliefs/
+profile_buildings/
+profile_reliefs/
