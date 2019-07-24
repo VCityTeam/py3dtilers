@@ -8,8 +8,7 @@ from kd_tree import kd_tree
 from citym_cityobject import CityMCityObjects
 from citym_building import CityMBuildings
 from citym_relief import CityMReliefs
-from database_accesses import open_data_base, retrieve_geometries,\
-                              retrieve_objects
+from database_accesses import open_data_base
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
@@ -37,7 +36,7 @@ def ParseCommandLine():
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
                         action='store_true',
-                        help='Adds a Batch Table Hierachy when defined')
+                        help='Adds a Batch Table Hierarchy when defined')
 
     return parser.parse_args()
 
@@ -103,7 +102,6 @@ def from_3dcitydb(cursor, objects_type):
 
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
-
 
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
     pre_tiles = kd_tree(cityobjects, 200)
@@ -179,7 +177,7 @@ def main():
     """
     :return: no return value
 
-    this function creates a repository name "junk_objecttype" were the tileset is
+    this function creates a repository name "junk_objecttype" where the tileset is
     stored.
     """
     args = ParseCommandLine()
@@ -193,6 +191,7 @@ def main():
         objects_type = CityMReliefs
         
     tileset = from_3dcitydb(cursor, objects_type)
+
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     if args.object_type == "building":

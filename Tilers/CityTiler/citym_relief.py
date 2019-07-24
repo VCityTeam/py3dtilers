@@ -25,8 +25,7 @@ class CityMReliefs(CityMCityObjects):
         :return:
         """
         if not reliefs:
-
-            # No specific relief were sought. We thus retrieve all the ones
+            # No specific reliefs were sought. We thus retrieve all the ones
             # we can find in the database:
             query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
                     "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"

@@ -131,6 +131,7 @@ class CityMCityObjects:
     @staticmethod
     def retrieve_objects(cursor, objects_type, cityobjects=list()):
         """
+        FIXME
         :param cursor: a database access cursor
         :param objects: a list of CityMCityObject type object that should be sought
                         in the database. When this list is empty all the objects
@@ -181,17 +182,26 @@ class CityMCityObjects:
             return cityobjects
 
     def sql_query_geometries(self):
+        """
+        Virtual method FIXME
+        :return:
+        """
         pass
 
     @staticmethod
     def retrieve_geometries(cursor, cityobject_ids, offset, objects_type):
         """
-        FIXME  
-        :param cursor:
-        :param cityobject_ids:
-        :param offset:
-        :param objects_type:
-        :return:
+        FIXME
+        :param cursor: a database access cursor
+        :param cityobject_ids: a list of (city)gml identifier corresponding to a certain
+                                type of objects.
+        :param offset: the offset (a a 3D "vector" of floats) by which the
+                       geographical coordinates should be translated (the
+                       computation is done at the GIS level)
+        :param args: CLI arguments as obtained with an ArgumentParser. Its object_type attribute
+                    determines which object type is sought in the database.
+
+        :rtype: a TileContent in the form a B3dm.
         """
         cityobject_ids_arg = str(cityobject_ids).replace(',)', ')')
 
