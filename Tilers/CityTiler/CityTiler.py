@@ -8,6 +8,7 @@ from kd_tree import kd_tree
 from citym_cityobject import CityMCityObjects
 from citym_building import CityMBuildings
 from citym_relief import CityMReliefs
+from citym_waterbody import CityMWaterBodies
 from database_accesses import open_data_base
 from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
@@ -29,7 +30,7 @@ def parse_command_line():
                         nargs='?',
                         default='building',
                         type=str,
-                        choices=['building', 'relief'],
+                        choices=['building', 'relief', 'water'],
                         help='identify the object type to seek in the database')
 
     # adding optional arguments
@@ -99,6 +100,7 @@ def from_3dcitydb(cursor, objects_type):
     :return: a tileset.
     """
     cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
+    print(cityobjects)
 
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
@@ -177,7 +179,7 @@ def main():
     """
     :return: no return value
 
-    this function creates a repository name "junk_objecttype" where the tileset is
+    this function creates a repository name "junk_object_type" where the tileset is
     stored.
     """
     args = parse_command_line()
@@ -187,17 +189,21 @@ def main():
         objects_type = CityMBuildings
         if args.with_BTH:
             CityMBuildings.set_bth()
-    else:
+    elif args.object_type == "relief":
         objects_type = CityMReliefs
+    elif args.object_type == "water":
+        objects_type = CityMWaterBodies
         
     tileset = from_3dcitydb(cursor, objects_type)
 
     cursor.close()
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     if args.object_type == "building":
-        tileset.write_to_directory('profile_buildings')
+        tileset.write_to_directory('junk_buildings')
     elif args.object_type == "relief":
-        tileset.write_to_directory('profile_reliefs')
+        tileset.write_to_directory('junk_reliefs')
+    elif args.object_type == "water":
+        tileset.write_to_directory('junk_water_bodies')
 
 
 if __name__ == '__main__':
