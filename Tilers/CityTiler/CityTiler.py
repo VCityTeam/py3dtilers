@@ -38,7 +38,6 @@ def parse_command_line():
                         dest='with_BTH',
                         action='store_true',
                         help='Adds a Batch Table Hierarchy when defined')
-
     return parser.parse_args()
 
 
