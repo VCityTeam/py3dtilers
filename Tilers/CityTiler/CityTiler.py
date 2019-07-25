@@ -99,7 +99,6 @@ def from_3dcitydb(cursor, objects_type):
     :return: a tileset.
     """
     cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
-    print(cityobjects)
 
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
