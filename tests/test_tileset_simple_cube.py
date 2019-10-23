@@ -62,7 +62,7 @@ class TestTileBuilder(unittest.TestCase, object):
                                     -178.1, -12.845, 300.0, 100., 200., 300.)
         triangles.extend(
                     TestTileBuilder.build_cuboid_as_binary_triangles_array(
-                                      -8.1, -1.8, 300.0, 200., 300., 100.) )
+                                      -8.1, -1.8, 300.0, 200., 300., 100.))
         ts.triangles = [triangles]
 
         # Define a tile that will hold the geometry
@@ -99,6 +99,6 @@ class TestTileBuilder(unittest.TestCase, object):
                                 0, 0, 1, 0,
                                 1841276.4464434995, 5172616.229383407, 0, 1])
 
-        tile_set.add_tile(tile)
+        tile_set.set_root_tile(tile)
         tile_set.add_asset_extras("Py3dTiles TestTileBuilder example.")
         tile_set.write_to_directory('junk')

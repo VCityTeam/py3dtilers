@@ -28,8 +28,8 @@ class Test_TemporalBatchTable(unittest.TestCase):
         tbt.append_start_date("2038-03-03")
         tbt.set_end_dates(["2019-01-01", "2029-02-02"])
         tbt.append_end_date("2039-03-03")
-        tbt.set_featureIds(["1", "2"])
-        tbt.append_featureId("3")
+        tbt.set_feature_ids(["1", "2"])
+        tbt.append_feature_id("3")
 
         return tbt
 
