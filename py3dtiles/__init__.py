@@ -16,6 +16,9 @@ from .temporal_extension_batch_table import TemporalBatchTable
 from .temporal_extension_bounding_volume import TemporalBoundingVolume
 from .temporal_extension_tileset import TemporalTileSet
 from .temporal_extension_transaction import TemporalTransaction
+from .temporal_extension_primary_transaction import TemporalPrimaryTransaction
+from .temporal_extension_transaction_aggregate \
+                                           import TemporalTransactionAggregate
 from .temporal_extension_version import TemporalVersion
 from .temporal_extension_version_transition import TemporalVersionTransition
 from .temporal_extension_utils import temporal_extract_bounding_dates
@@ -41,7 +44,9 @@ __all__ = ['B3dm',
            'TemporalBatchTable', 
            'TemporalBoundingVolume', 
            'TemporalTileSet', 
-           'TemporalTransaction', 
+           'TemporalTransaction',
+           'TemporalPrimaryTransaction',
+           'TemporalTransactionAggregate',
            'TemporalVersion', 
            'TemporalVersionTransition', 
            'temporal_extract_bounding_dates', 

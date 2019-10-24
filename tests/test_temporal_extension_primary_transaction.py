@@ -2,17 +2,19 @@
 
 import json
 import unittest
-from py3dtiles import TemporalTransaction, HelperTest
+from py3dtiles import TemporalPrimaryTransaction
+from py3dtiles import HelperTest
+from .test_temporal_extension_transaction import Test_TemporalTransaction
 
 
-class Test_TemporalTransaction(unittest.TestCase):
+class Test_TemporalPrimaryTransaction(unittest.TestCase):
     """
-    Batch Table extension of the Temporal applicative extension
+    Primary Transaction extension of the Temporal applicative extension
     """
     def test_basics(self):
-        helper = HelperTest(lambda x: TemporalTransaction().validate(x))
+        helper = HelperTest(lambda x: TemporalPrimaryTransaction().validate(x))
         helper.sample_file_names.append(
-                      'temporal_extension_transaction_sample.json')
+                      'temporal_extension_primary_transaction_sample.json')
         if not helper.check():
             self.fail()
 
@@ -20,18 +22,16 @@ class Test_TemporalTransaction(unittest.TestCase):
     def build_sample(cls):
         """
         Programmatically define the reference a sample.
-        :return: the sample as TemporalBatchTable object.
+        :return: the sample as TemporalPrimaryTransaction object.
         """
-        tt = TemporalTransaction()
+        tt = TemporalPrimaryTransaction()
+        base_transaction = Test_TemporalTransaction.build_sample()
+        # Copy the base class (sample) object within the sample we build. Note
+        # that shallow copy is enough because the base case _sample_ has no
+        # nested attribute values.
+        tt.__dict__ = dict(base_transaction.__dict__)
 
-        tt.set_id("0")
-        tt.set_start_date("2018-01-01")
-        tt.set_end_date("2019-01-01")
-        tt.set_tags(["heightened"])
-        tt.set_sources(["some-id"])
-        tt.append_source("some-other-id")
-        tt.set_destinations(["a given id"])
-        tt.append_destination("another given id")
+        tt.set_type("creation")
 
         return tt
 
@@ -49,7 +49,7 @@ class Test_TemporalTransaction(unittest.TestCase):
         """
         json_tt = json.loads(self.build_sample().to_json())
         json_tt_reference = HelperTest().load_json_reference_file(
-                            'temporal_extension_transaction_sample.json')
+                            'temporal_extension_primary_transaction_sample.json')
         if not json_tt.items() == json_tt_reference.items():
             self.fail()
 

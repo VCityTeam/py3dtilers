@@ -91,6 +91,8 @@ setup(
                      'py3dtiles/jsonschemas/3DTILES_temporal.boundingVolume.schema.json',
                      'py3dtiles/jsonschemas/3DTILES_temporal.tileset.schema.json',
                      'py3dtiles/jsonschemas/3DTILES_temporal.transaction.schema.json',
+                     'py3dtiles/jsonschemas/3DTILES_temporal.primaryTransaction.schema.json',
+                     'py3dtiles/jsonschemas/3DTILES_temporal.transactionAggregate.schema.json',
                      'py3dtiles/jsonschemas/3DTILES_temporal.version.schema.json',
                      'py3dtiles/jsonschemas/3DTILES_temporal.versionTransition.schema.json',
                      'py3dtiles/jsonschemas/batchTable.schema.json',

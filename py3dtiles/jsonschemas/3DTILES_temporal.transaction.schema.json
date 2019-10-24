@@ -5,8 +5,8 @@
   "type": "object",
   "properties": {
     "id": {
-      "description": "identifier of the transaction. Used in versionTransition",
-      "type": "number"
+      "description": "identifier of the transaction",
+      "type": "string"
     },
     "startDate": {
       "description": "Start date of the transaction",
@@ -18,23 +18,18 @@
       "type": "string",
       "format": "date"
     },
-    "type": {
-      "description": "Type of transaction",
-      "type": "string",
-      "enum": ["insert", "delete", "replace"]
-    },
-    "tags": {
-      "description": "tags of the transaction",
-      "type": "array",
-      "items": {"type": "string"}
-    },
-    "oldFeatures": {
+    "source": {
       "description": "Array of Features Ids (stored in the 3DTILES_temporal extension of the batch table) representing a state before the transaction",
       "type": "array",
       "items": {"type": "string"}
     },
-    "newFeatures": {
+    "destination": {
       "description": "Array of Features Ids (stored in the 3DTILES_temporal extension of the batch table) representing a state after the transaction",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "tags": {
+      "description": "tags of the transaction",
       "type": "array",
       "items": {"type": "string"}
     }

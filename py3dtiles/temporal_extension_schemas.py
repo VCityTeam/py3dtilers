@@ -48,13 +48,12 @@ class TemporalTileSetSchemaWithSample(SchemaWithSample):
                         "endDate": "2019-01-01",
                         "type": "insert",
                         "tags": ["heightened"],
-                        "oldFeatures": ["some-id"],
-                        "newFeatures": ["some-id"],
+                        "source": ["some-id"],
+                        "destination": ["some-id"],
                     }
                 ]
             }
         )
-
 
 class TemporalTransactionSchemaWithSample(SchemaWithSample):
 
@@ -64,13 +63,50 @@ class TemporalTransactionSchemaWithSample(SchemaWithSample):
         self.set_filename('3DTILES_temporal.transaction.schema.json')
         self.set_sample(
             {
-                "id": 0,
+                "id": "0",
                 "startDate": "2018-01-01",
                 "endDate": "2019-01-01",
-                "type": "insert",
                 "tags": ["heightened"],
-                "oldFeatures": ["some-id", "some-other-id"],
-                "newFeatures": ["a given id", "another given id"],
+                "source": ["some-id", "some-other-id"],
+                "destination": ["a given id", "another given id"],
+            }
+        )
+
+
+class TemporalPrimaryTransactionSchemaWithSample(SchemaWithSample):
+
+    def __init__(self):
+        super().__init__('TemporalPrimaryTransaction')
+        self.set_directory('py3dtiles/jsonschemas')
+        self.set_filename('3DTILES_temporal.primaryTransaction.schema.json')
+        self.set_sample(
+            {
+                "id": "0",
+                "startDate": "2018-01-01",
+                "endDate": "2019-01-01",
+                "type": "creation",
+                "tags": ["heightened"],
+                "source": ["some-id", "some-other-id"],
+                "destination": ["a given id", "another given id"],
+            }
+        )
+
+
+class TemporalTransactionAggregateSchemaWithSample(SchemaWithSample):
+
+    def __init__(self):
+        super().__init__('TemporalTransactionAggregate')
+        self.set_directory('py3dtiles/jsonschemas')
+        self.set_filename('3DTILES_temporal.transactionAggregate.schema.json')
+        self.set_sample(
+            {
+                "id": "0",
+                "startDate": "2018-01-01",
+                "endDate": "2019-01-01",
+                "tags": ["heightened"],
+                "source": ["some-id", "some-other-id"],
+                "destination": ["a given id", "another given id"],
+                "transactions": ["Add here a real nested primary transaction..."],
             }
         )
 
@@ -120,5 +156,7 @@ class TemporalExtensionSchemas(list):
         self.append(TemporalBoundingVolumeSchemaWithSample())
         self.append(TemporalTileSetSchemaWithSample())
         self.append(TemporalTransactionSchemaWithSample())
+        self.append(TemporalPrimaryTransactionSchemaWithSample())
+        self.append(TemporalTransactionAggregateSchemaWithSample())
         self.append(TemporalVersionSchemaWithSample())
         self.append(TemporalVersionTransitionSchemaWithSample())

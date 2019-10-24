@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import sys
+from abc import ABC
 from .threedtiles_notion import ThreeDTilesNotion
 
 
-class TemporalTransaction(ThreeDTilesNotion):
+class TemporalTransaction(ABC, ThreeDTilesNotion):
     """
     Temporal Transaction is an element of the Temporal TileSet extension.
     """
@@ -13,22 +14,18 @@ class TemporalTransaction(ThreeDTilesNotion):
         self.attributes['id'] = None
         self.attributes['startDate'] = None
         self.attributes['endDate'] = None
-        self.attributes['type'] = None
         self.attributes['tags'] = list()
-        self.attributes['oldFeatures'] = list()
-        self.attributes['newFeatures'] = list()
+        self.attributes['source'] = list()
+        self.attributes['destination'] = list()
 
-    def set_id(self, id):
-        self.attributes['id'] = id
+    def set_id(self, identifier):
+        self.attributes['id'] = identifier
 
     def set_start_date(self, date):
         self.attributes['startDate'] = date
 
     def set_end_date(self, date):
         self.attributes['endDate'] = date
-
-    def set_type(self, type):
-        self.attributes['type'] = type
 
     def set_tags(self, tags):
         if not isinstance(tags, list):
@@ -39,20 +36,20 @@ class TemporalTransaction(ThreeDTilesNotion):
     def append_tag(self, tag):
         self.attributes['tags'].append(tag)
 
-    def set_old_features(self, features):
+    def set_sources(self, features):
         if not isinstance(features, list):
             print("Setting old features requires a list argument.")
             sys.exit(1)
-        self.attributes['oldFeatures'] = features
+        self.attributes['source'] = features
 
-    def append_old_feature(self, feature):
-        self.attributes['oldFeatures'].append(feature)
+    def append_source(self, feature):
+        self.attributes['source'].append(feature)
 
-    def set_new_features(self, features):
+    def set_destinations(self, features):
         if not isinstance(features, list):
             print("Setting new features requires a list argument.")
             sys.exit(1)
-        self.attributes['newFeatures'] = features
+        self.attributes['destination'] = features
 
-    def append_new_feature(self, feature):
-        self.attributes['newFeatures'].append(feature)
+    def append_destination(self, feature):
+        self.attributes['destination'].append(feature)

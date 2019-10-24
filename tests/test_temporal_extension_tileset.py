@@ -2,11 +2,14 @@
 
 import json
 import unittest
-from py3dtiles import TemporalTileSet, HelperTest
-from tests.test_temporal_extension_transaction import Test_TemporalTransaction
+from py3dtiles import TemporalTileSet
+from tests.test_temporal_extension_primary_transaction \
+                                        import Test_TemporalPrimaryTransaction
 from tests.test_temporal_extension_version import Test_TemporalVersion
-from tests.test_temporal_extension_version_transition import Test_TemporalVersionTransition
+from tests.test_temporal_extension_version_transition \
+                                         import Test_TemporalVersionTransition
 from tests.test_tileset import Test_TileSet
+from py3dtiles import HelperTest
 
 
 class Test_TemporalTileSet(unittest.TestCase):
@@ -20,7 +23,8 @@ class Test_TemporalTileSet(unittest.TestCase):
         if not helper.check():
             self.fail()
 
-    def build_sample(self):
+    @classmethod
+    def build_sample(cls):
         """
         Programmatically define the reference a sample.
         :return: the sample as TemporalBatchTable object.
@@ -29,7 +33,7 @@ class Test_TemporalTileSet(unittest.TestCase):
 
         tts.set_start_date("2018-01-01")
         tts.set_end_date("2019-01-01")
-        tts.set_transactions([Test_TemporalTransaction.build_sample()])
+        tts.set_transactions([Test_TemporalPrimaryTransaction.build_sample()])
         tts.set_versions([Test_TemporalVersion.build_sample()])
         tts.set_version_transitions([Test_TemporalVersionTransition.build_sample()])
 
