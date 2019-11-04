@@ -35,6 +35,24 @@ class Test_TemporalTransactionAggregate(unittest.TestCase):
 
         return tt
 
+    @classmethod
+    def prune_id_from_nested_json_dict(cls, to_prune):
+        for k in to_prune.copy().keys():
+            if k == 'id':
+                # Also all transactions have a mandatory id, it could be that
+                # we use this method in a broader context than the one of
+                # testing transactions. For example we can test a full tileset
+                # that nests some transactions we wish to prune. We thus cannot
+                # assume that each to_prune parameter object will have an
+                # 'id' dictionary entry. Thus this test.
+                del to_prune['id']
+                continue
+            if not k == 'transactions':
+                # This was a PrimaryTransaction
+                continue
+            for transaction in to_prune['transactions']:
+                Test_TemporalTransactionAggregate.prune_id_from_nested_json_dict(transaction)
+
     def test_json_encoding(self):
         return self.build_sample().to_json()
 
@@ -50,6 +68,11 @@ class Test_TemporalTransactionAggregate(unittest.TestCase):
         json_tt = json.loads(self.build_sample().to_json())
         json_tt_reference = HelperTest().load_json_reference_file(
                         'temporal_extension_transaction_aggregate_sample.json')
+        # We do not want to compare the identifiers (that must differ):
+        Test_TemporalTransactionAggregate.prune_id_from_nested_json_dict(
+                                                                      json_tt)
+        Test_TemporalTransactionAggregate.prune_id_from_nested_json_dict(
+                                                            json_tt_reference)
         if not json_tt.items() == json_tt_reference.items():
             self.fail()
 

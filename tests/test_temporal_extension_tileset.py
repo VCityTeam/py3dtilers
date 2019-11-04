@@ -8,6 +8,8 @@ from tests.test_temporal_extension_primary_transaction \
 from tests.test_temporal_extension_version import Test_TemporalVersion
 from tests.test_temporal_extension_version_transition \
                                          import Test_TemporalVersionTransition
+from tests.test_temporal_extension_transaction_aggregate \
+                                      import Test_TemporalTransactionAggregate
 from tests.test_tileset import Test_TileSet
 from py3dtiles import HelperTest
 
@@ -54,6 +56,11 @@ class Test_TemporalTileSet(unittest.TestCase):
         json_tbt = json.loads(self.build_sample().to_json())
         json_tbt_reference = HelperTest().load_json_reference_file(
                             'temporal_extension_tileset_sample.json')
+        # We do not want to compare the possible transaction identifiers:
+        Test_TemporalTransactionAggregate.prune_id_from_nested_json_dict(
+                                                                    json_tbt)
+        Test_TemporalTransactionAggregate.prune_id_from_nested_json_dict(
+                                                          json_tbt_reference)
         if not json_tbt.items() == json_tbt_reference.items():
             self.fail()
 

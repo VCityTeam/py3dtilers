@@ -37,9 +37,14 @@ class TemporalTransaction(ThreeDTilesNotion):
         :param to_be_replicated: the object attributes that must be replicated
                                  to the ones of self.
         """
+        # We wish to copy all the attributes BUT the identifier (because the
+        # identifier must remain unique). We thus save the 'id' attribute
+        # in order to set it back to its initial value after the copy
+        original_id = self.attributes['id']
         self.attributes = copy.deepcopy(to_be_replicated.attributes)
-        # Because the attributes were overwritten we must redefine the
-        # derived class(es) attributes
+        self.attributes['id'] = original_id
+        # Because the attributes _dictionary_ was overwritten we have to
+        # redefine the derived class(es) attributes
         self.define_attributes()
 
     def set_id(self, identifier):

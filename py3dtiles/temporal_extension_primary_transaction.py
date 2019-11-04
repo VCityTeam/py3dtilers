@@ -12,6 +12,7 @@ class TemporalPrimaryTransaction(TemporalTransaction):
         self.define_attributes()
 
     def define_attributes(self):
+        # Refer to TemporalTransaction::replicate_from()
         self.attributes['type'] = None
 
     def set_type(self, new_type):

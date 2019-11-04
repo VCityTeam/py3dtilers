@@ -46,7 +46,10 @@ class Test_TemporalPrimaryTransaction(unittest.TestCase):
         """
         json_tt = json.loads(self.build_sample().to_json())
         json_tt_reference = HelperTest().load_json_reference_file(
-                            'temporal_extension_primary_transaction_sample.json')
+                        'temporal_extension_primary_transaction_sample.json')
+        # We do not want to compare the identifiers (that must differ):
+        del json_tt['id']
+        del json_tt_reference['id']
         if not json_tt.items() == json_tt_reference.items():
             self.fail()
 

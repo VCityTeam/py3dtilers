@@ -13,6 +13,7 @@ class TemporalTransactionAggregate(TemporalTransaction):
         self.define_attributes()
 
     def define_attributes(self):
+        # Refer to TemporalTransaction::replicate_from()
         self.attributes['transactions'] = list()
 
     def set_transactions(self, transactions):

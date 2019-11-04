@@ -24,7 +24,6 @@ class Test_TemporalTransaction(unittest.TestCase):
         """
         tt = TemporalTransaction()
 
-        tt.set_id("0")
         tt.set_start_date("2018-01-01")
         tt.set_end_date("2019-01-01")
         tt.set_tags(["heightened"])
@@ -50,6 +49,9 @@ class Test_TemporalTransaction(unittest.TestCase):
         json_tt = json.loads(self.build_sample().to_json())
         json_tt_reference = HelperTest().load_json_reference_file(
                             'temporal_extension_transaction_sample.json')
+        # We do not want to compare the identifiers (that must differ):
+        del json_tt['id']
+        del json_tt_reference['id']
         if not json_tt.items() == json_tt_reference.items():
             self.fail()
 
