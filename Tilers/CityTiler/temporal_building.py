@@ -1,7 +1,7 @@
-from building import Building
+from citym_building import CityMBuilding
 
 
-class TemporalBuilding(Building):
+class TemporalBuilding(CityMBuilding):
 
     def __init__(self):
         """
@@ -9,7 +9,7 @@ class TemporalBuilding(Building):
         by the 3DTiles Temporal Extension that complement a building with
         the respective values of its creation and deletion dates.
         """
-        Building.__init__(self)
+        CityMBuilding.__init__(self)
         # The date at which the building was constructed
         self.start_date = None
         # The date at which the building was destructed

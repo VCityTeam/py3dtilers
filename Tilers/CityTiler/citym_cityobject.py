@@ -108,6 +108,9 @@ class CityMCityObjects:
     def extend(self, others):
         self.cityobjects.extend(others)
 
+    def get_city_objects(self):
+        return self.cityobjects
+
     def __len__(self):
         return len(self.cityobjects)
 
@@ -138,9 +141,9 @@ class CityMCityObjects:
         :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
 
-        :param cityobjects: a list of objects_type type object that should be sought
-                        in the database. When this list is empty all the objects
-                        encountered in the database are returned.
+        :param cityobjects: a list of objects_type type object that should be
+                        sought in the database. When this list is empty all
+                        the objects encountered in the database are returned.
 
         :return: an objects_type type object containing the objects that were retrieved
                 in the 3DCityDB database, each object being decorated with its database

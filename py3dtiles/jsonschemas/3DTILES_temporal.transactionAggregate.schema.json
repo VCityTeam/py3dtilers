@@ -7,7 +7,7 @@
       "$ref" : "3DTILES_temporal.transaction.schema.json"
     }, {
       "properties" : {
-        "primaryTransactions": {
+        "transactions": {
           "description": "Array of transactionAggregate or of primaryTransactions",
           "type": "array",
           "items": { "anyOf": [

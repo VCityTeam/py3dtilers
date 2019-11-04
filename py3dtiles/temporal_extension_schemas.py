@@ -106,7 +106,17 @@ class TemporalTransactionAggregateSchemaWithSample(SchemaWithSample):
                 "tags": ["heightened"],
                 "source": ["some-id", "some-other-id"],
                 "destination": ["a given id", "another given id"],
-                "transactions": ["Add here a real nested primary transaction..."],
+                "transactions": [
+                    {
+                        "id": "0",
+                        "startDate": "2018-01-01",
+                        "endDate": "2019-01-01",
+                        "type": "creation",
+                        "tags": ["heightened"],
+                        "source": ["some-id", "some-other-id"],
+                        "destination": ["a given id", "another given id"]
+                    }
+                ],
             }
         )
 

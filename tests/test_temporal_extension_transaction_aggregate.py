@@ -28,10 +28,7 @@ class Test_TemporalTransactionAggregate(unittest.TestCase):
         """
         tt = TemporalTransactionAggregate()
         base_transaction = Test_TemporalTransaction.build_sample()
-        # Copy the base class (sample) object within the sample we build. Note
-        # that shallow copy is enough because the base case _sample_ has no
-        # nested attribute values.
-        tt.__dict__ = dict(base_transaction.__dict__)
+        tt.replicate_from(base_transaction)
 
         # This aggregate transaction includes a single primary transaction
         tt.set_transactions([Test_TemporalPrimaryTransaction.build_sample()])
@@ -41,7 +38,7 @@ class Test_TemporalTransactionAggregate(unittest.TestCase):
     def test_json_encoding(self):
         return self.build_sample().to_json()
 
-    def test_tt_build_sample_and_validate(self):
+    def test_build_sample_and_validate(self):
         if not self.build_sample().validate():
             self.fail()
 
@@ -56,6 +53,11 @@ class Test_TemporalTransactionAggregate(unittest.TestCase):
         if not json_tt.items() == json_tt_reference.items():
             self.fail()
 
+    def test_append_transaction(self):
+        tt = TemporalTransactionAggregate()
+        base_transaction = Test_TemporalTransaction.build_sample()
+        tt.replicate_from(base_transaction)
+        tt.append_transaction(Test_TemporalPrimaryTransaction.build_sample())
 
 if __name__ == "__main__":
     unittest.main()

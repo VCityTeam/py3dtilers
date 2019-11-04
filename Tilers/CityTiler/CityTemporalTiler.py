@@ -2,25 +2,27 @@ import argparse
 import numpy as np
 import sys
 
+from kd_tree import kd_tree
 from py3dtiles import B3dm, GlTF, Tile
 from py3dtiles import BatchTable, TemporalBatchTable
 from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
 from py3dtiles import TileSet, TemporalTileSet
-from py3dtiles import TemporalTransaction, temporal_extract_bounding_dates
+from py3dtiles import TemporalTransaction
+from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
+from py3dtiles import temporal_extract_bounding_dates
 
 from temporal_utils import debug_msg, debug_msg_ne
 from temporal_graph import TemporalGraph, Edge
 from temporal_building import TemporalBuilding
 
-from building import Buildings
-from kd_tree import kd_tree
-from database_accesses import open_data_bases, retrieve_geometries, \
-                              get_buildings_from_3dcitydb
+from citym_cityobject import CityMCityObjects
+from citym_building import CityMBuildings
+from database_accesses import open_data_bases
 
 
-def ParseCommandLine():
+def parse_command_line():
     # arg parse
-    descr = '''A small utility that build a 3DTiles temporal tileset out of 
+    descr = '''A small utility that build a 3DTiles temporal Tileset out of 
                - temporal data of the buildings
                - the content of a 3DCityDB databases.'''
     parser = argparse.ArgumentParser(description=descr)
@@ -92,9 +94,11 @@ def create_tile_content(cursors, buildings, offset):
             continue
         building_database_ids = tuple(
             [building.get_database_id() for building in yearly_buildings])
-        arrays.extend(retrieve_geometries(cursors[time_stamp],
-                                          building_database_ids,
-                                          offset))
+        arrays.extend(CityMCityObjects.retrieve_geometries(
+            cursors[time_stamp],
+            building_database_ids,
+            offset,
+            CityMBuildings))
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -218,7 +222,7 @@ def from_3dcitydb(cursors, buildings):
     return tileset
 
 
-def combine_nodes_with_buildings_from_3dcitydb(graph, cursors):
+def combine_nodes_with_buildings_from_3dcitydb(graph, cursors, cli_args):
     # ######## Convert the nodes to buildings (optimization purpose)
     # Constructing the pre-tiling stage (i.e. sorting out the cityGML objects
     # in a 2D-Tree used as input to the TileSet construction per-se, refer to
@@ -228,11 +232,11 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors):
     # dates). In order to avoid this possibly expensive matching, we create
     # temporal buildings and let from_3dcitydb() decorate those objects with
     # the information it extracts from the database:
-    resulting_buildings = Buildings()
+    resulting_buildings = CityMCityObjects()
     for index, time_stamp in enumerate(cli_args.time_stamps):
         cursor = cursors[index]
         nodes = graph.get_nodes_with_time_stamp(time_stamp)
-        buildings = Buildings()
+        buildings = CityMCityObjects()
         for node in nodes:
             new_building = TemporalBuilding()
             new_building.set_start_date(node.get_start_date())
@@ -242,15 +246,16 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors):
             buildings.append(new_building)
         if not buildings:
             continue
-        extracted_buildings = get_buildings_from_3dcitydb(cursor, buildings)
-        resulting_buildings.extend(extracted_buildings.buildings)
+        extracted_buildings = CityMCityObjects.retrieve_objects(
+            cursor, CityMBuildings, buildings)
+        resulting_buildings.extend(extracted_buildings.get_city_objects())
     return resulting_buildings
 
 
 def build_temporal_tile_set(graph):
     # ####### We are left with transposing the information carried by the
     # graph edges to transactions
-    debug_msg(f'  Creating transactions')
+    debug_msg('  Creating transactions')
     temporal_tile_set = TemporalTileSet()
     for edge in graph.edges:
         if not edge.is_modified():
@@ -259,14 +264,12 @@ def build_temporal_tile_set(graph):
             continue
         ancestor = edge.get_ancestor()
         descendant = edge.get_descendant()
-        transaction = TemporalTransaction()
-        transaction.set_id('dummy_id_for_modified_edge_case')
+        transaction = TemporalPrimaryTransaction()
         transaction.set_start_date(ancestor.get_end_date())
         transaction.set_end_date(descendant.get_start_date())
-        transaction.set_type('replace')
-        transaction.append_tag('modified')
-        transaction.append_old_feature(ancestor.get_global_id())
-        transaction.append_new_feature(descendant.get_global_id())
+        transaction.set_type('modification')
+        transaction.append_source(ancestor.get_global_id())
+        transaction.append_destination(descendant.get_global_id())
         temporal_tile_set.append_transaction(transaction)
 
     # ######## Re-qualifying modified-fusion or modified-subdivision
@@ -294,37 +297,66 @@ def build_temporal_tile_set(graph):
             for descendant_edge in node.get_descendant_edges():
                 descendant_edge.append_tag(Edge.Tag.subdivided)
 
-    # ####### The fusion case
+    # ####### The union case
     for time_stamp in time_stamps:
         current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
         for node in current_nodes:
             if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
                 continue
 
-            transaction = TemporalTransaction()
-            transaction.set_id('dummy_id_for_fusion_node_case')
-            transaction.set_type('replace')
-            transaction.append_new_feature(node.get_global_id())
+            # At first we do _not_ know whether the resulting transaction will
+            # be a
+            #  - a simple PrimaryTransaction of union type
+            #  - or an TransactionAggregate nesting the above (simple case) of
+            #    fusion PrimaryTransaction together with another simple
+            #    PrimaryTransaction of modification type
+            # Note that when both PrimaryTransactions happen to exist we need
+            # the three created transactions (the two primary transactions
+            # with the transaction aggregate holding them) to share the same
+            # (redundant) information (that is the attributes of the base
+            # class that they share i.e. a TemporalTransaction).
+            # We thus make a first pass where on the one hand we collect the
+            # elements of the transaction(s) and on the other hand on the other
+            # decide which case we are facing.
+            aggregate_required = False
+            transaction_elements = TemporalTransaction()
+            transaction_elements.append_destination(node.get_global_id())
 
             if not node.do_all_ancestor_nodes_share_same_date():
-                debug_msg("Warning: fusion transaction surely erroneous...")
-                transaction.set_id('dummy_id_ERRONEOUS_fusion_node_case')
-            # We here make the assumption that all ancestor nodes all share
-            # the same deletion date for the following code to make sense:
+                debug_msg("Warning: union transaction surely erroneous...")
+            # We here make the assumption that all ancestor nodes are all
+            # sharing the same deletion date for the following code to make
+            # sense:
             some_ancestor = node.get_ancestors()[0]
-            transaction.set_start_date(some_ancestor.get_end_date())
-            transaction.set_end_date(node.get_start_date())
+            transaction_elements.set_start_date(some_ancestor.get_end_date())
+            transaction_elements.set_end_date(node.get_start_date())
 
-            transaction.append_tag('fusion')
             for ancestor in node.get_ancestors():
-                transaction.append_old_feature(ancestor.get_global_id())
+                transaction_elements.append_source(ancestor.get_global_id())
             for ancestor_edge in node.get_ancestor_edges():
                 if ancestor_edge.is_modified():
-                    transaction.set_id('dummy_id_for_fusion_modified_case')
-                    transaction.append_tag('modified')
+                    aggregate_required = True
                     break
 
-            temporal_tile_set.append_transaction(transaction)
+            # We can now wrap the collected elements into the ad-hoc
+            # transaction:
+            union_transaction = TemporalPrimaryTransaction()
+            union_transaction.replicate_from(transaction_elements)
+            union_transaction.set_type('union')
+
+            if not aggregate_required:
+                resulting_transaction = union_transaction
+            else:
+                resulting_transaction = TemporalTransactionAggregate()
+                resulting_transaction.replicate_from(transaction_elements)
+                resulting_transaction.append_transaction(union_transaction)
+                modification_transaction = TemporalPrimaryTransaction()
+                modification_transaction.replicate_from(transaction_elements)
+                modification_transaction.set_type('modification')
+                resulting_transaction.append_transaction(
+                                                     modification_transaction)
+            # And eventually attach the result to the the tile set
+            temporal_tile_set.append_transaction(resulting_transaction)
 
     # ####### The subdivision case
     for time_stamp in time_stamps:
@@ -333,38 +365,54 @@ def build_temporal_tile_set(graph):
             if not node.are_all_descendant_edges_of_type(Edge.Tag.subdivided):
                 continue
 
-            transaction = TemporalTransaction()
-            transaction.set_id('dummy_id_for_fusion_node_case')
-            transaction.set_type('replace')
-            transaction.append_old_feature(node.get_global_id())
+            # Refer to the above fusion case for comments concerning the
+            # algorithm logic used for creating the transaction(s):
+            aggregate_required = False
+            transaction_elements = TemporalTransaction()
+            transaction_elements.append_source(node.get_global_id())
 
             if not node.do_all_descendant_nodes_share_same_date():
                 debug_msg("Warning: erroneous subdivision transaction ?")
-                transaction.set_id('dummy_id_ERRONEOUS_subdivision_node_case')
             # We here make the assumption that all descendant nodes all share
             # the same deletion date for the following code to make sense:
             some_descendant = node.get_descendants()[0]
-            transaction.set_end_date(some_descendant.get_start_date())
-            transaction.set_start_date(node.get_end_date())
+            transaction_elements.set_end_date(some_descendant.get_start_date())
+            transaction_elements.set_start_date(node.get_end_date())
 
-            transaction.append_tag('subdivision')
             for descendant in node.get_descendants():
-                transaction.append_new_feature(descendant.get_global_id())
+                transaction_elements.append_destination(
+                                                    descendant.get_global_id())
 
             for descendant_edge in node.get_descendant_edges():
                 if descendant_edge.is_modified():
-                    transaction.set_id('dummy_id_for_division_modified_case')
-                    transaction.append_tag('modified')
+                    aggregate_required = True
                     break
 
-            temporal_tile_set.append_transaction(transaction)
+            # We can now wrap the collected elements into the ad-hoc
+            # transaction:
+            union_transaction = TemporalPrimaryTransaction()
+            union_transaction.replicate_from(transaction_elements)
+            union_transaction.set_type('division')
+
+            if not aggregate_required:
+                resulting_transaction = union_transaction
+            else:
+                resulting_transaction = TemporalTransactionAggregate()
+                resulting_transaction.replicate_from(transaction_elements)
+                resulting_transaction.append_transaction(union_transaction)
+                modification_transaction = TemporalPrimaryTransaction()
+                modification_transaction.replicate_from(transaction_elements)
+                modification_transaction.set_type('modification')
+                resulting_transaction.append_transaction(
+                                                     modification_transaction)
+            # And eventually attach the result to the the tile set
+            temporal_tile_set.append_transaction(resulting_transaction)
 
     return temporal_tile_set
 
 
-if __name__ == '__main__':
-
-    cli_args = ParseCommandLine()
+def main():
+    cli_args = parse_command_line()
 
     # #### Reconstruct the graph
     graph = TemporalGraph(cli_args)
@@ -391,7 +439,10 @@ if __name__ == '__main__':
     time_stamped_cursors = dict()
     for index in range(len(cursors)):
         time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
-    all_buildings = combine_nodes_with_buildings_from_3dcitydb(graph, cursors)
+    all_buildings = combine_nodes_with_buildings_from_3dcitydb(
+        graph,
+        cursors,
+        cli_args)
 
     # Construct the temporal tile set
     tile_set = from_3dcitydb(time_stamped_cursors, all_buildings)
@@ -406,3 +457,5 @@ if __name__ == '__main__':
 
     tile_set.write_to_directory('junk')
 
+if __name__ == '__main__':
+    main()

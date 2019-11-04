@@ -177,8 +177,8 @@ def main():
     """
     :return: no return value
 
-    this function creates a repository name "junk_object_type" where the tileset is
-    stored.
+    this function creates a repository name "junk_object_type" where the
+    tileset is stored.
     """
     args = parse_command_line()
     cursor = open_data_base(args.db_config_path)

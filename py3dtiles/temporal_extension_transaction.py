@@ -1,22 +1,46 @@
 # -*- coding: utf-8 -*-
 import sys
-from abc import ABC
+import copy
 from .threedtiles_notion import ThreeDTilesNotion
 
-
-class TemporalTransaction(ABC, ThreeDTilesNotion):
+class TemporalTransaction(ThreeDTilesNotion):
     """
     Temporal Transaction is an element of the Temporal TileSet extension.
     """
+    # Total number of created transactions (as opposed to existing transactions
+    # the difference being that the counter doesn't take into account the
+    # deleted transactions)
+    transactions_counter = 0
+
     def __init__(self):
         ThreeDTilesNotion.__init__(self)
 
-        self.attributes['id'] = None
+        # The identifier is defaulted with a value handled by the class.
+        # Yet the identifier is only handled partially by the class since
+        # its value can be overwritten (and without warning in doing so)
+        self.attributes['id'] = str(TemporalTransaction.transactions_counter)
+        TemporalTransaction.transactions_counter += 1
         self.attributes['startDate'] = None
         self.attributes['endDate'] = None
         self.attributes['tags'] = list()
         self.attributes['source'] = list()
         self.attributes['destination'] = list()
+
+    def define_attributes(self):
+        print('This method should have been overloaded in derived class !')
+        sys.exit(1)
+
+    def replicate_from(self, to_be_replicated):
+        """
+        Overwrite the attributes of this object with the ones of the given
+        (argument) object.
+        :param to_be_replicated: the object attributes that must be replicated
+                                 to the ones of self.
+        """
+        self.attributes = copy.deepcopy(to_be_replicated.attributes)
+        # Because the attributes were overwritten we must redefine the
+        # derived class(es) attributes
+        self.define_attributes()
 
     def set_id(self, identifier):
         self.attributes['id'] = identifier

@@ -10,7 +10,9 @@ class TemporalTransactionAggregate(TemporalTransaction):
     """
     def __init__(self):
         TemporalTransaction.__init__(self)
+        self.define_attributes()
 
+    def define_attributes(self):
         self.attributes['transactions'] = list()
 
     def set_transactions(self, transactions):

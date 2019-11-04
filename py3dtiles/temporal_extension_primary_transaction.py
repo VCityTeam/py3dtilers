@@ -9,7 +9,9 @@ class TemporalPrimaryTransaction(TemporalTransaction):
     """
     def __init__(self):
         TemporalTransaction.__init__(self)
+        self.define_attributes()
 
+    def define_attributes(self):
         self.attributes['type'] = None
 
     def set_type(self, new_type):

@@ -26,10 +26,7 @@ class Test_TemporalPrimaryTransaction(unittest.TestCase):
         """
         tt = TemporalPrimaryTransaction()
         base_transaction = Test_TemporalTransaction.build_sample()
-        # Copy the base class (sample) object within the sample we build. Note
-        # that shallow copy is enough because the base case _sample_ has no
-        # nested attribute values.
-        tt.__dict__ = dict(base_transaction.__dict__)
+        tt.replicate_from(base_transaction)
 
         tt.set_type("creation")
 
