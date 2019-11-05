@@ -200,27 +200,27 @@ class CityMCityObjects:
         pass
 
     @staticmethod
-    def retrieve_geometries(cursor, cityobject_ids, offset, objects_type):
+    def retrieve_geometries(cursor, city_object_ids, offset, objects_type):
         """
         :param cursor: a database access cursor
-        :param cityobject_ids: a list of (city)gml identifier corresponding to objects_type type
-                            objects whose geometries are sought.
+        :param city_object_ids: a list of (city)gml identifier corresponding to
+                       objects_type type objects whose geometries are sought.
         :param offset: the offset (a 3D "vector" of floats) by which the
                        geographical coordinates should be translated (the
                        computation is done at the GIS level).
         :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
-
-        :rtype: a TileContent in the form a B3dm.
+        :rtype List[Dict]: a TileContent in the form a B3dm.
         """
-        cityobject_ids_arg = str(cityobject_ids).replace(',)', ')')
+        city_object_ids_arg = str(city_object_ids).replace(',)', ')')
 
-        cursor.execute(objects_type.sql_query_geometries(offset, cityobject_ids_arg))
+        cursor.execute(objects_type.sql_query_geometries(offset,
+                                                         city_object_ids_arg))
 
         # Deal with the reordering of the retrieved geometries
-        cityobjects_with_gmlid_key = dict()
+        city_objects_with_gmlid_key = dict()
         for t in cursor.fetchall():
-            cityobject_root_id = t[0]
+            city_object_root_id = t[0]
             geom_as_string = t[1]
             if geom_as_string is None:
                 # Some thematic surface may have no geometry (due to a cityGML
@@ -229,15 +229,15 @@ class CityMCityObjects:
                 sys.exit(1)
             geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
             if len(geom.triangles[0]) == 0:
-                print("Warning: empty geometry (no geometry) from the database.")
+                print("Warning: empty (no) geometry from the database.")
                 sys.exit(1)
-            cityobjects_with_gmlid_key[cityobject_root_id] = geom
+            city_objects_with_gmlid_key[city_object_root_id] = geom
 
         # Package the geometries within a data structure that the
         # GlTF.from_binary_arrays() function (see below) expects to consume:
         arrays = []
-        for incoming_id in cityobject_ids:
-            geom = cityobjects_with_gmlid_key[incoming_id]
+        for incoming_id in city_object_ids:
+            geom = city_objects_with_gmlid_key[incoming_id]
             arrays.append({
                 'position': geom.getPositionArray(),
                 'normal': geom.getNormalArray(),

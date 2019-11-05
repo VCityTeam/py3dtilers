@@ -2,7 +2,6 @@ import argparse
 import numpy as np
 import sys
 
-from kd_tree import kd_tree
 from py3dtiles import B3dm, GlTF, Tile
 from py3dtiles import BatchTable, TemporalBatchTable
 from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
@@ -17,7 +16,9 @@ from temporal_building import TemporalBuilding
 
 from citym_cityobject import CityMCityObjects
 from citym_building import CityMBuildings
+
 from database_accesses import open_data_bases
+from kd_tree import kd_tree
 
 
 def parse_command_line():
@@ -427,9 +428,9 @@ def main():
     # Just making sure the time stamps information is coherent between
     # their two sources that is the set of difference files and the command
     # line arguments
-    cli_time_stamps_as_ints = [ int(ts) for ts in cli_args.time_stamps]
+    cli_time_stamps_as_ints = [int(ts) for ts in cli_args.time_stamps]
     for extracted_time_stamp in graph.extract_time_stamps():
-        if not extracted_time_stamp in cli_time_stamps_as_ints:
+        if extracted_time_stamp not in cli_time_stamps_as_ints:
             print('Command line and difference files time stamps not aligned.')
             print("Exiting")
             sys.exit(1)
@@ -446,16 +447,18 @@ def main():
 
     # Construct the temporal tile set
     tile_set = from_3dcitydb(time_stamped_cursors, all_buildings)
-    [cursor.close() for cursor in cursors] # We are done with the databases
+    [cursor.close() for cursor in cursors]  # We are done with the databases
 
     tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+    tile_set.get_root_tile().get_bounding_volume().add_extension(
+                                                      TemporalBoundingVolume())
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = build_temporal_tile_set(graph)
     tile_set.add_extension(temporal_tile_set)
 
     tile_set.write_to_directory('junk')
+
 
 if __name__ == '__main__':
     main()
