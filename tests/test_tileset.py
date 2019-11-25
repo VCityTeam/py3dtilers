@@ -26,6 +26,10 @@ class Test_TileSet(unittest.TestCase):
         root_tile = Tile()
         root_tile.set_bounding_volume(bounding_volume)
         root_tile.set_geometric_error(3.14159)
+        # Setting the mode to the default mode does not really change things.
+        # The following line is thus just here ot test the "callability" of
+        # set_refine_mode():
+        root_tile.set_refine_mode('ADD')
         tile_set.set_root_tile(root_tile)
         #FIXME bt.add_property_from_array("id",
         #FIXME                           ["unique id", "another unique id"])

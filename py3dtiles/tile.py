@@ -53,15 +53,21 @@ class Tile(ThreeDTilesNotion):
         self.attributes["geometricError"] = error
 
     def set_content_uri(self, uri):
-        if not 'content' in self.attributes:
+        if 'content' not in self.attributes:
             self.set_content (TileContent())
         self.attributes["content"].set_uri(uri)
 
     def get_content_uri(self):
-        if not 'content' in self.attributes:
+        if 'content' not in self.attributes:
             print('Tile with unset content.')
             sys.exit(1)
         return self.attributes["content"].get_uri()
+
+    def set_refine_mode(self, mode):
+        if mode != 'ADD' and mode != 'REPLACE':
+            print(f'Unknown refinement mode {mode}.')
+            sys.exit(1)
+        self.attributes["refine"] = mode
 
     def add_child(self, tile):
         self.attributes["children"].append(tile)
