@@ -104,7 +104,7 @@ def from_3dcitydb(cursor, objects_type):
         raise ValueError(f'The database does not contain any {objects_type} object')
 
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(cityobjects, 200)
+    pre_tiles = kd_tree(cityobjects, 100000)
 
     tileset = TileSet()
     for tile_cityobjects in pre_tiles:
