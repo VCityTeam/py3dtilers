@@ -139,7 +139,7 @@ def from_3dcitydb(cursors, buildings):
     """
     # Lump out buildings in pre_tiles based on a 2D-Tree technique:
     debug_msg_ne('2D-Tree sorting: launching')
-    pre_tiles = kd_tree(buildings, 200)
+    pre_tiles = kd_tree(buildings, 100000)
     debug_msg('2D-Tree sorting: done.    ')
 
     tileset = TileSet()
