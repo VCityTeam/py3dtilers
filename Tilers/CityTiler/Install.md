@@ -27,9 +27,9 @@
 You can customize the [CityTilerDBConfigReference.yml](CityTilerDBConfigReference.yml) reference file:
 ```
 (venv) pushd Tilers/CityTiler
-(venv) cp CityTilerDBConfigReference.yml CityTilerDBMyConfig.yml
+(venv) cp CityTilerDBConfigReference.yml CityTilerDBConfig.yml
 ```
-Edit `CityTilerDBMyConfig.yml` and proceed with the configuration specification
+Edit `CityTilerDBConfig.yml` and proceed with the configuration specification
 by giving the information required to access the 3DCityDB. 
 Change working directory back to home of py3dtiles git clone
 ``` 
