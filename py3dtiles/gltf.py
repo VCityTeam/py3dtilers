@@ -207,8 +207,8 @@ def compute_header(binVertices, nVertices, bb, transform,
             'byteOffset': sum(sizeVce[0:i]),
             'componentType': 5126,
             'count': nVertices[i],
-            'max': [bb[i][0][1], bb[i][0][2], bb[i][0][0]],
-            'min': [bb[i][1][1], bb[i][1][2], bb[i][1][0]],
+            'min': [bb[i][0][0], bb[i][0][1], bb[i][0][2]],
+            'max': [bb[i][1][0], bb[i][1][1], bb[i][1][2]],
             'type': "VEC3"
         })
         # normals
