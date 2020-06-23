@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from py3dtiles import B3dm, GlTF, TriangleSoup, TileSet, Tile
+from py3dtiles import B3dm, BoundingVolumeBox, GlTF, TriangleSoup, TileSet, Tile
 
 
 class TestTileBuilder(unittest.TestCase, object):
@@ -99,6 +99,7 @@ class TestTileBuilder(unittest.TestCase, object):
                                 0, 0, 1, 0,
                                 1841276.4464434995, 5172616.229383407, 0, 1])
 
-        tile_set.set_root_tile(tile)
+        tile_set.add_tile(tile)
         tile_set.add_asset_extras("Py3dTiles TestTileBuilder example.")
+        tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tile_set.write_to_directory('junk')
