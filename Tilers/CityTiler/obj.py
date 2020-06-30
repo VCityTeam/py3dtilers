@@ -29,16 +29,39 @@ class Obj(object):
         return self.box
 
 
-    def parse_geom(self,geom):
-        vertices = geom.vertices
+    def parse_geom(self,path):
+        
+        geom = pywavefront.Wavefront(path, collect_faces = True)
+        box_max = [None,None,None]
+        box_min = [None,None,None]
+
+        triangles = []
+
         for mesh in geom.mesh_list:    
             for face in mesh.faces:
-                triangle = []
-                triangle.append(np.array(vertices[face[0]], dtype=np.float32))
-                triangle.append(np.array(vertices[face[1]], dtype=np.float32))
-                triangle.append(np.array(vertices[face[2]], dtype=np.float32))
-                self.geom.append(triangle) 
-        #create box and centroid        
+                for i in range(0,3): #On récupère les 3 sommets indiqués par chaque face
+                    triangles.append(np.array(geom.vertices[face[i]], dtype=np.float32))
+                    for j in range(0,3): #On récupère la boite englobante de la géométrie
+                        if(box_max[j] == None):
+                            box_max[j] = geom.vertices[face[i]][j]
+                            box_min[j] = geom.vertices[face[i]][j]
+                        elif(box_min[j] > geom.vertices[face[i]][j]):
+                            box_min[j] = geom.vertices[face[i]][j]
+                        elif(box_max[j] < geom.vertices[face[i]][j]):
+                            box_max[j] = geom.vertices[face[i]][j]
+                           
+        self.box = BoundingVolumeBox()
+        self.box.set_from_mins_maxs([box_max[0],box_max[1],box_max[2],box_min[0],box_min[1],box_min[2]])
+
+        self.centroid = [(box_max[0] + box_min[0]) / 2.0,
+                         (box_max[1] + box_min[1]) / 2.0,
+                         (box_max[2] + box_min[2]) / 2.0]
+        self.geom.append(triangles)
+             
+         
+
+
+        
 
 
     def getPositionArray(self):
@@ -90,3 +113,4 @@ def faceAttributeToArray(triangles):
     for face in triangles:
         array += [face, face, face]
     return array
+

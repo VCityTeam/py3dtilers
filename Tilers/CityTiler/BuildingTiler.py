@@ -8,13 +8,6 @@ from os.path import isfile, join
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from kd_tree import kd_tree
-from citym_cityobject import CityMCityObjects
-from citym_building import CityMBuildings
-from citym_relief import CityMReliefs
-from citym_waterbody import CityMWaterBodies
-from database_accesses import open_data_base
-from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 from obj import Obj
 
 def parse_command_line():
@@ -66,31 +59,65 @@ def create_tile_content(objects_with_id_key,pre_tile):
     return B3dm.from_glTF(gltf, bt)
 
 
+def kd_tree(objs, maxNumobj, depth=0):
+    # The module argument of 2 (in the next line) hard-wires the fact that
+    # this kd_tree is in fact a 2D_tree.
+    axis = depth % 2
+
+    # Within the sorting criteria point[1] refers to the centroid of the
+    # bounding boxes of the city objects. And thus, depending on the value of
+    # axis, we alternatively sort on the X or Y coordinate of those centroids:
+    sObjs = sorted(objs, key=lambda building: building.get_centroid()[axis])
+    median = len(sObjs) // 2
+    lObjs = sObjs[:median]
+    rObjs = sObjs[median:]
+    pre_tiles = []
+    if len(lObjs) > maxNumobj:
+        pre_tiles.extend(kd_tree(lObjs, maxNumobj, depth + 1))
+        pre_tiles.extend(kd_tree(rObjs, maxNumobj, depth + 1))
+    else:
+        pre_tiles.append(lObjs)
+        pre_tiles.append(rObjs)
+    return pre_tiles
+
+
 def from_objs_directory(path):    
     
     objects_with_ifc_key = dict()
         
     obj_rep = listdir(path)
+    i = 0
     for obj_file in obj_rep:
         id = obj_file.replace('.obj','')
-
         obj = Obj(id)
-        obj.parse_geom(pywavefront.Wavefront(path + "/" + obj_file, collect_faces = True))
-        objects_with_ifc_key[id] = obj 
-        break
+        obj.parse_geom(path + "/" + obj_file)
+        objects_with_ifc_key[id] = obj
+        i+= 1
+        if (i > 4):
+            break #test avec une geom
     
+    kd_tree(objects_with_ifc_key,4)
     #kd_tree avec tile par id 
          
          
     tileset = TileSet()
+
+    #pour chaque id dans une tile
     tile = Tile()  
     tile.set_geometric_error(500)
 
     tile_content_b3dm = create_tile_content(objects_with_ifc_key,tile)
-
-    
-    
     tile.set_content(tile_content_b3dm)
+    
+    bounding_box = BoundingVolumeBox()
+    # for obj in pre_tile:
+    #     bounding_box.add(obj.get_bouding_volume_box()) 
+    
+
+
+    tileset.add_tile(tile)
+
+
     return TileSet()
 
 
