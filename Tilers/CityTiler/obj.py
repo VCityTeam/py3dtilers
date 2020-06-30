@@ -17,10 +17,10 @@ class Obj(object):
         self.id = ifc_id if ifc_id else None   
 
     def set_id(self, id):
-        self.database_id = id
+        self.id = id
 
     def get_id(self):
-        return self.database_id
+        return self.id
 
     def get_centroid(self):
         return self.centroid

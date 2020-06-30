@@ -27,11 +27,10 @@ def parse_command_line():
 
 
 
-def create_tile_content(objects_with_id_key,pre_tile):
+def create_tile_content(pre_tile):
     #create B3DM content
     arrays = []
-    for id in pre_tile:
-        obj = objects_with_id_key[id]
+    for obj in pre_tile:
         arrays.append({
             'position': obj.getPositionArray(),
             'normal': obj.getNormalArray(),
@@ -49,9 +48,9 @@ def create_tile_content(objects_with_id_key,pre_tile):
                        0, 0,  0, 1])
     
     gltf = GlTF.from_binary_arrays(arrays, transform)
-    
+    ids = [obj.get_id() for obj in pre_tile]
     bt = BatchTable()
-    bt.add_property_from_array("ifc.id", pre_tile)
+    bt.add_property_from_array("ifc.id", ids)
 
     # bth = create_batch_table_hierarchy(ids)
     # bt.add_extension(bth)
@@ -67,7 +66,7 @@ def kd_tree(objs, maxNumobj, depth=0):
     # Within the sorting criteria point[1] refers to the centroid of the
     # bounding boxes of the city objects. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
-    sObjs = sorted(objs, key=lambda building: building.get_centroid()[axis])
+    sObjs = sorted(objs, key=lambda obj: obj.get_centroid()[axis])
     median = len(sObjs) // 2
     lObjs = sObjs[:median]
     rObjs = sObjs[median:]
@@ -83,7 +82,7 @@ def kd_tree(objs, maxNumobj, depth=0):
 
 def from_objs_directory(path):    
     
-    objects_with_ifc_key = dict()
+    objects = []
         
     obj_rep = listdir(path)
     i = 0
@@ -91,34 +90,33 @@ def from_objs_directory(path):
         id = obj_file.replace('.obj','')
         obj = Obj(id)
         obj.parse_geom(path + "/" + obj_file)
-        objects_with_ifc_key[id] = obj
+        objects.append(obj)
         i+= 1
         if (i > 4):
             break #test avec une geom
     
-    kd_tree(objects_with_ifc_key,4)
+    pre_tileset = kd_tree(objects,4)
     #kd_tree avec tile par id 
          
          
     tileset = TileSet()
 
     #pour chaque id dans une tile
-    tile = Tile()  
-    tile.set_geometric_error(500)
+    for pre_tile in pre_tileset:
+        tile = Tile()  
+        tile.set_geometric_error(500)
 
-    tile_content_b3dm = create_tile_content(objects_with_ifc_key,tile)
-    tile.set_content(tile_content_b3dm)
-    
-    bounding_box = BoundingVolumeBox()
-    # for obj in pre_tile:
-    #     bounding_box.add(obj.get_bouding_volume_box()) 
-    
+        tile_content_b3dm = create_tile_content(pre_tile)
+        tile.set_content(tile_content_b3dm)
+        
+        bounding_box = BoundingVolumeBox()
+        for obj in pre_tile:
+            bounding_box.add(obj.get_bounding_volume_box()) 
+        tile.set_bounding_volume(bounding_box)
+        tileset.add_tile(tile)
 
 
-    tileset.add_tile(tile)
-
-
-    return TileSet()
+    return tileset
 
 
 def main():
