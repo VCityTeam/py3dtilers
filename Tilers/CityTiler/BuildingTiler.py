@@ -92,10 +92,8 @@ def from_objs_directory(path):
         obj.parse_geom(path + "/" + obj_file)
         objects.append(obj)
         i+= 1
-        if (i > 4):
-            break #test avec une geom
     
-    pre_tileset = kd_tree(objects,4)
+    pre_tileset = kd_tree(objects,50)
     #kd_tree avec tile par id 
          
          
