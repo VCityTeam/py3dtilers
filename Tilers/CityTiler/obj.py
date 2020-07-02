@@ -35,10 +35,10 @@ class Obj(object):
         box_max = [None,None,None]
         box_min = [None,None,None]
 
-        triangles = []
 
         for mesh in geom.mesh_list:    
             for face in mesh.faces:
+                triangles = []
                 for i in range(0,3): #On récupère les 3 sommets indiqués par chaque face
                     triangles.append(np.array(geom.vertices[face[i]], dtype=np.float32))
                     for j in range(0,3): #On récupère la boite englobante de la géométrie
@@ -49,14 +49,14 @@ class Obj(object):
                             box_min[j] = geom.vertices[face[i]][j]
                         elif(box_max[j] < geom.vertices[face[i]][j]):
                             box_max[j] = geom.vertices[face[i]][j]
-                           
+                self.geom.append(triangles)
+
         self.box = BoundingVolumeBox()
         self.box.set_from_mins_maxs([box_max[0],box_max[1],box_max[2],box_min[0],box_min[1],box_min[2]])
 
         self.centroid = [(box_max[0] + box_min[0]) / 2.0,
                          (box_max[1] + box_min[1]) / 2.0,
                          (box_max[2] + box_min[2]) / 2.0]
-        self.geom.append(triangles)
              
          
 

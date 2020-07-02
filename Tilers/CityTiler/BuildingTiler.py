@@ -29,6 +29,8 @@ def parse_command_line():
 
 def create_tile_content(pre_tile):
     #create B3DM content
+    ids = [obj.get_id() for obj in pre_tile]
+
     arrays = []
     for obj in pre_tile:
         arrays.append({
@@ -48,7 +50,9 @@ def create_tile_content(pre_tile):
                        0, 0,  0, 1])
     
     gltf = GlTF.from_binary_arrays(arrays, transform)
-    ids = [obj.get_id() for obj in pre_tile]
+    
+    
+    
     bt = BatchTable()
     bt.add_property_from_array("ifc.id", ids)
 
@@ -85,17 +89,15 @@ def from_objs_directory(path):
     objects = []
         
     obj_rep = listdir(path)
-    i = 0
+
     for obj_file in obj_rep:
         id = obj_file.replace('.obj','')
         obj = Obj(id)
         obj.parse_geom(path + "/" + obj_file)
         objects.append(obj)
-        i+= 1
+
     
-    pre_tileset = kd_tree(objects,50)
-    #kd_tree avec tile par id 
-         
+    pre_tileset = kd_tree(objects,100)        
          
     tileset = TileSet()
 
@@ -130,11 +132,10 @@ def main():
     ifc_rep = listdir(mypath)
 
     for ifc_class_rep in ifc_rep:
-
-        tileset = from_objs_directory(mypath + ifc_class_rep)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-        tileset.write_to_directory('junk_obj')
-        break
+        if (ifc_class_rep == 'IfcWall'):    
+            tileset = from_objs_directory(mypath + ifc_class_rep)
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            tileset.write_to_directory('junk_obj')
 
     #tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 
