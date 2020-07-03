@@ -83,6 +83,22 @@ def kd_tree(objs, maxNumobj, depth=0):
         pre_tiles.append(rObjs)
     return pre_tiles
 
+def get_centroid_tileset(objects):
+    for obj in objects:
+        centroid_tileset += obj.get_centroid()
+
+    centroid_tileset /= objects.len
+
+    return centroid_tileset        
+
+def translate_tileset(objects,centroid_tileset):
+    for obj in objects:
+        for triangle in obj.get_geom():
+            for points in triangle
+                points -= centroid_tileset
+
+
+
 
 def from_objs_directory(path):    
     
@@ -98,17 +114,20 @@ def from_objs_directory(path):
 
     
     pre_tileset = kd_tree(objects,100)        
-         
+    centroid_tileset = get_centroid_tileset(objects)  
+    translate_tileset(objects,centroid_tileset)       
     tileset = TileSet()
 
-    #pour chaque id dans une tile
     for pre_tile in pre_tileset:
         tile = Tile()  
         tile.set_geometric_error(500)
 
         tile_content_b3dm = create_tile_content(pre_tile)
         tile.set_content(tile_content_b3dm)
-        
+        tile.set_transform([1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2], 1])
         bounding_box = BoundingVolumeBox()
         for obj in pre_tile:
             bounding_box.add(obj.get_bounding_volume_box()) 
@@ -135,7 +154,7 @@ def main():
         if (ifc_class_rep == 'IfcWall'):    
             tileset = from_objs_directory(mypath + ifc_class_rep)
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-            tileset.write_to_directory('junk_obj')
+            tileset.write_to_directory(ifc_class_rep)
 
     #tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 

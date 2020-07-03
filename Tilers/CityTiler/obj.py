@@ -28,6 +28,11 @@ class Obj(object):
     def get_bounding_volume_box(self):
         return self.box
 
+    def get_geom(self):
+        return self.geom
+
+    def set_geom(self,geom):
+        self.geom = geom
 
     def parse_geom(self,path):
         
