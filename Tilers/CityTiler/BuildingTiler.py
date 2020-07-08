@@ -39,15 +39,15 @@ def create_tile_content(pre_tile):
             'bbox': [[float(i) for i in j] for j in obj.getBbox()]
         })
     
-    # transform = np.array([1, 0,  0, 0,
-    #                   0, 0, -1, 0,
-    #                   0, 1,  0, 0,
-    #                   0, 0,  0, 1])
-    
     transform = np.array([1, 0,  0, 0,
-                       0, 1, 0, 0,
-                       0, 0,  1, 0,
-                       0, 0,  0, 1])
+                      0, 0, -1, 0,
+                      0, 1,  0, 0,
+                      0, 0,  0, 1])
+    
+    # transform = np.array([1, 0,  0, 0,
+                    #    0, 1, 0, 0,
+                    #    0, 0,  1, 0,
+                    #    0, 0,  0, 1])
     
     gltf = GlTF.from_binary_arrays(arrays, transform)
     
@@ -84,18 +84,31 @@ def kd_tree(objs, maxNumobj, depth=0):
     return pre_tiles
 
 def get_centroid_tileset(objects):
+    centroid_tileset = np.array([0.,0.,0.])
     for obj in objects:
         centroid_tileset += obj.get_centroid()
 
-    centroid_tileset /= objects.len
+    centroid_tileset /= len(objects)
 
     return centroid_tileset        
 
+# def translate_tileset(objects,centroid_tileset):
+#     for obj in objects:
+#         for triangle in obj.get_geom():
+#             for points in triangle:
+#                 points -= centroid_tileset
+#         obj.set_bbox()
+
 def translate_tileset(objects,centroid_tileset):
     for obj in objects:
+        new_geom = []
         for triangle in obj.get_geom():
-            for points in triangle
-                points -= centroid_tileset
+            new_position = []
+            for points in triangle:
+                new_position.append(np.array(points - centroid_tileset, dtype=np.float32))
+            new_geom.append(new_position)
+        obj.set_geom(new_geom)
+        obj.set_bbox()
 
 
 
@@ -105,15 +118,17 @@ def from_objs_directory(path):
     objects = []
         
     obj_rep = listdir(path)
-
+    print(str(len(obj_rep)) + " .obj to parse")
     for obj_file in obj_rep:
         id = obj_file.replace('.obj','')
         obj = Obj(id)
-        obj.parse_geom(path + "/" + obj_file)
-        objects.append(obj)
+        if(obj.parse_geom(path + "/" + obj_file)):
+            objects.append(obj)
 
-    
-    pre_tileset = kd_tree(objects,100)        
+    if(len(objects) == 0):
+        return None
+
+    pre_tileset = kd_tree(objects,200)        
     centroid_tileset = get_centroid_tileset(objects)  
     translate_tileset(objects,centroid_tileset)       
     tileset = TileSet()
@@ -127,8 +142,9 @@ def from_objs_directory(path):
         tile.set_transform([1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
-                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2], 1])
+                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2] + 310, 1])
         bounding_box = BoundingVolumeBox()
+        
         for obj in pre_tile:
             bounding_box.add(obj.get_bounding_volume_box()) 
         tile.set_bounding_volume(bounding_box)
@@ -149,12 +165,18 @@ def main():
     
     mypath = args.objs_path
     ifc_rep = listdir(mypath)
-
+    ifc_classes = ""
     for ifc_class_rep in ifc_rep:
-        if (ifc_class_rep == 'IfcWall'):    
-            tileset = from_objs_directory(mypath + ifc_class_rep)
+        print("Writing " + ifc_class_rep )
+        tileset = from_objs_directory(mypath + ifc_class_rep)
+        if(tileset != None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-            tileset.write_to_directory(ifc_class_rep)
+            tileset.write_to_directory("ifc_tilesets/"+ifc_class_rep)
+            ifc_classes+= ifc_class_rep + ";"
+
+    f = open("ifc_tilesets/classes.txt","w")
+    f.write(ifc_classes)
+    f.close()    
 
     #tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 

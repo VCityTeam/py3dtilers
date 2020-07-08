@@ -11,7 +11,6 @@ class Obj(object):
         self.geom = list()
 
         self.box = None
-
         self.centroid = None
 
         self.id = ifc_id if ifc_id else None   
@@ -37,37 +36,25 @@ class Obj(object):
     def parse_geom(self,path):
         
         geom = pywavefront.Wavefront(path, collect_faces = True)
-        box_max = [None,None,None]
-        box_min = [None,None,None]
-
+        if(len(geom.vertices)==0):
+            return False
 
         for mesh in geom.mesh_list:    
             for face in mesh.faces:
                 triangles = []
                 for i in range(0,3): #On récupère les 3 sommets indiqués par chaque face
-                    triangles.append(np.array(geom.vertices[face[i]], dtype=np.float32))
-                    for j in range(0,3): #On récupère la boite englobante de la géométrie
-                        if(box_max[j] == None):
-                            box_max[j] = geom.vertices[face[i]][j]
-                            box_min[j] = geom.vertices[face[i]][j]
-                        elif(box_min[j] > geom.vertices[face[i]][j]):
-                            box_min[j] = geom.vertices[face[i]][j]
-                        elif(box_max[j] < geom.vertices[face[i]][j]):
-                            box_max[j] = geom.vertices[face[i]][j]
+                    triangles.append(np.array(geom.vertices[face[i]], dtype=np.float64))
                 self.geom.append(triangles)
-
+        self.set_bbox()
+        return True
+    
+    def set_bbox(self):
+        bbox = self.getBbox()
         self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs([box_max[0],box_max[1],box_max[2],box_min[0],box_min[1],box_min[2]])
-
-        self.centroid = [(box_max[0] + box_min[0]) / 2.0,
-                         (box_max[1] + box_min[1]) / 2.0,
-                         (box_max[2] + box_min[2]) / 2.0]
-             
-         
-
-
-        
-
+        self.box.set_from_mins_maxs(np.append(bbox[0],bbox[1]))
+        self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
+                         (bbox[0][1] + bbox[1][1]) / 2.0,
+                         (bbox[0][2] + bbox[0][2]) / 2.0])
 
     def getPositionArray(self):
         array = []
@@ -111,7 +98,6 @@ class Obj(object):
         mins = np.array([np.min(t, 0) for t in self.geom])
         maxs = np.array([np.max(t, 0) for t in self.geom])
         return [np.min(mins, 0), np.max(maxs, 0)]
-
 
 def faceAttributeToArray(triangles):
     array = []
