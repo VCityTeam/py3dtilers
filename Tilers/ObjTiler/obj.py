@@ -36,7 +36,8 @@ class Obj(object):
     def parse_geom(self,path):
         # Realize the geometry conversion from OBJ to GLTF
         # The geometry is described in an obj file by writting vertices position 
-        # and writting triangles using vertex indices (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+        # and writting triangles using vertex indices 
+        # (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
         # i.e something in the form :
         # v 0.0 0.0 0.0
         # v 0.5 0.5 0.5
@@ -64,8 +65,10 @@ class Obj(object):
         for mesh in geom.mesh_list:    
             for face in mesh.faces:
                 triangles = []
-                for i in range(0,3): # We store each position for each triangles, as GLTF expect
-                    triangles.append(np.array(geom.vertices[face[i]], dtype=np.float64))
+                for i in range(0,3): 
+                    # We store each position for each triangles, as GLTF expect
+                    triangles.append(np.array(geom.vertices[face[i]],
+                        dtype=np.float64))
                 self.geom.append(triangles)
 
         self.set_bbox()

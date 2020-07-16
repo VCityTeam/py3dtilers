@@ -21,12 +21,13 @@ def parse_command_line():
     # adding positional arguments
     parser.add_argument('objs_path',
                         nargs='?',
-                        type=str,  # why precise this if it is the default config ?
+                        type=str,  
                         help='path to the database configuration file')
 
     result = parser.parse_args()
     if(result.objs_path == None):
-        print("Please provide a path to a directory containing some obj files or multiple directories")
+        print("Please provide a path to a directory " \
+                "containing some obj files or multiple directories")
         print("Exiting")
         sys.exit(1)
 
@@ -57,7 +58,7 @@ def create_tile_content(pre_tile):
     # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
     # client side when using (displaying) the data.
     # Refer to the note concerning the recommended data workflow
-    #    https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+    # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
     # for more details on this matter.
     transform = np.array([1, 0,  0, 0,
                       0, 0, -1, 0,
@@ -130,8 +131,8 @@ def translate_tileset(objects,offset):
         for triangle in obj.get_geom():
             new_position = []
             for points in triangle:
-                # Must to do this this way to ensure that the new position stays in float32
-                # Mandatory for writing the GLTF
+                # Must to do this this way to ensure that the new position 
+                # stays in float32, which is mandatory for writing the GLTF
                 new_position.append(np.array(points - offset, dtype=np.float32))
             new_geom.append(new_position)
         obj.set_geom(new_geom)
@@ -179,8 +180,9 @@ def from_obj_directory(path):
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
     pre_tileset = kd_tree(objects,200)       
 
-    # Get the centroid of the tileset and translate all of the obj by this centroid
-    # This centroid will be later added in the transform part of each tiles
+    # Get the centroid of the tileset and translate all of the obj 
+    # by this centroid
+    # which will be later added in the transform part of each tiles
     centroid = get_centroid_tileset(objects)  
     translate_tileset(objects,centroid)       
     
@@ -224,7 +226,7 @@ def main():
     this function creates either :
     - a repository named "obj_tileset" where the
     tileset is stored if the directory does only contains obj files.
-    - or a repository named "obj_tilesets" that contains all tilesets are stored,
+    - or a repository named "obj_tilesets" that contains all tilesets are stored
     created from sub_directories 
     and a classes.txt that contains the name of all tilesets
     """
@@ -241,14 +243,16 @@ def main():
                 tileset = from_obj_directory(dir_path)
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-                    tileset.write_to_directory(os.path.join("obj_tilesets",ifc_class_rep))
+                    tileset.write_to_directory(os.path.join("obj_tilesets",
+                        ifc_class_rep))
                     ifc_classes += ifc_class_rep + ";"
         if(ifc_classes != ""):
             f = open("obj_tilesets/classes.txt","w+")
             f.write(ifc_classes)
             f.close()    
         else:
-            print("Please provide a path to a directory containing some obj files or multiple directories")
+            print("lease provide a path to a directory containing " \
+                    "some obj files or multiple directories")
     else:
         tileset = from_obj_directory(mypath)
         if(tileset != None):
@@ -256,7 +260,8 @@ def main():
             print("Writing tileset")
             tileset.write_to_directory("obj_tileset/")   
         else:
-            print("Please provide a path to a directory containing some obj files or multiple directories")
+            print("Please provide a path to a directory containing some obj " \
+                "files or multiple directories")
 
 
 
