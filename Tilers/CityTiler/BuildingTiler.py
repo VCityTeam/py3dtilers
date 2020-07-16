@@ -1,7 +1,9 @@
 import argparse
 import numpy as np
 import pywavefront 
+import sys
 
+import os
 from os import listdir
 from os.path import isfile, join
 
@@ -19,9 +21,14 @@ def parse_command_line():
     # adding positional arguments
     parser.add_argument('objs_path',
                         nargs='?',
-                        default='CityTilerDBConfig.yml',
                         type=str,  # why precise this if it is the default config ?
                         help='path to the database configuration file')
+
+    result = parser.parse_args()
+    if(result.objs_path == None):
+        print("Please provide a path to a directory containing some obj files or multiple directories")
+        print("Exiting")
+        sys.exit(1)
 
     return parser.parse_args()
 
@@ -29,7 +36,6 @@ def parse_command_line():
 
 def create_tile_content(pre_tile):
     #create B3DM content
-    ids = [obj.get_id() for obj in pre_tile]
 
     arrays = []
     for obj in pre_tile:
@@ -39,26 +45,28 @@ def create_tile_content(pre_tile):
             'bbox': [[float(i) for i in j] for j in obj.getBbox()]
         })
     
+    # GlTF uses a y-up coordinate system whereas the geographical data (stored
+    # in the 3DCityDB database) uses a z-up coordinate system convention. In
+    # order to comply with Gltf we thus need to realize a z-up to y-up
+    # coordinate transform for the data to respect the glTF convention. This
+    # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
+    # client side when using (displaying) the data.
+    # Refer to the note concerning the recommended data workflow
+    #    https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+    # for more details on this matter.
     transform = np.array([1, 0,  0, 0,
                       0, 0, -1, 0,
                       0, 1,  0, 0,
-                      0, 0,  0, 1])
-    
-    # transform = np.array([1, 0,  0, 0,
-                    #    0, 1, 0, 0,
-                    #    0, 0,  1, 0,
-                    #    0, 0,  0, 1])
-    
+                      0, 0,  0, 1])  
     gltf = GlTF.from_binary_arrays(arrays, transform)
-    
-    
-    
+
+    # Create a batch table and add the ID of each obj to it
+    ids = [obj.get_id() for obj in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("ifc.id", ids)
 
-    # bth = create_batch_table_hierarchy(ids)
-    # bt.add_extension(bth)
-
+    # Eventually wrap the geometries together with the optional
+    # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
 
 
@@ -92,12 +100,6 @@ def get_centroid_tileset(objects):
 
     return centroid_tileset        
 
-# def translate_tileset(objects,centroid_tileset):
-#     for obj in objects:
-#         for triangle in obj.get_geom():
-#             for points in triangle:
-#                 points -= centroid_tileset
-#         obj.set_bbox()
 
 def translate_tileset(objects,centroid_tileset):
     for obj in objects:
@@ -111,26 +113,50 @@ def translate_tileset(objects,centroid_tileset):
         obj.set_bbox()
 
 
+def retrieve_objs(path):
+    """
+    :param path: a path to a directory
 
+    :return: a list of Obj. 
+    """
 
-def from_objs_directory(path):    
-    
     objects = []
         
-    obj_rep = listdir(path)
-    print(str(len(obj_rep)) + " .obj to parse")
-    for obj_file in obj_rep:
-        id = obj_file.replace('.obj','')
-        obj = Obj(id)
-        if(obj.parse_geom(path + "/" + obj_file)):
-            objects.append(obj)
+    obj_dir = listdir(path)
+
+    for obj_file in obj_dir:
+        if(os.path.isfile(os.path.join(path,obj_file))):
+            if(".obj" in obj_file):
+                #Get id from its name
+                id = obj_file.replace('.obj','')
+                obj = Obj(id)
+                #Create geometry as expected from GLTF from an obj file
+                if(obj.parse_geom(os.path.join(path,obj_file))):
+                    objects.append(obj)
+    return objects
+        
+def from_obj_directory(path):    
+    """
+    :param path: a path to a directory
+
+    :return: a tileset. 
+    """
+    
+    objects = retrieve_objs(path)
 
     if(len(objects) == 0):
+        print("No .obj found in " + path)
         return None
+    else:
+        print(str(len(objects)) + " .obj parsed")
+    
 
-    pre_tileset = kd_tree(objects,200)        
+    # Lump out objects in pre_tiles based on a 2D-Tree technique:
+    pre_tileset = kd_tree(objects,200)       
+
     centroid_tileset = get_centroid_tileset(objects)  
     translate_tileset(objects,centroid_tileset)       
+    
     tileset = TileSet()
 
     for pre_tile in pre_tileset:
@@ -142,7 +168,7 @@ def from_objs_directory(path):
         tile.set_transform([1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
-                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2] + 310, 1])
+                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2] + 315, 1])
         bounding_box = BoundingVolumeBox()
         
         for obj in pre_tile:
@@ -153,32 +179,60 @@ def from_objs_directory(path):
 
     return tileset
 
+def containDirectory(path):
+    """
+    :param path: a path to a directory
+    :return: true if the given directory contains at least one directory 
+    """
+    list_el = listdir(path)
+    for el in list_el:
+        if os.path.isdir(os.path.join(path,el)):
+            return True 
+    return False
 
 def main():
     """
     :return: no return value
 
-    this function creates a repository name "junk_object_type" where the
-    tileset is stored.
+    this function creates either :
+    - a repository named "obj_tileset" where the
+    tileset is stored if the directory does only contains obj files.
+    - or a repository named "obj_tilesets" that contains all tilesets are stored,
+    created from sub_directories 
+    and a classes.txt that contains the name of all tilesets
     """
-    args = parse_command_line()
-    
+    args = parse_command_line()   
     mypath = args.objs_path
-    ifc_rep = listdir(mypath)
-    ifc_classes = ""
-    for ifc_class_rep in ifc_rep:
-        print("Writing " + ifc_class_rep )
-        tileset = from_objs_directory(mypath + ifc_class_rep)
+
+    if (containDirectory(mypath)):
+        ifc_rep = listdir(mypath)
+        ifc_classes = ""
+        for ifc_class_rep in ifc_rep:
+            dir_path = os.path.join(mypath,ifc_class_rep)
+            if(os.path.isdir(dir_path)):
+                print("Writing " + dir_path )
+                tileset = from_obj_directory(dir_path)
+                if(tileset != None):
+                    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+                    tileset.write_to_directory(os.path.join("obj_tilesets",ifc_class_rep))
+                    ifc_classes += ifc_class_rep + ";"
+        if(ifc_classes != ""):
+            f = open("obj_tilesets/classes.txt","w+")
+            f.write(ifc_classes)
+            f.close()    
+        else:
+            print("Please provide a path to a directory containing some obj files or multiple directories")
+    else:
+        tileset = from_obj_directory(mypath)
         if(tileset != None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-            tileset.write_to_directory("ifc_tilesets/"+ifc_class_rep)
-            ifc_classes+= ifc_class_rep + ";"
+            print("Writing tileset")
+            tileset.write_to_directory("obj_tileset/")   
+        else:
+            print("Please provide a path to a directory containing some obj files or multiple directories")
 
-    f = open("ifc_tilesets/classes.txt","w")
-    f.write(ifc_classes)
-    f.close()    
 
-    #tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+
 
 
 if __name__ == '__main__':

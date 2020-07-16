@@ -7,13 +7,13 @@ from py3dtiles import BoundingVolumeBox
 
 class Obj(object):
     def __init__(self, ifc_id = None):
-
+        
         self.geom = list()
 
         self.box = None
         self.centroid = None
 
-        self.id = ifc_id if ifc_id else None   
+        self.id = ifc_id 
 
     def set_id(self, id):
         self.id = id
@@ -34,15 +34,37 @@ class Obj(object):
         self.geom = geom
 
     def parse_geom(self,path):
-        
+ 
         geom = pywavefront.Wavefront(path, collect_faces = True)
         if(len(geom.vertices)==0):
             return False
+        
+        # The geometry is described in an obj file by writting vertices position 
+        # and writting triangles using vertex indices (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+        # i.e something in the form :
+        # v 0.0 0.0 0.0
+        # v 0.5 0.5 0.5
+        # v 1.0 1.0 1.0
+        # v -1.0 -1.0 -1.0
+        # 
+        # f 1 2 3
+        # f 2 3 4
+        #  
+        # GLTF expect the geometry to only be triangles that contains 
+        # the vertices position, i.e something in the form :  
+        # [
+        #   [np.array([0., 0., 0,]),
+        #    np.array([0.5, 0.5, 0.5]),
+        #    np.array([1.0 ,1.0 ,1.0])]
+        #   [np.array([0.5, 0.5, 0,5]),
+        #    np.array([1., 1., 1.]),
+        #    np.array([-1.0 ,-1.0 ,-1.0])]
+        # ]
 
         for mesh in geom.mesh_list:    
             for face in mesh.faces:
                 triangles = []
-                for i in range(0,3): #On récupère les 3 sommets indiqués par chaque face
+                for i in range(0,3): #We store each position for each triangles, as GLTF expect
                     triangles.append(np.array(geom.vertices[face[i]], dtype=np.float64))
                 self.geom.append(triangles)
         self.set_bbox()
