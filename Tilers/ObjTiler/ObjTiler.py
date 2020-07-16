@@ -35,6 +35,11 @@ def parse_command_line():
 
 
 def create_tile_content(pre_tile):
+    """
+    :param pre_tile: an array containing objs of a single tile
+
+    :return: a B3dm tile.
+    """
     #create B3DM content
 
     arrays = []
@@ -60,7 +65,7 @@ def create_tile_content(pre_tile):
                       0, 0,  0, 1])  
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
-    # Create a batch table and add the ID of each obj to it
+    # Create a batch table and add the ID of each .obj to it
     ids = [obj.get_id() for obj in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("ifc.id", ids)
@@ -71,12 +76,19 @@ def create_tile_content(pre_tile):
 
 
 def kd_tree(objs, maxNumobj, depth=0):
+    """
+    :param objs: an array containing all of the obj
+    :param maxNumobj: maximum number of object by tile 
+    :param depth: depth in the tree, must start at 0 in the first call 
+
+    :return: lists of tile of obj.
+    """
     # The module argument of 2 (in the next line) hard-wires the fact that
     # this kd_tree is in fact a 2D_tree.
     axis = depth % 2
 
     # Within the sorting criteria point[1] refers to the centroid of the
-    # bounding boxes of the city objects. And thus, depending on the value of
+    # bounding boxes of the .objs. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
     sObjs = sorted(objs, key=lambda obj: obj.get_centroid()[axis])
     median = len(sObjs) // 2
@@ -92,6 +104,11 @@ def kd_tree(objs, maxNumobj, depth=0):
     return pre_tiles
 
 def get_centroid_tileset(objects):
+    """
+    :param objects: an array containing objs 
+
+    :return: the centroid of the tileset.
+    """
     centroid_tileset = np.array([0.,0.,0.])
     for obj in objects:
         centroid_tileset += obj.get_centroid()
@@ -101,13 +118,21 @@ def get_centroid_tileset(objects):
     return centroid_tileset        
 
 
-def translate_tileset(objects,centroid_tileset):
+def translate_tileset(objects,offset):
+    """
+    :param objects: an array containing objs 
+    :param offset: an offset
+    :return: 
+    """
+    # Translate the position of each obj by an offset
     for obj in objects:
         new_geom = []
         for triangle in obj.get_geom():
             new_position = []
             for points in triangle:
-                new_position.append(np.array(points - centroid_tileset, dtype=np.float32))
+                # Must to do this this way to ensure that the new position stays in float32
+                # Mandatory for writing the GLTF
+                new_position.append(np.array(points - offset, dtype=np.float32))
             new_geom.append(new_position)
         obj.set_geom(new_geom)
         obj.set_bbox()
@@ -154,8 +179,10 @@ def from_obj_directory(path):
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
     pre_tileset = kd_tree(objects,200)       
 
-    centroid_tileset = get_centroid_tileset(objects)  
-    translate_tileset(objects,centroid_tileset)       
+    # Get the centroid of the tileset and translate all of the obj by this centroid
+    # This centroid will be later added in the transform part of each tiles
+    centroid = get_centroid_tileset(objects)  
+    translate_tileset(objects,centroid)       
     
     tileset = TileSet()
 
@@ -168,14 +195,14 @@ def from_obj_directory(path):
         tile.set_transform([1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
-                    centroid_tileset[0], centroid_tileset[1], centroid_tileset[2] + 315, 1])
-        bounding_box = BoundingVolumeBox()
-        
+                    centroid[0], centroid[1], centroid[2], 1])
+
+        bounding_box = BoundingVolumeBox()        
         for obj in pre_tile:
             bounding_box.add(obj.get_bounding_volume_box()) 
         tile.set_bounding_volume(bounding_box)
+        
         tileset.add_tile(tile)
-
 
     return tileset
 
