@@ -60,6 +60,9 @@ def open_data_base(db_config_file_path):
     #   - https://stackoverflow.com/questions/53188306/python-sqlalchemy-connection-pattern-disconnected-from-the-remote-server
     # The keepalives solution is provided by this StackOverflow:
     # https://stackoverflow.com/questions/56289874/postgres-closes-connection-during-query-after-a-few-hundred-seconds-when-using-p
+    # 
+    # Concerning the keepalives connect parameters, refer to
+    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 
     try:
         # Open a cursor to perform database operations
