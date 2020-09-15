@@ -4,7 +4,7 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from kd_tree import kd_tree
+from py3dtiles import kd_tree
 from citym_cityobject import CityMCityObjects
 from citym_building import CityMBuildings
 from citym_relief import CityMReliefs
@@ -51,7 +51,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
     :rtype: a TileContent in the form a B3dm.
     """
     # Get cityobjects ids and the centroid of the tile which is the offset
-    cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
+    cityobject_ids = tuple([cityobject.get_id() for cityobject in cityobjects])
     offset = cityobjects.get_centroid()
 
     arrays = CityMCityObjects.retrieve_geometries(cursor, cityobject_ids, offset, objects_type)
@@ -76,7 +76,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
 
     database_ids = []
     for cityobject in cityobjects:
-        database_ids.append(cityobject.get_database_id())
+        database_ids.append(cityobject.get_id())
 
     bt.add_property_from_array("cityobject.database_id", database_ids)
 

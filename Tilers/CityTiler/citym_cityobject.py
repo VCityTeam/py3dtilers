@@ -2,14 +2,15 @@
 import sys
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import ObjectToTile, ObjectsToTile
 
 
-class CityMCityObject(object):
+class CityMCityObject(ObjectToTile):
     """
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
     """
-    def __init__(self, database_id=None, box_in=None):
+    def __init__(self, id=None, box_in=None):
         """
         :param id: given identifier
         :param box_2D: the maximum extents of the geometry a returned by a
@@ -19,21 +20,7 @@ class CityMCityObject(object):
                         * 1, 2 and 3 are the respective minimum of X, Y and Z
                         * 4, 5 and 6 are the respective maximum of X, Y and Z
         """
-
-        # The identifier of the database
-        self.database_id = None
-
-        # The City GML identifier (out of the "original" CityGML data file)
-        self.gml_id = None
-
-        # A Bounding Volume Box object
-        self.box = None
-
-        # The centroid of the box
-        self.centroid = None
-
-        if database_id:
-            self.set_database_id(database_id)
+        super().__init__(id)
         if box_in:
             self.set_box(box_in)
 
@@ -56,12 +43,6 @@ class CityMCityObject(object):
                          (y_min + y_max) / 2.0,
                          (z_min + z_max) / 2.0]
 
-    def set_database_id(self, id):
-        self.database_id = id
-
-    def get_database_id(self):
-        return self.database_id
-
     def set_gml_id(self, gml_id):
         self.gml_id = gml_id
 
@@ -72,57 +53,12 @@ class CityMCityObject(object):
         """
         return self.gml_id
 
-    def get_centroid(self):
-        return self.centroid
-
-    def get_bounding_volume_box(self):
-        return self.box
-
-
-class CityMCityObjects:
+class CityMCityObjects(ObjectsToTile):
     """
     A decorated list of CityMCityObject type objects.
     """
-    def __init__(self, cityobjects=None):
-        self.cityobjects = list()
-        if cityobjects:
-            self.cityobjects.extend(cityobjects)
-
-    def __iter__(self):
-        return iter(self.cityobjects)
-
-    def __getitem__(self, item):
-        if isinstance(item, slice):
-            return CityMCityObjects(self.cityobjects.__getitem__(item))
-        # item is then an int type:
-        return self.cityobjects.__getitem__(item)
-
-    def __add__(self, other):
-        new_cityobject = CityMCityObjects(self.cityobjects)
-        new_cityobject.cityobjects.extend(other.cityobjects)
-        return new_cityobject
-
-    def append(self, cityobject):
-        self.cityobjects.append(cityobject)
-
-    def extend(self, others):
-        self.cityobjects.extend(others)
-
-    def get_city_objects(self):
-        return self.cityobjects
-
-    def __len__(self):
-        return len(self.cityobjects)
-
-    def get_centroid(self):
-        centroid = [0., 0., 0.]
-        for cityobject in self:
-            centroid[0] += cityobject.get_centroid()[0]
-            centroid[1] += cityobject.get_centroid()[1]
-            centroid[2] += cityobject.get_centroid()[2]
-        return [centroid[0] / len(self),
-                centroid[1] / len(self),
-                centroid[2] / len(self)]
+    def __init__(self,cityMCityObjects=None):
+        super().__init__(cityMCityObjects)
 
     @staticmethod
     def sql_query_objects():
@@ -182,7 +118,7 @@ class CityMCityObjects:
             else:
                 gml_id = t[2]
                 cityobject = objects_with_gmlid_key[gml_id]
-                cityobject.set_database_id(object_id)
+                cityobject.set_id(object_id)
                 cityobject.set_box(box)
         if no_input:
             return result_objects

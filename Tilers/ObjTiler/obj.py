@@ -2,36 +2,26 @@
 import sys
 import numpy as np
 import pywavefront
-from py3dtiles import BoundingVolumeBox
+from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import ObjectToTile, ObjectsToTile
+
+import os
+from os import listdir
+from os.path import isfile, join
 
 
-class Obj(object):
-    def __init__(self, ifc_id = None):
-        
-        self.geom = list()
 
-        self.box = None
-        self.centroid = None
+class Obj(ObjectToTile):
+    def __init__(self, id = None):
+        super().__init__(id)
 
-        self.id = ifc_id 
+        self.geom = TriangleSoup()
 
-    def set_id(self, id):
-        self.id = id
+    def get_geom_as_triangles(self):
+        return self.geom.triangles[0]
 
-    def get_id(self):
-        return self.id
-
-    def get_centroid(self):
-        return self.centroid
-
-    def get_bounding_volume_box(self):
-        return self.box
-
-    def get_geom(self):
-        return self.geom
-
-    def set_geom(self,geom):
-        self.geom = geom
+    def set_triangles(self,triangles):
+        self.geom.triangles[0] = triangles
 
     def parse_geom(self,path):
         # Realize the geometry conversion from OBJ to GLTF
@@ -62,27 +52,29 @@ class Obj(object):
         if(len(geom.vertices)==0):
             return False
 
-        for mesh in geom.mesh_list:    
+        triangles = list()
+        for mesh in geom.mesh_list: 
             for face in mesh.faces:
-                triangles = []
+                triangle = []
                 for i in range(0,3): 
                     # We store each position for each triangles, as GLTF expect
-                    triangles.append(np.array(geom.vertices[face[i]],
+                    triangle.append(np.array(geom.vertices[face[i]],
                         dtype=np.float64))
-                self.geom.append(triangles)
+                triangles.append(triangle)
+        self.geom.triangles.append(triangles)
 
-        self.set_bbox()
+        self.set_box()
 
         return True
     
-    def set_bbox(self):
+    def set_box(self):
         """
         Parameters
         ----------
         Returns
         -------
         """
-        bbox = self.getBbox()
+        bbox = self.geom.getBbox()
         self.box = BoundingVolumeBox()
         self.box.set_from_mins_maxs(np.append(bbox[0],bbox[1]))
         
@@ -91,59 +83,48 @@ class Obj(object):
                          (bbox[0][1] + bbox[1][1]) / 2.0,
                          (bbox[0][2] + bbox[0][2]) / 2.0])
 
-    def getPositionArray(self):
-        """
-        Parameters
-        ----------
-        Returns
-        -------
-        Binary array of vertice position
-        """
-        array = []
-        for face in self.geom:
-            for vertex in face:
-                array.append(vertex)
-        return b''.join(array)
 
+class Objs(ObjectsToTile):
+    def __init__(self,objs=None):
+        super().__init__(objs)
 
-    def getNormalArray(self):
+    def translate_tileset(self,offset):
         """
-        Parameters
-        ----------
-        Returns
-        -------
-        Binary array of vertice normals
+        :param objects: an array containing objs 
+        :param offset: an offset
+        :return: 
         """
-        normals = []
-        for t in self.geom:
-            U = t[1] - t[0]
-            V = t[2] - t[0]
-            N = np.cross(U, V)
-            norm = np.linalg.norm(N)
-            if norm == 0:
-                normals.append(np.array([0, 0, 1], dtype=np.float32))
-            else:
-                normals.append(N / norm)
-        verticeArray = faceAttributeToArray(normals)
-        return b''.join(verticeArray)
-
-
-   
-    def getBbox(self):
+        # Translate the position of each obj by an offset
+        for obj in self.objects:
+            new_geom = []
+            for triangle in obj.get_geom_as_triangles():
+                new_position = []
+                for points in triangle:
+                    # Must to do this this way to ensure that the new position 
+                    # stays in float32, which is mandatory for writing the GLTF
+                    new_position.append(np.array(points - offset, dtype=np.float32))
+                new_geom.append(new_position)
+            obj.set_triangles(new_geom)
+            obj.set_box() 
+    
+    @staticmethod
+    def retrieve_objs(path, objects=list()):
         """
-        Parameters
-        ---------
-        Returns
-        -------
-        Array [[minX, minY, minZ],[maxX, maxY, maxZ]]
+        :param path: a path to a directory
+
+        :return: a list of Obj. 
         """
-        mins = np.array([np.min(t, 0) for t in self.geom])
-        maxs = np.array([np.max(t, 0) for t in self.geom])
-        return [np.min(mins, 0), np.max(maxs, 0)]
 
-def faceAttributeToArray(triangles):
-    array = []
-    for face in triangles:
-        array += [face, face, face]
-    return array
+        obj_dir = listdir(path)
 
+        for obj_file in obj_dir:
+            if(os.path.isfile(os.path.join(path,obj_file))):
+                if(".obj" in obj_file):
+                    #Get id from its name
+                    id = obj_file.replace('.obj','')
+                    obj = Obj(id)
+                    #Create geometry as expected from GLTF from an obj file
+                    if(obj.parse_geom(os.path.join(path,obj_file))):
+                        objects.append(obj)
+        
+        return Objs(objects)    
