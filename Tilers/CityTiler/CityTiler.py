@@ -51,7 +51,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
     :rtype: a TileContent in the form a B3dm.
     """
     # Get cityobjects ids and the centroid of the tile which is the offset
-    cityobject_ids = tuple([cityobject.get_id() for cityobject in cityobjects])
+    cityobject_ids = tuple([cityobject.get_database_id() for cityobject in cityobjects])
     offset = cityobjects.get_centroid()
 
     arrays = CityMCityObjects.retrieve_geometries(cursor, cityobject_ids, offset, objects_type)

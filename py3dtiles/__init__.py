@@ -28,8 +28,6 @@ from .helper_test import HelperTest
 from .pnts import Pnts
 from .utils import TileReader, convert_to_ecef
 from .wkb_utils import TriangleSoup
-from .Tiler.object_to_tile import ObjectToTile, ObjectsToTile
-from .Tiler.kd_tree import kd_tree
 __version__ = '1.1.0'
 __all__ = ['B3dm',
            'BatchTable', 
@@ -40,10 +38,7 @@ __all__ = ['B3dm',
            'SchemaValidators',
            'Extension',
            'Feature', 
-           'kd_tree',
            'GlTF',
-           'ObjectToTile',
-           'ObjectsToTile',
            'Pnts',
            'TemporalBatchTable', 
            'TemporalBoundingVolume', 
