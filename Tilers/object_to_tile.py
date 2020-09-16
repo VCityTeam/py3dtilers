@@ -21,8 +21,7 @@ class ObjectToTile(object):
         # The centroid of the box
         self.centroid = None
 
-        if id:
-            self.set_id(id)
+        self.set_id(id)
 
     def set_id(self, id):
         self.id = id
@@ -37,6 +36,9 @@ class ObjectToTile(object):
         return self.box
 
 class ObjectsToTile(object):
+    """
+    A decorated list of ObjectsToTile type objects.
+    """
     def __init__(self,objects=None):
         self.objects = list()
         if(objects):

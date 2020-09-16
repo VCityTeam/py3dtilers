@@ -1,5 +1,5 @@
-PG_HOST: <FQDN or IP number of the server hosting your db>
-PG_PORT: <port>
-PG_NAME: <database name>
-PG_USER: <your db user name>
-PG_PASSWORD: <user password>
+PG_HOST: 134.214.142.41
+PG_PORT: 5434
+PG_NAME: citydb-full_lyon-2015
+PG_USER: postgres
+PG_PASSWORD: postgres

@@ -76,7 +76,7 @@ def create_tile_content(cursor, cityobjects, objects_type):
 
     database_ids = []
     for cityobject in cityobjects:
-        database_ids.append(cityobject.get_id())
+        database_ids.append(cityobject.get_database_id())
 
     bt.add_property_from_array("cityobject.database_id", database_ids)
 

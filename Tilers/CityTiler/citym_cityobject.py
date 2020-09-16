@@ -43,6 +43,12 @@ class CityMCityObject(ObjectToTile):
                          (y_min + y_max) / 2.0,
                          (z_min + z_max) / 2.0]
 
+    def get_database_id(self):
+        return super().get_id()
+    
+    def set_database_id(self):
+        return super().set_id()
+
     def set_gml_id(self, gml_id):
         self.gml_id = gml_id
 

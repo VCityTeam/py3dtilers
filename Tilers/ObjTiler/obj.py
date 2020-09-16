@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import pywavefront
 from py3dtiles import BoundingVolumeBox, TriangleSoup
-from py3dtiles import ObjectToTile, ObjectsToTile
+from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 
 import os
 from os import listdir
@@ -83,8 +83,16 @@ class Obj(ObjectToTile):
                          (bbox[0][1] + bbox[1][1]) / 2.0,
                          (bbox[0][2] + bbox[0][2]) / 2.0])
 
+    def get_obj_id(self):
+        return super().get_id()
+    
+    def set_obj_id(self,id):
+        return super().set_id(id)
 
 class Objs(ObjectsToTile):
+    """
+        A decorated list of ObjectsToTile type objects.
+    """
     def __init__(self,objs=None):
         super().__init__(objs)
 

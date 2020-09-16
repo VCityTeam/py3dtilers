@@ -3,9 +3,9 @@
  - [Developer's/Design notes](DesignNotes.md)
  
 ### Running the ObjTiler
-Given a $PATH to a directory containing multiple obj files, or a directory containing multiple obj directory, from the **home directory** (and you have to) of your py3dtiles git clone, run 
+
 ```
-(venv) python Tilers/ObjTiler/CityTiler.py  $PATH
+(venv) python Tilers/ObjTiler/ObjTiler.py  $PATH
 ```
 
 It should produce a directory named "obj_tileset" or "obj_tilesets" depending on the input.

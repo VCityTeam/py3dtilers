@@ -9,7 +9,7 @@ from os.path import isfile, join
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
-from py3dtiles import kd_tree
+from Tilers.kd_tree import kd_tree
 
 
 from obj import Obj, Objs
@@ -71,7 +71,7 @@ def create_tile_content(pre_tile):
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
     # Create a batch table and add the ID of each .obj to it
-    ids = [obj.get_id() for obj in pre_tile]
+    ids = [obj.get_obj_id() for obj in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
 
