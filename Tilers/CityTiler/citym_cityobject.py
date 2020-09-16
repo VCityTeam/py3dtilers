@@ -46,8 +46,8 @@ class CityMCityObject(ObjectToTile):
     def get_database_id(self):
         return super().get_id()
     
-    def set_database_id(self):
-        return super().set_id()
+    def set_database_id(self, id):
+        return super().set_id(id)
 
     def set_gml_id(self, gml_id):
         self.gml_id = gml_id
