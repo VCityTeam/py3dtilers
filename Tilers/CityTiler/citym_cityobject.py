@@ -10,7 +10,7 @@ class CityMCityObject(ObjectToTile):
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
     """
-    def __init__(self, id=None, box_in=None):
+    def __init__(self, database_id=None, box_in=None):
         """
         :param id: given identifier
         :param box_2D: the maximum extents of the geometry a returned by a
@@ -20,7 +20,7 @@ class CityMCityObject(ObjectToTile):
                         * 1, 2 and 3 are the respective minimum of X, Y and Z
                         * 4, 5 and 6 are the respective maximum of X, Y and Z
         """
-        super().__init__(id)
+        super().__init__(database_id)
         if box_in:
             self.set_box(box_in)
 
