@@ -124,7 +124,7 @@ class CityMCityObjects(ObjectsToTile):
             else:
                 gml_id = t[2]
                 cityobject = objects_with_gmlid_key[gml_id]
-                cityobject.set_id(object_id)
+                cityobject.set_database_id(object_id)
                 cityobject.set_box(box)
         if no_input:
             return result_objects
