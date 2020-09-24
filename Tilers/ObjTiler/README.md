@@ -7,21 +7,23 @@
 ```
 (venv) python Tilers/ObjTiler/ObjTiler.py  $PATH
 ```
-
-It should produce a directory named "obj_tileset" or "obj_tilesets" depending on the input.
+$PATH should point to a directory holding a set of OBJ files. The 3DTiles tilesets
+will contained all of the Obj that are in the directory, using their filename as 
+ID. 
+It should produce a directory named "obj_tilesets"
 
 ### Debugging temporary notes
 Once [installed and ran](Install.md) and in order to 3D visulalize the results produced by the Tilers you might
  - install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples
    and point the resulting junk directory holding the produced tileset
+```
      cd 3d-tiles-samples
      ln -s ../py3dtiles.MEPP-team/junk .
-   launch the server with npm start
+```
+   launch the server with ```npm start```
    assert this is working by opening
       http://localhost:8003/junk/tileset.json
- - install UDV
- - patch UDV-Core/src/Setup3DScene.js and turn off temporal extension
-   $3dTilesTemporalLayer.TemporalExtension = false
+ - install [UD-Viz](https://github.com/VCityTeam/UD-Viz)
  - patch UDV-Core/examples/Demo.js and point buildingServerRequest
    const buildingServerRequest = 'http://localhost:8003/junk/tileset.json';
    install UDV and launch the server

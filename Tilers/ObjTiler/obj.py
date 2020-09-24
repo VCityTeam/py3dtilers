@@ -10,7 +10,17 @@ from os import listdir
 from os.path import isfile, join
 
 
-
+# This Obj class refers to the obj file fromat (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+# It is a 3D object file format that describes the object in the following way :
+# The position of each Vertex, then the face, using the index of each Vertex. 
+# Example : 
+# v 0.0 0.0 0.0
+# v 0.5 0.5 0.5
+# v 1.0 1.0 1.0
+# v -1.0 -1.0 -1.0
+# 
+# f 1 2 3
+# f 2 3 4
 class Obj(ObjectToTile):
     def __init__(self, id = None):
         super().__init__(id)
@@ -25,18 +35,6 @@ class Obj(ObjectToTile):
 
     def parse_geom(self,path):
         # Realize the geometry conversion from OBJ to GLTF
-        # The geometry is described in an obj file by writting vertices position 
-        # and writting triangles using vertex indices 
-        # (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
-        # i.e something in the form :
-        # v 0.0 0.0 0.0
-        # v 0.5 0.5 0.5
-        # v 1.0 1.0 1.0
-        # v -1.0 -1.0 -1.0
-        # 
-        # f 1 2 3
-        # f 2 3 4
-        #  
         # GLTF expect the geometry to only be triangles that contains 
         # the vertices position, i.e something in the form :  
         # [
