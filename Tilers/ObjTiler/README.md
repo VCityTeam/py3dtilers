@@ -7,10 +7,11 @@
 ```
 (venv) python Tilers/ObjTiler/ObjTiler.py  $PATH
 ```
-$PATH should point to a directory holding a set of OBJ files. The 3DTiles tilesets
-will contained all of the Obj that are in the directory, using their filename as 
+$PATH should point to a directory holding a set of OBJ files. The resulting 3DTiles tileset
+will contain all of the Obj that are in the directory, using their filename as 
 ID. 
-It should produce a directory named "obj_tilesets"
+
+This command should produce a directory named "obj_tilesets"
 
 ### Debugging temporary notes
 Once [installed and ran](Install.md) and in order to 3D visulalize the results produced by the Tilers you might
