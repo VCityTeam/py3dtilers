@@ -1,9 +1,0 @@
-{
-    "request": {
-        "interface": "org.bimserver.SettingsInterface",
-        "method": "setServerSettings",
-        "parameters": {
-        }
-    },
-    "token": null
-}

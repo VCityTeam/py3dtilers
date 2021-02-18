@@ -1,8 +1,0 @@
-{
-    "request": {
-      "interface": "SettingsInterface", 
-      "method": "getServerSettings", 
-      "parameters": {
-      }
-    }
-  }
