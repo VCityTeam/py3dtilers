@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "SettingsInterface",
+        "method": "setPluginStrictVersionChecking",
+        "parameters": {
+            "strict": true
+        }
+    },
+    "token": null
+}

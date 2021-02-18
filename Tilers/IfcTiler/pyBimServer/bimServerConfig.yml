@@ -1,0 +1,4 @@
+BS_HOST: <FQDN or IP number of the server hosting your bimserver>
+BS_PORT: <port>
+BS_USER: <your bimserver user name>
+BS_PASSWORD: <user password>

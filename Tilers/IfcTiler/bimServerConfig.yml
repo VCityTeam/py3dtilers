@@ -1,0 +1,4 @@
+BS_HOST: localhost
+BS_PORT: 8888
+BS_USER: admin@admin.fr
+BS_PASSWORD: admin

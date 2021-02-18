@@ -1,0 +1,15 @@
+{
+    "request": {
+      "interface": "ServiceInterface", 
+      "method": "checkinSync", 
+      "parameters": {
+        "poid": null,
+        "comment": null,
+        "deserializerOid": null,
+        "fileSize": null,
+        "fileName": null,
+        "data": null,
+        "merge": "false"
+      }
+    }
+  }

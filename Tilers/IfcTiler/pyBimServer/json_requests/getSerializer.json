@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "org.bimserver.PluginInterface",
+        "method": "getSerializerByPluginClassName",
+        "parameters": {
+            "pluginClassName": "org.bimserver.serializers.JsonStreamingSerializerPlugin"
+        }
+    },
+    "token": null
+}

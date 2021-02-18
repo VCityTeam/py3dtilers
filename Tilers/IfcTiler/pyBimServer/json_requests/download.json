@@ -1,0 +1,15 @@
+{
+    "request": {
+        "interface": "org.bimserver.ServiceInterface",
+        "method": "download",
+        "parameters": {
+            "roids": [
+                null
+            ],
+            "query": null,
+            "serializerOid": null,
+            "sync": false
+        }
+    },
+    "token": null
+}

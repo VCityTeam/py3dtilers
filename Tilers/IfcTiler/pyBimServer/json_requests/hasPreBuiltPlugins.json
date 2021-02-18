@@ -1,0 +1,8 @@
+{
+    "request": {
+        "interface": "PluginInterface",
+        "method": "hasPreBuiltPlugins",
+        "parameters": {}
+    },
+    "token": null
+}

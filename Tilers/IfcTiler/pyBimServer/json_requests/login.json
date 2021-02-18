@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "AuthInterface",
+        "method": "login",
+        "parameters": {
+            "username": null,
+            "password": null
+        }
+    }
+}

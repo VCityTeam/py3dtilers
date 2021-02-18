@@ -1,0 +1,10 @@
+{
+    "token": null,
+    "request": {
+      "interface": "ServiceInterface", 
+      "method": "getDownloadData", 
+      "parameters": {
+        "topicId": null
+      }
+    }
+  }

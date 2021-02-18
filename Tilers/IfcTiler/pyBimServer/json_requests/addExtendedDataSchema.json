@@ -1,0 +1,7 @@
+{
+    "interface": "ServiceInterface",
+    "method": "addExtendedDataSchema",
+    "parameters": {
+        "extendedDataSchema": null
+    }
+}

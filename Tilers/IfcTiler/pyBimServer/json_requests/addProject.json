@@ -1,0 +1,11 @@
+{
+    "request": {
+        "interface": "org.bimserver.ServiceInterface",
+        "method": "addProject",
+        "parameters": {
+            "schema": "ifc4",
+            "projectName": "Carl"
+        }
+    },
+    "token": null
+}

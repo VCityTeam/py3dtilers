@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "org.bimserver.NotificationRegistryInterface",
+        "method": "getProgress",
+        "parameters": {
+            "topicId": null
+        }
+    },
+    "token": null
+}

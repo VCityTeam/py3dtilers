@@ -1,0 +1,8 @@
+{
+    "request": {
+        "interface": "PluginInterface",
+        "method": "getInstalledPluginBundles",
+        "parameters": {}
+    },
+    "token": null
+}

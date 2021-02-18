@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "ServiceInterface",
+        "method": "getAllRepositoryExtendedDataSchemas",
+        "parameters": {
+            "usePre": true
+        }
+    },
+    "token": null
+}

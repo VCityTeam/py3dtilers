@@ -1,0 +1,15 @@
+{
+    "request": {
+        "interface": "AdminInterface",
+        "method": "setup",
+        "parameters": {
+            "siteAddress": null,
+            "serverName": "BimServer",
+            "serverDescription": "",
+            "serverIcon": "",
+            "adminName": null,
+            "adminUsername": null,
+            "adminPassword": null
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "request": {
+        "interface": "PluginInterface",
+        "method": "getPluginInformation",
+        "parameters": {
+            "repository": "central (https://repo1.maven.org/maven2/, default, releases snapshots)",
+            "groupId": "org.opensourcebim",
+            "artifactId": null,
+            "version": null
+        }
+    },
+    "token": null
+}

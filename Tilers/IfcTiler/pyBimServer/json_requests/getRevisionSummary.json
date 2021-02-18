@@ -1,0 +1,10 @@
+{
+    "request": {
+        "interface": "org.bimserver.ServiceInterface",
+        "method": "getRevisionSummary",
+        "parameters": {
+            "roid": null
+        }
+    },
+    "token": null
+}

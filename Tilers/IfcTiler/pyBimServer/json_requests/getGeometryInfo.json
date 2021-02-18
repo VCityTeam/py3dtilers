@@ -1,0 +1,11 @@
+{
+    "token": null,
+    "request": {
+      "interface": "ServiceInterface", 
+      "method": "getGeometryInfo", 
+      "parameters": {
+        "roid": null,
+        "oid": null
+      }
+    }
+  }
