@@ -1,11 +1,8 @@
-from pyBimServer import PyBimServer
-from pyBimServer import init_from_config_file
-
-
 import argparse
 import numpy as np
-import pywavefront 
 import sys
+import ifcopenshell
+import pyproj
 
 import os
 from os import listdir
@@ -19,11 +16,15 @@ from Tilers.kd_tree import kd_tree
 from ifcObjectGeom import IfcObjectGeom, IfcObjectsGeom
 
 
-
 def parse_command_line():
-    # arg parse
-    text = '''A small utility that build a 3DTiles tileset out of a bimserver'''
+    text = '''A small utility that build a 3DTiles tileset out of an IFC file'''
     parser = argparse.ArgumentParser(description=text)
+    parser.add_argument('ifc_file_path',
+                        nargs='?',
+                        type=str,  
+                        help='path to the ifc file')
+    return parser.parse_args()
+
 
 
 
@@ -60,45 +61,38 @@ def create_tile_content(pre_tile):
 
     # Create a batch table and add the ID of each .obj to it
     ids = [obj.get_obj_id() for obj in pre_tile]
+    classes = [obj.getIfcClasse() for obj in pre_tile]
+
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
+    bt.add_property_from_array("classe", classes)
 
     # Eventually wrap the geometries together with the optional
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_bimserver(bimserver,entity):    
+def from_ifc(path_to_file):    
     """
     :param path: a path to a directory
 
     :return: a tileset. 
     """
     
-    oidList = entity
-    objects = IfcObjectsGeom.retrieve_IfcObjs(bimserver,oidList)
 
+    pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, True)
 
-    # Lump out objects in pre_tiles based on a 2D-Tree technique:
-    pre_tileset = kd_tree(objects,200)       
-
-    # Get the centroid of the tileset and translate all of the obj 
-    # by this centroid
-    # which will be later added in the transform part of each tiles
-    centroid = objects.get_centroid()  
-    objects.translate_tileset(centroid)       
     
     tileset = TileSet()
 
-    for pre_tile in pre_tileset:
+    for pre_tile in pre_tileset.values():
+        if(len(pre_tile.objects) == 0) :
+            continue
         tile = Tile()  
         tile.set_geometric_error(500)
 
         tile_content_b3dm = create_tile_content(pre_tile)
         tile.set_content(tile_content_b3dm)
-        tile.set_transform([1, 0, 0, 0,
-                    0, 1, 0, 0,
-                    0, 0, 1, 0,
-                    centroid[0], centroid[1], centroid[2], 1])
+        tile.set_transform(centroid)
 
         bounding_box = BoundingVolumeBox()        
         for obj in pre_tile:
@@ -120,18 +114,17 @@ def main():
     created from sub_directories 
     and a classes.txt that contains the name of all tilesets
     """
-    parse_command_line()   
+    args = parse_command_line()
 
-    bimserver = init_from_config_file("Tilers/IfcTiler/bimServerConfig.yml")
-    
-    bimserver.getRoidByProjectName("carl")
-    entityOidDict = bimserver.getAllOidByEntity()
-    for entity,oidList in entityOidDict.items():
-        print(entity)
-                # tileset = from_bimserver(bimserver,currententity)
-                # if(tileset != None):
-                    # tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-                    # tileset.write_to_directory("ifc_tilesets/" + entityName)
+    #load file
+    # load ifc site, elevation, position et direction
+    # recuperer obj par entités
+    tileset = from_ifc(args.ifc_file_path)
+
+    ## pour chaque entité, créer un tileset 
+    if(tileset != None):
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory("ifc_tileset")
 
 
 if __name__ == '__main__':

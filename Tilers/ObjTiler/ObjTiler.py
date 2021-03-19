@@ -148,6 +148,7 @@ def main():
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                     folder_name = path.split('/')[-1]
+                    print("tilset in obj_tilesets/" + folder_name)
                     tileset.write_to_directory("obj_tilesets/" + folder_name)
                     rep_parsed += folder_name + ";"
 
