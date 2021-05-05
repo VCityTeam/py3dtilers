@@ -251,25 +251,6 @@ class IfcObjectsGeom(ObjectsToTile):
     def __init__(self,objs=None):
         super().__init__(objs)
 
-    # def translate_tileset(self,offset):
-    #     """
-    #     :param objects: an array containing objs 
-    #     :param offset: an offset
-    #     :return: 
-    #     """
-    #     # Translate the position of each obj by an offset
-    #     for obj in self.objects:
-    #         new_geom = []
-    #         for triangle in obj.get_geom_as_triangles():
-    #             new_position = []
-    #             for points in triangle:
-    #                 # Must to do this this way to ensure that the new position 
-    #                 # stays in float32, which is mandatory for writing the GLTF
-    #                 new_position.append(np.array(points - offset, dtype=np.float32))
-    #             new_geom.append(new_position)
-    #         obj.set_triangles(new_geom)
-    #         obj.set_box() 
-    
     @staticmethod
     def computeCentroid(ifcSite,convertToMeter) :
         elevation = ifcSite.RefElevation
