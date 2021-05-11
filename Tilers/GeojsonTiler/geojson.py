@@ -59,34 +59,29 @@ class Geojson(ObjectToTile):
             coordinates = feature['geometry']['coordinates']
             coords = np.array(coordinates)
             coords = coords.flatten()
-            print(coords)
-            print(len(coords))
 
-            vertices = np.zeros(shape=(2 * ((len(coords) // 3) + 2),3))
-            print(vertices)
+            coordsLenght = len(coords) // 3
+
+            vertices = np.zeros(shape=(2 * (coordsLenght + 1), 3))
             height = 20
-            if "HAUTEUR" in feature['properties'] and feature['properties']['HAUTEUR'] > 0:
-                height = feature['properties']['HAUTEUR']
+            if "HAUTEUR" in feature['properties']:
+                if feature['properties']['HAUTEUR'] > 0:
+                    height = feature['properties']['HAUTEUR']
             else:
                 print("No propertie called HAUTEUR in feature")
 
             # Set bottom center vertice value
             vertices[0] = self.get_center(coords)
             # Set top center vertice value
-            vertices[len(coords) + 1] = [vertices[0][0], vertices[0][1] + height, vertices[0][2]]
+            vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1] + height, vertices[0][2]]
 
             # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
-            for i in range(0, len(coords)):
-                vertices[i + 1] = coords[i]
-                vertices[i + len(coords) + 2] = [coords[0], coords[1] + height, coords[2]]
+            for i in range(0, coordsLenght):
+                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], coords[(i * 3) + 2]]
+                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1] + height, coords[(i * 3) + 2]]
 
         if(len(vertices)==0):
             return False
-
-        for i in range(0,len(coords),3):
-            print(vertices[i])
-            print(vertices[i+1])
-            print(vertices[i+2])
 
         return False
 
