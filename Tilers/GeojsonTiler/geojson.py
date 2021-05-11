@@ -40,6 +40,30 @@ class Geojson(ObjectToTile):
 
         return [x, y, z] 
 
+    def create_triangles(self,vertices,coordsLenght):
+        triangles = np.zeros(shape=(coordsLenght * 4, 3, 3))
+        k = 0
+
+        # Triangles faces haute et basse
+        for j in range(1,coordsLenght + 1):
+            # Basse
+            triangles[k] = [vertices[0], vertices[(j % coordsLenght) + 1], vertices[j]]
+
+            # Haute
+            triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + j], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1]]
+
+            k += 2
+
+        # Triangles faces cotés
+        for i in range(1,coordsLenght + 1):
+            triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(coordsLenght + 1) + i]]
+
+            triangles[k + 1] = [vertices[i], vertices[(i % coordsLenght) + 1], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
+
+            k += 2
+
+        return triangles
+
     def parse_geom(self,path):
         # Realize the geometry conversion from geojson to GLTF
         # GLTF expect the geometry to only be triangles that contains 
@@ -83,6 +107,7 @@ class Geojson(ObjectToTile):
         if(len(vertices)==0):
             return False
 
+        self.create_triangles(vertices,coordsLenght)
         return False
 
     def set_box(self):
