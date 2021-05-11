@@ -107,8 +107,12 @@ class Geojson(ObjectToTile):
         if(len(vertices)==0):
             return False
 
-        self.create_triangles(vertices,coordsLenght)
-        return False
+        triangles = self.create_triangles(vertices,coordsLenght)
+        self.geom.triangles.append(triangles)
+
+        self.set_box()
+
+        return True
 
     def set_box(self):
         """

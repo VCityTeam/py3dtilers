@@ -29,7 +29,9 @@ def kd_tree(objects, maxNumObjects, depth=0):
         pre_tiles.extend(kd_tree(lObjects, maxNumObjects, depth + 1))
         pre_tiles.extend(kd_tree(rObjects, maxNumObjects, depth + 1))
     else:
-        pre_tiles.append(lObjects)
-        pre_tiles.append(rObjects)
+        if len(lObjects) > 0:
+            pre_tiles.append(lObjects)
+        if len(rObjects) > 0:
+            pre_tiles.append(rObjects)
     return pre_tiles
     
