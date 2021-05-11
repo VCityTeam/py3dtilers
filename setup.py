@@ -18,7 +18,9 @@ requirements = (
     'psutil',
     'lz4',
     'pyzmq',
-    'jsonschema'
+    'jsonschema',
+    'pywavefront',
+    'geojson'
 )
 
 dev_requirements = (
