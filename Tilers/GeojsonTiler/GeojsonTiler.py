@@ -12,7 +12,7 @@ from py3dtiles import Tile, TileSet
 from Tilers.kd_tree import kd_tree
 
 
-from obj import Obj, Objs
+from geojson import Geojson, Geojsons
 
 
 
@@ -79,20 +79,20 @@ def create_tile_content(pre_tile):
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_obj_directory(path):    
+def from_geojson_directory(path):    
     """
     :param path: a path to a directory
 
     :return: a tileset. 
     """
     
-    objects = Objs.retrieve_objs(path)
+    objects = Geojsons.retrieve_geojsons(path)
 
     if(len(objects) == 0):
-        print("No .obj found in " + path)
+        print("No .geojson found in " + path)
         return None
     else:
-        print(str(len(objects)) + " .obj parsed")
+        print(str(len(objects)) + " .geojson parsed")
     
 
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
@@ -144,7 +144,7 @@ def main():
     for path in paths:
         if(os.path.isdir(path)):
                 print("Writing " + path )
-                tileset = from_obj_directory(path)
+                tileset = from_geojson_directory(path)
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                     folder_name = path.split('/')[-1]

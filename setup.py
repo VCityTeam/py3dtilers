@@ -20,7 +20,6 @@ requirements = (
     'pyzmq',
     'jsonschema',
     'pywavefront',
-    'geojson'
 )
 
 dev_requirements = (

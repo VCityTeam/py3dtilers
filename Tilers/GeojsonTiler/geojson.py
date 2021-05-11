@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 import pywavefront
-import geojson
+import json
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 
@@ -24,6 +24,22 @@ class Geojson(ObjectToTile):
     def set_triangles(self,triangles):
         self.geom.triangles[0] = triangles
 
+    def get_center(self,coords):
+        x = 0
+        y = 0
+        z = 0
+        
+        for i in range(0,len(coords),3):
+            x += coords[i]
+            y += coords[i + 1]
+            z += coords[i + 2]
+
+        x /= len(coords) / 3
+        y /= len(coords) / 3
+        z /= len(coords) / 3
+
+        return [x, y, z] 
+
     def parse_geom(self,path):
         # Realize the geometry conversion from geojson to GLTF
         # GLTF expect the geometry to only be triangles that contains 
@@ -36,26 +52,44 @@ class Geojson(ObjectToTile):
         #    np.array([1., 1., 1.]),
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
+        with open(path) as f:
+            gjContent = json.load(f)
 
-        geom = pywavefront.Wavefront(path, collect_faces = True)
-        if(len(geom.vertices)==0):
+        for feature in gjContent['features']:
+            coordinates = feature['geometry']['coordinates']
+            coords = np.array(coordinates)
+            coords = coords.flatten()
+            print(coords)
+            print(len(coords))
+
+            vertices = np.zeros(shape=(2 * ((len(coords) // 3) + 2),3))
+            print(vertices)
+            height = 20
+            if "HAUTEUR" in feature['properties'] and feature['properties']['HAUTEUR'] > 0:
+                height = feature['properties']['HAUTEUR']
+            else:
+                print("No propertie called HAUTEUR in feature")
+
+            # Set bottom center vertice value
+            vertices[0] = self.get_center(coords)
+            # Set top center vertice value
+            vertices[len(coords) + 1] = [vertices[0][0], vertices[0][1] + height, vertices[0][2]]
+
+            # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
+            for i in range(0, len(coords)):
+                vertices[i + 1] = coords[i]
+                vertices[i + len(coords) + 2] = [coords[0], coords[1] + height, coords[2]]
+
+        if(len(vertices)==0):
             return False
 
-        triangles = list()
-        for mesh in geom.mesh_list: 
-            for face in mesh.faces:
-                triangle = []
-                for i in range(0,3): 
-                    # We store each position for each triangles, as GLTF expect
-                    triangle.append(np.array(geom.vertices[face[i]],
-                        dtype=np.float64))
-                triangles.append(triangle)
-        self.geom.triangles.append(triangles)
+        for i in range(0,len(coords),3):
+            print(vertices[i])
+            print(vertices[i+1])
+            print(vertices[i+2])
 
-        self.set_box()
+        return False
 
-        return True
-    
     def set_box(self):
         """
         Parameters
@@ -116,10 +150,10 @@ class Geojsons(ObjectsToTile):
 
         for geojson_file in geojson_dir:
             if(os.path.isfile(os.path.join(path,geojson_file))):
-                if(".geojson" in geojson_file):
+                if(".geojson" in geojson_file or ".json" in geojson_file):
                     #Get id from its name
-                    id = geojson_file.replace('.geojson','')
-                    geojson = geojson(id)
+                    id = geojson_file.replace('json','')
+                    geojson = Geojson(id)
                     #Create geometry as expected from GLTF from an geojson file
                     if(geojson.parse_geom(os.path.join(path,geojson_file))):
                         objects.append(geojson)
