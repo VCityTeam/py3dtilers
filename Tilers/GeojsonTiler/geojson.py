@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import pywavefront
 import json
-import pymesh
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 
@@ -117,10 +116,13 @@ class Geojson(ObjectToTile):
 
             # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
             for i in range(0, coordsLenght):
-                #vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], coords[(i * 3) + 2]]
-                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], 300.]
-                #vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1] + height, coords[(i * 3) + 2]]
-                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], 300. + height]
+                z = coords[(i * 3) + 2]
+                # In file, if Z is equal to 9 999, it means to Z value wasn't available
+                # So, we put a default Z value
+                if z >= 9999:
+                    z = 174.
+                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
+                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
 
         if(len(vertices)==0):
             return False
