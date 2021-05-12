@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pywavefront
 import json
+import pymesh
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 
@@ -11,7 +12,10 @@ from os import listdir
 from os.path import isfile, join
 
 
-# Todo : Comment
+# The GeoJson file contains the ground surface of urban elements, mainly buildings.
+# Those elements are called "features", each feature has its own ground coordinates.
+# The goal here is to take those coordinates and create a box from it.
+# To do this, 
 class Geojson(ObjectToTile):
     def __init__(self, id = None):
         super().__init__(id)
@@ -41,16 +45,17 @@ class Geojson(ObjectToTile):
         return [x, y, z] 
 
     def create_triangles(self,vertices,coordsLenght):
-        triangles = np.zeros(shape=(coordsLenght * 4, 3, 3))
+        triangles = np.ndarray(shape=(coordsLenght * 4, 3,3))
         k = 0
 
         # Triangles faces haute et basse
         for j in range(1,coordsLenght + 1):
             # Basse
             triangles[k] = [vertices[0], vertices[(j % coordsLenght) + 1], vertices[j]]
-
+            #triangles[k] = [0, (j % coordsLenght) + 1, j]
             # Haute
             triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + j], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1]]
+            #triangles[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + j, (coordsLenght + 1) + (j % coordsLenght) + 1]
 
             k += 2
 
@@ -59,10 +64,20 @@ class Geojson(ObjectToTile):
             triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(coordsLenght + 1) + i]]
 
             triangles[k + 1] = [vertices[i], vertices[(i % coordsLenght) + 1], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
+            #triangles[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
+
+            #triangles[k + 1] = [i, (i % coordsLenght) + 1, (coordsLenght + 1) + (i % coordsLenght) + 1]
 
             k += 2
 
         return triangles
+
+    def flatten_list(self,list_of_lists):
+        if len(list_of_lists) == 0:
+            return list_of_lists
+        if isinstance(list_of_lists[0], list):
+            return self.flatten_list(list_of_lists[0]) + self.flatten_list(list_of_lists[1:])
+        return list_of_lists[:1] + self.flatten_list(list_of_lists[1:])
 
     def parse_geom(self,path):
         # Realize the geometry conversion from geojson to GLTF
@@ -81,12 +96,13 @@ class Geojson(ObjectToTile):
 
         for feature in gjContent['features']:
             coordinates = feature['geometry']['coordinates']
-            coords = np.array(coordinates)
-            coords = coords.flatten()
 
+            #coords = np.array(coordinates, dtype=object)
+            #coords = coords.flatten()
+            coords = self.flatten_list(coordinates)
             coordsLenght = len(coords) // 3
 
-            vertices = np.zeros(shape=(2 * (coordsLenght + 1), 3))
+            vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
             height = 20
             if "HAUTEUR" in feature['properties']:
                 if feature['properties']['HAUTEUR'] > 0:
@@ -97,17 +113,20 @@ class Geojson(ObjectToTile):
             # Set bottom center vertice value
             vertices[0] = self.get_center(coords)
             # Set top center vertice value
-            vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1] + height, vertices[0][2]]
+            vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
 
             # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
             for i in range(0, coordsLenght):
-                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], coords[(i * 3) + 2]]
-                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1] + height, coords[(i * 3) + 2]]
+                #vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], coords[(i * 3) + 2]]
+                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], 300.]
+                #vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1] + height, coords[(i * 3) + 2]]
+                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], 300. + height]
 
         if(len(vertices)==0):
             return False
 
         triangles = self.create_triangles(vertices,coordsLenght)
+
         self.geom.triangles.append(triangles)
 
         self.set_box()

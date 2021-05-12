@@ -64,8 +64,8 @@ def create_tile_content(pre_tile):
     # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
     # for more details on this matter.
     transform = np.array([1, 0,  0, 0,
-                      0, 0, -1, 0,
-                      0, 1,  0, 0,
+                      0, 1, 0, 0,
+                      0, 0,  1, 0,
                       0, 0,  0, 1])  
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
