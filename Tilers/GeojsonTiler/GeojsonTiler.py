@@ -91,9 +91,8 @@ def from_geojson_directory(path):
         print("No .geojson found in " + path)
         return None
     else:
-        print(str(len(objects)) + " .geojson parsed")
+        print(str(len(objects)) + " features parsed")
     
-
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
     pre_tileset = kd_tree(objects,200)       
 

@@ -83,7 +83,7 @@ class Geojson(ObjectToTile):
             return self.flatten_list(list_of_lists[0]) + self.flatten_list(list_of_lists[1:])
         return list_of_lists[:1] + self.flatten_list(list_of_lists[1:])
 
-    def parse_geom(self,path):
+    def parse_geom(self,feature):
         # Realize the geometry conversion from geojson to GLTF
         # GLTF expect the geometry to only be triangles that contains 
         # the vertices position, i.e something in the form :  
@@ -95,60 +95,53 @@ class Geojson(ObjectToTile):
         #    np.array([1., 1., 1.]),
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
-        geom_triangles = []
-        geom_vertices = []
 
-        with open(path) as f:
-            gjContent = json.load(f)
+        coordinates = feature['geometry']['coordinates']
 
-        for feature in gjContent['features']:
-            coordinates = feature['geometry']['coordinates']
+        #coords = np.array(coordinates, dtype=object)
+        #coords = coords.flatten()
+        coords = self.flatten_list(coordinates)
+        coordsLenght = len(coords) // 3
 
-            #coords = np.array(coordinates, dtype=object)
-            #coords = coords.flatten()
-            coords = self.flatten_list(coordinates)
-            coordsLenght = len(coords) // 3
+        vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
+        height = 5
+        if "HAUTEUR" in feature['properties']:
+            if feature['properties']['HAUTEUR'] > 0:
+                height = feature['properties']['HAUTEUR']
+        else:
+            print("No propertie called HAUTEUR in feature")
 
-            vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
-            height = 20
-            if "HAUTEUR" in feature['properties']:
-                if feature['properties']['HAUTEUR'] > 0:
-                    height = feature['properties']['HAUTEUR']
-            else:
-                print("No propertie called HAUTEUR in feature")
+        # Set bottom center vertice value
+        vertices[0] = self.get_center(coords)
+        # Set top center vertice value
+        vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
 
-            # Set bottom center vertice value
-            vertices[0] = self.get_center(coords)
-            # Set top center vertice value
-            vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
+        # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
+        for i in range(0, coordsLenght):
+            z = coords[(i * 3) + 2]
+            # In file, if Z is equal to 9 999, it means the Z value wasn't available
+            # So, we put a default Z value
+            if z >= 9999.:
+                z = 174.
+            vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
+            vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
 
-            # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
-            for i in range(0, coordsLenght):
-                z = coords[(i * 3) + 2]
-                # In file, if Z is equal to 9 999, it means the Z value wasn't available
-                # So, we put a default Z value
-                if z >= 9999.:
-                    z = 174.
-                vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
-                vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
+        if(len(vertices)==0):
+            return False
 
-            if(len(vertices)==0):
-                return False
+        triangles = self.create_triangles(vertices,coordsLenght)
 
-            triangles = self.create_triangles(vertices,coordsLenght)
+        # file_name = str(self.get_id()) + ".obj"
+        # f = open(os.path.join("debugObjs",file_name), "w")
+        # f.write("# " + file_name + "\n")
 
-            f = open("myfile.obj", "w")
-            f.write("# test.obj\n")
+        # for vertice in vertices:
+        #     f.write("v "+str(vertice[0]-844000)+" "+str(vertice[1]-6519000)+" "+str(vertice[2])+"\n")
 
-            for vertice in vertices:
-                f.write("v "+str(vertice[0]-844000)+" "+str(vertice[1]-6519000)+" "+str(vertice[2])+"\n")
+        # for triangle in triangles[1]:
+        #     f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
 
-            for triangle in triangles[1]:
-                f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
-        
-            geom_triangles.append(triangles[0])
-
-        self.geom.triangles.append(geom_triangles)
+        self.geom.triangles.append(triangles[0])
 
         self.set_box()
 
@@ -217,9 +210,20 @@ class Geojsons(ObjectsToTile):
                 if(".geojson" in geojson_file or ".json" in geojson_file):
                     #Get id from its name
                     id = geojson_file.replace('json','')
-                    geojson = Geojson(id)
-                    #Create geometry as expected from GLTF from an geojson file
-                    if(geojson.parse_geom(os.path.join(path,geojson_file))):
-                        objects.append(geojson)
+                    with open(os.path.join(path,geojson_file)) as f:
+                        gjContent = json.load(f)
+
+                    k = 0
+                    for feature in gjContent['features']:
+
+                        if "ID" in feature['properties']:
+                            feature_id = feature['properties']['ID']
+                        else:
+                            feature_id = id + str(k)
+                            k += 1
+                        geojson = Geojson(feature_id)
+                        #Create geometry as expected from GLTF from an geojson file
+                        if(geojson.parse_geom(feature)):
+                            objects.append(geojson)
         
         return Geojsons(objects)    
