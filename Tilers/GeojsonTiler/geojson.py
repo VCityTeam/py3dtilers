@@ -33,9 +33,12 @@ class Geojson(ObjectToTile):
         z = 0
         
         for i in range(0,len(coords),3):
+            cZ = coords[i + 2]
+            if cZ >= 9999.:
+                cZ = 174.
             x += coords[i]
             y += coords[i + 1]
-            z += coords[i + 2]
+            z += cZ
 
         x /= len(coords) / 3
         y /= len(coords) / 3
@@ -44,17 +47,18 @@ class Geojson(ObjectToTile):
         return [x, y, z] 
 
     def create_triangles(self,vertices,coordsLenght):
-        triangles = np.ndarray(shape=(coordsLenght * 4, 3,3))
+        triangles = np.ndarray(shape=(coordsLenght * 4, 3, 3))
+        triangles_id = np.ndarray(shape=(coordsLenght * 4, 3))
         k = 0
 
         # Triangles faces haute et basse
         for j in range(1,coordsLenght + 1):
             # Basse
             triangles[k] = [vertices[0], vertices[(j % coordsLenght) + 1], vertices[j]]
-            #triangles[k] = [0, (j % coordsLenght) + 1, j]
+            triangles_id[k] = [0, (j % coordsLenght) + 1, j]
             # Haute
             triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + j], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1]]
-            #triangles[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + j, (coordsLenght + 1) + (j % coordsLenght) + 1]
+            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + j, (coordsLenght + 1) + (j % coordsLenght) + 1]
 
             k += 2
 
@@ -63,13 +67,14 @@ class Geojson(ObjectToTile):
             triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(coordsLenght + 1) + i]]
 
             triangles[k + 1] = [vertices[i], vertices[(i % coordsLenght) + 1], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
-            #triangles[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
+            
+            triangles_id[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
 
-            #triangles[k + 1] = [i, (i % coordsLenght) + 1, (coordsLenght + 1) + (i % coordsLenght) + 1]
+            triangles_id[k + 1] = [i, (i % coordsLenght) + 1, (coordsLenght + 1) + (i % coordsLenght) + 1]
 
             k += 2
 
-        return triangles
+        return [triangles,triangles_id]
 
     def flatten_list(self,list_of_lists):
         if len(list_of_lists) == 0:
@@ -90,6 +95,9 @@ class Geojson(ObjectToTile):
         #    np.array([1., 1., 1.]),
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
+        geom_triangles = []
+        geom_vertices = []
+
         with open(path) as f:
             gjContent = json.load(f)
 
@@ -117,19 +125,30 @@ class Geojson(ObjectToTile):
             # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
             for i in range(0, coordsLenght):
                 z = coords[(i * 3) + 2]
-                # In file, if Z is equal to 9 999, it means to Z value wasn't available
+                # In file, if Z is equal to 9 999, it means the Z value wasn't available
                 # So, we put a default Z value
-                if z >= 9999:
+                if z >= 9999.:
                     z = 174.
                 vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
                 vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
 
-        if(len(vertices)==0):
-            return False
+            if(len(vertices)==0):
+                return False
 
-        triangles = self.create_triangles(vertices,coordsLenght)
+            triangles = self.create_triangles(vertices,coordsLenght)
 
-        self.geom.triangles.append(triangles)
+            f = open("myfile.obj", "w")
+            f.write("# test.obj\n")
+
+            for vertice in vertices:
+                f.write("v "+str(vertice[0]-844000)+" "+str(vertice[1]-6519000)+" "+str(vertice[2])+"\n")
+
+            for triangle in triangles[1]:
+                f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
+        
+            geom_triangles.append(triangles[0])
+
+        self.geom.triangles.append(geom_triangles)
 
         self.set_box()
 
