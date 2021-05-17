@@ -16,6 +16,9 @@ from os.path import isfile, join
 # The goal here is to take those coordinates and create a box from it.
 # To do this, 
 class Geojson(ObjectToTile):
+
+    line = 6
+
     def __init__(self, id = None):
         super().__init__(id)
 
@@ -96,11 +99,16 @@ class Geojson(ObjectToTile):
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
 
+
+        # print("Line : " + str(Geojson.line))
+        # Geojson.line += 1
+
         coordinates = feature['geometry']['coordinates']
 
-        #coords = np.array(coordinates, dtype=object)
-        #coords = coords.flatten()
-        coords = self.flatten_list(coordinates)
+        try:
+            coords = self.flatten_list(coordinates)
+        except RecursionError:
+            return False
         coordsLenght = len(coords) // 3
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
@@ -131,12 +139,13 @@ class Geojson(ObjectToTile):
 
         triangles = self.create_triangles(vertices,coordsLenght)
 
+        # print("Warning: Writting features as Objs might take a REALLY long time")
         # file_name = str(self.get_id()) + ".obj"
         # f = open(os.path.join("debugObjs",file_name), "w")
         # f.write("# " + file_name + "\n")
 
         # for vertice in vertices:
-        #     f.write("v "+str(vertice[0]-844000)+" "+str(vertice[1]-6519000)+" "+str(vertice[2])+"\n")
+        #     f.write("v "+str(vertice[0]-1844000)+" "+str(vertice[1]-5519000)+" "+str(vertice[2])+"\n")
 
         # for triangle in triangles[1]:
         #     f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
