@@ -18,6 +18,7 @@ from os.path import isfile, join
 class Geojson(ObjectToTile):
 
     line = 6
+    defaultZ = 144.
 
     def __init__(self, id = None):
         super().__init__(id)
@@ -36,9 +37,10 @@ class Geojson(ObjectToTile):
         z = 0
         
         for i in range(0,len(coords),3):
-            cZ = coords[i + 2]
+            # cZ = coords[i + 2]
+            cZ = Geojson.defaultZ
             if cZ >= 9999.:
-                cZ = 174.
+                cZ = Geojson.defaultZ
             x += coords[i]
             y += coords[i + 1]
             z += cZ
@@ -126,11 +128,12 @@ class Geojson(ObjectToTile):
 
         # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
         for i in range(0, coordsLenght):
-            z = coords[(i * 3) + 2]
+            # z = coords[(i * 3) + 2]
+            z = Geojson.defaultZ
             # In file, if Z is equal to 9 999, it means the Z value wasn't available
             # So, we put a default Z value
             if z >= 9999.:
-                z = 174.
+                z = Geojson.defaultZ
             vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
             vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
 
