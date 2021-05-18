@@ -25,6 +25,8 @@ class Geojson(ObjectToTile):
 
         self.geom = TriangleSoup()
 
+        self.z_min = 0
+
     def get_geom_as_triangles(self):
         return self.geom.triangles[0]
 
@@ -33,7 +35,6 @@ class Geojson(ObjectToTile):
 
     def get_z(self,coord):
         cZ = coord
-        #cZ = Geojson.defaultZ
         # In file, if Z is equal to 9 999, it means the Z value wasn't available
         # So, we put a default Z value
         if cZ >= 9999.:
@@ -48,7 +49,8 @@ class Geojson(ObjectToTile):
         for i in range(0,len(coords),3):
             x += coords[i]
             y += coords[i + 1]
-            z += self.get_z(coords[i + 2])
+            #z += self.get_z(coords[i + 2])
+            z += self.z_min
 
         x /= len(coords) / 3
         y /= len(coords) / 3
@@ -122,8 +124,7 @@ class Geojson(ObjectToTile):
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
 
         z_min = Geojson.defaultZ
-        z_max = Geojson.defaultZ
-        height = z_max - z_min
+        height = 0
 
         # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
         if "PREC_ALTI" in feature['properties']:
@@ -131,20 +132,6 @@ class Geojson(ObjectToTile):
                 return False
         else:
             print("No propertie called PREC_ALTI in feature : line " + str(Geojson.line))
-            return False
-
-        if "Z_MIN" in feature['properties']:
-            if feature['properties']['Z_MIN'] > 0:
-                z_min = feature['properties']['Z_MIN']
-        else:
-            print("No propertie called Z_MIN in feature : line " + str(Geojson.line))
-            return False
-
-        if "Z_MAX" in feature['properties']:
-            if feature['properties']['Z_MAX'] > 0:
-                z_max = feature['properties']['Z_MAX']
-        else:
-            print("No propertie called Z_MAX in feature : line " + str(Geojson.line))
             return False
 
         if "HAUTEUR" in feature['properties']:
@@ -156,6 +143,13 @@ class Geojson(ObjectToTile):
             print("No propertie called HAUTEUR in feature : line " + str(Geojson.line))
             return False
 
+        if "Z_MIN" in feature['properties']:
+            if feature['properties']['Z_MIN'] > 0:
+                self.z_min = feature['properties']['Z_MIN'] - height
+        else:
+            print("No propertie called Z_MIN in feature : line " + str(Geojson.line))
+            return False
+
         # Set bottom center vertice value
         vertices[0] = self.get_center(coords)
         # Set top center vertice value
@@ -163,7 +157,8 @@ class Geojson(ObjectToTile):
 
         # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
         for i in range(0, coordsLenght):
-            z = self.get_z(coords[(i * 3) + 2])
+            # z = self.get_z(coords[(i * 3) + 2])
+            z = self.z_min
 
             vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
             vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
