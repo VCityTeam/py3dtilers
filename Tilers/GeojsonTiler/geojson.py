@@ -32,8 +32,8 @@ class Geojson(ObjectToTile):
         self.geom.triangles[0] = triangles
 
     def get_z(self,coord):
-        # cZ = coord
-        cZ = Geojson.defaultZ
+        cZ = coord
+        #cZ = Geojson.defaultZ
         # In file, if Z is equal to 9 999, it means the Z value wasn't available
         # So, we put a default Z value
         if cZ >= 9999.:
@@ -108,7 +108,7 @@ class Geojson(ObjectToTile):
 
 
         # print("Line : " + str(Geojson.line))
-        # Geojson.line += 1
+        Geojson.line += 1
 
         coordinates = feature['geometry']['coordinates']
 
@@ -116,15 +116,45 @@ class Geojson(ObjectToTile):
             coords = self.flatten_list(coordinates)
         except RecursionError:
             return False
+
         coordsLenght = len(coords) // 3
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
-        height = 5
+
+        z_min = Geojson.defaultZ
+        z_max = Geojson.defaultZ
+        height = z_max - z_min
+
+        # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
+        if "PREC_ALTI" in feature['properties']:
+            if feature['properties']['PREC_ALTI'] >= 9999.:
+                return False
+        else:
+            print("No propertie called PREC_ALTI in feature : line " + str(Geojson.line))
+            return False
+
+        if "Z_MIN" in feature['properties']:
+            if feature['properties']['Z_MIN'] > 0:
+                z_min = feature['properties']['Z_MIN']
+        else:
+            print("No propertie called Z_MIN in feature : line " + str(Geojson.line))
+            return False
+
+        if "Z_MAX" in feature['properties']:
+            if feature['properties']['Z_MAX'] > 0:
+                z_max = feature['properties']['Z_MAX']
+        else:
+            print("No propertie called Z_MAX in feature : line " + str(Geojson.line))
+            return False
+
         if "HAUTEUR" in feature['properties']:
             if feature['properties']['HAUTEUR'] > 0:
                 height = feature['properties']['HAUTEUR']
+            else:
+                return False
         else:
-            print("No propertie called HAUTEUR in feature")
+            print("No propertie called HAUTEUR in feature : line " + str(Geojson.line))
+            return False
 
         # Set bottom center vertice value
         vertices[0] = self.get_center(coords)
