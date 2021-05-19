@@ -40,6 +40,9 @@ class Geojson(ObjectToTile):
 
         self.z_min = 0
 
+        self.vertices = list()
+        self.triangles = list()
+
     def get_geom_as_triangles(self):
         return self.geom.triangles[0]
 
@@ -64,27 +67,36 @@ class Geojson(ObjectToTile):
         return [x, y, z] 
 
     def create_triangles(self,vertices,coordsLenght):
+        # Contains the triangles vertices. Used to create 3D tiles
         triangles = np.ndarray(shape=(coordsLenght * 4, 3, 3))
+
+        # Contains the triangles vertices index. Used to create Objs
+        triangles_id = np.ndarray(shape=(coordsLenght * 4, 3))
         k = 0
 
         # Triangles in lower and upper faces
         for j in range(1,coordsLenght + 1):
             # Lower
             triangles[k] = [vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]]
+            triangles_id[k] = [0, j, (j % coordsLenght) + 1]
 
             # Upper
             triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]]
+            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + (j % coordsLenght) + 1, (coordsLenght + 1) + j]
 
             k += 2
 
         # Triangles sides
         for i in range(1,coordsLenght + 1):
             triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
+            triangles_id[k] = [i, (coordsLenght + 1) + i, (coordsLenght + 1) + (i % coordsLenght) + 1]
+
             triangles[k + 1] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]]
+            triangles_id[k + 1] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1,(i % coordsLenght) + 1]
 
             k += 2
 
-        return triangles
+        return [triangles,triangles_id]
 
     # Flatten list of lists (ex: [[a, b, c], [d, e, f], g]) to create a list (ex: [a, b, c, d, e, f, g])
     def flatten_list(self,list_of_lists):
@@ -121,7 +133,7 @@ class Geojson(ObjectToTile):
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
 
-        z_min = Geojson.defaultZ
+        self.z_min = Geojson.defaultZ
         height = 0
 
         # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
@@ -166,21 +178,14 @@ class Geojson(ObjectToTile):
 
         triangles = self.create_triangles(vertices,coordsLenght)
 
-        # print("Warning: Writting features as Objs might take a REALLY long time")
-        # file_name = str(self.get_id()) + ".obj"
-        # f = open(os.path.join("debugObjs",file_name), "w")
-        # f.write("# " + file_name + "\n")
-
-        # for vertice in vertices:
-        #     f.write("v "+str(vertice[0]-1844000)+" "+str(vertice[1]-5519000)+" "+str(vertice[2])+"\n")
-
-        # for triangle in triangles[1]:
-        #     f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
-
-        self.geom.triangles.append(triangles)
+        self.geom.triangles.append(triangles[0])
 
         self.set_box()
 
+        self.vertices = vertices
+        self.triangles = triangles[1]
+        # print("feature "+ str(Geojson.n_feature))
+        # print(self.triangles)
         return True
 
     def set_box(self):
@@ -241,6 +246,10 @@ class Geojsons(ObjectsToTile):
 
         geojson_dir = listdir(path)
 
+        vertices = list()
+        triangles = list()
+        vertice_offset = 1
+
         for geojson_file in geojson_dir:
             if(os.path.isfile(os.path.join(path,geojson_file))):
                 if(".geojson" in geojson_file or ".json" in geojson_file):
@@ -261,5 +270,21 @@ class Geojsons(ObjectsToTile):
                         #Create geometry as expected from GLTF from an geojson file
                         if(geojson.parse_geom(feature)):
                             objects.append(geojson)
+                            for vertice in geojson.vertices:
+                                vertices.append(vertice)
+                            for triangle in geojson.triangles:
+                                triangles.append(triangle + vertice_offset)
+                            vertice_offset += len(geojson.vertices)
+        
+        print("Warning: Writting features as Objs might take a REALLY long time")
+        file_name = "result.obj"
+        f = open(os.path.join("debugObjs",file_name), "w")
+        f.write("# " + file_name + "\n")
+        
+        for vertice in vertices:
+            f.write("v "+str(vertice[0]-1840000)+" "+str(vertice[1]-5170000)+" "+str(vertice[2])+"\n")
+
+        for triangle in triangles:
+            f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
         
         return Geojsons(objects)    
