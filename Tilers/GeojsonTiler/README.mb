@@ -11,5 +11,5 @@ Example:
 python Tilers/GeojsonTiler/GeojsonTiler.py --paths ../../geojson
 ```
 
-The Tiler uses "HAUTEUR" (height) and "Z_MIN" properties to create 3D tiles from features.
+The Tiler uses "HAUTEUR" (height) and "Z_MAX" properties to create 3D tiles from features.
 If the file don't have those properties, modify the geojson.py
