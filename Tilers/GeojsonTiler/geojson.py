@@ -129,7 +129,7 @@ class Geojson(ObjectToTile):
             if feature['properties']['PREC_ALTI'] >= 9999.:
                 return False
         else:
-            print("No propertie called PREC_ALTI in feature " + str(Geojson.line))
+            print("No propertie called PREC_ALTI in feature " + str(Geojson.n_feature))
             return False
 
         if "HAUTEUR" in feature['properties']:
@@ -138,14 +138,14 @@ class Geojson(ObjectToTile):
             else:
                 return False
         else:
-            print("No propertie called HAUTEUR in feature " + str(Geojson.line))
+            print("No propertie called HAUTEUR in feature " + str(Geojson.n_feature))
             return False
 
         if "Z_MIN" in feature['properties']:
             if feature['properties']['Z_MIN'] > 0:
                 self.z_min = feature['properties']['Z_MIN'] - height
         else:
-            print("No propertie called Z_MIN in feature " + str(Geojson.line))
+            print("No propertie called Z_MIN in feature " + str(Geojson.n_feature))
             return False
 
         # Set bottom center vertice value
