@@ -14,10 +14,23 @@ from os.path import isfile, join
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
 # Those elements are called "features", each feature has its own ground coordinates.
 # The goal here is to take those coordinates and create a box from it.
-# To do this, 
+# To do this, we compute the center of the lower face
+# Then we create the triangles of this face
+# and duplicate it with a Z offset to create the upper face
+# Then we create the side triangles to connect the upper and the lower faces
+#                 Top
+#                 .
+#             .       .
+#                 .
+
+
+#     .           .
+# .       .   .       .
+#     .           .
+#   Bottom      Bottom
 class Geojson(ObjectToTile):
 
-    line = 6
+    n_feature = 0
     defaultZ = 144.
 
     def __init__(self, id = None):
@@ -32,14 +45,6 @@ class Geojson(ObjectToTile):
 
     def set_triangles(self,triangles):
         self.geom.triangles[0] = triangles
-
-    def get_z(self,coord):
-        cZ = coord
-        # In file, if Z is equal to 9 999, it means the Z value wasn't available
-        # So, we put a default Z value
-        if cZ >= 9999.:
-            cZ = Geojson.defaultZ
-        return cZ
     
     def get_center(self,coords):
         x = 0
@@ -49,7 +54,7 @@ class Geojson(ObjectToTile):
         for i in range(0,len(coords),3):
             x += coords[i]
             y += coords[i + 1]
-            #z += self.get_z(coords[i + 2])
+            #z += coords[i + 2]
             z += self.z_min
 
         x /= len(coords) / 3
@@ -60,34 +65,28 @@ class Geojson(ObjectToTile):
 
     def create_triangles(self,vertices,coordsLenght):
         triangles = np.ndarray(shape=(coordsLenght * 4, 3, 3))
-        triangles_id = np.ndarray(shape=(coordsLenght * 4, 3))
         k = 0
 
-        # Triangles faces haute et basse
+        # Triangles in lower and upper faces
         for j in range(1,coordsLenght + 1):
-            # Basse
+            # Lower
             triangles[k] = [vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]]
 
-            triangles_id[k] = [0, (j % coordsLenght) + 1, j]
-            # Haute
+            # Upper
             triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]]
-
-            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + j, (coordsLenght + 1) + (j % coordsLenght) + 1]
 
             k += 2
 
-        # Triangles faces cotés
+        # Triangles sides
         for i in range(1,coordsLenght + 1):
             triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
             triangles[k + 1] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]]
 
-            triangles_id[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
-            triangles_id[k + 1] = [i, (i % coordsLenght) + 1, (coordsLenght + 1) + (i % coordsLenght) + 1]
-
             k += 2
 
-        return [triangles,triangles_id]
+        return triangles
 
+    # Flatten list of lists (ex: [[a, b, c], [d, e, f], g]) to create a list (ex: [a, b, c, d, e, f, g])
     def flatten_list(self,list_of_lists):
         if len(list_of_lists) == 0:
             return list_of_lists
@@ -108,9 +107,8 @@ class Geojson(ObjectToTile):
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
 
-
-        # print("Line : " + str(Geojson.line))
-        Geojson.line += 1
+        # Current feature number
+        Geojson.n_feature += 1
 
         coordinates = feature['geometry']['coordinates']
 
@@ -131,7 +129,7 @@ class Geojson(ObjectToTile):
             if feature['properties']['PREC_ALTI'] >= 9999.:
                 return False
         else:
-            print("No propertie called PREC_ALTI in feature : line " + str(Geojson.line))
+            print("No propertie called PREC_ALTI in feature " + str(Geojson.line))
             return False
 
         if "HAUTEUR" in feature['properties']:
@@ -140,14 +138,14 @@ class Geojson(ObjectToTile):
             else:
                 return False
         else:
-            print("No propertie called HAUTEUR in feature : line " + str(Geojson.line))
+            print("No propertie called HAUTEUR in feature " + str(Geojson.line))
             return False
 
         if "Z_MIN" in feature['properties']:
             if feature['properties']['Z_MIN'] > 0:
                 self.z_min = feature['properties']['Z_MIN'] - height
         else:
-            print("No propertie called Z_MIN in feature : line " + str(Geojson.line))
+            print("No propertie called Z_MIN in feature " + str(Geojson.line))
             return False
 
         # Set bottom center vertice value
