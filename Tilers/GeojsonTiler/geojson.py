@@ -49,7 +49,7 @@ class Geojson(ObjectToTile):
     def set_triangles(self,triangles):
         self.geom.triangles[0] = triangles
     
-    def get_center(self,coords):
+    def get_center(self,coords,height):
         x = 0
         y = 0
         z = 0
@@ -57,8 +57,8 @@ class Geojson(ObjectToTile):
         for i in range(0,len(coords),3):
             x += coords[i]
             y += coords[i + 1]
-            #z += coords[i + 2]
-            z += self.z_min
+            z += coords[i + 2] - height
+            #z += self.z_min
 
         x /= len(coords) / 3
         y /= len(coords) / 3
@@ -161,14 +161,14 @@ class Geojson(ObjectToTile):
             return False
 
         # Set bottom center vertice value
-        vertices[0] = self.get_center(coords)
+        vertices[0] = self.get_center(coords,height)
         # Set top center vertice value
         vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
 
         # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
         for i in range(0, coordsLenght):
-            # z = self.get_z(coords[(i * 3) + 2])
-            z = self.z_min
+            z = coords[(i * 3) + 2] - height
+            # z = self.z_min
 
             vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
             vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
@@ -184,8 +184,7 @@ class Geojson(ObjectToTile):
 
         self.vertices = vertices
         self.triangles = triangles[1]
-        # print("feature "+ str(Geojson.n_feature))
-        # print(self.triangles)
+
         return True
 
     def set_box(self):
@@ -276,7 +275,7 @@ class Geojsons(ObjectsToTile):
                                 triangles.append(triangle + vertice_offset)
                             vertice_offset += len(geojson.vertices)
         
-        print("Warning: Writting features as Objs might take a REALLY long time")
+        print("Warning: Writting features as Objs might take a long time")
         file_name = "result.obj"
         f = open(os.path.join("debugObjs",file_name), "w")
         f.write("# " + file_name + "\n")
