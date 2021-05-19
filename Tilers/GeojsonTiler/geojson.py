@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import numpy as np
-import pywavefront
 import json
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
@@ -38,7 +37,7 @@ class Geojson(ObjectToTile):
 
         self.geom = TriangleSoup()
 
-        self.z_min = 0
+        self.z_max = 0
 
         self.vertices = list()
         self.triangles = list()
@@ -57,8 +56,8 @@ class Geojson(ObjectToTile):
         for i in range(0,len(coords),3):
             x += coords[i]
             y += coords[i + 1]
-            z += coords[i + 2] - height
-            #z += self.z_min
+            #z += coords[i + 2] - height
+            z += self.z_max
 
         x /= len(coords) / 3
         y /= len(coords) / 3
@@ -133,7 +132,7 @@ class Geojson(ObjectToTile):
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
 
-        self.z_min = Geojson.defaultZ
+        self.z_max = Geojson.defaultZ
         height = 0
 
         # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
@@ -153,11 +152,11 @@ class Geojson(ObjectToTile):
             print("No propertie called HAUTEUR in feature " + str(Geojson.n_feature))
             return False
 
-        if "Z_MIN" in feature['properties']:
-            if feature['properties']['Z_MIN'] > 0:
-                self.z_min = feature['properties']['Z_MIN'] - height
+        if "Z_MAX" in feature['properties']:
+            if feature['properties']['Z_MAX'] > 0:
+                self.z_max = feature['properties']['Z_MAX'] - height
         else:
-            print("No propertie called Z_MIN in feature " + str(Geojson.n_feature))
+            print("No propertie called Z_MAX in feature " + str(Geojson.n_feature))
             return False
 
         # Set bottom center vertice value
@@ -167,8 +166,8 @@ class Geojson(ObjectToTile):
 
         # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
         for i in range(0, coordsLenght):
-            z = coords[(i * 3) + 2] - height
-            # z = self.z_min
+            # z = coords[(i * 3) + 2] - height
+            z = self.z_max
 
             vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
             vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
