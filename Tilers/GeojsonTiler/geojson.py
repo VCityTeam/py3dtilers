@@ -177,7 +177,7 @@ class Geojson(ObjectToTile):
         # for triangle in triangles[1]:
         #     f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
 
-        self.geom.triangles.append(triangles[0])
+        self.geom.triangles.append(triangles)
 
         self.set_box()
 

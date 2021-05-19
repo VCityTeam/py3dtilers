@@ -19,7 +19,7 @@ requirements = (
     'lz4',
     'pyzmq',
     'jsonschema',
-    'pywavefront',
+    'pywavefront'
 )
 
 dev_requirements = (

@@ -21,7 +21,6 @@ parts/
 sdist/
 var/
 debugObjs/
-geojson_tilesets/
 *.egg-info/
 .installed.cfg
 *.egg

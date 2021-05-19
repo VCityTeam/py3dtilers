@@ -41,17 +41,17 @@ def parse_command_line():
 
 def create_tile_content(pre_tile):
     """
-    :param pre_tile: an array containing geojsons of a single tile
+    :param pre_tile: an array containing features of a single tile
 
     :return: a B3dm tile.
     """
     #create B3DM content
     arrays = []
-    for geojson in pre_tile:
+    for feature in pre_tile:
         arrays.append({
-            'position': geojson.geom.getPositionArray(),
-            'normal': geojson.geom.getNormalArray(),
-            'bbox': [[float(i) for i in j] for j in geojson.geom.getBbox()]
+            'position': feature.geom.getPositionArray(),
+            'normal': feature.geom.getNormalArray(),
+            'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()]
         })
         
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
@@ -69,8 +69,8 @@ def create_tile_content(pre_tile):
                       0, 0,  0, 1])  
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
-    # Create a batch table and add the ID of each .geojson to it
-    ids = [geojson.get_geojson_id() for geojson in pre_tile]
+    # Create a batch table and add the ID of each feature to it
+    ids = [feature.get_geojson_id() for feature in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
 
