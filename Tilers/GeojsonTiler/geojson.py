@@ -105,6 +105,25 @@ class Geojson(ObjectToTile):
             return self.flatten_list(list_of_lists[0]) + self.flatten_list(list_of_lists[1:])
         return list_of_lists[:1] + self.flatten_list(list_of_lists[1:])
 
+    def skip_coord(self, coords):
+        clean_coords = list()
+
+        last_coord = [coords[0],coords[1],coords[2]]
+        clean_coords.append(coords[0])
+        clean_coords.append(coords[1])
+        clean_coords.append(coords[2])
+
+        for i in range(3,len(coords),3):
+            coord = [coords[i],coords[i+1],coords[i+2]]
+            diff_x = abs(last_coord[0] - coord[0])
+            diff_y = abs(last_coord[1] - coord[1])
+            if diff_x > 5 or diff_y > 5:
+                clean_coords.append(coord[0])
+                clean_coords.append(coord[1])
+                clean_coords.append(coord[2])
+            last_coord = coord
+        return clean_coords
+
     def parse_geom(self,feature):
         # Realize the geometry conversion from geojson to GLTF
         # GLTF expect the geometry to only be triangles that contains 
@@ -128,6 +147,7 @@ class Geojson(ObjectToTile):
         except RecursionError:
             return False
 
+        #coords = self.skip_coord(coords)
         coordsLenght = len(coords) // 3
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
