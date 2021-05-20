@@ -121,7 +121,7 @@ class Geojson(ObjectToTile):
                 clean_coords.append(coord[0])
                 clean_coords.append(coord[1])
                 clean_coords.append(coord[2])
-            last_coord = coord
+                last_coord = coord
         return clean_coords
 
     def parse_geom(self,feature):
@@ -148,6 +148,7 @@ class Geojson(ObjectToTile):
             return False
 
         #coords = self.skip_coord(coords)
+        
         coordsLenght = len(coords) // 3
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
