@@ -4,6 +4,7 @@ import numpy as np
 import json
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
+from scipy.spatial import ConvexHull
 
 import os
 from os import listdir
@@ -122,6 +123,7 @@ class Geojson(ObjectToTile):
                 clean_coords.append(coord[1])
                 clean_coords.append(coord[2])
                 last_coord = coord
+
         return clean_coords
 
     def parse_geom(self,feature):
@@ -144,11 +146,18 @@ class Geojson(ObjectToTile):
 
         try:
             coords = self.flatten_list(coordinates)
+            # print(coords)
+            # The last point in features is always the same as the first, so we remove the last point
+            coords = coords[:len(coords)-3]
         except RecursionError:
             return False
 
-        #coords = self.skip_coord(coords)
+        # coords = [coords[n:n+3] for n in range(0, len(coords), 3)]
+        # hull = ConvexHull(coords)
+        # print(hull)
         
+        #coords = self.skip_coord(coords)
+        #coords = self.flatten_list(coords)
         coordsLenght = len(coords) // 3
 
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
