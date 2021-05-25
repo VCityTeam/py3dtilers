@@ -19,7 +19,7 @@ from geojson import Geojson, Geojsons
 def parse_command_line():
     # arg parse
     text = '''A small utility that build a 3DTiles tileset out of the content
-               of an geojson repository extracted from FME'''
+               of an geojson repository'''
     parser = argparse.ArgumentParser(description=text)
 
     # adding positional arguments
@@ -28,14 +28,38 @@ def parse_command_line():
                         type=str,  
                         help='path to the database configuration file')
 
+    parser.add_argument('--lod',
+                        nargs='*',
+                        type=str,  
+                        help='path to the database configuration file')
+    
+    parser.add_argument('--properties',
+                        nargs='*',
+                        type=str,  
+                        help='path to the database configuration file')
+
     result = parser.parse_args()
+
+    if(result.lod == None):
+        result.lod = ['group','60']
+
+    if(result.properties == None or len(result.properties) % 2 != 0):
+        result.properties = ['height','HAUTEUR','z','Z_MAX','prec','PREC_ALTI']
+    else:
+        if('height' not in result.properties):
+            result.properties += ['height','HAUTEUR']
+        if('prec' not in result.properties):
+            result.properties += ['prec','PREC_ALTI']
+        if('z' not in result.properties):
+            result.properties += ['z','Z_MAX']
+
     if(result.paths == None):
         print("Please provide a path to a directory " \
                 "containing some geojson files or multiple directories")
         print("Exiting")
         sys.exit(1)
 
-    return parser.parse_args()
+    return result
 
 
 
@@ -78,14 +102,14 @@ def create_tile_content(pre_tile):
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_geojson_directory(path):    
+def from_geojson_directory(path, lod, properties):    
     """
     :param path: a path to a directory
 
     :return: a tileset. 
     """
     
-    objects = Geojsons.retrieve_geojsons(path)
+    objects = Geojsons.retrieve_geojsons(path,lod,properties)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -143,7 +167,7 @@ def main():
     for path in paths:
         if(os.path.isdir(path)):
                 print("Writing " + path )
-                tileset = from_geojson_directory(path)
+                tileset = from_geojson_directory(path,args.lod,args.properties)
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                     folder_name = path.split('/')[-1]

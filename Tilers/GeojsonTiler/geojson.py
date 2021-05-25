@@ -107,31 +107,34 @@ class Geojson(ObjectToTile):
             return self.flatten_list(list_of_lists[0]) + self.flatten_list(list_of_lists[1:])
         return list_of_lists[:1] + self.flatten_list(list_of_lists[1:])
 
-    def parse_geojson(self,feature):
+    def parse_geojson(self,feature,properties):
         # Current feature number
         Geojson.n_feature += 1
 
-        # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
-        if "PREC_ALTI" in feature['properties']:
-            if feature['properties']['PREC_ALTI'] >= 9999.:
+        # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
+        prec_name = properties[properties.index('prec') + 1]
+        if  prec_name in feature['properties']:
+            if feature['properties'][prec_name] >= 9999.:
                 return False
         else:
-            print("No propertie called PREC_ALTI in feature " + str(Geojson.n_feature))
+            print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
             return False
 
-        if "HAUTEUR" in feature['properties']:
-            if feature['properties']['HAUTEUR'] > 0:
-                self.height = feature['properties']['HAUTEUR']
+        height_name = properties[properties.index('height') + 1]
+        if  height_name in feature['properties']:
+            if feature['properties'][height_name] > 0:
+                self.height = feature['properties'][height_name]
             else:
                 return False
         else:
-            print("No propertie called HAUTEUR in feature " + str(Geojson.n_feature))
+            print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature))
             return False
 
-        if "Z_MAX" in feature['properties']:
-            self.z_max = feature['properties']['Z_MAX'] - self.height
+        z_name = properties[properties.index('z') + 1]
+        if  z_name in feature['properties']:
+            self.z_max = feature['properties'][z_name] - self.height
         else:
-            print("No propertie called Z_MAX in feature " + str(Geojson.n_feature))
+            print("No propertie called " + z_name + " in feature " + str(Geojson.n_feature))
             return False
 
         coordinates = feature['geometry']['coordinates']
@@ -228,6 +231,9 @@ class Geojsons(ObjectsToTile):
     """
         A decorated list of ObjectsToTile type objects.
     """
+
+    defaultGroupOffset = 50
+
     def __init__(self,objs=None):
         super().__init__(objs)
 
@@ -258,15 +264,15 @@ class Geojsons(ObjectsToTile):
             rounded_coord[i] = base * round(coordinate[i]/base)
         return rounded_coord
 
-    # Group features which are in the same cube of size 'offset'
+    # Group features which are in the same cube of size 'size'
     @staticmethod
-    def group_features_by_center(features,offset):
+    def group_features_by_center(features,size):
         grouped_features = list()
         features_dict = {}
         
         # Create a dictionary key: cubes center (x,y,z); value: list of features index
         for i in range(0,len(features)):
-            closest_cube = Geojsons.round_coordinate(features[i].center,offset)
+            closest_cube = Geojsons.round_coordinate(features[i].center,size)
             if tuple(closest_cube) in features_dict:
                 features_dict[tuple(closest_cube)].append(i)
             else:
@@ -299,7 +305,7 @@ class Geojsons(ObjectsToTile):
         return grouped_features
 
     @staticmethod
-    def retrieve_geojsons(path, objects=list()):
+    def retrieve_geojsons(path, lod, properties, objects=list()):
         """
         :param path: a path to a directory
 
@@ -330,10 +336,15 @@ class Geojsons(ObjectsToTile):
                             feature_id = id + str(k)
                             k += 1
                         geojson = Geojson(feature_id)
-                        if(geojson.parse_geojson(feature)):
+                        if(geojson.parse_geojson(feature,properties)):
                             geojsons.append(geojson)
 
-                    geojsons = Geojsons.group_features_by_center(geojsons,60)
+                    if 'group' in lod:
+                        try:
+                            size = int(lod[1])
+                        except:
+                            size = Geojsons.defaultGroupOffset
+                        geojsons = Geojsons.group_features_by_center(geojsons,size)
 
                     for geojson in geojsons:
                         #Create geometry as expected from GLTF from an geojson file
