@@ -156,8 +156,7 @@ class Geojson(ObjectToTile):
             return False
 
         if "Z_MAX" in feature['properties']:
-            if feature['properties']['Z_MAX'] > 0:
-                self.z_max = feature['properties']['Z_MAX'] - height
+            self.z_max = feature['properties']['Z_MAX'] - height
         else:
             print("No propertie called Z_MAX in feature " + str(Geojson.n_feature))
             return False
@@ -166,13 +165,14 @@ class Geojson(ObjectToTile):
 
         try:
             coords = self.flatten_list(coordinates)
+            # Group coords into (x,y) arrays, the z will always be the z_max
             # The last point in features is always the same as the first, so we remove the last point
             coords = [coords[n:n+2] for n in range(0, len(coords)-3, 3)]
         except RecursionError:
             return False
 
         # If the feature has at least 4 coords, create a convex hull
-        # The convex hull reduces the number of points and the level of details
+        # The convex hull reduces the number of points and the level of detail
         if len(coords) >= 4:
             hull = ConvexHull(coords)
             coords = [coords[i] for i in hull.vertices]
@@ -186,7 +186,7 @@ class Geojson(ObjectToTile):
         # Set top center vertice value
         vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
 
-        # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
+        # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
         for i in range(0, coordsLenght):
             z = self.z_max
 
@@ -196,6 +196,8 @@ class Geojson(ObjectToTile):
         if(len(vertices)==0):
             return False
 
+        # triangles[0] contains the triangles with coordinates ([[x1, y1, z1], [x2, y2, z2], [x3, y3, z3]) used for 3DTiles
+        # triangles[1] contains the triangles with indexes ([1, 2, 3]) used for Objs
         triangles = self.create_triangles(vertices,coordsLenght)
 
         self.geom.triangles.append(triangles[0])
