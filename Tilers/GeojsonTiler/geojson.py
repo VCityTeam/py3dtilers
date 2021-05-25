@@ -171,10 +171,11 @@ class Geojson(ObjectToTile):
         except RecursionError:
             return False
 
-        # if len(coords) >= 4:
-        #     hull = ConvexHull(coords)
-        #     coords = [coords[i] for i in hull.vertices]
-        #     print(coords)
+        # If the feature has at least 4 coords, create a convex hull
+        # The convex hull reduces the number of points and the level of details
+        if len(coords) >= 4:
+            hull = ConvexHull(coords)
+            coords = [coords[i] for i in hull.vertices]
         
         coordsLenght = len(coords)
 
