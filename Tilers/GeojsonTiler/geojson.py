@@ -22,8 +22,8 @@ from os.path import isfile, join
 #                 .
 #             .       .
 #                 .
-
-
+#
+#
 #     .           .
 # .       .   .       .
 #     .           .
@@ -39,9 +39,13 @@ class Geojson(ObjectToTile):
         self.geom = TriangleSoup()
 
         self.z_max = 0
+        self.height = 0
+        self.center = []
 
         self.vertices = list()
         self.triangles = list()
+
+        self.coords = list()
 
     def get_geom_as_triangles(self):
         return self.geom.triangles[0]
@@ -82,7 +86,7 @@ class Geojson(ObjectToTile):
 
             k += 2
 
-        # Triangles sides
+        # Triangles in side faces
         for i in range(1,coordsLenght + 1):
             triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(coordsLenght + 1) + i]]
             triangles_id[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
@@ -94,6 +98,7 @@ class Geojson(ObjectToTile):
 
         return [triangles,triangles_id]
 
+
     # Flatten list of lists (ex: [[a, b, c], [d, e, f], g]) to create a list (ex: [a, b, c, d, e, f, g])
     def flatten_list(self,list_of_lists):
         if len(list_of_lists) == 0:
@@ -102,39 +107,7 @@ class Geojson(ObjectToTile):
             return self.flatten_list(list_of_lists[0]) + self.flatten_list(list_of_lists[1:])
         return list_of_lists[:1] + self.flatten_list(list_of_lists[1:])
 
-    def skip_coord(self, coords):
-        clean_coords = list()
-
-        last_coord = [coords[0],coords[1],coords[2]]
-        clean_coords.append(coords[0])
-        clean_coords.append(coords[1])
-        clean_coords.append(coords[2])
-
-        for i in range(3,len(coords),3):
-            coord = [coords[i],coords[i+1],coords[i+2]]
-            diff_x = abs(last_coord[0] - coord[0])
-            diff_y = abs(last_coord[1] - coord[1])
-            if diff_x > 5 or diff_y > 5:
-                clean_coords.append(coord[0])
-                clean_coords.append(coord[1])
-                clean_coords.append(coord[2])
-                last_coord = coord
-
-        return clean_coords
-
-    def parse_geom(self,feature):
-        # Realize the geometry conversion from geojson to GLTF
-        # GLTF expect the geometry to only be triangles that contains 
-        # the vertices position, i.e something in the form :  
-        # [
-        #   [np.array([0., 0., 0,]),
-        #    np.array([0.5, 0.5, 0.5]),
-        #    np.array([1.0 ,1.0 ,1.0])]
-        #   [np.array([0.5, 0.5, 0,5]),
-        #    np.array([1., 1., 1.]),
-        #    np.array([-1.0 ,-1.0 ,-1.0])]
-        # ]
-
+    def parse_geojson(self,feature):
         # Current feature number
         Geojson.n_feature += 1
 
@@ -148,7 +121,7 @@ class Geojson(ObjectToTile):
 
         if "HAUTEUR" in feature['properties']:
             if feature['properties']['HAUTEUR'] > 0:
-                height = feature['properties']['HAUTEUR']
+                self.height = feature['properties']['HAUTEUR']
             else:
                 return False
         else:
@@ -156,7 +129,7 @@ class Geojson(ObjectToTile):
             return False
 
         if "Z_MAX" in feature['properties']:
-            self.z_max = feature['properties']['Z_MAX'] - height
+            self.z_max = feature['properties']['Z_MAX'] - self.height
         else:
             print("No propertie called Z_MAX in feature " + str(Geojson.n_feature))
             return False
@@ -168,8 +141,29 @@ class Geojson(ObjectToTile):
             # Group coords into (x,y) arrays, the z will always be the z_max
             # The last point in features is always the same as the first, so we remove the last point
             coords = [coords[n:n+2] for n in range(0, len(coords)-3, 3)]
+            self.coords = coords
+            center = self.get_center(coords)
+            self.center = [center[0], center[1], center[2] + self.height / 2]
         except RecursionError:
             return False
+
+        return True
+
+    def parse_geom(self):
+        # Realize the geometry conversion from geojson to GLTF
+        # GLTF expect the geometry to only be triangles that contains 
+        # the vertices position, i.e something in the form :  
+        # [
+        #   [np.array([0., 0., 0,]),
+        #    np.array([0.5, 0.5, 0.5]),
+        #    np.array([1.0 ,1.0 ,1.0])]
+        #   [np.array([0.5, 0.5, 0,5]),
+        #    np.array([1., 1., 1.]),
+        #    np.array([-1.0 ,-1.0 ,-1.0])]
+        # ]
+
+        coords = self.coords
+        height = self.height
 
         # If the feature has at least 4 coords, create a convex hull
         # The convex hull reduces the number of points and the level of detail
@@ -178,7 +172,6 @@ class Geojson(ObjectToTile):
             coords = [coords[i] for i in hull.vertices]
         
         coordsLenght = len(coords)
-
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
 
         # Set bottom center vertice value
@@ -256,7 +249,55 @@ class Geojsons(ObjectsToTile):
                 new_geom.append(new_position)
             geojson.set_triangles(new_geom)
             geojson.set_box() 
-    
+
+    # Round the coordinate to the closest multiple of 'base'
+    @staticmethod
+    def round_coordinate(coordinate,base):
+        rounded_coord = coordinate
+        for i in range(0,len(coordinate)):
+            rounded_coord[i] = base * round(coordinate[i]/base)
+        return rounded_coord
+
+    # Group features which are in the same cube of size 'offset'
+    @staticmethod
+    def group_features_by_center(features,offset):
+        grouped_features = list()
+        features_dict = {}
+        
+        # Create a dictionary key: cubes center (x,y,z); value: list of features index
+        for i in range(0,len(features)):
+            closest_cube = Geojsons.round_coordinate(features[i].center,offset)
+            if tuple(closest_cube) in features_dict:
+                features_dict[tuple(closest_cube)].append(i)
+            else:
+                features_dict[tuple(closest_cube)] = [i]
+
+        # For every cube, merge the features contained in this cube
+        k = 0
+        for cube in features_dict:
+            geojson = Geojson("group"+str(k))
+            z = 9999
+            height = 0
+            coords = list()
+
+            for j in features_dict[cube]:
+                if height < features[j].height:
+                    height = features[j].height
+                if z > features[j].z_max:
+                    z = features[j].z_max
+                for coord in features[j].coords:
+                    coords.append(coord)
+
+            center = geojson.get_center(coords)
+            geojson.coords = coords
+            geojson.z_max = z
+            geojson.height = height
+            geojson.center = [center[0], center[1], center[2] + geojson.height / 2]
+            grouped_features.append(geojson)
+            k += 1
+
+        return grouped_features
+
     @staticmethod
     def retrieve_geojsons(path, objects=list()):
         """
@@ -269,6 +310,7 @@ class Geojsons(ObjectsToTile):
 
         vertices = list()
         triangles = list()
+        geojsons = list()
         vertice_offset = 1
 
         for geojson_file in geojson_dir:
@@ -288,9 +330,16 @@ class Geojsons(ObjectsToTile):
                             feature_id = id + str(k)
                             k += 1
                         geojson = Geojson(feature_id)
+                        if(geojson.parse_geojson(feature)):
+                            geojsons.append(geojson)
+
+                    geojsons = Geojsons.group_features_by_center(geojsons,60)
+
+                    for geojson in geojsons:
                         #Create geometry as expected from GLTF from an geojson file
-                        if(geojson.parse_geom(feature)):
+                        if(geojson.parse_geom()):
                             objects.append(geojson)
+                            # Add triangles and vertices to create an obj
                             for vertice in geojson.vertices:
                                 vertices.append(vertice)
                             for triangle in geojson.triangles:
