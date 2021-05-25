@@ -18,6 +18,16 @@ from os.path import isfile, join
 # Then we create the triangles of this face
 # and duplicate it with a Z offset to create the upper face
 # Then we create the side triangles to connect the upper and the lower faces
+#                 Top
+#                 .
+#             .       .
+#                 .
+#
+#
+#     .           .
+# .       .   .       .
+#     .           .
+#   Bottom      Bottom
 class Geojson(ObjectToTile):
 
     n_feature = 0
@@ -67,22 +77,22 @@ class Geojson(ObjectToTile):
         # Triangles in lower and upper faces
         for j in range(1,coordsLenght + 1):
             # Lower
-            triangles[k] = [vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]]
-            triangles_id[k] = [0, j, (j % coordsLenght) + 1]
+            triangles[k] = [vertices[0], vertices[(j % coordsLenght) + 1], vertices[j]]
+            triangles_id[k] = [0, (j % coordsLenght) + 1, j]
 
             # Upper
-            triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]]
-            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + (j % coordsLenght) + 1, (coordsLenght + 1) + j]
+            triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + j], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1]]
+            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + j, (coordsLenght + 1) + (j % coordsLenght) + 1]
 
             k += 2
 
         # Triangles in side faces
         for i in range(1,coordsLenght + 1):
-            triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
-            triangles_id[k] = [i, (coordsLenght + 1) + i, (coordsLenght + 1) + (i % coordsLenght) + 1]
+            triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(coordsLenght + 1) + i]]
+            triangles_id[k] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (coordsLenght + 1) + i]
 
-            triangles[k + 1] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]]
-            triangles_id[k + 1] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (i % coordsLenght) + 1]
+            triangles[k + 1] = [vertices[i], vertices[(i % coordsLenght) + 1], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
+            triangles_id[k + 1] = [i,(i % coordsLenght) + 1, (coordsLenght + 1) + (i % coordsLenght) + 1]
 
             k += 2
 
@@ -163,7 +173,7 @@ class Geojson(ObjectToTile):
         # The convex hull reduces the number of points and the level of detail
         if len(coords) >= 4:
             hull = ConvexHull(coords)
-            coords = [coords[i] for i in reversed(hull.vertices)]
+            coords = [coords[i] for i in hull.vertices]
         
         coordsLenght = len(coords)
         vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
