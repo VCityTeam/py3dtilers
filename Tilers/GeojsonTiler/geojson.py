@@ -358,9 +358,9 @@ class Geojsons(ObjectsToTile):
                                 triangles.append(triangle + vertice_offset)
                             vertice_offset += len(geojson.vertices)
         
-        print("Warning: Writting features as Objs might take a long time")
+        # print("Warning: Writting features as Objs might take a long time")
         file_name = "result.obj"
-        f = open(os.path.join("debugObjs",file_name), "w")
+        f = open(os.path.join(file_name), "w")
         f.write("# " + file_name + "\n")
         
         for vertice in vertices:

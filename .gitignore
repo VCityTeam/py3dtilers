@@ -21,6 +21,7 @@ parts/
 sdist/
 var/
 debugObjs/
+result.obj
 *.egg-info/
 .installed.cfg
 *.egg
