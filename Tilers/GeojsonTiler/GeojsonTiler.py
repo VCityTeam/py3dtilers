@@ -28,7 +28,7 @@ def parse_command_line():
                         type=str,  
                         help='path to the database configuration file')
 
-    parser.add_argument('--lod',
+    parser.add_argument('--group',
                         nargs='*',
                         type=str,  
                         help='path to the database configuration file')
@@ -40,8 +40,8 @@ def parse_command_line():
 
     result = parser.parse_args()
 
-    if(result.lod == None):
-        result.lod = ['group','60']
+    if(result.group == None):
+        result.group = ['none']
 
     if(result.properties == None or len(result.properties) % 2 != 0):
         result.properties = ['height','HAUTEUR','z','Z_MAX','prec','PREC_ALTI']
@@ -102,14 +102,14 @@ def create_tile_content(pre_tile):
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_geojson_directory(path, lod, properties):    
+def from_geojson_directory(path, group, properties):    
     """
     :param path: a path to a directory
 
     :return: a tileset. 
     """
     
-    objects = Geojsons.retrieve_geojsons(path,lod,properties)
+    objects = Geojsons.retrieve_geojsons(path,group,properties)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -167,7 +167,7 @@ def main():
     for path in paths:
         if(os.path.isdir(path)):
                 print("Writing " + path )
-                tileset = from_geojson_directory(path,args.lod,args.properties)
+                tileset = from_geojson_directory(path,args.group,args.properties)
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                     folder_name = path.split('/')[-1]

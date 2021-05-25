@@ -113,12 +113,13 @@ class Geojson(ObjectToTile):
 
         # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
         prec_name = properties[properties.index('prec') + 1]
-        if  prec_name in feature['properties']:
-            if feature['properties'][prec_name] >= 9999.:
+        if prec_name != 'NONE':
+            if  prec_name in feature['properties']:
+                if feature['properties'][prec_name] >= 9999.:
+                    return False
+            else:
+                print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
                 return False
-        else:
-            print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
-            return False
 
         height_name = properties[properties.index('height') + 1]
         if  height_name in feature['properties']:
@@ -305,7 +306,7 @@ class Geojsons(ObjectsToTile):
         return grouped_features
 
     @staticmethod
-    def retrieve_geojsons(path, lod, properties, objects=list()):
+    def retrieve_geojsons(path, group, properties, objects=list()):
         """
         :param path: a path to a directory
 
@@ -339,9 +340,9 @@ class Geojsons(ObjectsToTile):
                         if(geojson.parse_geojson(feature,properties)):
                             geojsons.append(geojson)
 
-                    if 'group' in lod:
+                    if 'cube' in group:
                         try:
-                            size = int(lod[1])
+                            size = int(group[group.index('cube') + 1])
                         except:
                             size = Geojsons.defaultGroupOffset
                         geojsons = Geojsons.group_features_by_center(geojsons,size)
