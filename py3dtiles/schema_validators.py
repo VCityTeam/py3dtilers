@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import jsonschema
+import pathlib
 
 from .threedtiles_core_schemas import ThreeDTilesCoreSchemas
 from .batch_table_hierarchy_extension_schemas import BatchTableHierarchySchemas
@@ -40,7 +41,7 @@ class SchemaValidators:
             # as the given schema. Refer to
             #     https://github.com/Julian/jsonschema/issues/98
             # for the reasons of the following parameters and call
-            base_uri = 'file://' + os.path.abspath(relative_dir) + '/'
+            base_uri = pathlib.Path(os.path.abspath(relative_dir)).as_uri() + '/'
             self.resolver = jsonschema.RefResolver(base_uri, None)
 
             self.register_schema_with_sample_list(ThreeDTilesCoreSchemas())

@@ -49,22 +49,18 @@ class Geojson(ObjectToTile):
     def set_triangles(self,triangles):
         self.geom.triangles[0] = triangles
     
-    def get_center(self,coords,height):
+    def get_center(self,coords):
         x = 0
         y = 0
-        z = 0
         
-        for i in range(0,len(coords),3):
-            x += coords[i]
-            y += coords[i + 1]
-            #z += coords[i + 2] - height
-            z += self.z_max
+        for i in range(0,len(coords)):
+            x += coords[i][0]
+            y += coords[i][1]
 
-        x /= len(coords) / 3
-        y /= len(coords) / 3
-        z /= len(coords) / 3
+        x /= len(coords)
+        y /= len(coords)
 
-        return [x, y, z] 
+        return [x, y, self.z_max] 
 
     def create_triangles(self,vertices,coordsLenght):
         # Contains the triangles vertices. Used to create 3D tiles
@@ -142,29 +138,6 @@ class Geojson(ObjectToTile):
         # Current feature number
         Geojson.n_feature += 1
 
-        coordinates = feature['geometry']['coordinates']
-
-        try:
-            coords = self.flatten_list(coordinates)
-            # print(coords)
-            # The last point in features is always the same as the first, so we remove the last point
-            coords = coords[:len(coords)-3]
-        except RecursionError:
-            return False
-
-        # coords = [coords[n:n+3] for n in range(0, len(coords), 3)]
-        # hull = ConvexHull(coords)
-        # print(hull)
-        
-        #coords = self.skip_coord(coords)
-        #coords = self.flatten_list(coords)
-        coordsLenght = len(coords) // 3
-
-        vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
-
-        self.z_max = Geojson.defaultZ
-        height = 0
-
         # If PREC_ALTI is equal to 9999, it means Z values of the features are missing, so we skip the feature
         if "PREC_ALTI" in feature['properties']:
             if feature['properties']['PREC_ALTI'] >= 9999.:
@@ -189,18 +162,35 @@ class Geojson(ObjectToTile):
             print("No propertie called Z_MAX in feature " + str(Geojson.n_feature))
             return False
 
+        coordinates = feature['geometry']['coordinates']
+
+        try:
+            coords = self.flatten_list(coordinates)
+            # The last point in features is always the same as the first, so we remove the last point
+            coords = [coords[n:n+2] for n in range(0, len(coords)-3, 3)]
+        except RecursionError:
+            return False
+
+        # if len(coords) >= 4:
+        #     hull = ConvexHull(coords)
+        #     coords = [coords[i] for i in hull.vertices]
+        #     print(coords)
+        
+        coordsLenght = len(coords)
+
+        vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
+
         # Set bottom center vertice value
-        vertices[0] = self.get_center(coords,height)
+        vertices[0] = self.get_center(coords)
         # Set top center vertice value
         vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
 
         # For each coordinates, add a vertice at the coordinates and a vertice at the same coordinates with a Y-offset
         for i in range(0, coordsLenght):
-            # z = coords[(i * 3) + 2] - height
             z = self.z_max
 
-            vertices[i + 1] = [coords[i * 3], coords[(i * 3) + 1], z]
-            vertices[i + coordsLenght + 2] = [coords[i * 3], coords[(i * 3) + 1], z + height]
+            vertices[i + 1] = [coords[i][0], coords[i][1], z]
+            vertices[i + coordsLenght + 2] = [coords[i][0], coords[i][1], z + height]
 
         if(len(vertices)==0):
             return False
