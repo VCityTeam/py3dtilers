@@ -5,6 +5,7 @@ import json
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 from scipy.spatial import ConvexHull
+import rdp
 
 import os
 from os import listdir
@@ -18,16 +19,6 @@ from os.path import isfile, join
 # Then we create the triangles of this face
 # and duplicate it with a Z offset to create the upper face
 # Then we create the side triangles to connect the upper and the lower faces
-#                 Top
-#                 .
-#             .       .
-#                 .
-#
-#
-#     .           .
-# .       .   .       .
-#     .           .
-#   Bottom      Bottom
 class Geojson(ObjectToTile):
 
     n_feature = 0
@@ -172,6 +163,7 @@ class Geojson(ObjectToTile):
         # If the feature has at least 4 coords, create a convex hull
         # The convex hull reduces the number of points and the level of detail
         if len(coords) >= 4:
+            #coords = rdp(coords)
             hull = ConvexHull(coords)
             coords = [coords[i] for i in reversed(hull.vertices)]
         

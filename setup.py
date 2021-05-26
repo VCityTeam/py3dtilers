@@ -20,7 +20,8 @@ requirements = (
     'pyzmq',
     'jsonschema',
     'pywavefront',
-    'scipy'
+    'rdp',
+    'shapely'
 )
 
 dev_requirements = (
