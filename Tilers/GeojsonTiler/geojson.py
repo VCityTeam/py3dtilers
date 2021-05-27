@@ -5,11 +5,13 @@ import json
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 from scipy.spatial import ConvexHull
+from shapely.geometry import Point
 import rdp
 
 import os
 from os import listdir
 from os.path import isfile, join
+from PolygonDetection import PolygonDetector
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -257,10 +259,47 @@ class Geojsons(ObjectsToTile):
             rounded_coord[i] = base * round(coordinate[i]/base)
         return rounded_coord
 
+    @staticmethod
+    def group_features_by_roads(features,path):
+        road_path = os.path.join(path,"gj_road")
+        road_dir = listdir(road_path)
+        lines = list()
+        for road_file in road_dir:
+            if(".geojson" in road_file or ".json" in road_file):
+                with open(os.path.join(road_path,road_file)) as f:
+                    gjContent = json.load(f)
+                for feature in gjContent['features']:
+                    if 'type' in feature['geometry'] and feature['geometry']['type'] == 'LineString':
+                        lines.append(feature['geometry']['coordinates'])
+
+        p = PolygonDetector(lines)
+        polygons = p.create_polygons()
+        for pl in polygons:
+            print(pl)
+        print(len(polygons))
+        features_dict = {}
+        features_without_poly = list()
+        for i in range(0,len(features)):
+            p = Point(features[i].center[:2])
+            in_polygon = False
+            for index, polygon in enumerate(polygons):
+                if p.within(polygon):
+                    if i in features_dict:
+                        features_dict[index].append(i)
+                    else:
+                        features_dict[index] = [i]
+                    in_polygon = True
+                    break
+            if not in_polygon:
+                features_without_poly.append(features[i])
+            #print(p,'in poly =',in_polygon)
+        
+        grouped_features = Geojsons.group_features(features,features_dict)
+        return features_without_poly
+
     # Group features which are in the same cube of size 'size'
     @staticmethod
-    def group_features_by_center(features,size):
-        grouped_features = list()
+    def group_features_by_cube(features,size):
         features_dict = {}
         
         # Create a dictionary key: cubes center (x,y,z); value: list of features index
@@ -270,16 +309,19 @@ class Geojsons(ObjectsToTile):
                 features_dict[tuple(closest_cube)].append(i)
             else:
                 features_dict[tuple(closest_cube)] = [i]
+        return Geojsons.group_features(features,features_dict)
 
-        # For every cube, merge the features contained in this cube
+    @staticmethod 
+    def group_features(features, dictionary):
         k = 0
-        for cube in features_dict:
+        grouped_features = list()
+        for cube in dictionary:
             geojson = Geojson("group"+str(k))
             z = 9999
             height = 0
             coords = list()
 
-            for j in features_dict[cube]:
+            for j in dictionary[cube]:
                 if height < features[j].height:
                     height = features[j].height
                 if z > features[j].z_max:
@@ -294,7 +336,6 @@ class Geojsons(ObjectsToTile):
             geojson.center = [center[0], center[1], center[2] + geojson.height / 2]
             grouped_features.append(geojson)
             k += 1
-
         return grouped_features
 
     @staticmethod
@@ -332,12 +373,16 @@ class Geojsons(ObjectsToTile):
                         if(geojson.parse_geojson(feature,properties)):
                             geojsons.append(geojson)
 
-                    if 'cube' in group:
+                    if 'road' in group:
+                        geojsons = Geojsons.group_features_by_roads(geojsons,path)
+                        # for feature in geojsons:
+                        #     print(feature)
+                    elif 'cube' in group:
                         try:
                             size = int(group[group.index('cube') + 1])
                         except:
                             size = Geojsons.defaultGroupOffset
-                        geojsons = Geojsons.group_features_by_center(geojsons,size)
+                        geojsons = Geojsons.group_features_by_cube(geojsons,size)
 
                     for geojson in geojsons:
                         #Create geometry as expected from GLTF from an geojson file
