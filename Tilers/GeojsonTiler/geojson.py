@@ -31,7 +31,7 @@ class Geojson(ObjectToTile):
 
         self.geom = TriangleSoup()
 
-        self.z_max = 0
+        self.z = 0
         self.height = 0
         self.center = []
 
@@ -57,7 +57,7 @@ class Geojson(ObjectToTile):
         x /= len(coords)
         y /= len(coords)
 
-        return [x, y, self.z_max] 
+        return [x, y, self.z] 
 
     def create_triangles(self,vertices,coordsLenght):
         # Contains the triangles vertices. Used to create 3D tiles
@@ -126,7 +126,7 @@ class Geojson(ObjectToTile):
 
         z_name = properties[properties.index('z') + 1]
         if  z_name in feature['properties']:
-            self.z_max = feature['properties'][z_name] - self.height
+            self.z = feature['properties'][z_name] - self.height
         else:
             print("No propertie called " + z_name + " in feature " + str(Geojson.n_feature))
             return False
@@ -135,7 +135,7 @@ class Geojson(ObjectToTile):
 
         try:
             coords = self.flatten_list(coordinates)
-            # Group coords into (x,y) arrays, the z will always be the z_max
+            # Group coords into (x,y) arrays, the z will always be the same z
             # The last point in features is always the same as the first, so we remove the last point
             coords = [coords[n:n+2] for n in range(0, len(coords)-3, 3)]
             self.coords = coords
@@ -179,7 +179,7 @@ class Geojson(ObjectToTile):
 
         # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
         for i in range(0, coordsLenght):
-            z = self.z_max
+            z = self.z
 
             vertices[i + 1] = [coords[i][0], coords[i][1], z]
             vertices[i + coordsLenght + 2] = [coords[i][0], coords[i][1], z + height]
@@ -270,13 +270,14 @@ class Geojsons(ObjectsToTile):
                     gjContent = json.load(f)
                 for feature in gjContent['features']:
                     if 'type' in feature['geometry'] and feature['geometry']['type'] == 'LineString':
-                        lines.append(feature['geometry']['coordinates'])
+                        if 'commune1' in feature['properties'] and 'LYON ' in str(feature['properties']['commune1']):
+                            lines.append(feature['geometry']['coordinates'])
 
         p = PolygonDetector(lines)
         polygons = p.create_polygons()
-        for pl in polygons:
-            print(pl)
-        print(len(polygons))
+        # for pl in polygons:
+        #     print(pl)
+        # print(len(polygons))
         features_dict = {}
         features_without_poly = list()
         for i in range(0,len(features)):
@@ -289,13 +290,14 @@ class Geojsons(ObjectsToTile):
                     else:
                         features_dict[index] = [i]
                     in_polygon = True
+                    #print(p,'in poly =',index)
                     break
             if not in_polygon:
                 features_without_poly.append(features[i])
-            #print(p,'in poly =',in_polygon)
+            
         
         grouped_features = Geojsons.group_features(features,features_dict)
-        return features_without_poly
+        return grouped_features
 
     # Group features which are in the same cube of size 'size'
     @staticmethod
@@ -315,23 +317,23 @@ class Geojsons(ObjectsToTile):
     def group_features(features, dictionary):
         k = 0
         grouped_features = list()
-        for cube in dictionary:
+        for key in dictionary:
             geojson = Geojson("group"+str(k))
             z = 9999
             height = 0
             coords = list()
 
-            for j in dictionary[cube]:
+            for j in dictionary[key]:
                 if height < features[j].height:
                     height = features[j].height
-                if z > features[j].z_max:
-                    z = features[j].z_max
+                if z > features[j].z:
+                    z = features[j].z
                 for coord in features[j].coords:
                     coords.append(coord)
 
             center = geojson.get_center(coords)
             geojson.coords = coords
-            geojson.z_max = z
+            geojson.z = z
             geojson.height = height
             geojson.center = [center[0], center[1], center[2] + geojson.height / 2]
             grouped_features.append(geojson)

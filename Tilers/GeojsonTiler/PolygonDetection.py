@@ -62,7 +62,10 @@ class PolygonDetector:
                 vertex = Vertex.index_dict[index]
                 points.append(vertex.point)
             self.polygons.append(Polygon(points))
-
+        # points1 = [(0,0),(1843000,0),(1843000,9000000),(0,9000000)]
+        # points2 = [(1843001,0),(9000000,0),(9000000,9000000),(1843001,9000000)]
+        # self.polygons.append(Polygon(points1))
+        # self.polygons.append(Polygon(points2))
         return self.polygons
 
 def main():
