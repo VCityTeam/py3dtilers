@@ -6,7 +6,7 @@ from py3dtiles import BoundingVolumeBox, TriangleSoup
 from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
 from scipy.spatial import ConvexHull
 from shapely.geometry import Point
-import rdp
+from rdp import rdp
 
 import os
 from os import listdir
@@ -165,7 +165,7 @@ class Geojson(ObjectToTile):
         # If the feature has at least 4 coords, create a convex hull
         # The convex hull reduces the number of points and the level of detail
         if len(coords) >= 4:
-            #coords = rdp(coords)
+            # coords = rdp(coords)
             hull = ConvexHull(coords)
             coords = [coords[i] for i in reversed(hull.vertices)]
         
@@ -272,7 +272,7 @@ class Geojsons(ObjectsToTile):
                     if 'type' in feature['geometry'] and feature['geometry']['type'] == 'LineString':
                         if 'commune1' in feature['properties'] and 'LYON ' in str(feature['properties']['commune1']):
                             lines.append(feature['geometry']['coordinates'])
-
+        print("Roads parsed from file")
         p = PolygonDetector(lines)
         polygons = p.create_polygons()
         # for pl in polygons:
@@ -297,6 +297,7 @@ class Geojsons(ObjectsToTile):
             
         
         grouped_features = Geojsons.group_features(features,features_dict)
+        print("Features grouped")
         return grouped_features
 
     # Group features which are in the same cube of size 'size'
