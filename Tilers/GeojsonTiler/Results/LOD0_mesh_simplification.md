@@ -28,6 +28,17 @@ coords = [coords[i] for i in reversed(hull.vertices)]
 ![convexHull](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/convexHull.png)
 ![convexHull_tris](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/convexHull_tris.png)
 ### Concave hull
+The concave hull uses the [rdp](https://pypi.org/project/rdp/) module, based on [Ramer–Douglas–Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
+```
+from rdp import rdp
+
+coords = rdp(coords)
+```
+
+The result of the concave hull were not conclusive. Applied on every feature separately, less than 0.5% of the vertices are removed (surely because most of the features already have concave polygon coordinates).
+![concaveHull_tris](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/concaveHull_tris.png)
+
+Applied on features grouped by cube, the concave hull was less efficient than the convex hull.
 
 ### Group by cube
 The _group by cube_ method create a 3D grid. Each cube of this grid has an arbitrary size (see [Group method -> Cube](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/README.md)). All features of the Geojsons will be distributed in the cubes according to their center (mean of all their coordinates). To do so, we create a dictionary with the cubes with at least one feature and the indexes of the features they contain:
