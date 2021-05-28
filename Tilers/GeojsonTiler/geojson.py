@@ -275,7 +275,7 @@ class Geojsons(ObjectsToTile):
         p = PolygonDetector(lines)
         polygons = p.create_polygons()
         # for pl in polygons:
-        #      print(pl.area)
+        #     print(pl)
         # print(len(polygons),"polygons")
         features_dict = {}
         features_without_poly = list()
@@ -293,6 +293,7 @@ class Geojsons(ObjectsToTile):
                     break
             if not in_polygon:
                 features_without_poly.append(features[i])
+                # print(p,'not in polygon')
             
         
         grouped_features = Geojsons.group_features(features,features_dict)

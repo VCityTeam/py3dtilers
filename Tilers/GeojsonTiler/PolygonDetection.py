@@ -37,6 +37,7 @@ class PolygonDetector:
             vertex = Vertex(point)
             self.vertices_dict[tuple(point)] = vertex
             self.vertices.append(vertex)
+            #print(point)
         return vertex
 
     def create_graph(self,lines):
@@ -46,8 +47,10 @@ class PolygonDetector:
             last_point = self.get_point(line[0])
             for i in range(1,len(line)):
                 current_point = self.get_point(line[i])
+                # print(last_point.point,'->',current_point.point)
                 G.add_edge(last_point.index,current_point.index,weight = Vertex.distance(last_point.point,current_point.point))
                 last_point = current_point
+        #G = G.to_undirected()
         print("Graph created")
         return G
     
@@ -56,18 +59,36 @@ class PolygonDetector:
         self.cycles = [sorted(c) for c in nx.minimum_cycle_basis(self.graph,weight = 'weight')]
         print("Cycles computed")
         # Create polygons
+        k = 0
         for cycle in self.cycles:
-            points = list()
-            for index in cycle:
-                vertex = Vertex.index_dict[index]
-                points.append(vertex.point)
+            points = self.order_points(cycle)
+            # print(k)
+            # for index in cycle:
+            #     vertex = Vertex.index_dict[index]
+            #     points.append(vertex.point)
+            #     print(vertex.point)
             self.polygons.append(Polygon(points))
+            k += 1
         # points1 = [(0,0),(1843000,0),(1843000,9000000),(0,9000000)]
         # points2 = [(1843001,0),(9000000,0),(9000000,9000000),(1843001,9000000)]
         # self.polygons.append(Polygon(points1))
         # self.polygons.append(Polygon(points2))
         print("Polygons created")
         return self.polygons
+
+    def order_points(self,indexes):
+        points = list()
+        current_index = indexes[0]
+        indexes_to_treat = indexes[1:len(indexes)]
+        points.append(Vertex.index_dict[current_index].point)
+        while len(points) < len(indexes):
+            for i in indexes_to_treat:
+                if self.graph.has_edge(current_index,i):
+                    points.append(Vertex.index_dict[i].point)
+                    indexes_to_treat.remove(i)
+                    current_index = i
+                    break
+        return points
 
 def main():
     lines = [[[20, 10], [30, 10], [30, 0]],
