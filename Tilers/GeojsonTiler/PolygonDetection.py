@@ -48,13 +48,13 @@ class PolygonDetector:
                 current_point = self.get_point(line[i])
                 G.add_edge(last_point.index,current_point.index,weight = Vertex.distance(last_point.point,current_point.point))
                 last_point = current_point
-        
+        print("Graph created")
         return G
     
     def create_polygons(self):
         # Create mimimum cycle basis
         self.cycles = [sorted(c) for c in nx.minimum_cycle_basis(self.graph,weight = 'weight')]
-
+        print("Cycles computed")
         # Create polygons
         for cycle in self.cycles:
             points = list()
@@ -66,6 +66,7 @@ class PolygonDetector:
         # points2 = [(1843001,0),(9000000,0),(9000000,9000000),(1843001,9000000)]
         # self.polygons.append(Polygon(points1))
         # self.polygons.append(Polygon(points2))
+        print("Polygons created")
         return self.polygons
 
 def main():
