@@ -55,7 +55,7 @@ def parse_command_line():
 
     if(result.paths == None):
         print("Please provide a path to a directory " \
-                "containing some geojson files or multiple directories")
+                "containing some geojson files")
         print("Exiting")
         sys.exit(1)
 
@@ -161,19 +161,18 @@ def main():
     and a classes.txt that contains the name of all tilesets
     """
     args = parse_command_line()   
-    paths = args.paths
+    path = args.paths[0]
 
     rep_parsed = ""
-    for path in paths:
-        if(os.path.isdir(path)):
-                print("Writing " + path )
-                tileset = from_geojson_directory(path,args.group,args.properties)
-                if(tileset != None):
-                    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-                    folder_name = path.split('/')[-1]
-                    print("tilset in geojson_tilesets/" + folder_name)
-                    tileset.write_to_directory("geojson_tilesets/" + folder_name)
-                    rep_parsed += folder_name + ";"
+    if(os.path.isdir(path)):
+            print("Writing " + path )
+            tileset = from_geojson_directory(path,args.group,args.properties)
+            if(tileset != None):
+                tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+                folder_name = path.split('/')[-1]
+                print("tilset in geojson_tilesets/" + folder_name)
+                tileset.write_to_directory("geojson_tilesets/" + folder_name)
+                rep_parsed += folder_name + ";"
 
 
     if(rep_parsed != ""):
