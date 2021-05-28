@@ -31,23 +31,39 @@ It means the tiler will target the property 'HAUTEUR' to find the height, 'Z_MAX
 
 If the file don't have those properties, you can change one or several property names to target in command line with _--properties_:
 ```
-python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path(s)> --properties height HEIGHT_NAME z Z_NAME prec PREC_NAME
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path> --properties height HEIGHT_NAME z Z_NAME prec PREC_NAME
 ```
 If you want to skip the precision, you can set _prec_ to '_NONE_':
 ```
-python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path(s)> --properties prec NONE
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path> --properties prec NONE
 ```
 
 ### Group method
 You can also change the group method by using _--group_ in command line:
 ```
-python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path(s)> --group <group_method> [<parameters>]*
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path> --group <group_method> [<parameters>]*
 ```
 Merging features together will reduce the __number of polygons__, but also the __level of detail__.  
 By default, the group method is '_none_', meaning it won't merge features.
 #### Cube
 The 'cube' group method will merge features which are contained in the same cube of size '_size x size x size_'. The default size is _60_, but it can be changed in command line:
 ```
-python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path(s)> --group cube 100
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path> --group cube 100
 ```
 This line will call the tiler and group features into cubes with size _100 x 100 x 100_.
+
+#### Road
+The 'road' group method will create "_islets_" based on roads. The program will [create polygons](https://web.ist.utl.pt/alfredo.ferreira/publications/12EPCG-PolygonDetection.pdf) from a graph made with roads: each intersection of the roads is a vertex, each segment of road between two intersections is an edge.  
+The roads will be load from the directory _roads_ in the <path> and the group method can be used with _--group road_:
+```
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths ../../geojson/ --group road
+```
+This command will use _road group method_ with the roads file in ../../geojson/roads/
+  
+In this example, we keep only the features which are in a polygon.
+
+Geojsons:  
+![qgis_fc_small](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/qgis_fc_small.png)
+  
+Result:  
+![flyingCampus_small](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/flyingCampus_small.png)
