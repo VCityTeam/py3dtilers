@@ -261,8 +261,13 @@ class Geojsons(ObjectsToTile):
 
     @staticmethod
     def group_features_by_roads(features,path):
-        road_path = os.path.join(path,"gj_road")
-        road_dir = listdir(road_path)
+        try:
+            road_path = os.path.join(path,"roads")
+            road_dir = listdir(road_path)
+        except:
+            print("No directory called 'roads' in",path,". Please, place the roads to read in",road_path)
+            print("Exiting")
+            sys.exit(1)
         lines = list()
         for road_file in road_dir:
             if(".geojson" in road_file or ".json" in road_file):
