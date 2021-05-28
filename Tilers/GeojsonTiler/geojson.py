@@ -298,7 +298,7 @@ class Geojsons(ObjectsToTile):
         
         grouped_features = Geojsons.group_features(features,features_dict)
         print("Features grouped")
-        return grouped_features
+        return grouped_features + features_without_poly
 
     # Group features which are in the same cube of size 'size'
     @staticmethod
