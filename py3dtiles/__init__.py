@@ -28,6 +28,7 @@ from .helper_test import HelperTest
 from .pnts import Pnts
 from .utils import TileReader, convert_to_ecef
 from .wkb_utils import TriangleSoup
+
 __version__ = '1.1.0'
 __all__ = ['B3dm',
            'BatchTable', 
@@ -38,7 +39,7 @@ __all__ = ['B3dm',
            'SchemaValidators',
            'Extension',
            'Feature', 
-           'GlTF',
+           'GlTF', 
            'Pnts',
            'TemporalBatchTable', 
            'TemporalBoundingVolume', 
