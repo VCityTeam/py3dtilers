@@ -20,6 +20,13 @@ python Tilers/GeojsonTiler/GeojsonTiler.py --paths ../../geojson/
 ```
 It will read all .geojson and .json it the _geojson_ directory and parse them into 3DTiles. It will also create a single .obj model from all readed files.
 
+### Obj creation
+The .obj model is created if the _--obj_ flag is present in command line. To create an obj file, use:
+```
+python Tilers/GeojsonTiler/GeojsonTiler.py --paths <path> --obj <obj_file_name>
+```
+If no name is specified after _--obj_, the .obj will be named "_result.obj_".
+
 ### Properties
 The Tiler uses '_height_' and '_z_' properties to create 3D tiles from features. It also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).
 
