@@ -342,7 +342,7 @@ class Geojsons(ObjectsToTile):
         return grouped_features
 
     @staticmethod
-    def retrieve_geojsons(path, group, properties, objects=list()):
+    def retrieve_geojsons(path, group, properties, obj_name, objects=list()):
         """
         :param path: a path to a directory
 
@@ -390,24 +390,27 @@ class Geojsons(ObjectsToTile):
                         #Create geometry as expected from GLTF from an geojson file
                         if(geojson.parse_geom()):
                             objects.append(geojson)
-                            # Add triangles and vertices to create an obj
-                            for vertice in geojson.vertices:
-                                vertices.append(vertice)
-                            for triangle in geojson.triangles:
-                                triangles.append(triangle + vertice_offset)
-                            vertice_offset += len(geojson.vertices)
-                            for i in range(0,len(geojson.center)):
-                                center[i] += geojson.center[i]
 
-        center[:] = [c / len(objects) for c in center]
-        file_name = "result.obj"
-        f = open(os.path.join(file_name), "w")
-        f.write("# " + file_name + "\n")
-        
-        for vertice in vertices:
-            f.write("v "+str(vertice[0] - center[0])+" "+str(vertice[1] - center[1])+" "+str(vertice[2] - center[2])+"\n")
+                            if not obj_name == '':
+                                # Add triangles and vertices to create an obj
+                                for vertice in geojson.vertices:
+                                    vertices.append(vertice)
+                                for triangle in geojson.triangles:
+                                    triangles.append(triangle + vertice_offset)
+                                vertice_offset += len(geojson.vertices)
+                                for i in range(0,len(geojson.center)):
+                                    center[i] += geojson.center[i]
 
-        for triangle in triangles:
-            f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
+        if not obj_name == '':
+            center[:] = [c / len(objects) for c in center]
+            file_name = obj_name
+            f = open(os.path.join(file_name), "w")
+            f.write("# " + file_name + "\n")
+            
+            for vertice in vertices:
+                f.write("v "+str(vertice[0] - center[0])+" "+str(vertice[1] - center[1])+" "+str(vertice[2] - center[2])+"\n")
+
+            for triangle in triangles:
+                f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
         
         return Geojsons(objects)    

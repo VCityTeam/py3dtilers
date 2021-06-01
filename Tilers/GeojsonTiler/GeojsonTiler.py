@@ -37,10 +37,22 @@ def parse_command_line():
                         type=str,  
                         help='name of the properties to read in Geojson files')
 
+    parser.add_argument('--obj',
+                        nargs='*',
+                        type=str,  
+                        help='create also obj model with specified name')
+
     result = parser.parse_args()
 
     if(result.group == None):
         result.group = ['none']
+
+    if(result.obj == None):
+        result.obj = ['']
+    elif(len(result.obj) == 0):
+        result.obj = ['result.obj']
+    elif('.obj' not in result.obj[0]):
+        result.obj[0] = result.obj[0] + '.obj'
 
     if(result.properties == None or len(result.properties) % 2 != 0):
         result.properties = ['height','HAUTEUR','z','Z_MAX','prec','PREC_ALTI']
@@ -101,14 +113,14 @@ def create_tile_content(pre_tile):
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_geojson_directory(path, group, properties):    
+def from_geojson_directory(path, group, properties, obj_name):    
     """
     :param path: a path to a directory
 
     :return: a tileset. 
     """
     
-    objects = Geojsons.retrieve_geojsons(path,group,properties)
+    objects = Geojsons.retrieve_geojsons(path,group,properties,obj_name)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -161,10 +173,10 @@ def main():
     """
     args = parse_command_line()   
     path = args.paths[0]
-
+    obj_name = args.obj[0]
     if(os.path.isdir(path)):
             print("Writing " + path )
-            tileset = from_geojson_directory(path,args.group,args.properties)
+            tileset = from_geojson_directory(path,args.group,args.properties,obj_name)
             if(tileset != None):
                 tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                 folder_name = path.split('/')[-1]
