@@ -1,6 +1,5 @@
 import argparse
 import numpy as np
-import pywavefront 
 import sys
 
 import os
@@ -31,12 +30,12 @@ def parse_command_line():
     parser.add_argument('--group',
                         nargs='*',
                         type=str,  
-                        help='path to the database configuration file')
+                        help='method to merge features together')
     
     parser.add_argument('--properties',
                         nargs='*',
                         type=str,  
-                        help='path to the database configuration file')
+                        help='name of the properties to read in Geojson files')
 
     result = parser.parse_args()
 
@@ -163,7 +162,6 @@ def main():
     args = parse_command_line()   
     path = args.paths[0]
 
-    rep_parsed = ""
     if(os.path.isdir(path)):
             print("Writing " + path )
             tileset = from_geojson_directory(path,args.group,args.properties)
@@ -172,13 +170,6 @@ def main():
                 folder_name = path.split('/')[-1]
                 print("tilset in geojson_tilesets/" + folder_name)
                 tileset.write_to_directory("geojson_tilesets/" + folder_name)
-                rep_parsed += folder_name + ";"
-
-
-    if(rep_parsed != ""):
-        f = open("geojson_tilesets/classes.txt","w+")
-        f.write(rep_parsed)
-        f.close()  
 
 
 if __name__ == '__main__':

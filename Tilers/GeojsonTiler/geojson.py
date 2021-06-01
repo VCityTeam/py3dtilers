@@ -24,7 +24,6 @@ from PolygonDetection import PolygonDetector
 class Geojson(ObjectToTile):
 
     n_feature = 0
-    defaultZ = 144.
 
     def __init__(self, id = None):
         super().__init__(id)
@@ -277,11 +276,10 @@ class Geojsons(ObjectsToTile):
                     if 'type' in feature['geometry'] and feature['geometry']['type'] == 'LineString':
                         lines.append(feature['geometry']['coordinates'])
         print("Roads parsed from file")
+
         p = PolygonDetector(lines)
         polygons = p.create_polygons()
-        # for pl in polygons:
-        #     print(pl)
-        # print(len(polygons),"polygons")
+
         features_dict = {}
         features_without_poly = list()
         for i in range(0,len(features)):
@@ -294,11 +292,9 @@ class Geojsons(ObjectsToTile):
                     else:
                         features_dict[index] = [i]
                     in_polygon = True
-                    # print(p,'in poly =',index)
                     break
             if not in_polygon:
                 features_without_poly.append(features[i])
-                # print(p,'not in polygon')
             
         
         grouped_features = Geojsons.group_features(features,features_dict)
@@ -359,6 +355,7 @@ class Geojsons(ObjectsToTile):
         triangles = list()
         geojsons = list()
         vertice_offset = 1
+        center = [0,0,0]
 
         for geojson_file in geojson_dir:
             if(os.path.isfile(os.path.join(path,geojson_file))):
@@ -382,8 +379,6 @@ class Geojsons(ObjectsToTile):
 
                     if 'road' in group:
                         geojsons = Geojsons.group_features_by_roads(geojsons,path)
-                        # for feature in geojsons:
-                        #     print(feature)
                     elif 'cube' in group:
                         try:
                             size = int(group[group.index('cube') + 1])
@@ -401,14 +396,16 @@ class Geojsons(ObjectsToTile):
                             for triangle in geojson.triangles:
                                 triangles.append(triangle + vertice_offset)
                             vertice_offset += len(geojson.vertices)
-        
-        # print("Warning: Writting features as Objs might take a long time")
+                            for i in range(0,len(geojson.center)):
+                                center[i] += geojson.center[i]
+
+        center[:] = [c / len(objects) for c in center]
         file_name = "result.obj"
         f = open(os.path.join(file_name), "w")
         f.write("# " + file_name + "\n")
         
         for vertice in vertices:
-            f.write("v "+str(vertice[0]-1840000)+" "+str(vertice[1]-5170000)+" "+str(vertice[2])+"\n")
+            f.write("v "+str(vertice[0] - center[0])+" "+str(vertice[1] - center[1])+" "+str(vertice[2] - center[2])+"\n")
 
         for triangle in triangles:
             f.write("f "+str(int(triangle[0]))+" "+str(int(triangle[1]))+" "+str(int(triangle[2]))+"\n")
