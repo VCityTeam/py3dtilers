@@ -6,6 +6,7 @@ The tiler also creates .obj models.
 
 Geojson files contain _features_. Each feature corresponds to a building and has a _geometry_ field. The geometry has _coordinates_. A feature is tied to a _properties_ containing data about the feature (for example height, precision, feature type...).
 
+The Geojson files are computed with [QGIS](https://www.qgis.org/en/site/) from public data.
 ## Installation
 See https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst
 
@@ -59,11 +60,3 @@ The group method can be used with _--group road_:
 python Tilers/GeojsonTiler/GeojsonTiler.py --paths ../../geojson/ --group road
 ```
 The roads will be load from the directory _roads_ in the <path>. This command will use _road group method_ with the roads file in ../../geojson/roads/
-  
-In this example, we keep only the features which are in a polygon.
-
-Geojsons:  
-![qgis_fc_small](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/qgis_fc_small.png)
-  
-Result:  
-![flyingCampus_small](https://github.com/LorenzoMarnat/py3dtiles/blob/Tiler/Tilers/GeojsonTiler/Results/ScreenShots/flyingCampus_small.png)
