@@ -50,7 +50,11 @@ class PolygonDetector:
                 # print(last_point.point,'->',current_point.point)
                 G.add_edge(last_point.index,current_point.index,weight = Vertex.distance(last_point.point,current_point.point))
                 last_point = current_point
-        #G = G.to_undirected()
+
+        for j in range(0,len(G.nodes)):
+            if len(list(G.neighbors(j))) <= 1:
+                G.remove_node(j)
+
         print("Graph created")
         return G
     
@@ -62,11 +66,6 @@ class PolygonDetector:
         k = 0
         for cycle in self.cycles:
             points = self.order_points(cycle)
-            # print(k)
-            # for index in cycle:
-            #     vertex = Vertex.index_dict[index]
-            #     points.append(vertex.point)
-            #     print(vertex.point)
             self.polygons.append(Polygon(points))
             k += 1
         # points1 = [(0,0),(1843000,0),(1843000,9000000),(0,9000000)]
