@@ -1,21 +1,27 @@
 sudo: required
-dist: trusty
+dist: bionic
 
 language: python
 python:
-  - "3.5"
+  - "3.6"
 
 before_install:
+  - sudo add-apt-repository universe
   - sudo apt-get install -y liblas-c3 libopenblas-base
 
 install:
   - pip install -e .
   - pip install pytest pytest-benchmark
 
-script:
-  - pytest
-  - py3dtiles info tests/pointCloudRGB.pnts
-
 addons:
   apt:
     update: true
+
+jobs:
+  include:
+    - stage: tests
+      if: branch = Tiler
+      script:
+      - |
+        pytest
+        py3dtiles info tests/pointCloudRGB.pnts
