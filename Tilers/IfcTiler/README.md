@@ -3,7 +3,7 @@
  - [Developer's/Design notes](DesignNotes.md)
 
 
-### Intallation note (temporary) : 
+### Intallation note : 
 
 This tiler needs more packages (that needs to be in the setup.py) : 
 
@@ -104,20 +104,3 @@ trimesh.creation.extrude_polygon(polygon,50)
 ```
 
 
-### Debugging temporary notes
-Once [installed and ran](Install.md) and in order to 3D visualize the results produced by the Tilers you might
- - install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples
-   and point the resulting junk directory holding the produced tileset
-```
-     cd 3d-tiles-samples
-     ln -s ../py3dtiles.MEPP-team/junk .
-```
-   launch the server with ```npm start```
-   assert this is working by opening
-      http://localhost:8003/junk/tileset.json
- - install [UD-Viz](https://github.com/VCityTeam/UD-Viz)
- - patch UDV-Core/examples/Demo.js and point buildingServerRequest
-   const buildingServerRequest = 'http://localhost:8003/junk/tileset.json';
-   install UDV and launch the server
- - view the results with your browser by opening
-     http://localhost:8080/examples/Demo.html
