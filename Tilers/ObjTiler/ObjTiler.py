@@ -102,6 +102,7 @@ def from_obj_directory(path):
     # by this centroid
     # which will be later added in the transform part of each tiles
     centroid = objects.get_centroid()  
+    
     objects.translate_tileset(centroid)       
     
     tileset = TileSet()
@@ -112,6 +113,7 @@ def from_obj_directory(path):
 
         tile_content_b3dm = create_tile_content(pre_tile)
         tile.set_content(tile_content_b3dm)
+        
         tile.set_transform([1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
@@ -140,7 +142,6 @@ def main():
     args = parse_command_line()   
     paths = args.paths
 
-    rep_parsed = ""
     for path in paths:
         if(os.path.isdir(path)):
                 print("Writing " + path )
@@ -148,15 +149,9 @@ def main():
                 if(tileset != None):
                     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                     folder_name = path.split('/')[-1]
-                    print("tilset in obj_tilesets/" + folder_name)
+                    print("tileset in obj_tilesets/" + folder_name)
                     tileset.write_to_directory("obj_tilesets/" + folder_name)
-                    rep_parsed += folder_name + ";"
 
-
-    if(rep_parsed != ""):
-        f = open("obj_tilesets/classes.txt","w+")
-        f.write(rep_parsed)
-        f.close()  
 
 
 if __name__ == '__main__':
