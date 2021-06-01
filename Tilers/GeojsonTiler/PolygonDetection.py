@@ -1,4 +1,3 @@
-from networkx.algorithms.shortest_paths import weighted
 from shapely.geometry import Point, Polygon
 import networkx as nx
 import math
@@ -29,15 +28,12 @@ class PolygonDetector:
     # Return the vertex at the coordinates of 'point' in the dictionary
     # If the vertex doesn't exist, create it and add it to the dictionary
     def get_point(self,point):
-        # for i in range(0,len(point)):
-        #     point[i] = round(point[i],4)
         if tuple(point) in self.vertices_dict:
             vertex = self.vertices_dict[tuple(point)]
         else:
             vertex = Vertex(point)
             self.vertices_dict[tuple(point)] = vertex
             self.vertices.append(vertex)
-            #print(point)
         return vertex
 
     def create_graph(self,lines):
@@ -47,13 +43,27 @@ class PolygonDetector:
             last_point = self.get_point(line[0])
             for i in range(1,len(line)):
                 current_point = self.get_point(line[i])
-                # print(last_point.point,'->',current_point.point)
                 G.add_edge(last_point.index,current_point.index,weight = Vertex.distance(last_point.point,current_point.point))
                 last_point = current_point
-
-        for j in range(0,len(G.nodes)):
-            if len(list(G.neighbors(j))) <= 1:
-                G.remove_node(j)
+        # Clean graph by deleting useless vertices
+        nodes_to_treat = []
+        for n in list(G.nodes):
+            neighbors = list(G.neighbors(n))
+            if len(neighbors) <= 1:
+                nodes_to_treat.append(n)
+            else:
+                continue
+        while len(nodes_to_treat) > 0:
+            node = nodes_to_treat[0]
+            if not G.has_node(n):
+                nodes_to_treat.remove(node)
+                continue
+            neighbors = list(G.neighbors(node))
+            G.remove_node(node)
+            nodes_to_treat.remove(node)
+            for n in neighbors:
+                if len(list(G.neighbors(n))) <= 1:
+                    nodes_to_treat.append(n)
 
         print("Graph created")
         return G
@@ -63,15 +73,9 @@ class PolygonDetector:
         self.cycles = [sorted(c) for c in nx.minimum_cycle_basis(self.graph,weight = 'weight')]
         print("Cycles computed")
         # Create polygons
-        k = 0
         for cycle in self.cycles:
             points = self.order_points(cycle)
             self.polygons.append(Polygon(points))
-            k += 1
-        # points1 = [(0,0),(1843000,0),(1843000,9000000),(0,9000000)]
-        # points2 = [(1843001,0),(9000000,0),(9000000,9000000),(1843001,9000000)]
-        # self.polygons.append(Polygon(points1))
-        # self.polygons.append(Polygon(points2))
         print("Polygons created")
         return self.polygons
 
@@ -88,26 +92,3 @@ class PolygonDetector:
                     current_index = i
                     break
         return points
-
-def main():
-    lines = [[[20, 10], [30, 10], [30, 0]],
-             [[30,0], [20, 0], [10, 0], [10, 10]],
-             [[10,10], [20, 10], [20, 0]]]
-
-    p = PolygonDetector(lines)
-    polygons = p.create_polygons()
-
-    points = [(15,5),(25,5),(30,15)]
-
-    for point in points:
-        p = Point(point)
-        in_polygon = False
-        for polygon in polygons:
-            if p.within(polygon):
-                print('point',point,'in polygon',polygon)
-                in_polygon = True
-                break
-        if not in_polygon:
-            print('point',point,'not in polygon')
-
-#main()
