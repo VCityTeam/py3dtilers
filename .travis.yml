@@ -5,10 +5,6 @@ language: python
 python:
   - "3.6"
 
-before_install:
-  - sudo add-apt-repository universe
-  - sudo apt-get install -y liblas-c3 libopenblas-base
-
 install:
   - pip install -e .
   - pip install pytest pytest-benchmark
@@ -20,7 +16,6 @@ addons:
 jobs:
   include:
     - stage: tests
-      if: branch = Tiler
       script:
       - |
         pytest
