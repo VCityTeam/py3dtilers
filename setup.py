@@ -18,7 +18,10 @@ requirements = (
     'psutil',
     'lz4',
     'pyzmq',
-    'jsonschema'
+    'jsonschema',
+    'pywavefront',
+    'rdp',
+    'shapely'
 )
 
 dev_requirements = (
