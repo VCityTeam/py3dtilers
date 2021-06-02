@@ -4,11 +4,11 @@
 
 Each geometry is descrided in a local space.
 
-A field [IfcLocalPlacement](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometricconstraintresource/lexical/ifclocalplacement.htm) describe the object relative placement to another *ifc product* 
+An [IfcLocalPlacement](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometricconstraintresource/lexical/ifclocalplacement.htm) field describes the object relative placement to another *ifc product* 
 If this field is empty, it means that the object placement uses the world coordinates.
 If not, the relative placement to another object is described with two fields : 
-- one, [IfcObjectPlacement](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometricconstraintresource/lexical/ifcobjectplacement.htm) describe the offset of the object to its parent, using a Vec3
-- the other, [IfcAxis2Placement3D](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometryresource/lexical/ifcaxis2placement3d.htm) describe two Vec3 corresponding the Z-axis (named Axis) and X-axis (named RefDirection) that allows to transform the object space in the parent space with the construction of the tranformation matrix with the function [IfcBuildAxes](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcbuildaxes.htm) and [IfcFirstProjAxis](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcfirstprojaxis.htm)
+- one, [IfcObjectPlacement](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometricconstraintresource/lexical/ifcobjectplacement.htm) describes the offset of the object to its parent, using a Vec3
+- the other, [IfcAxis2Placement3D](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/HTML/ifcgeometryresource/lexical/ifcaxis2placement3d.htm) describes two Vec3 corresponding the Z-axis (named Axis) and X-axis (named RefDirection) that allows to transform the object space in the parent space with the construction of the tranformation matrix with the function [IfcBuildAxes](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcbuildaxes.htm) and [IfcFirstProjAxis](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcfirstprojaxis.htm)
 
 
 Each object should be place relatively to its parent.The only exception is the [IfcSite](https://standards.buildingsmart.org/IFC/RELEASE/IFC2x/ADD1/HTML/ifcproductextension/lexical/ifcsite.html) that should be placed within the world coordinates (eventually using a projection system).

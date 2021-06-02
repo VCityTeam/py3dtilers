@@ -1,12 +1,13 @@
-import argparse
-import numpy as np
-import sys
-import ifcopenshell
-import pyproj
-
 import os
 from os import listdir
 from os.path import isfile, join
+import sys
+import argparse
+
+import numpy as np
+import pyproj
+
+import ifcopenshell
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
@@ -116,12 +117,8 @@ def main():
     """
     args = parse_command_line()
 
-    #load file
-    # load ifc site, elevation, position et direction
-    # recuperer obj par entités
     tileset = from_ifc(args.ifc_file_path)
 
-    ## pour chaque entité, créer un tileset 
     if(tileset != None):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory("ifc_tileset")

@@ -1,21 +1,7 @@
 ### See also
- - [Installation notes](Install.md)
- - [Developer's/Design notes](DesignNotes.md)
-
+ - [Understanding ifc geometry and processing](IFC_Geometry.md)
 
 ### Intallation note : 
-
-This tiler needs more packages (that needs to be in the setup.py) : 
-
-- To install [numpy](https://numpy.org/)
-```
-(venv) pip install numpy
-```
-
-- To install [pyproj](https://pypi.org/project/pyproj/)
-```
-(venv) pip install pyproj
-```
 
 - To install [IfcOpenShell](http://ifcopenshell.org/)
     - Download the archive of the binary [here](http://ifcopenshell.org/python)
