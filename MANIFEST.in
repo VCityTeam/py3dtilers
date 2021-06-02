@@ -1,2 +1,2 @@
-recursive-include py3dtiles *
-include README.rst LICENSE
+recursive-include py3dtiles-tilers *
+include README.md LICENSE

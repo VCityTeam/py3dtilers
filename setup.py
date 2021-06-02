@@ -6,34 +6,17 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
-    'numpy',
-    'pyproj',
-    'cython',
-    'triangle',
-    'psycopg2-binary',
-    'liblas',
-    'laspy',
-    'numba',
-    'pyproj',
-    'psutil',
-    'lz4',
-    'pyzmq',
-    'jsonschema',
-    'pywavefront',
-    'rdp',
-    'shapely'
+    'numpy'
 )
+
+install_requires = [
+    'py3dtiles @ git+ssh://git@github.com/VCityTeam/py3dtiles@Tiler',
+]
 
 dev_requirements = (
     'pytest',
     'pytest-cov',
-    'pytest-benchmark',
     'line_profiler'
-)
-
-doc_requirements = (
-    'sphinx',
-    'sphinx_rtd_theme',
 )
 
 prod_requirements = (
@@ -63,18 +46,17 @@ def find_version(*file_paths):
 
 
 setup(
-    name='py3dtiles',
-    version=find_version('py3dtiles', '__init__.py'),
-    description="Python module for 3D tiles format",
-    long_description=read('README.rst'),
-    url='https://github.com/Oslandia/py3dtiles',
-    author='Oslandia',
-    author_email='contact@oslandia.com',
+    name='py3dtiles-tilers',
+    version=find_version('py3dtiles-tilers', '__init__.py'),
+    description="Python module for computing 3D tiles",
+    long_description=read('README.md'),
+    url='https://github.com/VCityTeam/py3dtiles-tilers',
+    author='Université de Lyon',
+    author_email='contact@liris.cnrs.fr',
     license='Apache License Version 2.0',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
     packages=find_packages(),
@@ -82,30 +64,10 @@ setup(
     test_suite="tests",
     extras_require={
         'dev': dev_requirements,
-        'prod': prod_requirements,
-        'doc': doc_requirements
+        'prod': prod_requirements
     },
     entry_points={
         'console_scripts': ['py3dtiles=py3dtiles.command_line:main'],
     },
-    data_files=[('py3dtiles/jsonschemas',
-                   [ 'py3dtiles/jsonschemas/3DTILES_batch_table_hierarchy.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.batchTable.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.boundingVolume.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.tileset.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.transaction.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.primaryTransaction.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.transactionAggregate.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.version.schema.json',
-                     'py3dtiles/jsonschemas/3DTILES_temporal.versionTransition.schema.json',
-                     'py3dtiles/jsonschemas/batchTable.schema.json',
-                     'py3dtiles/jsonschemas/boundingVolume.schema.json',
-                     'py3dtiles/jsonschemas/extension.schema.json',
-                     'py3dtiles/jsonschemas/extras.schema.json',
-                     'py3dtiles/jsonschemas/properties.schema.json',
-                     'py3dtiles/jsonschemas/tile.schema.json',
-                     'py3dtiles/jsonschemas/tile.content.schema.json',
-                     'py3dtiles/jsonschemas/tileset.schema.json' ]
-                )], 
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )

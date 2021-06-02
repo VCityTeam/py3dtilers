@@ -1,6 +1,9 @@
+### UNDER CONSTRUCTION
+### This test will FAIL 
+
 # -*- coding: utf-8 -*-
 import unittest
-from py3dtiles import BoundingVolumeBox, HelperTest, Tile
+from py3dtiles-tilers import BoundingVolumeBox, HelperTest, Tile
 
 
 class Test_Tile(unittest.TestCase):
@@ -33,3 +36,4 @@ class Test_Tile(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
