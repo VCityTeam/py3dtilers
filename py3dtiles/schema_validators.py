@@ -3,7 +3,8 @@ import os
 import sys
 import json
 import jsonschema
-import pathlib 
+import pathlib
+
 from .threedtiles_core_schemas import ThreeDTilesCoreSchemas
 from .batch_table_hierarchy_extension_schemas import BatchTableHierarchySchemas
 from .temporal_extension_schemas import TemporalExtensionSchemas

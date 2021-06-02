@@ -4,7 +4,7 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from kd_tree import kd_tree
+from Tilers.kd_tree import kd_tree
 from citym_cityobject import CityMCityObjects
 from citym_building import CityMBuildings
 from citym_relief import CityMReliefs
