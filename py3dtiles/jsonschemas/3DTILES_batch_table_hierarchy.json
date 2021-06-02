@@ -1,0 +1,102 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "3DTILES_batch_table_hierarchy extension",
+    "type": "object",
+    "properties" : {
+        "classes" : {
+            "type" : "array",
+            "items" : {
+                "type" : "object",
+                "properties" : {
+                    "name" : {
+                        "type" : "string"
+                    },
+                    "length" : {
+                        "type" : "number",
+                        "minimum" : 0
+                    },
+                    "instances" : {
+                        "type" : "object",
+                        "additionalProperties" : {
+                            "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/property"
+                        }
+                    }
+                },        
+                "required" : ["name", "length", "instances"]
+            }
+        },
+        "instancesLength" : {
+            "type" : "number",
+            "minimum" : 0
+        },
+        "classIds" : {
+            "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/integerProperty"
+        },
+        "parentCounts" : {
+            "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/integerProperty"
+        },
+        "parentIds" : {
+            "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/integerProperty"
+        },
+        "extensions" : {
+            "$ref": "extension.schema.json"
+        },
+        "extras" : {
+            "$ref": "extras.schema.json"
+        }
+    },
+    "definitions" : {
+        "binaryBodyReference" : {
+            "type" : "object",
+            "properties" : {
+                "byteOffset" : {
+                    "type" : "integer",
+                    "minimum" : 0
+                },
+                "componentType" : {
+                    "type" : "string",
+                    "enum" : ["BYTE", "UNSIGNED_BYTE", "SHORT", "UNSIGNED_SHORT", "INT", "UNSIGNED_INT", "FLOAT", "DOUBLE"]
+                },
+                "type" : {
+                    "type" : "string",
+                    "enum" : ["SCALAR", "VEC2", "VEC3", "VEC4"]
+                }
+            },
+            "required" : ["byteOffset", "componentType", "type"]
+        },
+        "property" : {
+            "anyOf" : [
+                { "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/binaryBodyReference" },
+                { "type" : "array" }
+            ]
+        },
+        "integerArray" : {
+            "type" : "array",
+            "items" : {
+                "type" : "number",
+                "minimum" : 0
+            }
+        },
+        "integerBinaryBodyReference" : {
+            "type" : "object",
+            "properties" : {
+                "byteOffset" : {
+                    "type" : "integer",
+                    "minimum" : 0
+                },
+                "componentType" : {
+                    "type" : "string",
+                    "enum" : ["UNSIGNED_BYTE", "UNSIGNED_SHORT", "UNSIGNED_INT"]
+                }
+            },
+            "required" : ["byteOffset"]
+        },
+        "integerProperty" : {
+            "anyOf" : [
+                { "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/integerBinaryBodyReference" },
+                { "$ref" : "3DTILES_batch_table_hierarchy.json#/definitions/integerArray" }
+            ]
+        }
+    },
+    "required" : ["classes", "instancesLength", "classIds"]
+}

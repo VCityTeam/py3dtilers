@@ -1,0 +1,3 @@
+[flake8]
+exclude=earcut.py
+ignore=E501

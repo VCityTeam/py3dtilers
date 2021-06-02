@@ -1,0 +1,9 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of a Batch Table",
+  "id": 0,
+  "startDate": "2018-01-01",
+  "endDate": "2019-01-01",
+  "name": "some version name",
+  "versionMembers": ["version 1", "version 2", "version 3"],
+  "tags": ["some tag version", "some other tag version"]
+}

@@ -1,0 +1,11 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of Version Transition.",
+  "name": "Version Transition Name",
+  "startDate": "2018-01-01",
+  "endDate":   "2019-01-01",
+  "from": 100,
+  "to": 200,
+  "reason": "Reason of evolution between two versions",
+  "type": "merge",
+  "transactions": [1000, 2000]
+}

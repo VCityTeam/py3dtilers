@@ -1,0 +1,25 @@
+{
+  "_comment": "A reference example given in the specification: refer to https://github.com/AnalyticalGraphicsInc/3d-tiles/blob/master/specification/TileFormats/BatchTable/README.md#json-header",
+  "id": [
+    "unique id",
+    "another unique id"
+  ],
+  "displayName": [
+    "Building name",
+    "Another building name"
+  ],
+  "yearBuilt": [
+    1999,
+    2015
+  ],
+  "address": [
+    {
+      "street": "Main Street",
+      "houseNumber": "1"
+    },
+    {
+      "street": "Main Street",
+      "houseNumber": "2"
+    }
+  ]
+}

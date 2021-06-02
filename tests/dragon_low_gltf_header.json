@@ -1,0 +1,247 @@
+{
+	"accessors": {
+		"accessor_index_0": {
+			"bufferView": "bufferView_1",
+			"byteOffset": 0,
+			"byteStride": 0,
+			"componentType": 5123,
+			"count": 186,
+			"type": "SCALAR",
+			"min": [0],
+			"max": [48]
+		},
+		"accessor_index_1": {
+			"bufferView": "bufferView_1",
+			"byteOffset": 372,
+			"byteStride": 0,
+			"componentType": 5123,
+			"count": 6750,
+			"type": "SCALAR",
+			"min": [49],
+			"max": [6103]
+		},
+		"accessor_position": {
+			"bufferView": "bufferView_0",
+			"byteOffset": 0,
+			"byteStride": 0,
+			"componentType": 5126,
+			"count": 1162,
+			"min": [-7.08220100402832, -5.059500217437744, -3.1356399059295654],
+			"max": [7.10925817489624, 5.027458190917969, 3.1452269554138184],
+			"type": "VEC3"
+		},
+		"accessor_normal": {
+			"bufferView": "bufferView_0",
+			"byteOffset": 13944,
+			"byteStride": 0,
+			"componentType": 5126,
+			"count": 1162,
+			"type": "VEC3",
+			"min": [-0.9960055351257324, -0.9998721480369568, -0.9999771118164062],
+			"max": [0.9936025142669678, 0.9968665242195129, 0.9974824786186218]
+		}
+	},
+	"asset": {
+		"generator": "OBJ2GLTF",
+		"premultipliedAlpha": true,
+		"profile": {
+			"api": "WebGL",
+			"version": "1.0"
+		},
+		"version": "1.0"
+	},
+	"buffers": {
+		"binary_glTF": {
+			"type": "arraybuffer",
+			"byteLength": 43306,
+			"uri": "data:,"
+		}
+	},
+	"bufferViews": {
+		"bufferView_0": {
+			"buffer": "binary_glTF",
+			"byteLength": 27888,
+			"byteOffset": 0,
+			"target": 34962
+		},
+		"bufferView_1": {
+			"buffer": "binary_glTF",
+			"byteLength": 13872,
+			"byteOffset": 27888,
+			"target": 34963
+		},
+		"binary_bufferView0": {
+			"buffer": "binary_glTF",
+			"byteLength": 402,
+			"byteOffset": 41760
+		},
+		"binary_bufferView1": {
+			"buffer": "binary_glTF",
+			"byteLength": 1144,
+			"byteOffset": 42162
+		}
+	},
+	"images": {},
+	"materials": {
+		"material_01_-_Default": {
+			"name": "01_-_Default",
+			"extensions": {},
+			"values": {
+				"ambient": [1, 1, 1, 1],
+				"diffuse": [0.64, 0.64, 0.64, 1],
+				"emission": [0, 0, 0, 1],
+				"specular": [0.5, 0.5, 0.5, 1],
+				"shininess": 96.078431,
+				"transparency": 1
+			},
+			"technique": "technique0"
+		},
+		"material_03_-_Default": {
+			"name": "03_-_Default",
+			"extensions": {},
+			"values": {
+				"ambient": [1, 1, 1, 1],
+				"diffuse": [0.64, 0.64, 0.64, 1],
+				"emission": [0, 0, 0, 1],
+				"specular": [0.5, 0.5, 0.5, 1],
+				"shininess": 96.078431,
+				"transparency": 1
+			},
+			"technique": "technique0"
+		}
+	},
+	"meshes": {
+		"mesh_dragon_low": {
+			"name": "dragon_low",
+			"primitives": [{
+				"attributes": {
+					"POSITION": "accessor_position",
+					"NORMAL": "accessor_normal"
+				},
+				"indices": "accessor_index_0",
+				"material": "material_03_-_Default",
+				"mode": 4
+			}, {
+				"attributes": {
+					"POSITION": "accessor_position",
+					"NORMAL": "accessor_normal"
+				},
+				"indices": "accessor_index_1",
+				"material": "material_01_-_Default",
+				"mode": 4
+			}]
+		}
+	},
+	"nodes": {
+		"node_dragon_low": {
+			"children": [],
+			"matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+			"meshes": ["mesh_dragon_low"],
+			"name": "dragon_low"
+		}
+	},
+	"samplers": {},
+	"scene": "scene_dragon_low",
+	"scenes": {
+		"scene_dragon_low": {
+			"nodes": ["node_dragon_low"]
+		}
+	},
+	"textures": {},
+	"animations": {},
+	"cameras": {},
+	"extensions": {},
+	"techniques": {
+		"technique0": {
+			"attributes": {
+				"a_position": "position",
+				"a_normal": "normal"
+			},
+			"parameters": {
+				"modelViewMatrix": {
+					"semantic": "MODELVIEW",
+					"type": 35676
+				},
+				"projectionMatrix": {
+					"semantic": "PROJECTION",
+					"type": 35676
+				},
+				"normalMatrix": {
+					"semantic": "MODELVIEWINVERSETRANSPOSE",
+					"type": 35675
+				},
+				"ambient": {
+					"type": 35666
+				},
+				"diffuse": {
+					"type": 35666,
+					"semantic": "_3DTILESDIFFUSE"
+				},
+				"emission": {
+					"type": 35666
+				},
+				"specular": {
+					"type": 35666
+				},
+				"shininess": {
+					"type": 5126
+				},
+				"transparency": {
+					"type": 5126
+				},
+				"position": {
+					"semantic": "POSITION",
+					"type": 35665
+				},
+				"normal": {
+					"semantic": "NORMAL",
+					"type": 35665
+				}
+			},
+			"program": "program0",
+			"states": {
+				"enable": [2884, 2929]
+			},
+			"uniforms": {
+				"u_modelViewMatrix": "modelViewMatrix",
+				"u_projectionMatrix": "projectionMatrix",
+				"u_normalMatrix": "normalMatrix",
+				"u_ambient": "ambient",
+				"u_diffuse": "diffuse",
+				"u_emission": "emission",
+				"u_specular": "specular",
+				"u_shininess": "shininess",
+				"u_transparency": "transparency"
+			}
+		}
+	},
+	"programs": {
+		"program0": {
+			"attributes": ["a_position", "a_normal"],
+			"fragmentShader": "fragmentShader0",
+			"vertexShader": "vertexShader0"
+		}
+	},
+	"shaders": {
+		"vertexShader0": {
+			"type": 35633,
+			"uri": "data:,",
+			"extensions": {
+				"KHR_binary_glTF": {
+					"bufferView": "binary_bufferView0"
+				}
+			}
+		},
+		"fragmentShader0": {
+			"type": 35632,
+			"uri": "data:,",
+			"extensions": {
+				"KHR_binary_glTF": {
+					"bufferView": "binary_bufferView1"
+				}
+			}
+		}
+	},
+	"skins": {},
+	"extensionsUsed": ["KHR_binary_glTF"]
+}

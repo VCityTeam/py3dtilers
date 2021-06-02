@@ -1,0 +1,32 @@
+{
+ "_comment": "A reference example given in the specification, refer to https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/extensions/3DTILES_batch_table_hierarchy#batch-table-json-schema-updates",
+ "classes" : [
+   {
+     "name" : "Wall",
+     "length" : 6,
+     "instances" : {
+       "color" : ["white", "red", "yellow", "gray", "brown", "black"]
+     }
+   },
+   {
+     "name" : "Building",
+     "length" : 3,
+     "instances" : {
+       "name" : ["unit29", "unit20", "unit93"],
+       "address" : ["100 Main St", "102 Main St", "104 Main St"]
+     }
+   },
+   {
+     "name" : "Owner",
+     "length" : 3,
+     "instances" : {
+       "type" : ["city", "resident", "commercial"],
+       "id" : [1120, 1250, 6445]
+     }
+   }
+ ],
+ "instancesLength" : 12,
+ "classIds" : [0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2],
+ "parentCounts" : [1, 3, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+ "parentIds" : [6, 6, 10, 11, 7, 11, 7, 8, 8, 10, 10, 9]
+}

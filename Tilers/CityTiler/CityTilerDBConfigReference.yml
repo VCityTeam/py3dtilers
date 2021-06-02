@@ -1,0 +1,5 @@
+PG_HOST: <FQDN or IP number of the server hosting your db>
+PG_PORT: <port>
+PG_NAME: <database name>
+PG_USER: <your db user name>
+PG_PASSWORD: <user password>

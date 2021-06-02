@@ -1,0 +1,9 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of Transaction",
+  "id": "0",
+  "startDate": "2018-01-01",
+  "endDate": "2019-01-01",
+  "tags": ["heightened"],
+  "source": ["some-id", "some-other-id"],
+  "destination": ["a given id", "another given id"]
+}

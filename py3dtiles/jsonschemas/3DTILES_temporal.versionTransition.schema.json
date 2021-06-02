@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "3DTILES_temporal.versionTransition.schema.json",
+  "title": "3DTILES_temporal_version_transition extension",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "Version Transition name",
+      "type": "string"
+    },
+    "startDate": {
+      "description": "Start date of the version transition",
+      "type": "string",
+      "format": "date"
+    },
+    "endDate": {
+      "description": "End date of the version transition",
+      "type": "string",
+      "format": "date"
+    },
+    "from": {
+      "description": "Preceding version id",
+      "type": "number"
+    },
+    "to": {
+      "description": "Following version id",
+      "type": "number"
+    },
+    "reason": {
+      "description": "Reason of evolution between two versions",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type of transition",
+      "type": "string",
+      "enum": ["planned", "realized", "historical succession", "fork", "merge"]
+    },
+    "transactions": {
+      "type": "array",
+      "description": "ids of the transactions",
+      "items": {"type": "number"}
+    }
+  }
+}

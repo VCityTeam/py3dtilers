@@ -1,0 +1,38 @@
+{
+  "_comment": "A reference example of 3DTiles temporal applicative extension of a TileSet",
+  "startDate": "2018-01-01",
+  "endDate":  "2019-01-01",
+  "versions": [
+    {
+      "id": 0,
+      "startDate": "2018-01-01",
+      "endDate": "2019-01-01",
+      "name": "some version name",
+      "versionMembers": ["version 1", "version 2", "version 3"],
+      "tags": ["some tag version", "some other tag version"]
+    }
+  ],
+  "versionTransitions": [
+    {
+      "name": "Version Transition Name",
+      "startDate": "2018-01-01",
+      "endDate":   "2019-01-01",
+      "from": 100,
+      "to": 200,
+      "reason": "Reason of evolution between two versions",
+      "type": "merge",
+      "transactions": [1000, 2000]
+    }
+  ],
+  "transactions": [
+    {
+      "id": "0",
+      "startDate": "2018-01-01",
+      "endDate": "2019-01-01",
+      "type": "creation",
+      "tags": ["heightened"],
+      "source": ["some-id", "some-other-id"],
+      "destination": ["a given id", "another given id"]
+    }
+  ]
+}
