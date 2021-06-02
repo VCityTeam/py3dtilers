@@ -24,6 +24,17 @@ def parse_command_line():
                         nargs='?',
                         type=str,  
                         help='path to the ifc file')
+    parser.add_argument('--originalUnit',
+                        nargs='*',
+                        default="m",
+                        type=str,  
+                        help='original unit of the ifc file')
+    parser.add_argument('--targetedUnit',
+                        nargs='*',
+                        default="m",
+                        type=str,  
+                        help='targeted unit of the 3DTiles produced')
+    
     return parser.parse_args()
 
 
@@ -72,7 +83,7 @@ def create_tile_content(pre_tile):
     # BatchTableHierarchy within a B3dm:
     return B3dm.from_glTF(gltf, bt)
         
-def from_ifc(path_to_file):    
+def from_ifc(path_to_file,originalUnit,targetedUnit):    
     """
     :param path: a path to a directory
 
@@ -80,7 +91,7 @@ def from_ifc(path_to_file):
     """
     
 
-    pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, True)
+    pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
 
     
     tileset = TileSet()
@@ -117,7 +128,7 @@ def main():
     """
     args = parse_command_line()
 
-    tileset = from_ifc(args.ifc_file_path)
+    tileset = from_ifc(args.ifc_file_path,args.originalUnit,args.targetedUnit)
 
     if(tileset != None):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())

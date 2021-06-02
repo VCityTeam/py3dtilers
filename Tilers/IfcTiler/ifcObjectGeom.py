@@ -25,18 +25,25 @@ def computeDirection(axis,refDirection):
     XAxis = normalize(np.subtract(V,XVec))
     return np.array([XAxis,np.cross(Z,XAxis),Z])
 
-
+def unitConversion(originalUnit,targetedUnit):
+    conversions = {
+                "mm": {"mm": 1, "cm": 1/10, "m": 1/1000, "km": 1/1000000},
+                "cm": {"mm": 10, "cm": 1, "m": 1/100, "km": 1/100000},
+                "m":  {"mm": 1000, "cm": 100, "m": 1, "km": 1/1000},
+                "km": {"mm": 100000, "cm": 10000, "m": 1000, "km": 1},
+              }
+    return conversions[originalUnit][targetedUnit]
 
 class IfcObjectGeom(ObjectToTile):
-    def __init__(self,ifcObject,convertToMeter = False):
+    def __init__(self,ifcObject,originalUnit = "m",targetedUnit = "m"):
         super().__init__()
 
         self.id = ifcObject.GlobalId
         self.geom = TriangleSoup()
-        self.convertToMeter = convertToMeter
         self.ifcObject = ifcObject
         self.ifcClasse = ifcObject.is_a()
         self.has_geom = self.parse_geom()
+        self.convertionRatio = unitConversion(originalUnit,targetedUnit)
 
     def hasGeom(self):
         return self.has_geom
@@ -151,11 +158,7 @@ class IfcObjectGeom(ObjectToTile):
         elevation = 0
         if(self.ifcObject.ContainedInStructure) :
             if(not(self.ifcObject.ContainedInStructure[0].RelatingStructure.is_a("IfcSpace"))) :
-                elevation += self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation
-
-        if(self.convertToMeter):
-            elevation /= 100
-
+                elevation += (self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation * self.convertionRatio)
         return elevation
 
     def parse_geom(self):
@@ -163,9 +166,7 @@ class IfcObjectGeom(ObjectToTile):
             return False
         
         representations = self.ifcObject.Representation.Representations
-        
-        elevation = self.getElevation()
-        
+            
         listPosition = self.getPosition(self.ifcObject.ObjectPlacement)
 
         listDirection = self.getDirections(self.ifcObject.ObjectPlacement)
@@ -204,8 +205,7 @@ class IfcObjectGeom(ObjectToTile):
             for i in range(len(listDirection)) :
                 vertex = np.dot(np.array(vertex),listDirection[i])
                 vertex = (vertex + listPosition[i])
-            if(self.convertToMeter):
-                vertex = vertex / 100
+                vertex = vertex * self.convertionRatio
             vertexList[j] = np.array([round(vertex[0],5),round(vertex[1],5),round(vertex[2],5)],dtype=np.float32)
 
         triangles = list()
@@ -252,13 +252,12 @@ class IfcObjectsGeom(ObjectsToTile):
         super().__init__(objs)
 
     @staticmethod
-    def computeCentroid(ifcSite,convertToMeter) :
+    def computeCentroid(ifcSite,unitRatio) :
         elevation = ifcSite.RefElevation
         placement = ifcSite.ObjectPlacement.RelativePlacement
         location = placement.Location.Coordinates
         transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
-        if(convertToMeter) :
-            location = (location[0]/100,location[1]/100,location[2] / 100)
+        location = (location[0] * unitRatio,location[1] * unitRatio,location[2] * unitRatio)
         location = transformer.transform(location[0],location[1])
         direction = computeDirection(placement.Axis.DirectionRatios,placement.RefDirection.DirectionRatios)
         centroid = [direction[0][0],direction[0][1],direction[0][2],0,
@@ -269,7 +268,7 @@ class IfcObjectsGeom(ObjectsToTile):
 
 
     @staticmethod
-    def retrievObjByType(path_to_file,convertToMeter = False):
+    def retrievObjByType(path_to_file,originalUnit = "m",targetedUnit = "m"):
         """
         :param path: a path to a directory
 
@@ -277,7 +276,7 @@ class IfcObjectsGeom(ObjectsToTile):
         """
         ifc_file = ifcopenshell.open(path_to_file)
         
-        centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0],convertToMeter)
+        centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0],unitConversion(originalUnit,targetedUnit))
         elements = ifc_file.by_type('IfcElement')   
 
         dictObjByType = dict()
@@ -286,7 +285,7 @@ class IfcObjectsGeom(ObjectsToTile):
                 print(element.is_a())
                 dictObjByType[element.is_a()] = list()   
 
-            obj = IfcObjectGeom(element,convertToMeter)
+            obj = IfcObjectGeom(element,originalUnit,targetedUnit)
             if(obj.hasGeom()):
                 dictObjByType[element.is_a()].append(obj)
 
