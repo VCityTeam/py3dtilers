@@ -3,7 +3,7 @@
 
 # -*- coding: utf-8 -*-
 import unittest
-from py3dtiles-tilers import BoundingVolumeBox, HelperTest, Tile
+from py3dtilers import BoundingVolumeBox, HelperTest, Tile
 
 
 class Test_Tile(unittest.TestCase):

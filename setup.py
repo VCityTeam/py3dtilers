@@ -46,11 +46,11 @@ def find_version(*file_paths):
 
 
 setup(
-    name='py3dtiles-tilers',
-    version=find_version('py3dtiles-tilers', '__init__.py'),
+    name='py3dtilers',
+    version=find_version('py3dtilers', '__init__.py'),
     description="Python module for computing 3D tiles",
     long_description=read('README.md'),
-    url='https://github.com/VCityTeam/py3dtiles-tilers',
+    url='https://github.com/VCityTeam/py3dtilers',
     author='Université de Lyon',
     author_email='contact@liris.cnrs.fr',
     license='Apache License Version 2.0',
