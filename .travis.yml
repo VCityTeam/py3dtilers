@@ -6,8 +6,6 @@ python:
   - "3.6"
 
 install:
-  - git --version
-  - pip --version
   - pip install -e . -v
   - pip install pytest pytest-benchmark
 
