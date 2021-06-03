@@ -5,3 +5,5 @@ from .kd_tree import kd_tree
 from .object_to_tile import *
 
 
+__version__ = '1.1.0'
+__all__ = ['kd_tree']
