@@ -6,8 +6,13 @@ python:
   - "3.6"
 
 install:
-  - pip install -e . -v
-  - pip install pytest pytest-benchmark
+    ### Dealing with py3dtiles sub-dependencies
+  - sudo add-apt-repository universe
+  - sudo apt-get install -y liblas-c3 libopenblas-base flake8
+    ### Proceed with the install of py3dtilers per se.
+    # The extra flag installs the dev dependencies, refer to e.g.
+    # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
+  - pip install -e .[extra] -v  # 
 
 addons:
   apt:
