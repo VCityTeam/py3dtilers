@@ -5,6 +5,10 @@ language: python
 python:
   - "3.6"
 
+addons:
+  apt:
+    update: true
+
 install:
     ### Dealing with py3dtiles sub-dependencies
   - sudo add-apt-repository universe
@@ -12,11 +16,8 @@ install:
     ### Proceed with the install of py3dtilers per se.
     # The extra flag installs the dev dependencies, refer to e.g.
     # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
-  - pip install -e .[extra] -v  # 
-
-addons:
-  apt:
-    update: true
+  - pip install -e .[extra]
+  - python -c 'import ifcopenshell'  # Just to make sure
 
 jobs:
   include:
@@ -24,4 +25,4 @@ jobs:
       script:
       - |
         pytest
-        py3dtiles info tests/pointCloudRGB.pnts
+        pytest -v

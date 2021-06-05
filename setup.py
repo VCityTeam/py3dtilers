@@ -36,9 +36,10 @@ requirements = (
 )
 
 dev_requirements = (
+    'flake8',
+    'line_profiler',
     'pytest',
-    'pytest-cov',
-    'line_profiler'
+    'pytest-cov'
 )
 
 prod_requirements = (
