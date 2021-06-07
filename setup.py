@@ -157,7 +157,11 @@ setup(
         'prod': prod_requirements
     },
     entry_points={
-        'console_scripts': ['py3dtiles=py3dtiles.command_line:main'],
+        'console_scripts': ['citygml-tiler=py3dtilers.CityTiler:main',
+                            'geojson-tiler=py3dtilers.GeojsonTiler:main'],
     },
+    data_files=[('py3dtilers/CityTiler',
+                   ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']
+    )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )

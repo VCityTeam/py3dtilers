@@ -9,10 +9,10 @@ import json
 from scipy.spatial import ConvexHull
 from shapely.geometry import Point
 from rdp import rdp
-from PolygonDetection import PolygonDetector
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
+from .PolygonDetection import PolygonDetector
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.

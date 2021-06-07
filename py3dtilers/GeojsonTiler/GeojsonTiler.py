@@ -5,11 +5,11 @@ import argparse
 import sys
 
 import numpy as np
-from geojson import Geojson, Geojsons
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 from ..Common import kd_tree
+from .geojson import Geojson, Geojsons
 
 
 def parse_command_line():
