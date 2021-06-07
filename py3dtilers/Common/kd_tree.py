@@ -1,4 +1,4 @@
-from Tilers.object_to_tile import ObjectsToTile
+from .object_to_tile import ObjectsToTile
 
 
 def kd_tree(objects, maxNumObjects, depth=0):

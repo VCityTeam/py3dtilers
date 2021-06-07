@@ -6,12 +6,11 @@ import argparse
 
 import numpy as np
 import pyproj
-
 import ifcopenshell
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
-from Tilers.kd_tree import kd_tree
+from ..Common import kd_tree
 
 
 from ifcObjectGeom import IfcObjectGeom, IfcObjectsGeom

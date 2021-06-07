@@ -1,7 +1,7 @@
 import itertools
 
 from py3dtiles import BatchTableHierarchy
-from tree_with_children_and_parent import TreeWithChildrenAndParent
+from ..Common import TreeWithChildrenAndParent
 
 
 def retrieve_buildings_and_sub_parts(cursor, buildingIds, classes, hierarchy):

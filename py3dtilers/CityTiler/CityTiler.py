@@ -4,13 +4,13 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 
-from Tilers.kd_tree import kd_tree
-from citym_cityobject import CityMCityObjects
-from citym_building import CityMBuildings
-from citym_relief import CityMReliefs
-from citym_waterbody import CityMWaterBodies
-from database_accesses import open_data_base
-from database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
+from ..Common import kd_tree
+from .citym_cityobject import CityMCityObjects
+from .citym_building import CityMBuildings
+from .citym_relief import CityMReliefs
+from .citym_waterbody import CityMWaterBodies
+from .database_accesses import open_data_base
+from .database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
 def parse_command_line():

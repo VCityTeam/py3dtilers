@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-import sys
-import numpy as np
-import json
-from py3dtiles import BoundingVolumeBox, TriangleSoup
-from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
-from scipy.spatial import ConvexHull
-from shapely.geometry import Point
-from rdp import rdp
-
 import os
 from os import listdir
 from os.path import isfile, join
+import sys
+import numpy as np
+import json
+
+from scipy.spatial import ConvexHull
+from shapely.geometry import Point
+from rdp import rdp
 from PolygonDetection import PolygonDetector
+
+from py3dtiles import BoundingVolumeBox, TriangleSoup
+from ..Common import ObjectToTile, ObjectsToTile
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.

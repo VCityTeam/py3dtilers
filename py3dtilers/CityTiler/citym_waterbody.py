@@ -15,7 +15,7 @@ water body objects
 """
 
 
-from citym_cityobject import CityMCityObject, CityMCityObjects
+from .citym_cityobject import CityMCityObject, CityMCityObjects
 
 
 class CityMWaterBody(CityMCityObject):

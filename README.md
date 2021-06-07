@@ -17,7 +17,8 @@ In order to install py3dtilers from sources use:
 ```bash
 $ apt install git python3 python3-pip virtualenv
 $ git clone https://github.com/VCityTeam/py3dtilers
-$ cd py3dtilers```
+$ cd py3dtilers
+```
 
 Install `py3dtiles` sub-dependencies (`liblas`) with your platform package installer e.g. for Ubuntu use
 

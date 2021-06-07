@@ -10,15 +10,15 @@ from py3dtiles import TemporalTransaction
 from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
 from py3dtiles import temporal_extract_bounding_dates
 
-from temporal_utils import debug_msg, debug_msg_ne
-from temporal_graph import TemporalGraph, Edge
-from temporal_building import TemporalBuilding
+from .temporal_utils import debug_msg, debug_msg_ne
+from .temporal_graph import TemporalGraph, Edge
+from .temporal_building import TemporalBuilding
 
-from citym_cityobject import CityMCityObjects
-from citym_building import CityMBuildings
+from .citym_cityobject import CityMCityObjects
+from .citym_building import CityMBuildings
 
-from database_accesses import open_data_bases
-from kd_tree import kd_tree
+from .database_accesses import open_data_bases
+from ..Common import kd_tree
 
 
 def parse_command_line():

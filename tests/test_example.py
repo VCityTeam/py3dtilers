@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from py3dtilers import kd_tree
+from py3dtilers.Common.kd_tree import kd_tree
 
 
 class Test_kd_tree(unittest.TestCase):

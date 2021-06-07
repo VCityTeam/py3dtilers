@@ -15,8 +15,7 @@ and the geometric data in the surface_geometry table
 
 """
 
-
-from citym_cityobject import CityMCityObject, CityMCityObjects
+from .citym_cityobject import CityMCityObject, CityMCityObjects
 
 
 class CityMBuilding(CityMCityObject):

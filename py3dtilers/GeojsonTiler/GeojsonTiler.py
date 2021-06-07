@@ -1,18 +1,15 @@
-import argparse
-import numpy as np
-import sys
-
 import os
 from os import listdir
 from os.path import isfile, join
+import argparse
+import sys
+
+import numpy as np
+from geojson import Geojson, Geojsons
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
-from Tilers.kd_tree import kd_tree
-
-
-from geojson import Geojson, Geojsons
-
+from ..Common import kd_tree
 
 
 def parse_command_line():

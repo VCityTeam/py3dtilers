@@ -1,4 +1,4 @@
-from citym_building import CityMBuilding
+from .citym_building import CityMBuilding
 
 
 class TemporalBuilding(CityMBuilding):

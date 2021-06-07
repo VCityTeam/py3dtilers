@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-import sys
-import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup
-from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
-import ifcopenshell
-
 import os
 from os import listdir
 from os.path import isfile, join
+import sys
+import numpy as np
+import ifcopenshell
 from pyproj import Transformer
+from py3dtiles import BoundingVolumeBox, TriangleSoup
+from ..Common import ObjectToTile, ObjectsToTile
+
 
 def normalize(v): 
     norm = np.linalg.norm(v) 

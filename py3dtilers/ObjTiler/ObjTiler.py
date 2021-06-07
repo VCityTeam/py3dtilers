@@ -3,16 +3,10 @@ import numpy as np
 import pywavefront 
 import sys
 
-import os
-from os import listdir
-from os.path import isfile, join
-
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
-from Tilers.kd_tree import kd_tree
-
-
-from obj import Obj, Objs
+from ..Common import kd_tree
+from .obj import Obj, Objs
 
 
 

@@ -1,9 +1,9 @@
 import json
 import sys
 from enum import Enum, unique
-
 from pprint import pprint
-from temporal_utils import debug_msg, debug_msg_ne, debug_mode
+
+from .temporal_utils import debug_msg, debug_msg_ne, debug_mode
 
 
 class Node(object):

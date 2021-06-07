@@ -2,7 +2,7 @@
 import sys
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
-from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
+from ..Common import ObjectToTile, ObjectsToTile
 
 
 class CityMCityObject(ObjectToTile):

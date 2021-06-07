@@ -15,7 +15,7 @@ their "parent" which is a more complex relief object
 """
 
 
-from citym_cityobject import CityMCityObject, CityMCityObjects
+from .citym_cityobject import CityMCityObject, CityMCityObjects
 
 
 class CityMRelief(CityMCityObject):

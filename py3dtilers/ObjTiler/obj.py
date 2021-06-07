@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import sys
-import numpy as np
-import pywavefront
-from py3dtiles import BoundingVolumeBox, TriangleSoup
-from Tilers.object_to_tile import ObjectToTile, ObjectsToTile
-
 import os
 from os import listdir
 from os.path import isfile, join
+import sys
+
+import numpy as np
+import pywavefront
+
+from py3dtiles import BoundingVolumeBox, TriangleSoup
+from ..Common import ObjectToTile, ObjectsToTile
 
 
 # This Obj class refers to the obj file fromat (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
