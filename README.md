@@ -39,7 +39,7 @@ of failure of the importation try re-installing but this time with the verbose
 flag, that is try
 
 ```bash
-(venv)$ pip install -e -v .
+(venv)$ pip install -e . -v
 ```
 
 and look for the lines concerning `IfcOpenShell.`
