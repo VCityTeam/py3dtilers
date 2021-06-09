@@ -25,6 +25,7 @@ Install `py3dtiles` sub-dependencies (`liblas`) with your platform package insta
 ```bash
 $ apt-get install -y liblas-c3 libopenblas-base
 ```
+(_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
 Proceed with the installation of `py3dtilers` per se
 
