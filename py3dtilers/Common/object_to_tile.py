@@ -1,5 +1,6 @@
 import sys
 
+import numpy as np
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 class ObjectToTile(object):
@@ -34,6 +35,28 @@ class ObjectToTile(object):
 
     def get_bounding_volume_box(self):
         return self.box
+
+    def get_geom_as_triangles(self):
+        return self.geom.triangles[0]
+
+    def set_triangles(self,triangles):
+        self.geom.triangles[0] = triangles
+        
+    def set_box(self):
+        """
+        Parameters
+        ----------
+        Returns
+        -------
+        """
+        bbox = self.geom.getBbox()
+        self.box = BoundingVolumeBox()
+        self.box.set_from_mins_maxs(np.append(bbox[0],bbox[1]))
+        
+        # Set centroid from Bbox center
+        self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
+                         (bbox[0][1] + bbox[1][1]) / 2.0,
+                         (bbox[0][2] + bbox[0][2]) / 2.0])
 
 class ObjectsToTile(object):
     """
@@ -84,3 +107,22 @@ class ObjectsToTile(object):
         return [centroid[0] / len(self),
                 centroid[1] / len(self),
                 centroid[2] / len(self)]
+
+    def translate_tileset(self,offset):
+        """
+        :param objects: an array containing geojsons 
+        :param offset: an offset
+        :return: 
+        """
+        # Translate the position of each geojson by an offset
+        for object_to_tile in self.objects:
+            new_geom = []
+            for triangle in object_to_tile.get_geom_as_triangles():
+                new_position = []
+                for points in triangle:
+                    # Must to do this this way to ensure that the new position 
+                    # stays in float32, which is mandatory for writing the GLTF
+                    new_position.append(np.array(points - offset, dtype=np.float32))
+                new_geom.append(new_position)
+            object_to_tile.set_triangles(new_geom)
+            object_to_tile.set_box()

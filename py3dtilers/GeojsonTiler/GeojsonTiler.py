@@ -10,6 +10,7 @@ from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 from ..Common import kd_tree
 from .geojson import Geojson, Geojsons
+from ..Common import create_lod_tree, create_tileset, LodNode
 
 
 def parse_command_line():
@@ -68,47 +69,6 @@ def parse_command_line():
         sys.exit(1)
 
     return result
-
-
-
-def create_tile_content(pre_tile):
-    """
-    :param pre_tile: an array containing features of a single tile
-
-    :return: a B3dm tile.
-    """
-    #create B3DM content
-    arrays = []
-    for feature in pre_tile:
-        arrays.append({
-            'position': feature.geom.getPositionArray(),
-            'normal': feature.geom.getNormalArray(),
-            'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()]
-        })
-        
-    # GlTF uses a y-up coordinate system whereas the geographical data (stored
-    # in the 3DCityDB database) uses a z-up coordinate system convention. In
-    # order to comply with Gltf we thus need to realize a z-up to y-up
-    # coordinate transform for the data to respect the glTF convention. This
-    # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
-    # client side when using (displaying) the data.
-    # Refer to the note concerning the recommended data workflow
-    # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
-    # for more details on this matter.
-    transform = np.array([1, 0,  0, 0,
-                      0, 0, -1, 0,
-                      0, 1,  0, 0,
-                      0, 0,  0, 1])  
-    gltf = GlTF.from_binary_arrays(arrays, transform)
-
-    # Create a batch table and add the ID of each feature to it
-    ids = [feature.get_geojson_id() for feature in pre_tile]
-    bt = BatchTable()
-    bt.add_property_from_array("id", ids)
-
-    # Eventually wrap the geometries together with the optional
-    # BatchTableHierarchy within a B3dm:
-    return B3dm.from_glTF(gltf, bt)
         
 def from_geojson_directory(path, group, properties, obj_name):    
     """
@@ -125,37 +85,14 @@ def from_geojson_directory(path, group, properties, obj_name):
     else:
         print(str(len(objects)) + " features parsed")
     
-    # Lump out objects in pre_tiles based on a 2D-Tree technique:
-    pre_tileset = kd_tree(objects,200)       
+    tree = create_lod_tree(objects,False)
 
-    # Get the centroid of the tileset and translate all of the geojson 
-    # by this centroid
-    # which will be later added in the transform part of each tiles
-    centroid = objects.get_centroid()  
-    objects.translate_tileset(centroid)       
-    
-    tileset = TileSet()
+    if len(Geojsons.base_features) > 0:
+        for index, node in enumerate(tree.root_nodes):
+            features = [Geojsons.base_features[i] for i in Geojsons.features_dict[index]]
+            node.set_child_nodes(features)
 
-    for pre_tile in pre_tileset:
-
-        tile = Tile()  
-        tile.set_geometric_error(500)
-
-        tile_content_b3dm = create_tile_content(pre_tile)
-        tile.set_content(tile_content_b3dm)
-        tile.set_transform([1, 0, 0, 0,
-                    0, 1, 0, 0,
-                    0, 0, 1, 0,
-                    centroid[0], centroid[1], centroid[2], 1])
-
-        bounding_box = BoundingVolumeBox()        
-        for geojson in pre_tile:
-            bounding_box.add(geojson.get_bounding_volume_box()) 
-        tile.set_bounding_volume(bounding_box)
-        
-        tileset.add_tile(tile)
-
-    return tileset
+    return create_tileset(tree)
 
 def main():
     """
@@ -177,9 +114,8 @@ def main():
             if(tileset != None):
                 tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                 folder_name = path.split('/')[-1]
-                print("tilset in geojson_tilesets/" + folder_name)
+                print("tileset in geojson_tilesets/" + folder_name)
                 tileset.write_to_directory("geojson_tilesets/" + folder_name)
-
 
 if __name__ == '__main__':
     main()
