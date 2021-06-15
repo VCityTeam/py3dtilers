@@ -10,8 +10,8 @@ from ..Common import ObjectsToTile
 
 class LodNode():
 
-    def __init__(self, objects_to_tile=list(), depth=0):
-        self.objects_to_tile = ObjectsToTile(objects_to_tile)
+    def __init__(self, objects_to_tile=None, depth=0):
+        self.objects_to_tile = objects_to_tile
         self.child_nodes = list()
         self.depth = depth
 
@@ -21,7 +21,7 @@ class LodNode():
     def set_child_nodes(self, objects_to_tile, group_children=True):
         if not group_children:
             for object_to_tile in objects_to_tile:
-                self.child_nodes.append(LodNode([object_to_tile], self.depth + 1))
+                self.child_nodes.append(LodNode(ObjectsToTile([object_to_tile]), self.depth + 1))
 
         else:
             self.child_nodes.append(LodNode(objects_to_tile, self.depth + 1))
@@ -38,15 +38,16 @@ class LodTree():
         self.centroid = centroid
 
 
-def create_lod_tree(objects_to_tile=list(), group=True):
+def create_lod_tree(objects_to_tile_array=list(), group=True):
 
     nodes = list()
-
-    if not group:
-        for object_to_tile in objects_to_tile:
-            nodes.append(LodNode([object_to_tile]))
-    else:
-        nodes.append(LodNode(objects_to_tile))
+    
+    for objects_to_tile in objects_to_tile_array:
+        if not group:
+            for object_to_tile in objects_to_tile:
+                nodes.append(LodNode(ObjectsToTile([object_to_tile])))
+        else:
+            nodes.append(LodNode(objects_to_tile))
 
     tree = LodTree(nodes)
     tree.set_centroid(objects_to_tile.get_centroid())
@@ -84,7 +85,7 @@ def create_tile_content(pre_tile):
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
     # Create a batch table and add the ID of each feature to it
-    ids = [feature.get_geojson_id() for feature in pre_tile]
+    ids = [feature.get_id() for feature in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
 

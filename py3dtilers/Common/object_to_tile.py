@@ -12,7 +12,8 @@ class ObjectToTile(object):
         """
         :param id: given identifier
         """
-
+        
+        self.geom = TriangleSoup()
         # The identifier of the database
         self.id = None
 

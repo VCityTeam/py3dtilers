@@ -28,8 +28,6 @@ class Geojson(ObjectToTile):
     def __init__(self, id=None):
         super().__init__(id)
 
-        self.geom = TriangleSoup()
-
         self.z = 0
         self.height = 0
         self.center = []

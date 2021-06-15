@@ -10,38 +10,8 @@ class CityMCityObject(ObjectToTile):
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
     """
-    def __init__(self, database_id=None, box_in=None):
-        """
-        :param id: given identifier
-        :param box_2D: the maximum extents of the geometry a returned by a
-                       PostGis::Box3D(geometry geomA) call (refer to
-                       https://postgis.net/docs/Box3D.html) that is a string
-                       of the form 'BOX3D(1 2 3, 4 5 6)' where:
-                        * 1, 2 and 3 are the respective minimum of X, Y and Z
-                        * 4, 5 and 6 are the respective maximum of X, Y and Z
-        """
+    def __init__(self, database_id=None):
         super().__init__(database_id)
-        if box_in:
-            self.set_box(box_in)
-
-    def set_box(self, box_in):
-        # Realize the following convertion:
-        # 'BOX3D(1 2 3, 4 5 6)' -> [[1, 2, 3], [4, 5, 6]]
-        box_parsed = [[float(coord) for coord in point.split(' ')]
-                                    for point in box_in[6:-1].split(',')]
-        x_min = box_parsed[0][0]
-        x_max = box_parsed[1][0]
-        y_min = box_parsed[0][1]
-        y_max = box_parsed[1][1]
-        z_min = box_parsed[0][2]
-        z_max = box_parsed[1][2]
-
-        self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs([x_min, y_min, z_min, x_max, y_max, z_max])
-        # Centroid of the box
-        self.centroid = [(x_min + x_max) / 2.0,
-                         (y_min + y_max) / 2.0,
-                         (z_min + z_max) / 2.0]
 
     def get_database_id(self):
         return super().get_id()
@@ -117,15 +87,14 @@ class CityMCityObjects(ObjectsToTile):
                     continue
                 print("     Exiting (is the database corrupted ?)")
                 sys.exit(1)
-            box = t[1]
             if no_input:
-                new_object = CityMCityObject(object_id, box)
+                new_object = CityMCityObject(object_id)
                 result_objects.append(new_object)
             else:
                 gml_id = t[2]
                 cityobject = objects_with_gmlid_key[gml_id]
                 cityobject.set_database_id(object_id)
-                cityobject.set_box(box)
+                cityobject.set_box()
         if no_input:
             return result_objects
         else:
@@ -140,49 +109,3 @@ class CityMCityObjects(ObjectsToTile):
         :return: no return value.
         """
         pass
-
-    @staticmethod
-    def retrieve_geometries(cursor, city_object_ids, offset, objects_type):
-        """
-        :param cursor: a database access cursor
-        :param city_object_ids: a list of (city)gml identifier corresponding to
-                       objects_type type objects whose geometries are sought.
-        :param offset: the offset (a 3D "vector" of floats) by which the
-                       geographical coordinates should be translated (the
-                       computation is done at the GIS level).
-        :param objects_type: a class name among CityMCityObject derived classes.
-                        For example, objects_type can be "CityMBuilding".
-        :rtype List[Dict]: a TileContent in the form a B3dm.
-        """
-        city_object_ids_arg = str(city_object_ids).replace(',)', ')')
-
-        cursor.execute(objects_type.sql_query_geometries(offset,
-                                                         city_object_ids_arg))
-
-        # Deal with the reordering of the retrieved geometries
-        city_objects_with_gmlid_key = dict()
-        for t in cursor.fetchall():
-            city_object_root_id = t[0]
-            geom_as_string = t[1]
-            if geom_as_string is None:
-                # Some thematic surface may have no geometry (due to a cityGML
-                # exporter bug?): simply ignore them.
-                print("Warning: no valid geometry in database.")
-                sys.exit(1)
-            geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-            if len(geom.triangles[0]) == 0:
-                print("Warning: empty (no) geometry from the database.")
-                sys.exit(1)
-            city_objects_with_gmlid_key[city_object_root_id] = geom
-
-        # Package the geometries within a data structure that the
-        # GlTF.from_binary_arrays() function (see below) expects to consume:
-        arrays = []
-        for incoming_id in city_object_ids:
-            geom = city_objects_with_gmlid_key[incoming_id]
-            arrays.append({
-                'position': geom.getPositionArray(),
-                'normal': geom.getNormalArray(),
-                'bbox': [[float(i) for i in j] for j in geom.getBbox()]
-            })
-        return arrays

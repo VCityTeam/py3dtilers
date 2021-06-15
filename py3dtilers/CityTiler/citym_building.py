@@ -34,8 +34,8 @@ class CityMBuildings(CityMCityObjects):
     # depends on the command line optional argument "--With_BTH" of CityTiler.
     with_bth = False
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,objects=None):
+        super().__init__(objects)
 
     @classmethod
     def set_bth(cls):
@@ -71,7 +71,7 @@ class CityMBuildings(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(offset, buildings_ids_arg):
+    def sql_query_geometries(buildings_ids_arg):
         """
         :param offset: the offset (a 3D "vector" of floats) by which the
                        geographical coordinates should be translated (the
@@ -88,9 +88,8 @@ class CityMBuildings(CityMCityObjects):
 
         query = \
             "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-            "ST_Translate(surface_geometry.geometry, " + \
-            str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
-            ")))) " + \
+            "surface_geometry.geometry) " + \
+            ")) " + \
             "FROM surface_geometry JOIN thematic_surface " + \
             "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
             "JOIN building ON thematic_surface.building_id = building.id " + \
