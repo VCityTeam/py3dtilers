@@ -80,7 +80,7 @@ def from_geojson_directory(path, group, properties, obj_name):
     else:
         print(str(len(objects)) + " features parsed")
 
-    tree = create_lod_tree([objects], False)
+    tree = create_lod_tree(objects, False, False)
 
     if len(Geojsons.base_features) > 0:
         for index, node in enumerate(tree.root_nodes):

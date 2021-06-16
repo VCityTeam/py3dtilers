@@ -64,11 +64,10 @@ def from_3dcitydb(cursor, objects_type):
             cityobject.set_box()
     
     # Lump out objects in pre_tiles based on a 2D-Tree technique:
-    pre_tiles = kd_tree(cityobjects, 100000)
+    #pre_tiles = kd_tree(cityobjects, 100000)
 
-    tree = create_lod_tree(pre_tiles, True)
-
-
+    tree = create_lod_tree(cityobjects, True, True)
+    
     return create_tileset(tree)
 
 def main():

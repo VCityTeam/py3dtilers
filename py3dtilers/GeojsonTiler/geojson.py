@@ -38,17 +38,10 @@ class Geojson(ObjectToTile):
         self.coords = list()
 
     def get_center(self, coords):
-        x = 0
-        y = 0
-
-        for i in range(0, len(coords)):
-            x += coords[i][0]
-            y += coords[i][1]
-
-        x /= len(coords)
-        y /= len(coords)
-
-        return [x, y, self.z]
+        length = len(coords)
+        sum_x = np.sum([coord[0] for coord in coords])
+        sum_y = np.sum([coord[1] for coord in coords])
+        return [sum_x/length, sum_y/length, self.z]
 
     def create_triangles(self, vertices, coordsLenght):
         # Contains the triangles vertices. Used to create 3D tiles
