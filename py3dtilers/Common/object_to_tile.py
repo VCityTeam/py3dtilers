@@ -127,3 +127,11 @@ class ObjectsToTile(object):
                 new_geom.append(new_position)
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
+
+# Contains an instance of ObjectsToTile
+# It can also contain its own geometry
+class ObjectsToTileWithGeometry():
+    def __init__(self, objects_to_tile, geometry=None):
+        self.objects_to_tile = objects_to_tile
+        self.with_geometry = geometry is not None
+        self.geometry = geometry

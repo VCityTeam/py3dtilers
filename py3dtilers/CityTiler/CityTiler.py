@@ -1,17 +1,13 @@
 import argparse
-import numpy as np
 
-from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, TriangleSoup
-from py3dtiles import Tile, TileSet
+from py3dtiles import BoundingVolumeBox, TriangleSoup
 
-from ..Common import kd_tree
-from ..Common import create_lod_tree, create_tileset
+from ..Common import create_tileset
 from .citym_cityobject import CityMCityObjects
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
 from .database_accesses import open_data_base
-from .database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
 def parse_command_line():
@@ -63,12 +59,7 @@ def from_3dcitydb(cursor, objects_type):
             cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
             cityobject.set_box()
     
-    # Lump out objects in pre_tiles based on a 2D-Tree technique:
-    #pre_tiles = kd_tree(cityobjects, 100000)
-
-    tree = create_lod_tree(cityobjects, True, True)
-    
-    return create_tileset(tree)
+    return create_tileset(cityobjects, True, True)
 
 def main():
     """

@@ -4,7 +4,7 @@ import sys
 
 from py3dtiles import BoundingVolumeBox
 from .geojson import Geojsons
-from ..Common import create_lod_tree, create_tileset
+from ..Common import create_tileset
 
 
 def parse_command_line():
@@ -80,14 +80,7 @@ def from_geojson_directory(path, group, properties, obj_name):
     else:
         print(str(len(objects)) + " features parsed")
 
-    tree = create_lod_tree(objects, False, False)
-
-    if len(Geojsons.base_features) > 0:
-        for index, node in enumerate(tree.root_nodes):
-            features = [Geojsons.base_features[i] for i in Geojsons.features_dict[index]]
-            node.set_child_nodes(features)
-
-    return create_tileset(tree)
+    return create_tileset(objects, False, True)
 
 
 def main():

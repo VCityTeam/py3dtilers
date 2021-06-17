@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from ..Common import ObjectToTile
 from scipy.spatial import ConvexHull
@@ -9,22 +10,26 @@ class FootPrint():
         self.max_height = max_height
 
 def get_footprint(object_to_tile):
-    triangles = object_to_tile.geom.triangles
+    geom_triangles = object_to_tile.geom.triangles
     points = list()
     minZ = np.Inf
-    maxZ = np.NINF
-    for triangle in triangles[0]:
-        for point in triangle:
-            points.append([point[0],point[1]])
-            if point[2] < minZ:
-                minZ = point[2]
-            if point[2] > maxZ:
-                maxZ = point[2]
-
+    average_maxZ = 0
+    for triangles in geom_triangles:
+        maxZ = np.NINF
+        for triangle in triangles:
+            for point in triangle:
+                if len(point) >= 3:
+                    points.append([point[0],point[1]])
+                    if point[2] < minZ:
+                        minZ = point[2]
+                    if point[2] > maxZ:
+                        maxZ = point[2]
+        average_maxZ += maxZ
+    average_maxZ /= len(geom_triangles)
     hull = ConvexHull(points)
     points = [[points[i][0],points[i][1],minZ] for i in reversed(hull.vertices)]
 
-    return FootPrint(points,minZ,maxZ)
+    return FootPrint(points,minZ,average_maxZ)
 
 def create_triangles(vertices, length):
     # Contains the triangles vertices. Used to create 3D tiles

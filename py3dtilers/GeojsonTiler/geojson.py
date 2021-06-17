@@ -41,37 +41,30 @@ class Geojson(ObjectToTile):
         length = len(coords)
         sum_x = np.sum([coord[0] for coord in coords])
         sum_y = np.sum([coord[1] for coord in coords])
-        return [sum_x/length, sum_y/length, self.z]
+        return np.array([sum_x/length, sum_y/length, self.z],dtype=np.float32)
 
     def create_triangles(self, vertices, coordsLenght):
         # Contains the triangles vertices. Used to create 3D tiles
-        triangles = np.ndarray(shape=(coordsLenght * 4, 3, 3))
-
+        triangles = list()
         # Contains the triangles vertices index. Used to create Objs
-        triangles_id = np.ndarray(shape=(coordsLenght * 4, 3))
-        k = 0
+        triangles_id = list()
 
         # Triangles in lower and upper faces
         for j in range(1, coordsLenght + 1):
             # Lower
-            triangles[k] = [vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]]
-            triangles_id[k] = [0, j, (j % coordsLenght) + 1]
-
+            triangles.append([vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]])
+            triangles_id.append([0, j, (j % coordsLenght) + 1])
             # Upper
-            triangles[k + 1] = [vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]]
-            triangles_id[k + 1] = [(coordsLenght + 1), (coordsLenght + 1) + (j % coordsLenght) + 1, (coordsLenght + 1) + j]
-
-            k += 2
+            triangles.append([vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]])
+            triangles_id.append([(coordsLenght + 1), (coordsLenght + 1) + (j % coordsLenght) + 1, (coordsLenght + 1) + j])
 
         # Triangles in side faces
         for i in range(1, coordsLenght + 1):
-            triangles[k] = [vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]]
-            triangles_id[k] = [i, (coordsLenght + 1) + i, (coordsLenght + 1) + (i % coordsLenght) + 1]
+            triangles.append([vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]])
+            triangles_id.append([i, (coordsLenght + 1) + i, (coordsLenght + 1) + (i % coordsLenght) + 1])
 
-            triangles[k + 1] = [vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]]
-            triangles_id[k + 1] = [i, (coordsLenght + 1) + (i % coordsLenght) + 1, (i % coordsLenght) + 1]
-
-            k += 2
+            triangles.append([vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]])
+            triangles_id.append([i, (coordsLenght + 1) + (i % coordsLenght) + 1, (i % coordsLenght) + 1])
 
         return [triangles, triangles_id]
 
@@ -155,19 +148,19 @@ class Geojson(ObjectToTile):
             coords = [coords[i] for i in reversed(hull.vertices)]
 
         coordsLenght = len(coords)
-        vertices = np.ndarray(shape=(2 * (coordsLenght + 1), 3))
+        vertices = [None] * (2 * (coordsLenght + 1))
 
         # Set bottom center vertice value
         vertices[0] = self.get_center(coords)
         # Set top center vertice value
-        vertices[coordsLenght + 1] = [vertices[0][0], vertices[0][1], vertices[0][2] + height]
+        vertices[coordsLenght + 1] = np.array([vertices[0][0], vertices[0][1], vertices[0][2] + height],dtype=np.float32)
 
         # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
         for i in range(0, coordsLenght):
             z = self.z
 
-            vertices[i + 1] = [coords[i][0], coords[i][1], z]
-            vertices[i + coordsLenght + 2] = [coords[i][0], coords[i][1], z + height]
+            vertices[i + 1] = np.array([coords[i][0], coords[i][1], z],dtype=np.float32)
+            vertices[i + coordsLenght + 2] = np.array([coords[i][0], coords[i][1], z + height],dtype=np.float32)
 
         if(len(vertices) == 0):
             return False
@@ -227,9 +220,7 @@ class Geojsons(ObjectsToTile):
                 with open(os.path.join(polygon_path, polygon_file)) as f:
                     gjContent = json.load(f)
                 for feature in gjContent['features']:
-                    coords = feature['geometry']['coordinates']
-                    coords = Geojson.flatten_list(coords)
-                    coords = [coords[n:n + 2] for n in range(0, len(coords) - 2, 2)]
+                    coords = feature['geometry']['coordinates'][0][:-1]
                     polygons.append(Polygon(coords))
         return Geojsons.distribute_features_in_polygons(features, polygons)
 
@@ -389,7 +380,7 @@ class Geojsons(ObjectsToTile):
                     for vertice in feature.vertices:
                         vertices.append(vertice)
                     for triangle in feature.triangles:
-                        triangles.append(triangle + vertice_offset)
+                        triangles.append([v + vertice_offset for v in triangle])
                     vertice_offset += len(feature.vertices)
                     for i in range(0, len(feature.center)):
                         center[i] += feature.center[i]
