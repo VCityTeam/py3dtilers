@@ -34,6 +34,11 @@ def parse_command_line():
                         type=str,
                         help='create also obj model with specified name')
 
+    parser.add_argument('--loa',
+                        nargs='*',
+                        type=str,
+                        help='identity which loa to create')
+
     result = parser.parse_args()
 
     if(result.group is None):
@@ -56,6 +61,9 @@ def parse_command_line():
         if('z' not in result.properties):
             result.properties += ['z', 'Z_MAX']
 
+    if(result.loa is not None and len(result.loa) == 0):
+        result.loa = ['polygons']
+
     if(result.paths is None):
         print("Please provide a path to a directory "
               "containing some geojson files")
@@ -65,7 +73,7 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name):
+def from_geojson_directory(path, group, properties, obj_name, loa_path=None):
     """
     :param path: a path to a directory
 
@@ -80,7 +88,8 @@ def from_geojson_directory(path, group, properties, obj_name):
     else:
         print(str(len(objects)) + " features parsed")
 
-    return create_tileset(objects, False, True)
+    with_loa = loa_path is not None
+    return create_tileset(objects, False, with_loa, loa_path)
 
 
 def main():
@@ -97,9 +106,13 @@ def main():
     args = parse_command_line()
     path = args.paths[0]
     obj_name = args.obj[0]
+    loa_path = None
+    if args.loa is not None:
+        loa_path = args.loa[0]
+
     if(os.path.isdir(path)):
         print("Writing " + path)
-        tileset = from_geojson_directory(path, args.group, args.properties, obj_name)
+        tileset = from_geojson_directory(path, args.group, args.properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = path.split('/')[-1]

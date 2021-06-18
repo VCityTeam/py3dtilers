@@ -7,8 +7,8 @@ import numpy as np
 from ..Common import ObjectToTile, ObjectsToTile, ObjectsToTileWithGeometry
 from ..Common import get_lod1
 
-def create_loa(objects_to_tile):
-    return group_features_by_polygons(objects_to_tile,"../../geojson/polygons")
+def create_loa(objects_to_tile, loa_path):
+    return group_features_by_polygons(objects_to_tile,loa_path)
 
 def group_features_by_polygons(features, path):
     try:

@@ -35,10 +35,10 @@ class LodTree():
     def set_centroid(self, centroid):
         self.centroid = centroid
 
-def create_lod_tree(objects_to_tile, also_create_lod1=True, also_create_loa=True):
+def create_lod_tree(objects_to_tile, also_create_lod1=True, also_create_loa=True, loa_path=None):
     nodes = list()
 
-    groups = group_features(objects_to_tile,also_create_loa)
+    groups = group_features(objects_to_tile, also_create_loa, loa_path)
 
     for group in groups:
         node = LodNode(group.objects_to_tile,2)
@@ -59,8 +59,8 @@ def create_lod_tree(objects_to_tile, also_create_lod1=True, also_create_loa=True
     return tree
 
 
-def create_tileset(objects_to_tile, also_create_lod1=True, also_create_loa=True):
-    lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa)
+def create_tileset(objects_to_tile, also_create_lod1=True, also_create_loa=True, loa_path=None):
+    lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
 
     tileset = TileSet()
     centroid = lod_tree.centroid
@@ -138,10 +138,10 @@ def create_tile_content(pre_tile):
     return B3dm.from_glTF(gltf, bt)
 
 
-def group_features(objects_to_tile,also_create_loa=False):
+def group_features(objects_to_tile,also_create_loa=False, loa_path=None):
     groups = list()
     if also_create_loa:
-        groups = create_loa(objects_to_tile)
+        groups = create_loa(objects_to_tile, loa_path)
     else:
         objects = kd_tree(objects_to_tile, 100)
         for objects_to_tile in objects:

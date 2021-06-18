@@ -30,14 +30,24 @@ def parse_command_line():
                         choices=['building', 'relief', 'water'],
                         help='identify the object type to seek in the database')
 
+    parser.add_argument('--loa',
+                        nargs='*',
+                        type=str,
+                        help='identity which loa to create')
+
     # adding optional arguments
     parser.add_argument('--with_BTH',
                         dest='with_BTH',
                         action='store_true',
                         help='Adds a Batch Table Hierarchy when defined')
-    return parser.parse_args()
 
-def from_3dcitydb(cursor, objects_type):
+    result = parser.parse_args()
+    if(result.loa is not None and len(result.loa) == 0):
+        result.loa = ['polygons']
+
+    return result
+
+def from_3dcitydb(cursor, objects_type, loa_path=None):
     """
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -59,7 +69,8 @@ def from_3dcitydb(cursor, objects_type):
             cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
             cityobject.set_box()
     
-    return create_tileset(cityobjects, True, True)
+    with_loa = loa_path is not None
+    return create_tileset(cityobjects, True, with_loa, loa_path)
 
 def main():
     """
@@ -80,7 +91,11 @@ def main():
     elif args.object_type == "water":
         objects_type = CityMWaterBodies
         
-    tileset = from_3dcitydb(cursor, objects_type)
+    loa_path = None
+    if args.loa is not None:
+        loa_path = args.loa[0]
+
+    tileset = from_3dcitydb(cursor, objects_type, loa_path)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

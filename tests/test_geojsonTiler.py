@@ -13,13 +13,14 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block.obj'
         group = ['none']
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI', 'z', 'Z_MAX']
+        loa_path = 'tests/geojson_tiler_test_data/geojson_1/polygons'
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, obj_name)
+        tileset = from_geojson_directory(path, group, properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "basic_case"
@@ -32,13 +33,14 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_other_properties_name.obj'
         group = ['none']
         properties = ['height', 'HEIGHT', 'prec', 'NONE', 'z', 'Z']
+        loa_path = 'tests/geojson_tiler_test_data/geojson_2/polygons'
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, obj_name)
+        tileset = from_geojson_directory(path, group, properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "properties_with_other_name"
@@ -51,13 +53,14 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_group_by_cube_100.obj'
         group = ['cube', '100']
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI', 'z', 'Z_MAX']
+        loa_path = 'tests/geojson_tiler_test_data/geojson_1/polygons'
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, obj_name)
+        tileset = from_geojson_directory(path, group, properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "group_cube_100"
@@ -70,13 +73,14 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_group_by_roads.obj'
         group = ['road']
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI', 'z', 'Z_MAX']
+        loa_path = 'tests/geojson_tiler_test_data/geojson_1/polygons'
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, obj_name)
+        tileset = from_geojson_directory(path, group, properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "group_roads"
@@ -89,13 +93,14 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_group_by_polygons.obj'
         group = ['polygon']
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI', 'z', 'Z_MAX']
+        loa_path = 'tests/geojson_tiler_test_data/geojson_1/polygons'
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, obj_name)
+        tileset = from_geojson_directory(path, group, properties, obj_name, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "group_roads"
