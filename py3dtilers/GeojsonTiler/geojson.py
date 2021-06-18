@@ -191,8 +191,6 @@ class Geojsons(ObjectsToTile):
     """
 
     defaultGroupOffset = 50
-    features_dict = {}
-    base_features = list()
 
     def __init__(self, objs=None):
         super().__init__(objs)
@@ -287,7 +285,6 @@ class Geojsons(ObjectsToTile):
             geojson.center = [center[0], center[1], center[2] + geojson.height / 2]
             grouped_features.append(geojson)
             k += 1
-        Geojsons.features_dict = grouped_features_dict
         return grouped_features
 
     @staticmethod
@@ -321,8 +318,6 @@ class Geojsons(ObjectsToTile):
 
         geojson_dir = listdir(path)
 
-        Geojsons.features_dict = {}
-        Geojsons.base_features = list()
         vertices = list()
         triangles = list()
         features = list()
@@ -363,12 +358,6 @@ class Geojsons(ObjectsToTile):
             grouped_features = Geojsons.group_features_by_cube(features, size)
         else:
             grouped_features = features
-            grouped = False
-
-        if grouped:
-            for geojson in features:
-                if(geojson.parse_geom()):
-                    Geojsons.base_features.append(geojson)
 
         for feature in grouped_features:
             # Create geometry as expected from GLTF from an geojson file
