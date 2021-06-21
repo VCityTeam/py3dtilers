@@ -66,4 +66,14 @@ The group method can be used with _--group road_:
 ```
 geojson-tiler --paths ../../geojson/ --group road
 ```
-The roads will be load from the directory _roads_ in the <path>. This command will use _road group method_ with the roads file in ../../geojson/roads/
+The roads will be loaded from the directory _roads_ in the <path>. This command will use _road group method_ with the roads file in ../../geojson/roads/
+  
+#### Polygon
+This solution follow the same process as the solution above, but in this case the polygons are __pre-computed__ with QGIS. In fact, the polygon detection described above takes a really long time when there is more than ~1000 vertices in the graph. Computing the polygons with QGIS before and loading them as a Geojson file at runtime is way faster.  
+The group method can be used with _--group polygon_:
+```
+geojson-tiler --paths ../../geojson/ --group polygon
+```
+The roads will be loaded from the directory _polygons_ in the <path>. This command will use _polygon group method_ with the polygons file in ../../geojson/polygons/
+  
+To polygonize the roads on QGIS, use the tool _Polygonize_ (_Processing --> Toolbox --> Vector Geometry --> Polygonize_)
