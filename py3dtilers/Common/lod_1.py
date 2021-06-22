@@ -28,7 +28,6 @@ def get_footprint(object_to_tile):
     average_maxZ /= len(geom_triangles)
     hull = ConvexHull(points)
     points = [[points[i][0],points[i][1],minZ] for i in reversed(hull.vertices)]
-
     return FootPrint(points,minZ,average_maxZ)
 
 def create_triangles(vertices, length):

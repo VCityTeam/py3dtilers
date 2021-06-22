@@ -89,7 +89,7 @@ def from_geojson_directory(path, group, properties, obj_name, loa_path=None):
         print(str(len(objects)) + " features parsed")
 
     with_loa = loa_path is not None
-    return create_tileset(objects, False, with_loa, loa_path)
+    return create_tileset(objects, also_create_lod1=False, also_create_loa=with_loa, loa_path=loa_path)
 
 
 def main():

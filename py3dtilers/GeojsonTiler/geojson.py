@@ -266,7 +266,7 @@ class Geojsons(ObjectsToTile):
         grouped_features_dict = {}
         for key in dictionary:
             geojson = Geojson("group" + str(k))
-            z = 9999
+            z = np.Inf
             height = 0
             coords = list()
             grouped_features_dict[k] = []
@@ -345,7 +345,6 @@ class Geojsons(ObjectsToTile):
                         if(geojson.parse_geojson(feature, properties)):
                             features.append(geojson)
 
-        grouped = True
         if 'road' in group:
             grouped_features = Geojsons.group_features_by_roads(features, path)
         elif 'polygon' in group:

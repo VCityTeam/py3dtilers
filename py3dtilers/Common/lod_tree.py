@@ -35,20 +35,24 @@ class LodTree():
     def set_centroid(self, centroid):
         self.centroid = centroid
 
-def create_lod_tree(objects_to_tile, also_create_lod1=True, also_create_loa=True, loa_path=None):
+# create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes
+# In order to reduce the number of .b3dm, it also groups the objects (ObjectToTile instances) in different ObjectsToTileWithGeometry
+# An ObjectsToTileWithGeometry contains an ObjectsToTile (the ObjectToTile(s) in the group) and an optional ObjectToTile which is its own geometry
+def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
     nodes = list()
 
     groups = group_features(objects_to_tile, also_create_loa, loa_path)
+    #groups = group_features_by_cube(groups, 1000)
 
     for group in groups:
-        node = LodNode(group.objects_to_tile,2)
+        node = LodNode(group.objects_to_tile,1)
         root_node = node
         if also_create_lod1:
-            lod1_node = LodNode(ObjectsToTile([get_lod1(object_to_tile) for object_to_tile in group.objects_to_tile]),30)
+            lod1_node = LodNode(ObjectsToTile([get_lod1(object_to_tile) for object_to_tile in group.objects_to_tile]),5)
             lod1_node.add_child_node(root_node)
             root_node = lod1_node
         if group.with_geometry:
-            loa_node = LodNode(ObjectsToTile([group.geometry]),100)
+            loa_node = LodNode(ObjectsToTile([group.geometry]),20)
             loa_node.add_child_node(root_node)
             root_node = loa_node
 
@@ -59,7 +63,7 @@ def create_lod_tree(objects_to_tile, also_create_lod1=True, also_create_loa=True
     return tree
 
 
-def create_tileset(objects_to_tile, also_create_lod1=True, also_create_loa=True, loa_path=None):
+def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
     lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
 
     tileset = TileSet()
