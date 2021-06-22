@@ -118,12 +118,7 @@ def main():
     """
     :return: no return value
 
-    this function creates either :
-    - a repository named "obj_tileset" where the
-    tileset is stored if the directory does only contains obj files.
-    - or a repository named "obj_tilesets" that contains all tilesets are stored
-    created from sub_directories 
-    and a classes.txt that contains the name of all tilesets
+    this function creates an ifc tileset handling one ifc classe per tiles
     """
     args = parse_command_line()
 
