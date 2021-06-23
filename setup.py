@@ -27,12 +27,9 @@ requirements = (
      'rdp',
      'scipy',
      'shapely',
-     # 'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
-     # The following will download and unzip the package but will fail
-     # at finding an included setup.py file (because zip doesn't include one) 
-     # 'ifcopenshell @ https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-38-v0.6.0-517b819-macos64.zip',
-     # Refer to definition and usage of install_ifcopenshell_from_url() function
-     # below for a plan B...
+     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
+     # 'ifcopenshell' requires specific treatment, refer to 
+     # install_ifcopenshell_from_url() function definition.
 )
 
 dev_requirements = (
