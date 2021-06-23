@@ -51,6 +51,7 @@ After the installation, if you additionally wish to run unit tests, use
 
 ```bash
 (venv)$ pip install -e .[extra]
+(venv)$ pip install pytest # Even if you already have pytest, re-install it to make sure pytest exists in venv
 (venv)$ pytest
 ```
 
