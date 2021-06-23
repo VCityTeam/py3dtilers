@@ -13,7 +13,7 @@ from py3dtiles import Tile, TileSet
 from ..Common import kd_tree
 
 
-from ifcObjectGeom import IfcObjectGeom, IfcObjectsGeom
+from .ifcObjectGeom import IfcObjectGeom, IfcObjectsGeom
 
 
 def parse_command_line():

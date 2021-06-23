@@ -42,8 +42,8 @@ class IfcObjectGeom(ObjectToTile):
         self.geom = TriangleSoup()
         self.ifcObject = ifcObject
         self.ifcClasse = ifcObject.is_a()
-        self.has_geom = self.parse_geom()
         self.convertionRatio = unitConversion(originalUnit,targetedUnit)
+        self.has_geom = self.parse_geom()
 
     def hasGeom(self):
         return self.has_geom
