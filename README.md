@@ -56,16 +56,26 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
-### Working with Py3DTiles
+### Developing py3dtilers together with py3dtiles
 
-By default, the setup.py build refers to the online github of py3DTiles.
-If one want to work with a local py3DTiles, intall py3DTiles by following the [installation notes](https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst)
-Then, in the py3dtilers repository, comment or delete [this](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) line, that link the py3dtiles github with py3dtilers.
+By default, the py3dtilers' [`setup.py`](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) build stage uses [github's version of py3dtiles](https://github.com/VCityTeam/py3dtiles) (as opposed to using [Oslandia's version on Pypi](https://pypi.org/project/py3dtiles/).
+When developing one might need/wish to use a local version of py3dtiles (located on host in another directory e.g. by cloning the original repository) it is possible 
+ 1. to first install py3dtiles by following the [installation notes](https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst)
+ 2. then within the py3dtilers (cloned) directory, comment out (or delete) [the line reference to py3dtiles](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30).
 
-Use :
-`(venv)$ cd PATH_TO_py3dtilers`
-`(venv)$ pip install -e .`
-
+This boils down to :
+```bash
+$ git clone https://github.com/VCityTeam/py3dtiles
+$ cd py3dtiles
+$ ...
+$ source venv/bin/activate
+(venv)$ cd ..
+(venv)$ git clone https://github.com/VCityTeam/py3dtilers
+(venv)$ cd py3dtilers
+(venv$ # Edit setup.py and comment out py3dtiles reference
+(venv)$ pip install -e .
+(venv)$ pytest
+```
 
 ## CLI Usage
 
