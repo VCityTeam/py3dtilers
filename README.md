@@ -20,10 +20,11 @@ $ git clone https://github.com/VCityTeam/py3dtilers
 $ cd py3dtilers
 ```
 
-Install `py3dtiles` sub-dependencies (`liblas`) with your platform package installer e.g. for Ubuntu use
+Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
-$ apt-get install -y liblas-c3 libopenblas-base libpq-dev
+$ apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
+$ apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
 ```
 (_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
