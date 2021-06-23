@@ -23,7 +23,7 @@ $ cd py3dtilers
 Install `py3dtiles` sub-dependencies (`liblas`) with your platform package installer e.g. for Ubuntu use
 
 ```bash
-$ apt-get install -y liblas-c3 libopenblas-base
+$ apt-get install -y liblas-c3 libopenblas-base libpq-dev
 ```
 (_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
@@ -51,6 +51,7 @@ After the installation, if you additionally wish to run unit tests, use
 
 ```bash
 (venv)$ pip install -e .[extra]
+(venv)$ pip install pytest # Even if you already have pytest, re-install it to make sure pytest exists in venv
 (venv)$ pytest
 ```
 
@@ -61,7 +62,7 @@ If one want to work with a local py3DTiles, intall py3DTiles by following the [i
 Then, in the py3dtilers repository, comment or delete [this](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) line, that link the py3dtiles github with py3dtilers.
 
 Use :
-`(venv)$ cd PATH_TO_py3dtilers'
+`(venv)$ cd PATH_TO_py3dtilers`
 `(venv)$ pip install -e .`
 
 
