@@ -54,6 +54,17 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
+### Working with Py3DTiles
+
+By default, the setup.py build refers to the online github of py3DTiles.
+If one want to work with a local py3DTiles, intall py3DTiles by following the [installation notes](https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst)
+Then, in the py3dtilers repository, comment or delete [this](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) line, that link the py3dtiles github with py3dtilers.
+
+Use :
+`(venv)$ cd PATH_TO_py3dtilers'
+`(venv)$ pip install -e .`
+
+
 ## CLI Usage
 
 ### Concerning CityTiler
