@@ -42,8 +42,8 @@ class IfcObjectGeom(ObjectToTile):
         self.geom = TriangleSoup()
         self.ifcObject = ifcObject
         self.ifcClasse = ifcObject.is_a()
-        self.has_geom = self.parse_geom()
         self.convertionRatio = unitConversion(originalUnit,targetedUnit)
+        self.has_geom = self.parse_geom()
 
     def hasGeom(self):
         return self.has_geom
@@ -161,6 +161,15 @@ class IfcObjectGeom(ObjectToTile):
                 elevation += (self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation * self.convertionRatio)
         return elevation
 
+    def parse_indexed_faces(self, Faces):
+        indexListTemp = list()
+
+        for face in Faces:
+            for i in range(1,len(face.CoordIndex)-1):    
+                indexListTemp.append([face.CoordIndex[0],face.CoordIndex[i],face.CoordIndex[i+1]])
+        
+        return indexListTemp
+
     def parse_geom(self):
         if (not(self.ifcObject.Representation)) :
             return False
@@ -186,8 +195,14 @@ class IfcObjectGeom(ObjectToTile):
                 indexListTemp = None
                 vertexListTemp = None
                 if(representation.RepresentationType == "Tessellation") :
-                    indexListTemp = itemGeom.CoordIndex
+                    if( hasattr(itemGeom, 'Faces')) :
+                        indexListTemp=self.parse_indexed_faces(itemGeom.Faces)
+                    elif (hasattr(itemGeom, 'CoordIndex')):
+                        indexListTemp = itemGeom.CoordIndex
+                    else :
+                            sys.exit("Géométrie de ce type non encore gérée")
                     vertexListTemp = itemGeom.Coordinates.CoordList
+
                 elif(representation.RepresentationType == "SweptSolid") :
                     vertexListTemp,indexListTemp = self.extrudGeom(itemGeom)
                 if(vertexListTemp and indexListTemp) :
@@ -256,14 +271,26 @@ class IfcObjectsGeom(ObjectsToTile):
         elevation = ifcSite.RefElevation
         placement = ifcSite.ObjectPlacement.RelativePlacement
         location = placement.Location.Coordinates
-        transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
-        location = (location[0] * unitRatio,location[1] * unitRatio,location[2] * unitRatio)
-        location = transformer.transform(location[0],location[1])
-        direction = computeDirection(placement.Axis.DirectionRatios,placement.RefDirection.DirectionRatios)
+        location = (location[0] * unitRatio,location[1] * unitRatio,(location[2] + elevation) * unitRatio)
+
+        # transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
+        transformer = Transformer.from_crs("EPSG:3947", "EPSG:3857")
+        location = transformer.transform(location[0],location[1],location[2])
+
+        if(placement.Axis==None):
+            axis = [0,0,1]
+        else :
+            axis = placement.Axis.DirectionRatios
+        if(placement.RefDirection==None):
+             refDirection = [1,0,0]
+        else:
+            refDirection = placement.RefDirection.DirectionRatios
+
+        direction = computeDirection(axis,refDirection)
         centroid = [direction[0][0],direction[0][1],direction[0][2],0,
                     direction[1][0],direction[1][1],direction[1][2],0,
                     direction[2][0],direction[2][1],direction[2][2],0,
-                    location[0],location[1],elevation,1]
+                    location[0],location[1],location[2],1]
         return centroid
 
 

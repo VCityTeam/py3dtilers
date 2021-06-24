@@ -20,10 +20,11 @@ $ git clone https://github.com/VCityTeam/py3dtilers
 $ cd py3dtilers
 ```
 
-Install `py3dtiles` sub-dependencies (`liblas`) with your platform package installer e.g. for Ubuntu use
+Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
-$ apt-get install -y liblas-c3 libopenblas-base
+$ apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
+$ apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
 ```
 (_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
@@ -51,6 +52,28 @@ After the installation, if you additionally wish to run unit tests, use
 
 ```bash
 (venv)$ pip install -e .[extra]
+(venv)$ pip install pytest # Even if you already have pytest, re-install it to make sure pytest exists in venv
+(venv)$ pytest
+```
+
+### Developing py3dtilers together with py3dtiles
+
+By default, the py3dtilers' [`setup.py`](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) build stage uses [github's version of py3dtiles](https://github.com/VCityTeam/py3dtiles) (as opposed to using [Oslandia's version on Pypi](https://pypi.org/project/py3dtiles/).
+When developing one might need/wish to use a local version of py3dtiles (located on host in another directory e.g. by cloning the original repository) it is possible 
+ 1. to first install py3dtiles by following the [installation notes](https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst)
+ 2. then within the py3dtilers (cloned) directory, comment out (or delete) [the line reference to py3dtiles](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30).
+
+This boils down to :
+```bash
+$ git clone https://github.com/VCityTeam/py3dtiles
+$ cd py3dtiles
+$ ...
+$ source venv/bin/activate
+(venv)$ cd ..
+(venv)$ git clone https://github.com/VCityTeam/py3dtilers
+(venv)$ cd py3dtilers
+(venv$ # Edit setup.py and comment out py3dtiles reference
+(venv)$ pip install -e .
 (venv)$ pytest
 ```
 

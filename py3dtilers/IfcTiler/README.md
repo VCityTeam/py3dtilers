@@ -18,7 +18,7 @@ $PATH should point to a directory holding an IFC file.
 The resulting 3DTiles tileset will contain the ifc geometry, ordered by category :
 each tile will contain an IFC Object Type, that can be found in the batch table, along with its GUID 
 
-This command should produce a directory named "ifc_tileset"
+This command should produce a directory named "ifc_tileset".
 
 
 ### About the tiler : 
@@ -34,8 +34,8 @@ This command should produce a directory named "ifc_tileset"
 
 - Support only IFC4 :
     - needs to support IFC2XC3 : 
-            - test the file version
-            - change the geometry access 
+      - test the file version
+      - change the geometry access 
 
 - Support the following geometry types, ignore other types : 
     - MappedRepresentation

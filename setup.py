@@ -28,11 +28,8 @@ requirements = (
      'scipy',
      'shapely',
      'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
-     # The following will download and unzip the package but will fail
-     # at finding an included setup.py file (because zip doesn't include one) 
-     # 'ifcopenshell @ https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-38-v0.6.0-517b819-macos64.zip',
-     # Refer to definition and usage of install_ifcopenshell_from_url() function
-     # below for a plan B...
+     # 'ifcopenshell' requires specific treatment, refer to 
+     # install_ifcopenshell_from_url() function definition.
 )
 
 dev_requirements = (
@@ -158,7 +155,8 @@ setup(
     },
     entry_points={
         'console_scripts': ['citygml-tiler=py3dtilers.CityTiler:main',
-                            'geojson-tiler=py3dtilers.GeojsonTiler:main'],
+                            'geojson-tiler=py3dtilers.GeojsonTiler:main',
+                            'ifc-tiler=py3dtilers.IfcTiler:main'],
     },
     data_files=[('py3dtilers/CityTiler',
                    ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']
