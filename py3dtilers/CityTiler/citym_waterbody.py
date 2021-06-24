@@ -30,8 +30,8 @@ class CityMWaterBodies(CityMCityObjects):
     """
     A decorated list of CityMWaterBody type objects.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, objects=None):
+        super().__init__(objects)
 
     @staticmethod
     def sql_query_objects(waterbodies):
@@ -58,7 +58,7 @@ class CityMWaterBodies(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(offset, waterbodies_ids=None):
+    def sql_query_geometries(waterbodies_ids=None):
         """
         waterbodies_ids is unused but is given in argument to preserve the same structure
         as the sql_query_geometries method of parent class CityMCityObject.
@@ -67,15 +67,13 @@ class CityMWaterBodies(CityMCityObjects):
         """
         # cityobjects_ids contains ids of waterbodies
         query = \
-            "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-            "ST_Translate(surface_geometry.geometry, " + \
-            str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
-            ")))) " + \
+            "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
             "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
             "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
             "JOIN waterboundary_surface " + \
             "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
             "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+            "WHERE waterbody.id IN " + waterbodies_ids + " " + \
             "GROUP BY waterbody.id "
 
         return query

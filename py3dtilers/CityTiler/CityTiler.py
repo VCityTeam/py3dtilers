@@ -3,7 +3,7 @@ import argparse
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 from ..Common import create_tileset
-from .citym_cityobject import CityMCityObjects
+from .citym_cityobject import CityMCityObjects, CityMCityObject
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
@@ -63,14 +63,31 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
     for cityobject in cityobjects:
         id = '(' + str(cityobject.get_database_id()) + ')'
         cursor.execute(objects_type.sql_query_geometries(id))
-
         for t in cursor.fetchall():
             geom_as_string = t[1]
             cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
             cityobject.set_box()
-    
+
+    # surfaces = list()
+    # for cityobject in cityobjects:
+    #     id = '(' + str(cityobject.get_database_id()) + ')'
+    #     cursor.execute(objects_type.sql_query_geometries(id))
+    #     for t in cursor.fetchall():
+    #         surface_id = t[0]
+    #         geom_as_string = t[1]
+    #         if geom_as_string is not None:
+    #             surface = CityMCityObject(surface_id)
+    #             try:
+    #                 surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+    #                 surface.set_box()
+    #                 surfaces.append(surface)
+    #             except ValueError:
+    #                 continue
+    # objets_to_tile = CityMCityObjects(surfaces)
+
     with_loa = loa_path is not None
-    return create_tileset(cityobjects, also_create_lod1=True, also_create_loa=with_loa, loa_path=loa_path)
+
+    return create_tileset(cityobjects, also_create_lod1=False, also_create_loa=with_loa, loa_path=loa_path)
 
 def main():
     """

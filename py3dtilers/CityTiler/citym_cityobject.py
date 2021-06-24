@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from py3dtiles import BoundingVolumeBox, TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
 
 

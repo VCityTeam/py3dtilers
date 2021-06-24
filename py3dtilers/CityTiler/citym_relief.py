@@ -30,8 +30,8 @@ class CityMReliefs(CityMCityObjects):
     """
     A decorated list of CityMRelief type objects.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, objects=None):
+        super().__init__(objects)
 
     @staticmethod
     def sql_query_objects(reliefs):
@@ -58,7 +58,7 @@ class CityMReliefs(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(offset, reliefs_ids=None):
+    def sql_query_geometries(reliefs_ids=None):
         """
         reliefs_ids is unused but is given in argument to preserve the same structure
         as the sql_query_geometries method of parent class CityMCityObject.
@@ -67,15 +67,13 @@ class CityMReliefs(CityMCityObjects):
         """
         # cityobjects_ids contains ids of reliefs
         query = \
-            "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-            "ST_Translate(surface_geometry.geometry, " + \
-            str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
-            ")))) " + \
+            "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
             "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
             "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
             "JOIN tin_relief " + \
             "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
             "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+            "WHERE relief_feature.id IN " + reliefs_ids + " " + \
             "GROUP BY relief_feature.id "
 
         return query
