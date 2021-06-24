@@ -42,7 +42,6 @@ def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=Fal
     nodes = list()
 
     groups = group_features(objects_to_tile, also_create_loa, loa_path)
-    #groups = group_features_by_cube(groups, 1000)
 
     for group in groups:
         node = LodNode(group.objects_to_tile,1)
@@ -52,7 +51,7 @@ def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=Fal
             lod1_node.add_child_node(root_node)
             root_node = lod1_node
         if group.with_geometry:
-            loa_node = LodNode(ObjectsToTile([group.geometry]),20)
+            loa_node = LodNode(group.geometry,20)
             loa_node.add_child_node(root_node)
             root_node = loa_node
 

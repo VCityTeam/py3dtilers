@@ -34,9 +34,9 @@ def create_loa_from_features(features, features_indexes, index, with_geometry):
         for i in features_indexes:
             loa_geometry.geom.triangles.append(features[i].geom.triangles[0])
         loa_geometry = get_lod1(loa_geometry)
+        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), ObjectsToTile([loa_geometry]))
     else:
-        loa_geometry = None
-    return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), loa_geometry)
+        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features))
 
 def distribute_features_in_polygons(features, polygons):
     features_dict = {}
@@ -67,3 +67,41 @@ def distribute_features_in_polygons(features, polygons):
         index += 1
 
     return loas
+    #return distribute_groups_in_cubes(loas, 300)
+
+def round_coordinate(coordinate, base):
+    rounded_coord = coordinate
+    for i in range(0, len(coordinate)):
+        rounded_coord[i] = base * round(coordinate[i] / base)
+    return rounded_coord
+
+def distribute_groups_in_cubes(groups, size):
+    groups_dict = {}
+
+    # Create a dictionary key: cubes center (x,y,z); value: list of groups index
+    for i in range(0, len(groups)):
+        closest_cube = round_coordinate(groups[i].get_centroid(), size)
+        with_geometry = groups[i].with_geometry
+        if (tuple(closest_cube), with_geometry) in groups_dict:
+            groups_dict[(tuple(closest_cube), with_geometry)].append(i)
+        else:
+            groups_dict[(tuple(closest_cube), with_geometry)] = [i]
+
+    groups_in_cube = list()
+    for cube in groups_dict:
+        objects = list()
+        geometries = list()
+        with_geometry = cube[1]
+        for index in groups_dict[cube]:
+            for object_to_tile in groups[index].objects_to_tile:
+                objects.append(object_to_tile)
+            if with_geometry:
+                for object_to_tile in groups[index].geometry:
+                    geometries.append(object_to_tile)
+
+        if with_geometry:
+            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects),ObjectsToTile(geometries)))
+        else:
+            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects)))
+    
+    return groups_in_cube
