@@ -37,11 +37,11 @@ class LodTree():
 
 # create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes
 # In order to reduce the number of .b3dm, it also groups the objects (ObjectToTile instances) in different ObjectsToTileWithGeometry
-# An ObjectsToTileWithGeometry contains an ObjectsToTile (the ObjectToTile(s) in the group) and an optional ObjectToTile which is its own geometry
+# An ObjectsToTileWithGeometry contains an ObjectsToTile (the ObjectToTile(s) in the group) and an optional ObjectsToTile which is its own geometry
 
 
 def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
-    nodes = list()
+    root_nodes = list()
 
     groups = group_features(objects_to_tile, also_create_loa, loa_path)
 
@@ -57,13 +57,14 @@ def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=Fal
             loa_node.add_child_node(root_node)
             root_node = loa_node
 
-        nodes.append(root_node)
+        root_nodes.append(root_node)
 
-    tree = LodTree(nodes)
+    tree = LodTree(root_nodes)
     tree.set_centroid(objects_to_tile.get_centroid())
     return tree
 
 
+# Recursively creates a tileset from the nodes of a LodTree
 def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
     lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
 
@@ -84,6 +85,8 @@ def create_tile(node, parent, centroid, transform_offset, depth):
 
     content_b3dm = create_tile_content(objects)
     tile.set_content(content_b3dm)
+
+    # Set the position of the tile. The position is relative to the parent tile's position
     tile.set_transform([1, 0, 0, 0,
                         0, 1, 0, 0,
                         0, 0, 1, 0,
@@ -94,8 +97,10 @@ def create_tile(node, parent, centroid, transform_offset, depth):
         bounding_box.add(geojson.get_bounding_volume_box())
     tile.set_bounding_volume(bounding_box)
 
+    # If the node is a root of the LodTree, add the created tile to the tileset's root
     if depth == 0:
         parent.add_tile(tile)
+    # Else, add the created tile to its parent's children
     else:
         parent.add_child(tile)
 

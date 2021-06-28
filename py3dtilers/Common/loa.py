@@ -29,18 +29,6 @@ def group_features_by_polygons(features, path):
     return distribute_features_in_polygons(features, polygons)
 
 
-def create_loa_from_features(features, features_indexes, index, with_geometry):
-    contained_features = [features[i] for i in features_indexes]
-    if with_geometry:
-        loa_geometry = ObjectToTile("group" + str(index))
-        for i in features_indexes:
-            loa_geometry.geom.triangles.append(features[i].geom.triangles[0])
-        loa_geometry = get_lod1(loa_geometry)
-        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), ObjectsToTile([loa_geometry]))
-    else:
-        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features))
-
-
 def distribute_features_in_polygons(features, polygons):
     features_dict = {}
     features_without_poly = {}
@@ -69,8 +57,19 @@ def distribute_features_in_polygons(features, polygons):
         loas.append(loa)
         index += 1
 
-    return loas
-    # return distribute_groups_in_cubes(loas, 300)
+    return distribute_groups_in_cubes(loas, 300)
+
+
+def create_loa_from_features(features, features_indexes, index, with_geometry):
+    contained_features = [features[i] for i in features_indexes]
+    if with_geometry:
+        loa_geometry = ObjectToTile("group" + str(index))
+        for i in features_indexes:
+            loa_geometry.geom.triangles.append(features[i].geom.triangles[0])
+        loa_geometry = get_lod1(loa_geometry)
+        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), ObjectsToTile([loa_geometry]))
+    else:
+        return ObjectsToTileWithGeometry(ObjectsToTile(contained_features))
 
 
 def round_coordinate(coordinate, base):
@@ -80,18 +79,22 @@ def round_coordinate(coordinate, base):
     return rounded_coord
 
 
-def distribute_groups_in_cubes(groups, size):
+# Merge together the groups in order to reduce the number of tiles.
+# The groups are distributed into cubes of a grid.
+# To avoid conflicts, the groups with geometry are not merged with those without geometry.
+def distribute_groups_in_cubes(groups, cube_size=300):
     groups_dict = {}
 
-    # Create a dictionary key: cubes center (x,y,z); value: list of groups index
+    # Create a dictionary key: cubes center (x,y,z), with geometry (boolean); value: list of groups index
     for i in range(0, len(groups)):
-        closest_cube = round_coordinate(groups[i].get_centroid(), size)
+        closest_cube = round_coordinate(groups[i].get_centroid(), cube_size)
         with_geometry = groups[i].with_geometry
         if (tuple(closest_cube), with_geometry) in groups_dict:
             groups_dict[(tuple(closest_cube), with_geometry)].append(i)
         else:
             groups_dict[(tuple(closest_cube), with_geometry)] = [i]
 
+    # Merge the groups in the same cube and create new groups
     groups_in_cube = list()
     for cube in groups_dict:
         objects = list()

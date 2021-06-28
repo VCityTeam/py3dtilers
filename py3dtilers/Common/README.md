@@ -48,9 +48,9 @@ distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per Object
 ## [lod_tree](https://github.com/VCityTeam/py3dtilers/blob/CityTiler_with_LodTree/py3dtilers/Common/lod_tree.py)
 lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an _ObjectsToTile_ (the geometries of the node) and a list of child nodes.
 A node will correspond to a tile (.b3dm file) of the tileset.  
-The leafs of the tree contain the geometries with the most details. The parent node of each node contains a smaller level of details.
+The leafs of the tree contain the geometries with the most details. The parent node of each node contains a lower level of details.
 
-The lod_tree creation takes an _ObjectsToTile_(containing _ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
+The lod_tree creation takes an _ObjectsToTile_ (containing _ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
 
 The first step of the tree creation is the distribution of _ObjectToTile(s)_ into groups. A group is an instance of _ObjectsToTileWithGeometry_ where the objects to tile are a group of detailled geometries. The group can also have its own geometry, which is a lower level of details of the detailled geometries.
 and the optionnal geometry (_ObjectsToTile_) of the group.  
@@ -60,7 +60,7 @@ To create a tileset with LOA\*, use:
 ```
 create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
                also_create_loa=True, # Indicate to create a LOA
-               loa_path="./path/to/file") # Path to a file if a file is needed to create LOA
+               loa_path="./path/to/dir") # Path to a directory if additional files are needed to create LOA
 ```
 \* _Level Of Abstraction_, in this case it consists in a tile with a low level of details where the geometries are grouped into one.
 
@@ -92,7 +92,7 @@ Groups from `create_loa` which __have__ their own geometry:
             detailled tile          detailled tile
             
 LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of an _ObjectToTile_'s geometry.
-It consists in a 3D extrusion a the footprint of the geometry.
+It consists in a 3D extrusion of the footprint of the geometry.
 
 To create a tileset with LOD1, use:
 ```
@@ -120,7 +120,7 @@ A tileset can be created with both LOD1 and LOA with:
 create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
                also_create_lod1=True, # Indicate to create a LOD1
                also_create_loa=True, # Indicate to create a LOA
-               loa_path="./path/to/file") # Path to a file if a file is needed to create LOA
+               loa_path="./path/to/dir") # Path to a directory if additional files are needed to create LOA
 ```
 Resulting tilesets:
 
