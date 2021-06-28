@@ -18,7 +18,7 @@ The bounding box is a box containing the [🟠](#objecttotile) _ObjectToTile_'s 
 object_to_tile.set_box()
 ```
 
-### 🟣 ObjectsToTile
+### 🟣ObjectsToTile
 An [🟣](#objectstotile)&nbsp;_ObjectsToTile_ instance contains a collection of [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_. To create an [🟣](#objectstotile)&nbsp;_ObjectsToTile_, use:
 ```
 objects = [object_to_tile] # List of ObjectToTile(s)
@@ -28,7 +28,7 @@ for object in objects_to_tile:
     print(object.get_id())
 ```
 
-### 🟢 ObjectsToTileWithGeometry
+### 🟢ObjectsToTileWithGeometry
 An [🟢](#objectstotilewithgeometry)&nbsp;_ObjectsToTileWithGeometry_ contains objects to tile ([🟣](#objectstotile)&nbsp;_ObjectsToTile_) and can have its own geometry ([🟣](#objectstotile)&nbsp;_ObjectsToTile_).
 It can be created with:
 ```
