@@ -9,12 +9,13 @@ class CityMCityObject(ObjectToTile):
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
     """
+
     def __init__(self, database_id=None):
         super().__init__(database_id)
 
     def get_database_id(self):
         return super().get_id()
-    
+
     def set_database_id(self, id):
         return super().set_id(id)
 
@@ -28,23 +29,25 @@ class CityMCityObject(ObjectToTile):
         """
         return self.gml_id
 
+
 class CityMCityObjects(ObjectsToTile):
     """
     A decorated list of CityMCityObject type objects.
     """
-    def __init__(self,cityMCityObjects=None):
+
+    def __init__(self, cityMCityObjects=None):
         super().__init__(cityMCityObjects)
 
     @staticmethod
     def sql_query_objects():
         """
-        Virtual method: all CityMCityObjects and childs classes instances should 
+        Virtual method: all CityMCityObjects and childs classes instances should
         implement this method.
 
         :return: no return value.
         """
         pass
-    
+
     @staticmethod
     def retrieve_objects(cursor, objects_type, cityobjects=list()):
         """
@@ -102,9 +105,9 @@ class CityMCityObjects(ObjectsToTile):
     @staticmethod
     def sql_query_geometries():
         """
-        Virtual method: all CityMCityObjects and childs classes instances should 
+        Virtual method: all CityMCityObjects and childs classes instances should
         implement this method.
-        
+
         :return: no return value.
         """
         pass

@@ -1,13 +1,14 @@
-import sys
 import numpy as np
 from ..Common import ObjectToTile
 from scipy.spatial import ConvexHull
 
+
 class FootPrint():
-    def __init__(self,points,min_height,max_height):
+    def __init__(self, points, min_height, max_height):
         self.points = points
         self.min_height = min_height
         self.max_height = max_height
+
 
 def get_footprint(object_to_tile):
     geom_triangles = object_to_tile.geom.triangles
@@ -19,7 +20,7 @@ def get_footprint(object_to_tile):
         for triangle in triangles:
             for point in triangle:
                 if len(point) >= 3:
-                    points.append([point[0],point[1]])
+                    points.append([point[0], point[1]])
                     if point[2] < minZ:
                         minZ = point[2]
                     if point[2] > maxZ:
@@ -27,8 +28,9 @@ def get_footprint(object_to_tile):
         average_maxZ += maxZ
     average_maxZ /= len(geom_triangles)
     hull = ConvexHull(points)
-    points = [[points[i][0],points[i][1],minZ] for i in reversed(hull.vertices)]
-    return FootPrint(points,minZ,average_maxZ)
+    points = [[points[i][0], points[i][1], minZ] for i in reversed(hull.vertices)]
+    return FootPrint(points, minZ, average_maxZ)
+
 
 def create_triangles(vertices, length):
     # Contains the triangles vertices. Used to create 3D tiles
@@ -48,6 +50,7 @@ def create_triangles(vertices, length):
         k += 2
     return triangles
 
+
 def create_vertices(footprint):
     points = footprint.points
     minZ = footprint.min_height
@@ -56,7 +59,7 @@ def create_vertices(footprint):
     vertices = np.ndarray(shape=(2 * (length + 1), 3))
     sum_x = np.sum([point[0] for point in points])
     sum_y = np.sum([point[1] for point in points])
-    centroid = [sum_x/length, sum_y/length, minZ]
+    centroid = [sum_x / length, sum_y / length, minZ]
     # Set bottom center vertice value
     vertices[0] = centroid
     # Set top center vertice value
@@ -67,10 +70,11 @@ def create_vertices(footprint):
         vertices[i + length + 2] = [points[i][0], points[i][1], maxZ]
     return vertices
 
+
 def get_lod1(object_to_tile):
     footprint = get_footprint(object_to_tile)
     vertices = create_vertices(footprint)
-    triangles = create_triangles(vertices,len(footprint.points))
+    triangles = create_triangles(vertices, len(footprint.points))
     lod1_object = ObjectToTile(str(object_to_tile.get_id()) + "_lod1")
     lod1_object.geom.triangles.append(triangles)
     lod1_object.set_box()

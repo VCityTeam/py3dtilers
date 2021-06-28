@@ -3,7 +3,7 @@ import argparse
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 from ..Common import create_tileset
-from .citym_cityobject import CityMCityObjects, CityMCityObject
+from .citym_cityobject import CityMCityObjects
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
@@ -47,6 +47,7 @@ def parse_command_line():
 
     return result
 
+
 def from_3dcitydb(cursor, objects_type, loa_path=None):
     """
     :param cursor: a database access cursor.
@@ -56,7 +57,7 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
     :return: a tileset.
     """
     cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
-    
+
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
 
@@ -89,6 +90,7 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
 
     return create_tileset(cityobjects, also_create_lod1=True, also_create_loa=with_loa, loa_path=loa_path)
 
+
 def main():
     """
     :return: no return value
@@ -107,7 +109,7 @@ def main():
         objects_type = CityMReliefs
     elif args.object_type == "water":
         objects_type = CityMWaterBodies
-        
+
     loa_path = None
     if args.loa is not None:
         loa_path = args.loa[0]

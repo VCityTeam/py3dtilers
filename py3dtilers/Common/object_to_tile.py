@@ -1,18 +1,18 @@
-import sys
-
 import numpy as np
 from py3dtiles import BoundingVolumeBox, TriangleSoup
+
 
 class ObjectToTile(object):
     """
     The base class of all object that need to be tiled, in order to be
     used with the corresponding tiler.
     """
+
     def __init__(self, id=None):
         """
         :param id: given identifier
         """
-        
+
         self.geom = TriangleSoup()
         # The identifier of the database
         self.id = None
@@ -40,9 +40,9 @@ class ObjectToTile(object):
     def get_geom_as_triangles(self):
         return self.geom.triangles[0]
 
-    def set_triangles(self,triangles):
+    def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
-        
+
     def set_box(self):
         """
         Parameters
@@ -52,18 +52,20 @@ class ObjectToTile(object):
         """
         bbox = self.geom.getBbox()
         self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs(np.append(bbox[0],bbox[1]))
-        
+        self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
+
         # Set centroid from Bbox center
         self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
-                         (bbox[0][1] + bbox[1][1]) / 2.0,
-                         (bbox[0][2] + bbox[0][2]) / 2.0])
+                                  (bbox[0][1] + bbox[1][1]) / 2.0,
+                                  (bbox[0][2] + bbox[0][2]) / 2.0])
+
 
 class ObjectsToTile(object):
     """
     A decorated list of ObjectsToTile type objects.
     """
-    def __init__(self,objects=None):
+
+    def __init__(self, objects=None):
         self.objects = list()
         if(objects):
             self.objects.extend(objects)
@@ -93,10 +95,10 @@ class ObjectsToTile(object):
 
     def __len__(self):
         return len(self.objects)
-    
+
     def get_centroid(self):
         """
-        :param objects: an array containing objs 
+        :param objects: an array containing objs
 
         :return: the centroid of the tileset.
         """
@@ -109,11 +111,11 @@ class ObjectsToTile(object):
                 centroid[1] / len(self),
                 centroid[2] / len(self)]
 
-    def translate_tileset(self,offset):
+    def translate_tileset(self, offset):
         """
-        :param objects: an array containing geojsons 
+        :param objects: an array containing geojsons
         :param offset: an offset
-        :return: 
+        :return:
         """
         # Translate the position of each geojson by an offset
         for object_to_tile in self.objects:
@@ -121,7 +123,7 @@ class ObjectsToTile(object):
             for triangle in object_to_tile.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    # Must to do this this way to ensure that the new position 
+                    # Must to do this this way to ensure that the new position
                     # stays in float32, which is mandatory for writing the GLTF
                     new_position.append(np.array(points - offset, dtype=np.float32))
                 new_geom.append(new_position)
@@ -130,6 +132,8 @@ class ObjectsToTile(object):
 
 # Contains an instance of ObjectsToTile
 # It can also contain its own geometry
+
+
 class ObjectsToTileWithGeometry():
     def __init__(self, objects_to_tile, geometry=None):
         self.objects_to_tile = objects_to_tile

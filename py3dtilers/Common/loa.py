@@ -3,12 +3,13 @@ from os import listdir
 import sys
 import json
 from shapely.geometry import Point, Polygon
-import numpy as np
 from ..Common import ObjectToTile, ObjectsToTile, ObjectsToTileWithGeometry
 from ..Common import get_lod1
 
+
 def create_loa(objects_to_tile, loa_path):
-    return group_features_by_polygons(objects_to_tile,loa_path)
+    return group_features_by_polygons(objects_to_tile, loa_path)
+
 
 def group_features_by_polygons(features, path):
     try:
@@ -27,6 +28,7 @@ def group_features_by_polygons(features, path):
                 polygons.append(Polygon(coords))
     return distribute_features_in_polygons(features, polygons)
 
+
 def create_loa_from_features(features, features_indexes, index, with_geometry):
     contained_features = [features[i] for i in features_indexes]
     if with_geometry:
@@ -37,6 +39,7 @@ def create_loa_from_features(features, features_indexes, index, with_geometry):
         return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), ObjectsToTile([loa_geometry]))
     else:
         return ObjectsToTileWithGeometry(ObjectsToTile(contained_features))
+
 
 def distribute_features_in_polygons(features, polygons):
     features_dict = {}
@@ -57,7 +60,7 @@ def distribute_features_in_polygons(features, polygons):
 
     loas = list()
     index = 0
-    for key in features_dict: 
+    for key in features_dict:
         loa = create_loa_from_features(features, features_dict[key], index, True)
         loas.append(loa)
         index += 1
@@ -67,13 +70,15 @@ def distribute_features_in_polygons(features, polygons):
         index += 1
 
     return loas
-    #return distribute_groups_in_cubes(loas, 300)
+    # return distribute_groups_in_cubes(loas, 300)
+
 
 def round_coordinate(coordinate, base):
     rounded_coord = coordinate
     for i in range(0, len(coordinate)):
         rounded_coord[i] = base * round(coordinate[i] / base)
     return rounded_coord
+
 
 def distribute_groups_in_cubes(groups, size):
     groups_dict = {}
@@ -100,8 +105,8 @@ def distribute_groups_in_cubes(groups, size):
                     geometries.append(object_to_tile)
 
         if with_geometry:
-            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects),ObjectsToTile(geometries)))
+            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects), ObjectsToTile(geometries)))
         else:
             groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects)))
-    
+
     return groups_in_cube

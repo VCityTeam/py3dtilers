@@ -1,15 +1,15 @@
 ## [object_to_tile](Common/object_to_tile.py)
 ### ObjectToTile
-An ObjectToTile instance contains a geometry and a bounding box.  
+An _ObjectToTile_ instance contains a geometry and a bounding box.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
 To set the triangles of an ObjectToTile, use:  
 ```
-triangles = [np.array([0., 0., 0.], dtype=np.float32), # First triangle
-             np.array([1., 0., 0.], dtype=np.float32),
-             np.array([1., 1., 0.], dtype=np.float32)],
-            [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
-             np.array([1., 0., 1.], dtype=np.float32),
-             np.array([1., 1., 1.], dtype=np.float32)] # Each np.array is the coordinates of a vertice
+triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
+              np.array([1., 0., 0.], dtype=np.float32),
+              np.array([1., 1., 0.], dtype=np.float32)],
+             [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
+              np.array([1., 0., 1.], dtype=np.float32),
+              np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is the coordinates of a vertice
 object_to_tile = ObjectToTile("id")
 object_to_tile.geom.triangles.append()
 ```
@@ -19,7 +19,7 @@ object_to_tile.set_box()
 ```
 
 ### ObjectsToTile
-An ObjectsToTile instance contains a collection of ObjectToTile(s). To create an ObjectsToTile, use:
+An _ObjectsToTile_ instance contains a collection of _ObjectToTile(s)_. To create an _ObjectsToTile_, use:
 ```
 objects = [object_to_tile] # List of ObjectToTile(s)
 
@@ -29,16 +29,16 @@ for object in objects_to_tile:
 ```
 
 ### ObjectsToTileWithGeometry
-An ObjectsToTileWithGeometry contains an instance of ObjectsToTile and an optionnal instance of ObjectToTile which is its own geometry.
+An _ObjectsToTileWithGeometry_ contains objects to tile (_ObjectsToTile_) and can have its own geometry (_ObjectsToTile_).
 It can be created with:
 ```
-objects_to_tile_with_geom = ObjectsToTileWithGeometry(objects_to_tile, object_to_tile) # Instance with its own geometry
+objects_to_tile_with_geom = ObjectsToTileWithGeometry(objects_to_tile, geometry) # Instance with its own geometry
 # or
 objects_to_tile_with_geom = ObjectsToTileWithGeometry(objects_to_tile) # Instance without its own geometry
 ```
 
 ## [kd_tree](Common/kd_tree.py)
-The kd_tree distributes the ObjectToTile(s) contained in an ObjectsToTile into multiple ObjectsToTile. Each instance of ObjectsToTile can have a maximum of `maxNumObjects`:
+The kd_tree distributes the _ObjectToTile(s)_ contained in an ObjectsToTile into multiple ObjectsToTile. Each instance of _ObjectsToTile_ can have a maximum of `maxNumObjects`:
 ```
 # Takes : an ObjectsToTile
 # Returns : a list of ObjectsToTile
@@ -46,14 +46,14 @@ distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per Object
 ```
 
 ## [lod_tree](https://github.com/VCityTeam/py3dtilers/blob/CityTiler_with_LodTree/py3dtilers/Common/lod_tree.py)
-lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an ObjectsToTile (the geometries of the node) and a list of child nodes.
+lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an _ObjectsToTile_ (the geometries of the node) and a list of child nodes.
 A node will correspond to a tile (.b3dm file) of the tileset.  
 The leafs of the tree contain the geometries with the most details. The parent node of each node contains a smaller level of details.
 
-The lod_tree creation takes an ObjectsToTile (containing ObjectToTile(s) with a geometry and a bounding box) and returns a tileset.
+The lod_tree creation takes an _ObjectsToTile_(containing _ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
 
-The first step of the tree creation is the distribution of ObjectToTile(s) into groups. A group is an instance of ObjectsToTileWithGeometry and contains an ObjectsToTile
-and an optionnal ObjectToTile.  
+The first step of the tree creation is the distribution of _ObjectToTile(s)_ into groups. A group is an instance of _ObjectsToTileWithGeometry_ where the objects to tile are a group of detailled geometries. The group can also have its own geometry, which is a lower level of details of the detailled geometries.
+and the optionnal geometry (_ObjectsToTile_) of the group.  
 The groups are either created with `create_loa` or from the list of ObjectsToTile of `kd_tree`. The groups from `create_loa` have their own geometry, those from `kd_tree` don't.
 
 To create a tileset with LOA\*, use:
@@ -91,7 +91,7 @@ Groups from `create_loa` which __have__ their own geometry:
                     /                    \
             detailled tile          detailled tile
             
-LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of an ObjectToTile's geometry.
+LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of an _ObjectToTile_'s geometry.
 It consists in a 3D extrusion a the footprint of the geometry.
 
 To create a tileset with LOD1, use:

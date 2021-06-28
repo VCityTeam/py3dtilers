@@ -20,7 +20,7 @@ class LodNode():
 
     def set_child_nodes(self, nodes=list()):
         self.child_nodes = nodes
-    
+
     def add_child_node(self, node):
         self.child_nodes.append(node)
 
@@ -38,20 +38,22 @@ class LodTree():
 # create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes
 # In order to reduce the number of .b3dm, it also groups the objects (ObjectToTile instances) in different ObjectsToTileWithGeometry
 # An ObjectsToTileWithGeometry contains an ObjectsToTile (the ObjectToTile(s) in the group) and an optional ObjectToTile which is its own geometry
+
+
 def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
     nodes = list()
 
     groups = group_features(objects_to_tile, also_create_loa, loa_path)
 
     for group in groups:
-        node = LodNode(group.objects_to_tile,1)
+        node = LodNode(group.objects_to_tile, 1)
         root_node = node
         if also_create_lod1:
-            lod1_node = LodNode(ObjectsToTile([get_lod1(object_to_tile) for object_to_tile in group.objects_to_tile]),5)
+            lod1_node = LodNode(ObjectsToTile([get_lod1(object_to_tile) for object_to_tile in group.objects_to_tile]), 5)
             lod1_node.add_child_node(root_node)
             root_node = lod1_node
         if group.with_geometry:
-            loa_node = LodNode(group.geometry,20)
+            loa_node = LodNode(group.geometry, 20)
             loa_node.add_child_node(root_node)
             root_node = loa_node
 
@@ -141,7 +143,7 @@ def create_tile_content(pre_tile):
     return B3dm.from_glTF(gltf, bt)
 
 
-def group_features(objects_to_tile,also_create_loa=False, loa_path=None):
+def group_features(objects_to_tile, also_create_loa=False, loa_path=None):
     groups = list()
     if also_create_loa:
         groups = create_loa(objects_to_tile, loa_path)

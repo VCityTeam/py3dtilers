@@ -9,7 +9,6 @@ from scipy.spatial import ConvexHull
 from shapely.geometry import Point, Polygon
 # from rdp import rdp
 
-from py3dtiles import TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
 from .PolygonDetection import PolygonDetector
 
@@ -41,7 +40,7 @@ class Geojson(ObjectToTile):
         length = len(coords)
         sum_x = np.sum([coord[0] for coord in coords])
         sum_y = np.sum([coord[1] for coord in coords])
-        return np.array([sum_x/length, sum_y/length, self.z],dtype=np.float32)
+        return np.array([sum_x / length, sum_y / length, self.z], dtype=np.float32)
 
     def create_triangles(self, vertices, coordsLenght):
         # Contains the triangles vertices. Used to create 3D tiles
@@ -153,14 +152,14 @@ class Geojson(ObjectToTile):
         # Set bottom center vertice value
         vertices[0] = self.get_center(coords)
         # Set top center vertice value
-        vertices[coordsLenght + 1] = np.array([vertices[0][0], vertices[0][1], vertices[0][2] + height],dtype=np.float32)
+        vertices[coordsLenght + 1] = np.array([vertices[0][0], vertices[0][1], vertices[0][2] + height], dtype=np.float32)
 
         # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
         for i in range(0, coordsLenght):
             z = self.z
 
-            vertices[i + 1] = np.array([coords[i][0], coords[i][1], z],dtype=np.float32)
-            vertices[i + coordsLenght + 2] = np.array([coords[i][0], coords[i][1], z + height],dtype=np.float32)
+            vertices[i + 1] = np.array([coords[i][0], coords[i][1], z], dtype=np.float32)
+            vertices[i + coordsLenght + 2] = np.array([coords[i][0], coords[i][1], z + height], dtype=np.float32)
 
         if(len(vertices) == 0):
             return False
