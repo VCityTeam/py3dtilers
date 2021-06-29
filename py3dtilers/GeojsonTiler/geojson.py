@@ -7,7 +7,7 @@ import json
 
 from scipy.spatial import ConvexHull
 from shapely.geometry import Point, Polygon
-# from rdp import rdp
+from alphashape import alphashape
 
 from ..Common import ObjectToTile, ObjectsToTile
 from .PolygonDetection import PolygonDetector
@@ -108,18 +108,17 @@ class Geojson(ObjectToTile):
             print("No propertie called " + z_name + " in feature " + str(Geojson.n_feature))
             return False
 
-        coordinates = feature['geometry']['coordinates']
+        if feature['geometry']['type'] == 'Polygon':
+            coords = feature['geometry']['coordinates'][0]
+        if feature['geometry']['type'] == 'MultiPolygon':
+            coords = feature['geometry']['coordinates'][0][0]
 
-        try:
-            coords = Geojson.flatten_list(coordinates)
-            # Group coords into (x,y) arrays, the z will always be the same z
-            # The last point in features is always the same as the first, so we remove the last point
-            coords = [coords[n:n + 2] for n in range(0, len(coords) - 3, 3)]
-            self.coords = coords
-            center = self.get_center(coords)
-            self.center = [center[0], center[1], center[2] + self.height / 2]
-        except RecursionError:
-            return False
+        # Group coords into (x,y) arrays, the z will always be the same z
+        # The last point in features is always the same as the first, so we remove the last point
+        coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords) - 1)]
+        self.coords = coords
+        center = self.get_center(coords)
+        self.center = [center[0], center[1], center[2] + self.height / 2]
 
         return True
 
@@ -142,9 +141,10 @@ class Geojson(ObjectToTile):
         # If the feature has at least 4 coords, create a convex hull
         # The convex hull reduces the number of points and the level of detail
         if len(coords) >= 4:
-            # coords = rdp(coords)
-            hull = ConvexHull(coords)
-            coords = [coords[i] for i in reversed(hull.vertices)]
+            hull = alphashape(coords, 0.)
+            coords = hull.exterior.coords[:-1]
+            # hull = ConvexHull(coords)
+            # coords = [coords[i] for i in reversed(hull.vertices)]
 
         coordsLenght = len(coords)
         vertices = [None] * (2 * (coordsLenght + 1))

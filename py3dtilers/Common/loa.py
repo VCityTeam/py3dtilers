@@ -24,7 +24,10 @@ def group_features_by_polygons(features, path):
             with open(os.path.join(path, polygon_file)) as f:
                 gjContent = json.load(f)
             for feature in gjContent['features']:
-                coords = feature['geometry']['coordinates'][0][:-1]
+                if feature['geometry']['type'] == 'Polygon':
+                    coords = feature['geometry']['coordinates'][0][:-1]
+                if feature['geometry']['type'] == 'MultiPolygon':
+                    coords = feature['geometry']['coordinates'][0][0][:-1]
                 polygons.append(Polygon(coords))
     return distribute_features_in_polygons(features, polygons)
 
@@ -47,26 +50,27 @@ def distribute_features_in_polygons(features, polygons):
             features_without_poly[i] = [i]
 
     loas = list()
-    index = 0
+    loa_index = 0
     for key in features_dict:
-        loa = create_loa_from_features(features, features_dict[key], index, True)
+        loa = create_loa_from_features(features, features_dict[key], loa_index, True, polygons[key])
         loas.append(loa)
-        index += 1
+        loa_index += 1
     for key in features_without_poly:
-        loa = create_loa_from_features(features, features_without_poly[key], index, False)
+        loa = create_loa_from_features(features, features_without_poly[key], loa_index, False)
         loas.append(loa)
-        index += 1
+        loa_index += 1
 
     return distribute_groups_in_cubes(loas, 300)
 
 
-def create_loa_from_features(features, features_indexes, index, with_geometry):
+def create_loa_from_features(features, features_indexes, loa_index, with_geometry, polygon=None):
     contained_features = [features[i] for i in features_indexes]
     if with_geometry:
-        loa_geometry = ObjectToTile("group" + str(index))
+        points = polygon.exterior.coords[:-1]
+        loa_geometry = ObjectToTile("group" + str(loa_index))
         for i in features_indexes:
             loa_geometry.geom.triangles.append(features[i].geom.triangles[0])
-        loa_geometry = get_lod1(loa_geometry)
+        loa_geometry = get_lod1(loa_geometry, True, points)
         return ObjectsToTileWithGeometry(ObjectsToTile(contained_features), ObjectsToTile([loa_geometry]))
     else:
         return ObjectsToTileWithGeometry(ObjectsToTile(contained_features))

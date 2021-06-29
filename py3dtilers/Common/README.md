@@ -1,8 +1,8 @@
 ## [object_to_tile](Common/object_to_tile.py)
 ### 🟠ObjectToTile
-An [🟠](#objecttotile) _ObjectToTile_ instance contains a geometry and a bounding box.  
+An [🟠](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry and a bounding box.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
-To set the triangles of an [🟠](#objecttotile) _ObjectToTile_, use:  
+To set the triangles of an [🟠](#objecttotile)&nbsp;_ObjectToTile_, use:  
 ```
 triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
               np.array([1., 0., 0.], dtype=np.float32),
@@ -13,7 +13,7 @@ triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
 object_to_tile = ObjectToTile("id")
 object_to_tile.geom.triangles.append()
 ```
-The bounding box is a box containing the [🟠](#objecttotile) _ObjectToTile_'s geometry. It can be set with:
+The bounding box is a box containing the [🟠](#objecttotile)&nbsp;_ObjectToTile_'s geometry. It can be set with:
 ```
 object_to_tile.set_box()
 ```
@@ -52,7 +52,7 @@ The leafs of the tree contain the geometries with the most details. The parent n
 
 The lod_tree creation takes an [🟣](#objectstotile)&nbsp;_ObjectsToTile_ (containing [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
 
-The first step of the tree creation is the distribution of [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_ into groups. A group is an instance of [🟢](#objectstotilewithgeometry)&nbsp;_ObjectsToTileWithGeometry_ where the objects to tile ([🟣](#objectstotile)&nbsp;_ObjectsToTile_) are a group of detailled geometries. The group can also have its own geometry ([🟣](#objectstotile)&nbsp;_ObjectsToTile_), which is a lower level of details of the detailled geometries.
+The first step of the tree creation is the distribution of [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_ into groups. A group is an instance of [🟢](#objectstotilewithgeometry)&nbsp;_ObjectsToTileWithGeometry_ where the objects to tile ([🟣](#objectstotile)&nbsp;(_ObjectsToTile_) are a group of detailled geometries. The group can also have its own geometry ([🟣](#objectstotile)&nbsp;_ObjectsToTile_), which is a lower level of details of the detailled geometries.
 The groups are either created with `create_loa` or from the list of [🟣](#objectstotile)&nbsp;_ObjectsToTile_ of `kd_tree`. The groups from `create_loa` have their own geometry, those from `kd_tree` don't.
 
 To create a tileset with LOA\*, use:

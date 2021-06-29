@@ -1,6 +1,7 @@
 import numpy as np
 from ..Common import ObjectToTile
 from scipy.spatial import ConvexHull
+from alphashape import alphashape
 
 
 class FootPrint():
@@ -10,7 +11,7 @@ class FootPrint():
         self.max_height = max_height
 
 
-def get_footprint(object_to_tile):
+def get_footprint(object_to_tile, override_points=False, other_points=None):
     geom_triangles = object_to_tile.geom.triangles
     points = list()
     minZ = np.Inf
@@ -27,8 +28,13 @@ def get_footprint(object_to_tile):
                         maxZ = point[2]
         average_maxZ += maxZ
     average_maxZ /= len(geom_triangles)
-    hull = ConvexHull(points)
-    points = [[points[i][0], points[i][1], minZ] for i in reversed(hull.vertices)]
+    if override_points:
+        points = other_points
+    else:
+        # hull = ConvexHull(points)
+        # points = [[points[i][0], points[i][1], minZ] for i in reversed(hull.vertices)]
+        hull = alphashape(points, 0.)
+        points = hull.exterior.coords[:-1]
     return FootPrint(points, minZ, average_maxZ)
 
 
@@ -71,8 +77,8 @@ def create_vertices(footprint):
     return vertices
 
 
-def get_lod1(object_to_tile):
-    footprint = get_footprint(object_to_tile)
+def get_lod1(object_to_tile, override_points=False, other_points=None):
+    footprint = get_footprint(object_to_tile, override_points, other_points)
     vertices = create_vertices(footprint)
     triangles = create_triangles(vertices, len(footprint.points))
     lod1_object = ObjectToTile(str(object_to_tile.get_id()) + "_lod1")
