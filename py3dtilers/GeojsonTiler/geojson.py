@@ -67,15 +67,6 @@ class Geojson(ObjectToTile):
 
         return [triangles, triangles_id]
 
-    # Flatten list of lists (ex: [[a, b, c], [d, e, f], g]) to create a list (ex: [a, b, c, d, e, f, g])
-
-    @staticmethod
-    def flatten_list(list_of_lists):
-        if len(list_of_lists) == 0:
-            return list_of_lists
-        if isinstance(list_of_lists[0], list):
-            return Geojson.flatten_list(list_of_lists[0]) + Geojson.flatten_list(list_of_lists[1:])
-        return list_of_lists[:1] + Geojson.flatten_list(list_of_lists[1:])
 
     def parse_geojson(self, feature, properties):
         # Current feature number

@@ -101,19 +101,22 @@ def distribute_groups_in_cubes(groups, cube_size=300):
     # Merge the groups in the same cube and create new groups
     groups_in_cube = list()
     for cube in groups_dict:
-        objects = list()
-        geometries = list()
         with_geometry = cube[1]
-        for index in groups_dict[cube]:
-            for object_to_tile in groups[index].objects_to_tile:
-                objects.append(object_to_tile)
-            if with_geometry:
-                for object_to_tile in groups[index].geometry:
-                    geometries.append(object_to_tile)
-
-        if with_geometry:
-            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects), ObjectsToTile(geometries)))
-        else:
-            groups_in_cube.append(ObjectsToTileWithGeometry(ObjectsToTile(objects)))
+        groups_in_cube.append(merge_groups_together(groups, groups_dict[cube], with_geometry))
 
     return groups_in_cube
+
+def merge_groups_together(groups, group_indexes, with_geometry):
+    objects = list()
+    geometries = list()
+    for index in group_indexes:
+        for object_to_tile in groups[index].objects_to_tile:
+            objects.append(object_to_tile)
+        if with_geometry:
+            for object_to_tile in groups[index].geometry:
+                geometries.append(object_to_tile)
+
+    if with_geometry:
+        return ObjectsToTileWithGeometry(ObjectsToTile(objects), ObjectsToTile(geometries))
+    else:
+        return ObjectsToTileWithGeometry(ObjectsToTile(objects))
