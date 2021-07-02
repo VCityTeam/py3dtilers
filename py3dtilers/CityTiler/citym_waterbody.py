@@ -30,8 +30,8 @@ class CityMWaterBodies(CityMCityObjects):
     """
     A decorated list of CityMWaterBody type objects.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, objects=None):
+        super().__init__(objects)
 
     @staticmethod
     def sql_query_objects(waterbodies):
