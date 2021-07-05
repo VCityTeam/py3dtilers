@@ -35,7 +35,7 @@ class CityMBuildings(CityMCityObjects):
     # depends on the command line optional argument "--With_BTH" of CityTiler.
     with_bth = False
 
-    def __init__(self,objects=None):
+    def __init__(self, objects=None):
         super().__init__(objects)
 
     @classmethod
