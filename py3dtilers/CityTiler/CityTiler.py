@@ -88,7 +88,11 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
 
     with_loa = loa_path is not None
 
-    return create_tileset(cityobjects, also_create_lod1=True, also_create_loa=with_loa, loa_path=loa_path)
+    extension_name = None
+    if CityMBuildings.is_bth_set():
+        extension_name = "batch_table_hierarchy"
+
+    return create_tileset(cityobjects, also_create_lod1=True, also_create_loa=with_loa, loa_path=loa_path, extension_name=extension_name)
 
 
 def main():
@@ -113,6 +117,8 @@ def main():
     loa_path = None
     if args.loa is not None:
         loa_path = args.loa[0]
+
+    objects_type.set_cursor(cursor)
 
     tileset = from_3dcitydb(cursor, objects_type, loa_path)
 

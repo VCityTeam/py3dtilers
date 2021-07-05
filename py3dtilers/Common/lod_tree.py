@@ -65,25 +65,25 @@ def create_lod_tree(objects_to_tile, also_create_lod1=False, also_create_loa=Fal
 
 
 # Recursively creates a tileset from the nodes of a LodTree
-def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None):
+def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None, extension_name=None):
     lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
 
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:
-        create_tile(root_node, tileset, centroid, centroid, 0)
+        create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
     return tileset
 
 
-def create_tile(node, parent, centroid, transform_offset, depth):
+def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
     objects = node.objects_to_tile
     objects.translate_tileset(centroid)
 
     tile = Tile()
     tile.set_geometric_error(node.geometric_error)
 
-    content_b3dm = create_tile_content(objects)
+    content_b3dm = create_tile_content(objects, extension_name)
     tile.set_content(content_b3dm)
 
     # Set the position of the tile. The position is relative to the parent tile's position
@@ -105,10 +105,10 @@ def create_tile(node, parent, centroid, transform_offset, depth):
         parent.add_child(tile)
 
     for child_node in node.child_nodes:
-        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1)
+        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
 
-def create_tile_content(pre_tile):
+def create_tile_content(pre_tile, extension_name=None):
     """
     :param pre_tile: an array containing features of a single tile
 
@@ -142,6 +142,11 @@ def create_tile_content(pre_tile):
     ids = [feature.get_id() for feature in pre_tile]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
+
+    if extension_name is not None:
+        extension = pre_tile.__class__.create_extension(extension_name, ids)
+        if extension is not None:
+            bt.add_extension(extension)
 
     # Eventually wrap the geometries together with the optional
     # BatchTableHierarchy within a B3dm:

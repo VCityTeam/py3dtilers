@@ -75,12 +75,14 @@ class ObjectsToTile(object):
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            return ObjectsToTile(self.objects.__getitem__(item))
+            objects_class = self.__class__
+            return objects_class(self.objects.__getitem__(item))
         # item is then an int type:
         return self.objects.__getitem__(item)
 
     def __add__(self, other):
-        new_objects = ObjectsToTile(self.objects)
+        objects_class = self.__class__
+        new_objects = objects_class(self.objects)
         new_objects.objects.extend(other.objects)
         return new_objects
 
@@ -129,6 +131,10 @@ class ObjectsToTile(object):
                 new_geom.append(new_position)
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
+
+    @staticmethod
+    def create_extension(extension_name, ids):
+        pass
 
 # Contains an instance of ObjectsToTile
 # It can also contain its own geometry

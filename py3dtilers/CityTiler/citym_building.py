@@ -16,6 +16,7 @@ and the geometric data in the surface_geometry table
 """
 
 from .citym_cityobject import CityMCityObject, CityMCityObjects
+from .database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
 
 class CityMBuilding(CityMCityObject):
@@ -105,3 +106,13 @@ class CityMBuildings(CityMCityObjects):
             # "WHERE building.building_root_id IN " + buildings_ids_arg
 
         return query
+
+    @staticmethod
+    def create_extension(extension_name, ids):
+        if CityMBuildings.is_bth_set() and extension_name == "batch_table_hierarchy":
+            cityobjects_ids = "("
+            for i in range(0, len(ids) - 1):
+                cityobjects_ids += str(ids[i]) + ','
+            cityobjects_ids += str(ids[-1]) + ')'
+            return create_batch_table_hierarchy(CityMCityObjects.get_cursor(), cityobjects_ids)
+        return None

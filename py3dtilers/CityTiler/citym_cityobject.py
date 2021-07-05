@@ -35,8 +35,18 @@ class CityMCityObjects(ObjectsToTile):
     A decorated list of CityMCityObject type objects.
     """
 
+    gml_cursor = None
+
     def __init__(self, cityMCityObjects=None):
         super().__init__(cityMCityObjects)
+
+    @staticmethod
+    def set_cursor(cursor):
+        CityMCityObjects.gml_cursor = cursor
+
+    @staticmethod
+    def get_cursor():
+        return CityMCityObjects.gml_cursor
 
     @staticmethod
     def sql_query_objects():
