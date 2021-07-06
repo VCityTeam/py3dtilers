@@ -21,13 +21,14 @@ geojson-tiler --paths ../../geojson/
 It will read all .geojson and .json it the _geojson_ directory and parse them into 3DTiles. It will also create a single .obj model from all readed files.
 
 ### LOA
-Using the LOA option creates a tileset with a __refinement hierarchy__. The leafs of the created tree are the detailled features (features loaded from the data source) and their parents are LOA geometries of those detailled features. The LOA creation merges togother the features in the same polygons to create a single geometry.
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leafs of the created tree are the detailled features (features loaded from the data source) and their parents are LOA geometries of those detailled features. The LOAs are 3D extrusions of the polygons defined by roads. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons).
 
 To use the LOA option:
 ```
 geojson-tiler --paths <path> --loa <path-to-polygons>
 ```
 
+\*_LOA (level Of Abstraction): here, it is simple 3D extrusion of a polygon.
 ### Obj creation
 The .obj model is created if the `--obj_` flag is present in command line. To create an obj file, use:
 ```
