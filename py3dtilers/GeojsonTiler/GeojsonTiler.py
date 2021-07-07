@@ -37,7 +37,14 @@ def parse_command_line():
     parser.add_argument('--loa',
                         nargs='*',
                         type=str,
-                        help='identity which loa to create')
+                        help='Creates a LOA when defined. The LOA is a 3D extrusion of polygons. \
+                              Objects in the same polygon are merged together. \
+                              Must be followed by the path to directory containing the polygons .geojson')
+
+    parser.add_argument('--lod1',
+                        dest='lod1',
+                        action='store_true',
+                        help='Creates a LOD1 when defined. The LOD1 is a 3D extrusion of the footprint of each object.')
 
     result = parser.parse_args()
 
@@ -73,7 +80,7 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name, loa_path=None):
+def from_geojson_directory(path, group, properties, obj_name, create_lod1=False, create_loa=False, loa_path=None):
     """
     :param path: a path to a directory
 
@@ -88,8 +95,7 @@ def from_geojson_directory(path, group, properties, obj_name, loa_path=None):
     else:
         print(str(len(objects)) + " features parsed")
 
-    with_loa = loa_path is not None
-    return create_tileset(objects, also_create_lod1=False, also_create_loa=with_loa, loa_path=loa_path)
+    return create_tileset(objects, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path)
 
 
 def main():
@@ -106,13 +112,20 @@ def main():
     args = parse_command_line()
     path = args.paths[0]
     obj_name = args.obj[0]
+
     loa_path = None
-    if args.loa is not None:
+    create_loa = False
+    if args.loa:
         loa_path = args.loa[0]
+        create_loa = True
+
+    create_lod1 = False
+    if args.lod1:
+        create_lod1 = True
 
     if(os.path.isdir(path)):
         print("Writing " + path)
-        tileset = from_geojson_directory(path, args.group, args.properties, obj_name, loa_path)
+        tileset = from_geojson_directory(path, args.group, args.properties, obj_name, create_lod1, create_loa, loa_path)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = path.split('/')[-1]

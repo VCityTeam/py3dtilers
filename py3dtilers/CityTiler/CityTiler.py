@@ -33,7 +33,9 @@ def parse_command_line():
     parser.add_argument('--loa',
                         nargs='*',
                         type=str,
-                        help='identity which loa to create')
+                        help='Creates a LOA when defined. The LOA is a 3D extrusion of polygons. \
+                              Objects in the same polygon are merged together. \
+                              Must be followed by the path to directory containing the polygons .geojson')
 
     # adding optional arguments
     parser.add_argument('--with_BTH',
@@ -46,6 +48,11 @@ def parse_command_line():
                         action='store_true',
                         help='Keeps the surfaces of the cityObjects splitted when defined')
 
+    parser.add_argument('--lod1',
+                        dest='lod1',
+                        action='store_true',
+                        help='Creates a LOD1 when defined. The LOD1 is a 3D extrusion of the footprint of each object.')
+
     result = parser.parse_args()
     if(result.loa is not None and len(result.loa) == 0):
         result.loa = ['polygons']
@@ -53,6 +60,8 @@ def parse_command_line():
     return result
 
 # Surfaces of the same cityObject are merged into one geometry
+
+
 def get_surfaces_merged(cursor, cityobjects, objects_type):
     for cityobject in cityobjects:
         id = '(' + str(cityobject.get_database_id()) + ')'
@@ -65,6 +74,8 @@ def get_surfaces_merged(cursor, cityobjects, objects_type):
 
 # Surfaces of each cityObject are splitted into different geometries
 # Each surface will be an ObjectToTile
+
+
 def get_surfaces_splitted(cursor, cityobjects, objects_type):
     surfaces = list()
     for cityobject in cityobjects:
@@ -84,7 +95,7 @@ def get_surfaces_splitted(cursor, cityobjects, objects_type):
     return CityMCityObjects(surfaces)
 
 
-def from_3dcitydb(cursor, objects_type, loa_path=None, split_surfaces=False):
+def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa_path=None, split_surfaces=False):
     """
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -102,13 +113,11 @@ def from_3dcitydb(cursor, objects_type, loa_path=None, split_surfaces=False):
     else:
         objects_to_tile = get_surfaces_merged(cursor, cityobjects, objects_type)
 
-    with_loa = loa_path is not None
-
     extension_name = None
     if CityMBuildings.is_bth_set():
         extension_name = "batch_table_hierarchy"
 
-    return create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=with_loa, loa_path=loa_path, extension_name=extension_name)
+    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path, extension_name=extension_name)
 
 
 def main():
@@ -131,8 +140,14 @@ def main():
         objects_type = CityMWaterBodies
 
     loa_path = None
-    if args.loa is not None:
+    create_loa = False
+    if args.loa:
         loa_path = args.loa[0]
+        create_loa = True
+
+    create_lod1 = False
+    if args.lod1:
+        create_lod1 = True
 
     split_surfaces = False
     if args.split_surfaces:
@@ -140,7 +155,7 @@ def main():
 
     objects_type.set_cursor(cursor)
 
-    tileset = from_3dcitydb(cursor, objects_type, loa_path, split_surfaces)
+    tileset = from_3dcitydb(cursor, objects_type, create_lod1, create_loa, loa_path, split_surfaces)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:
