@@ -3,7 +3,7 @@ import argparse
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 from ..Common import create_tileset
-from .citym_cityobject import CityMCityObjects
+from .citym_cityobject import CityMCityObjects, CityMCityObject
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
@@ -41,14 +41,50 @@ def parse_command_line():
                         action='store_true',
                         help='Adds a Batch Table Hierarchy when defined')
 
+    parser.add_argument('--split_surfaces',
+                        dest='split_surfaces',
+                        action='store_true',
+                        help='Keeps the surfaces of the cityObjects splitted when defined')
+
     result = parser.parse_args()
     if(result.loa is not None and len(result.loa) == 0):
         result.loa = ['polygons']
 
     return result
 
+# Surfaces of the same cityObject are merged into one geometry
+def get_surfaces_merged(cursor, cityobjects, objects_type):
+    for cityobject in cityobjects:
+        id = '(' + str(cityobject.get_database_id()) + ')'
+        cursor.execute(objects_type.sql_query_geometries(id, False))
+        for t in cursor.fetchall():
+            geom_as_string = t[1]
+            cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+            cityobject.set_box()
+    return cityobjects
 
-def from_3dcitydb(cursor, objects_type, loa_path=None):
+# Surfaces of each cityObject are splitted into different geometries
+# Each surface will be an ObjectToTile
+def get_surfaces_splitted(cursor, cityobjects, objects_type):
+    surfaces = list()
+    for cityobject in cityobjects:
+        id = '(' + str(cityobject.get_database_id()) + ')'
+        cursor.execute(objects_type.sql_query_geometries(id, True))
+        for t in cursor.fetchall():
+            surface_id = t[0]
+            geom_as_string = t[1]
+            if geom_as_string is not None:
+                surface = CityMCityObject(surface_id)
+                try:
+                    surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                    surface.set_box()
+                    surfaces.append(surface)
+                except ValueError:
+                    continue
+    return CityMCityObjects(surfaces)
+
+
+def from_3dcitydb(cursor, objects_type, loa_path=None, split_surfaces=False):
     """
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -61,30 +97,10 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
 
-    for cityobject in cityobjects:
-        id = '(' + str(cityobject.get_database_id()) + ')'
-        cursor.execute(objects_type.sql_query_geometries(id))
-        for t in cursor.fetchall():
-            geom_as_string = t[1]
-            cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-            cityobject.set_box()
-
-    # surfaces = list()
-    # for cityobject in cityobjects:
-    #     id = '(' + str(cityobject.get_database_id()) + ')'
-    #     cursor.execute(objects_type.sql_query_geometries(id))
-    #     for t in cursor.fetchall():
-    #         surface_id = t[0]
-    #         geom_as_string = t[1]
-    #         if geom_as_string is not None:
-    #             surface = CityMCityObject(surface_id)
-    #             try:
-    #                 surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-    #                 surface.set_box()
-    #                 surfaces.append(surface)
-    #             except ValueError:
-    #                 continue
-    # objets_to_tile = CityMCityObjects(surfaces)
+    if split_surfaces:
+        objects_to_tile = get_surfaces_splitted(cursor, cityobjects, objects_type)
+    else:
+        objects_to_tile = get_surfaces_merged(cursor, cityobjects, objects_type)
 
     with_loa = loa_path is not None
 
@@ -92,7 +108,7 @@ def from_3dcitydb(cursor, objects_type, loa_path=None):
     if CityMBuildings.is_bth_set():
         extension_name = "batch_table_hierarchy"
 
-    return create_tileset(cityobjects, also_create_lod1=True, also_create_loa=with_loa, loa_path=loa_path, extension_name=extension_name)
+    return create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=with_loa, loa_path=loa_path, extension_name=extension_name)
 
 
 def main():
@@ -118,9 +134,13 @@ def main():
     if args.loa is not None:
         loa_path = args.loa[0]
 
+    split_surfaces = False
+    if args.split_surfaces:
+        split_surfaces = True
+
     objects_type.set_cursor(cursor)
 
-    tileset = from_3dcitydb(cursor, objects_type, loa_path)
+    tileset = from_3dcitydb(cursor, objects_type, loa_path, split_surfaces)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

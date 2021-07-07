@@ -58,7 +58,7 @@ class CityMWaterBodies(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(waterbodies_ids=None):
+    def sql_query_geometries(waterbodies_ids=None, split_surfaces=False):
         """
         waterbodies_ids is unused but is given in argument to preserve the same structure
         as the sql_query_geometries method of parent class CityMCityObject.
@@ -66,14 +66,24 @@ class CityMWaterBodies(CityMCityObjects):
         :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of waterbodies
-        query = \
-            "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
-            "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
-            "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
-            "JOIN waterboundary_surface " + \
-            "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
-            "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
-            "WHERE waterbody.id IN " + waterbodies_ids + " " + \
-            "GROUP BY waterbody.id "
+        if split_surfaces:
+            query = \
+                "SELECT waterbody.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) " + \
+                "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
+                "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
+                "JOIN waterboundary_surface " + \
+                "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
+                "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+                "WHERE waterbody.id IN " + waterbodies_ids
+        else:
+            query = \
+                "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
+                "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
+                "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
+                "JOIN waterboundary_surface " + \
+                "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
+                "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+                "WHERE waterbody.id IN " + waterbodies_ids + " " + \
+                "GROUP BY waterbody.id "
 
         return query

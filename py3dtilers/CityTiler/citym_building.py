@@ -72,7 +72,7 @@ class CityMBuildings(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(buildings_ids_arg):
+    def sql_query_geometries(buildings_ids_arg, split_surfaces=False):
         """
         :param offset: the offset (a 3D "vector" of floats) by which the
                        geographical coordinates should be translated (the
@@ -87,7 +87,17 @@ class CityMBuildings(CityMCityObjects):
         # from which inherits concrete building class as well building-subdivisions
         # a.k.a. parts) we must first collect all the buildings and their parts:
 
-        query = \
+        if split_surfaces:
+            query = \
+            "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
+            "surface_geometry.geometry) " + \
+            ") " + \
+            "FROM surface_geometry JOIN thematic_surface " + \
+            "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+            "JOIN building ON thematic_surface.building_id = building.id " + \
+            "WHERE building.building_root_id IN " + buildings_ids_arg
+        else:
+            query = \
             "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
             "surface_geometry.geometry) " + \
             ")) " + \
@@ -96,14 +106,6 @@ class CityMBuildings(CityMCityObjects):
             "JOIN building ON thematic_surface.building_id = building.id " + \
             "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
             "GROUP BY building.building_root_id "
-
-            # "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
-            # "surface_geometry.geometry) " + \
-            # ") " + \
-            # "FROM surface_geometry JOIN thematic_surface " + \
-            # "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
-            # "JOIN building ON thematic_surface.building_id = building.id " + \
-            # "WHERE building.building_root_id IN " + buildings_ids_arg
 
         return query
 
