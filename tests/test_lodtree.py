@@ -2,7 +2,7 @@ import unittest
 from py3dtiles import BoundingVolumeBox
 import numpy as np
 
-from py3dtilers.Common.lod_tree import create_tileset
+from py3dtilers.Common.tileset_creation import create_tileset
 from py3dtilers.Common.object_to_tile import ObjectToTile, ObjectsToTile
 
 

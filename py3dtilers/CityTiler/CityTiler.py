@@ -59,10 +59,12 @@ def parse_command_line():
 
     return result
 
-# Surfaces of the same cityObject are merged into one geometry
-
 
 def get_surfaces_merged(cursor, cityobjects, objects_type):
+    """
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup
+    Surfaces of the same cityObject are merged into one geometry
+    """
     for cityobject in cityobjects:
         id = '(' + str(cityobject.get_database_id()) + ')'
         cursor.execute(objects_type.sql_query_geometries(id, False))
@@ -72,11 +74,13 @@ def get_surfaces_merged(cursor, cityobjects, objects_type):
             cityobject.set_box()
     return cityobjects
 
-# Surfaces of each cityObject are splitted into different geometries
-# Each surface will be an ObjectToTile
-
 
 def get_surfaces_splitted(cursor, cityobjects, objects_type):
+    """
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup
+    Surfaces of each cityObject are splitted into different geometries
+    Each surface will be an ObjectToTile
+    """
     surfaces = list()
     for cityobject in cityobjects:
         id = '(' + str(cityobject.get_database_id()) + ')'

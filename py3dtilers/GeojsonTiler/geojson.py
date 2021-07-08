@@ -67,7 +67,6 @@ class Geojson(ObjectToTile):
 
         return [triangles, triangles_id]
 
-
     def parse_geojson(self, feature, properties):
         # Current feature number
         Geojson.n_feature += 1

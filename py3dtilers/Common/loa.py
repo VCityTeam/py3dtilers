@@ -106,6 +106,7 @@ def distribute_groups_in_cubes(groups, cube_size=300):
 
     return groups_in_cube
 
+
 def merge_groups_together(groups, group_indexes, with_geometry):
     objects = list()
     geometries = list()

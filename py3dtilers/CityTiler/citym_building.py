@@ -23,6 +23,7 @@ class CityMBuilding(CityMCityObject):
     """
     Implementation of the Building Model objects from the CityGML model.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -89,23 +90,23 @@ class CityMBuildings(CityMCityObjects):
 
         if split_surfaces:
             query = \
-            "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
-            "surface_geometry.geometry) " + \
-            ") " + \
-            "FROM surface_geometry JOIN thematic_surface " + \
-            "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
-            "JOIN building ON thematic_surface.building_id = building.id " + \
-            "WHERE building.building_root_id IN " + buildings_ids_arg
+                "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
+                "surface_geometry.geometry) " + \
+                ") " + \
+                "FROM surface_geometry JOIN thematic_surface " + \
+                "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+                "JOIN building ON thematic_surface.building_id = building.id " + \
+                "WHERE building.building_root_id IN " + buildings_ids_arg
         else:
             query = \
-            "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-            "surface_geometry.geometry) " + \
-            ")) " + \
-            "FROM surface_geometry JOIN thematic_surface " + \
-            "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
-            "JOIN building ON thematic_surface.building_id = building.id " + \
-            "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
-            "GROUP BY building.building_root_id "
+                "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
+                "surface_geometry.geometry) " + \
+                ")) " + \
+                "FROM surface_geometry JOIN thematic_surface " + \
+                "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+                "JOIN building ON thematic_surface.building_id = building.id " + \
+                "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
+                "GROUP BY building.building_root_id "
 
         return query
 
