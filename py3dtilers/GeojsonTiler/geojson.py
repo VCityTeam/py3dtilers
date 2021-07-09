@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import json
 
-from scipy.spatial import ConvexHull
+# from scipy.spatial import ConvexHull
 from shapely.geometry import Point, Polygon
 from alphashape import alphashape
 
@@ -91,17 +91,12 @@ class Geojson(ObjectToTile):
             print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature))
             return False
 
-        z_name = properties[properties.index('z') + 1]
-        if z_name in feature['properties']:
-            self.z = feature['properties'][z_name] - self.height
-        else:
-            print("No propertie called " + z_name + " in feature " + str(Geojson.n_feature))
-            return False
-
         if feature['geometry']['type'] == 'Polygon':
             coords = feature['geometry']['coordinates'][0]
         if feature['geometry']['type'] == 'MultiPolygon':
             coords = feature['geometry']['coordinates'][0][0]
+
+        self.z = min(coords, key=lambda x: x[2])[2] - self.height
 
         # Group coords into (x,y) arrays, the z will always be the same z
         # The last point in features is always the same as the first, so we remove the last point
@@ -352,7 +347,7 @@ class Geojsons(ObjectsToTile):
             if(feature.parse_geom()):
                 objects.append(feature)
 
-                if not obj_name == '':
+                if obj_name is not None:
                     # Add triangles and vertices to create an obj
                     for vertice in feature.vertices:
                         vertices.append(vertice)
@@ -362,7 +357,7 @@ class Geojsons(ObjectsToTile):
                     for i in range(0, len(feature.center)):
                         center[i] += feature.center[i]
 
-        if not obj_name == '':
+        if obj_name is not None:
             center[:] = [c / len(objects) for c in center]
             file_name = obj_name
             f = open(os.path.join(file_name), "w")

@@ -31,7 +31,7 @@ def parse_command_line():
                         help='identify the object type to seek in the database')
 
     parser.add_argument('--loa',
-                        nargs='*',
+                        nargs='?',
                         type=str,
                         help='Creates a LOA when defined. The LOA is a 3D extrusion of polygons. \
                               Objects in the same polygon are merged together. \
@@ -54,8 +54,6 @@ def parse_command_line():
                         help='Creates a LOD1 when defined. The LOD1 is a 3D extrusion of the footprint of each object.')
 
     result = parser.parse_args()
-    if(result.loa is not None and len(result.loa) == 0):
-        result.loa = ['polygons']
 
     return result
 
@@ -143,23 +141,13 @@ def main():
     elif args.object_type == "water":
         objects_type = CityMWaterBodies
 
-    loa_path = None
-    create_loa = False
-    if args.loa:
-        loa_path = args.loa[0]
-        create_loa = True
-
-    create_lod1 = False
-    if args.lod1:
-        create_lod1 = True
-
-    split_surfaces = False
-    if args.split_surfaces:
-        split_surfaces = True
+    create_lod1 = args.lod1
+    create_loa = args.loa is not None
+    split_surfaces = args.split_surfaces is not None
 
     objects_type.set_cursor(cursor)
 
-    tileset = from_3dcitydb(cursor, objects_type, create_lod1, create_loa, loa_path, split_surfaces)
+    tileset = from_3dcitydb(cursor, objects_type, create_lod1, create_loa, args.loa, split_surfaces)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:
