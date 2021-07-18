@@ -26,3 +26,16 @@ jobs:
       - |
         pytest
         pytest -v
+    - stage: "Markdown link checks"
+      language: node_js
+      node_js: 12
+      script:
+        - npm install --global remark-cli remark-validate-links
+        - remark -u validate-links .
+        - |
+          export FAILURE_THRESHOLD=1
+          export warnings=`remark -u validate-links . 2>&1 | grep warning | grep "Link to unknown" | wc -l`
+          if [ $warnings -gt $FAILURE_THRESHOLD ]; then
+            exit 1;
+          fi
+
