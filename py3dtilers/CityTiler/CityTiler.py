@@ -63,14 +63,19 @@ def get_surfaces_merged(cursor, cityobjects, objects_type):
     Get the surfaces of all the cityobjects and transform them into TriangleSoup
     Surfaces of the same cityObject are merged into one geometry
     """
+    cityobjects_with_geom = list()
     for cityobject in cityobjects:
-        id = '(' + str(cityobject.get_database_id()) + ')'
-        cursor.execute(objects_type.sql_query_geometries(id, False))
-        for t in cursor.fetchall():
-            geom_as_string = t[1]
-            cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-            cityobject.set_box()
-    return cityobjects
+        try:
+            id = '(' + str(cityobject.get_database_id()) + ')'
+            cursor.execute(objects_type.sql_query_geometries(id, False))
+            for t in cursor.fetchall():
+                geom_as_string = t[1]
+                cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                cityobject.set_box()
+                cityobjects_with_geom.append(cityobject)
+        except AttributeError:
+            continue
+    return objects_type(cityobjects_with_geom)
 
 
 def get_surfaces_splitted(cursor, cityobjects, objects_type):
@@ -141,13 +146,11 @@ def main():
     elif args.object_type == "water":
         objects_type = CityMWaterBodies
 
-    create_lod1 = args.lod1
     create_loa = args.loa is not None
-    split_surfaces = args.split_surfaces is not None
 
     objects_type.set_cursor(cursor)
 
-    tileset = from_3dcitydb(cursor, objects_type, create_lod1, create_loa, args.loa, split_surfaces)
+    tileset = from_3dcitydb(cursor, objects_type, args.lod1, create_loa, args.loa, args.split_surfaces)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

@@ -9,7 +9,6 @@ def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=Fals
     Recursively creates a tileset from the nodes of a LodTree
     """
     lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
-
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:
@@ -37,6 +36,12 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
     bounding_box = BoundingVolumeBox()
     for geojson in objects:
         bounding_box.add(geojson.get_bounding_volume_box())
+
+    if extension_name is not None:
+        extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
+        if extension is not None:
+            bounding_box.add_extension(extension)
+
     tile.set_bounding_volume(bounding_box)
 
     # If the node is a root of the LodTree, add the created tile to the tileset's root
@@ -50,7 +55,7 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
         create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
 
-def create_tile_content(pre_tile, extension_name=None):
+def create_tile_content(objects, extension_name=None):
     """
     :param pre_tile: an array containing features of a single tile
 
@@ -58,7 +63,7 @@ def create_tile_content(pre_tile, extension_name=None):
     """
     # create B3DM content
     arrays = []
-    for feature in pre_tile:
+    for feature in objects:
         arrays.append({
             'position': feature.geom.getPositionArray(),
             'normal': feature.geom.getNormalArray(),
@@ -81,12 +86,12 @@ def create_tile_content(pre_tile, extension_name=None):
     gltf = GlTF.from_binary_arrays(arrays, transform)
 
     # Create a batch table and add the ID of each feature to it
-    ids = [feature.get_id() for feature in pre_tile]
+    ids = [feature.get_id() for feature in objects]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
 
     if extension_name is not None:
-        extension = pre_tile.__class__.create_extension(extension_name, ids)
+        extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
         if extension is not None:
             bt.add_extension(extension)
 

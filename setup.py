@@ -156,7 +156,8 @@ setup(
     entry_points={
         'console_scripts': ['citygml-tiler=py3dtilers.CityTiler:main',
                             'geojson-tiler=py3dtilers.GeojsonTiler:main',
-                            'ifc-tiler=py3dtilers.IfcTiler:main'],
+                            'ifc-tiler=py3dtilers.IfcTiler:main',
+                            'citygml-tiler-temporal=py3dtilers.CityTiler:main_temporal'],
     },
     data_files=[('py3dtilers/CityTiler',
                    ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']

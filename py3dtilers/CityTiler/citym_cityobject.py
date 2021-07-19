@@ -77,7 +77,6 @@ class CityMCityObjects(ObjectsToTile):
             no_input = True
         else:
             no_input = False
-
         cursor.execute(objects_type.sql_query_objects(cityobjects))
 
         if no_input:
@@ -106,7 +105,6 @@ class CityMCityObjects(ObjectsToTile):
                 gml_id = t[2]
                 cityobject = objects_with_gmlid_key[gml_id]
                 cityobject.set_database_id(object_id)
-                cityobject.set_box()
         if no_input:
             return result_objects
         else:

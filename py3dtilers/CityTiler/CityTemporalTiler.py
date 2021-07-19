@@ -1,16 +1,13 @@
 import argparse
-import numpy as np
 import sys
 
-from py3dtiles import B3dm, GlTF, Tile
-from py3dtiles import BatchTable, TemporalBatchTable
 from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
-from py3dtiles import TileSet, TemporalTileSet
+from py3dtiles import TemporalTileSet
 from py3dtiles import TemporalTransaction
 from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
-from py3dtiles import temporal_extract_bounding_dates
+from py3dtiles import TriangleSoup
 
-from .temporal_utils import debug_msg, debug_msg_ne
+from .temporal_utils import debug_msg
 from .temporal_graph import TemporalGraph, Edge
 from .temporal_building import TemporalBuilding
 
@@ -18,12 +15,12 @@ from .citym_cityobject import CityMCityObjects
 from .citym_building import CityMBuildings
 
 from .database_accesses import open_data_bases
-from ..Common import kd_tree
+from ..Common import create_tileset
 
 
 def parse_command_line():
     # arg parse
-    descr = '''A small utility that build a 3DTiles temporal Tileset out of 
+    descr = '''A small utility that build a 3DTiles temporal Tileset out of
                - temporal data of the buildings
                - the content of a 3DCityDB databases.'''
     parser = argparse.ArgumentParser(description=descr)
@@ -70,66 +67,26 @@ def parse_command_line():
     return result
 
 
-def create_tile_content(cursors, buildings, offset):
+def get_surfaces_merged(cursors, cityobjects, objects_type):
     """
-    :param cursors: a dictionary with a timestamp as key and database cursors
-                    as values
-    :param buildings: a Buildings object
-    :param offset: the offset (a a 3D "vector" of floats) by which the
-                   geographical coordinates should be translated (the
-                   computation is done at the GIS level)
-    :rtype: a TileContent in the form a B3dm.
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup
+    Surfaces of the same cityObject are merged into one geometry
     """
-    # We have to fan out the retrieval of the geometries (because buildings
-    # belong to different databases)
-
-    time_stamped_buildings = dict()
-    for time_stamp in cursors.keys():
-        time_stamped_buildings[time_stamp] = list()
-    for building in buildings:
-        time_stamped_buildings[building.get_time_stamp()].append(building)
-
-    arrays = []
-    for time_stamp, yearly_buildings in time_stamped_buildings.items():
-        if not yearly_buildings:
+    cityobjects_with_geom = list()
+    for cityobject in cityobjects:
+        try:
+            id = '(' + str(cityobject.get_database_id()) + ')'
+            time_stamp = cityobject.get_time_stamp()
+            cursors[time_stamp].execute(objects_type.sql_query_geometries(id, False))
+            for t in cursors[time_stamp].fetchall():
+                geom_as_string = t[1]
+                cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                cityobject.set_box()
+                cityobjects_with_geom.append(cityobject)
+        except AttributeError:
             continue
-        building_database_ids = tuple(
-            [building.get_database_id() for building in yearly_buildings])
-        arrays.extend(CityMCityObjects.retrieve_geometries(
-            cursors[time_stamp],
-            building_database_ids,
-            offset,
-            CityMBuildings))
+    return objects_type(cityobjects_with_geom)
 
-    # GlTF uses a y-up coordinate system whereas the geographical data (stored
-    # in the 3DCityDB database) uses a z-up coordinate system convention. In
-    # order to comply with Gltf we thus need to realize a z-up to y-up
-    # coordinate transform for the data to respect the glTF convention. This
-    # rotation gets "corrected" (taken care of) by the B3dm/gltf parser on the
-    # client side when using (displaying) the data.
-    # Refer to the note concerning the recommended data workflow
-    #    https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
-    # for more details on this matter.
-    transform = np.array([1, 0, 0, 0,
-                          0, 0, -1, 0,
-                          0, 1, 0, 0,
-                          0, 0, 0, 1])
-    gltf = GlTF.from_binary_arrays(arrays, transform)
-
-    temporal_bt = TemporalBatchTable()
-
-    for time_stamp, yearly_buildings in time_stamped_buildings.items():
-        if not yearly_buildings:
-            continue
-        for building in yearly_buildings:
-            temporal_bt.append_feature_id(building.get_temporal_id())
-            temporal_bt.append_start_date(building.get_start_date())
-            temporal_bt.append_end_date(building.get_end_date())
-    bt = BatchTable()
-    bt.add_extension(temporal_bt)
-
-    # Eventually wrap the geometries together within a B3dm:
-    return B3dm.from_glTF(gltf, bt)
 
 def from_3dcitydb(cursors, buildings):
     """
@@ -137,90 +94,13 @@ def from_3dcitydb(cursors, buildings):
                     as values
     :param buildings: a Buildings object
     """
-    # Lump out buildings in pre_tiles based on a 2D-Tree technique:
-    debug_msg_ne('2D-Tree sorting: launching')
-    pre_tiles = kd_tree(buildings, 100000)
-    debug_msg('2D-Tree sorting: done.    ')
 
-    tileset = TileSet()
-    debug_msg('TileSet creation:')
-    for debug_index, tile_buildings in enumerate(pre_tiles):
-        debug_msg_ne(f'  Creating tile {debug_index+1} / {len(pre_tiles)}')
-        tile = Tile()
-        tile.set_geometric_error(500)
+    if not buildings:
+        raise ValueError(f'The database does not contain any {CityMBuildings} object')
 
-        # Construct the tile content and attach it to the new Tile:
-        centroid = tile_buildings.get_centroid()
-        tile_content_b3dm = create_tile_content(cursors,
-                                                tile_buildings,
-                                                centroid)
-        tile.set_content(tile_content_b3dm)
+    objects_to_tile = get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        # The current new tile bounding volume shall be a box enclosing the
-        # buildings withheld in the considered tile_buildings:
-        bounding_box = BoundingVolumeBox()
-        for building in tile_buildings:
-            bounding_box.add(building.get_bounding_volume_box())
-
-        # Deal with the temporal extension of of Bounding Volume Box
-        temporal_bv = TemporalBoundingVolume()
-        bounding_dates = temporal_extract_bounding_dates(tile_buildings)
-        temporal_bv.set_start_date(bounding_dates['start_date'])
-        temporal_bv.set_end_date(bounding_dates['end_date'])
-        bounding_box.add_extension(temporal_bv)
-
-        # The Tile Content returned by the above call to create_tile_content()
-        # (refer to the usage of the centroid/offset third argument) uses
-        # coordinates that are local to the centroid (considered as a
-        # referential system within the chosen geographical coordinate system).
-        # Yet the above computed bounding_box was set up based on
-        # coordinates that are relative to the chosen geographical coordinate
-        # system. We thus need to align the Tile Content to the
-        # BoundingVolumeBox of the Tile by "adjusting" to this change of
-        # referential:
-        bounding_box.translate([- centroid[i] for i in range(0, 3)])
-        tile.set_bounding_volume(bounding_box)
-
-        # The transformation matrix for the tile is limited to a translation
-        # to the centroid (refer to the offset realized by the
-        # create_tile_content() method).
-        # Note: the geographical data (stored in the 3DCityDB) uses a z-up
-        #       referential convention. When building the B3dm/gltf, and in
-        #       order to comply to the y-up gltf convention) it was necessary
-        #       (look for the definition of the `transform` matrix when invoking
-        #       `GlTF.from_binary_arrays(arrays, transform)` in the
-        #        create_tile_content() method) to realize a z-up to y-up
-        #        coordinate transform. The Tile is not aware on this z-to-y
-        #        rotation (when writing the data) followed by the invert y-to-z
-        #        rotation (when reading the data) that only concerns the gltf
-        #        part of the TileContent.
-        tile.set_transform([1, 0, 0, 0,
-                            0, 1, 0, 0,
-                            0, 0, 1, 0,
-                            centroid[0], centroid[1], centroid[2], 1])
-
-        # Eventually we can add the newly build tile to the tile set:
-        tileset.add_tile(tile)
-
-    debug_msg(f'  Creating tile {debug_index+1} / {len(pre_tiles)}: done.')
-
-    # Note: we don't need to explicitly adapt the TileSet's root tile
-    # bounding volume, because TileSet::write_to_directory() already
-    # takes care of this synchronisation.
-
-    # A shallow attempt at providing some traceability on where the resulting
-    # data set comes from:
-    origin = f'This tileset is the result of Py3DTiles {__file__} script '
-    origin += 'ran with data extracted from the following databases:'
-    for cursor in cursors.values():
-        cursor.execute('SELECT inet_client_addr()')
-        server_ip = cursor.fetchone()[0]
-        cursor.execute('SELECT current_database()')
-        database_name = cursor.fetchone()[0]
-        origin += '   - ' + server_ip + ': ' + database_name + '\n'
-    tileset.add_asset_extras(origin)
-
-    return tileset
+    return create_tileset(objects_to_tile, extension_name="temporal")
 
 
 def combine_nodes_with_buildings_from_3dcitydb(graph, cursors, cli_args):
@@ -233,11 +113,11 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors, cli_args):
     # dates). In order to avoid this possibly expensive matching, we create
     # temporal buildings and let from_3dcitydb() decorate those objects with
     # the information it extracts from the database:
-    resulting_buildings = CityMCityObjects()
+    resulting_buildings = CityMBuildings()
     for index, time_stamp in enumerate(cli_args.time_stamps):
         cursor = cursors[index]
         nodes = graph.get_nodes_with_time_stamp(time_stamp)
-        buildings = CityMCityObjects()
+        buildings = CityMBuildings()
         for node in nodes:
             new_building = TemporalBuilding()
             new_building.set_start_date(node.get_start_date())
@@ -249,7 +129,7 @@ def combine_nodes_with_buildings_from_3dcitydb(graph, cursors, cli_args):
             continue
         extracted_buildings = CityMCityObjects.retrieve_objects(
             cursor, CityMBuildings, buildings)
-        resulting_buildings.extend(extracted_buildings.get_city_objects())
+        resulting_buildings.extend(extracted_buildings)
     return resulting_buildings
 
 
@@ -355,7 +235,7 @@ def build_temporal_tile_set(graph):
                 modification_transaction.replicate_from(transaction_elements)
                 modification_transaction.set_type('modification')
                 resulting_transaction.append_transaction(
-                                                     modification_transaction)
+                    modification_transaction)
             # And eventually attach the result to the the tile set
             temporal_tile_set.append_transaction(resulting_transaction)
 
@@ -382,7 +262,7 @@ def build_temporal_tile_set(graph):
 
             for descendant in node.get_descendants():
                 transaction_elements.append_destination(
-                                                    descendant.get_global_id())
+                    descendant.get_global_id())
 
             for descendant_edge in node.get_descendant_edges():
                 if descendant_edge.is_modified():
@@ -405,7 +285,7 @@ def build_temporal_tile_set(graph):
                 modification_transaction.replicate_from(transaction_elements)
                 modification_transaction.set_type('modification')
                 resulting_transaction.append_transaction(
-                                                     modification_transaction)
+                    modification_transaction)
             # And eventually attach the result to the the tile set
             temporal_tile_set.append_transaction(resulting_transaction)
 
@@ -447,15 +327,28 @@ def main():
 
     # Construct the temporal tile set
     tile_set = from_3dcitydb(time_stamped_cursors, all_buildings)
-    [cursor.close() for cursor in cursors]  # We are done with the databases
 
     tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    tile_set.get_root_tile().get_bounding_volume().add_extension(
-                                                      TemporalBoundingVolume())
+    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = build_temporal_tile_set(graph)
     tile_set.add_extension(temporal_tile_set)
+
+    # A shallow attempt at providing some traceability on where the resulting
+    # data set comes from:
+    origin = f'This tileset is the result of Py3DTiles {__file__} script '
+    origin += 'ran with data extracted from the following databases:'
+    for cursor in cursors:
+        cursor.execute('SELECT inet_client_addr()')
+        server_ip = cursor.fetchone()[0]
+        cursor.execute('SELECT current_database()')
+        database_name = cursor.fetchone()[0]
+        origin += '   - ' + server_ip + ': ' + database_name + '\n'
+
+    tile_set.add_asset_extras(origin)
+
+    [cursor.close() for cursor in cursors]  # We are done with the databases
 
     tile_set.write_to_directory('junk')
 

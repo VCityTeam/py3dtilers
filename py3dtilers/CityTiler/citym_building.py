@@ -14,7 +14,8 @@ and the geometric data in the surface_geometry table
 - the surface_geometry table contains the geometry of all objects
 
 """
-
+from py3dtiles import TemporalBatchTable, TemporalBoundingVolume
+from py3dtiles import temporal_extract_bounding_dates
 from .citym_cityobject import CityMCityObject, CityMCityObjects
 from .database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 
@@ -24,8 +25,8 @@ class CityMBuilding(CityMCityObject):
     Implementation of the Building Model objects from the CityGML model.
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id=None):
+        super().__init__(id)
 
 
 class CityMBuildings(CityMCityObjects):
@@ -111,11 +112,31 @@ class CityMBuildings(CityMCityObjects):
         return query
 
     @staticmethod
-    def create_extension(extension_name, ids):
+    def create_batch_table_extension(extension_name, ids=None, objects=None):
         if CityMBuildings.is_bth_set() and extension_name == "batch_table_hierarchy":
             cityobjects_ids = "("
             for i in range(0, len(ids) - 1):
                 cityobjects_ids += str(ids[i]) + ','
             cityobjects_ids += str(ids[-1]) + ')'
             return create_batch_table_hierarchy(CityMCityObjects.get_cursor(), cityobjects_ids)
+
+        if extension_name == "temporal":
+            temporal_bt = TemporalBatchTable()
+
+            for building in objects:
+                temporal_bt.append_feature_id(building.get_temporal_id())
+                temporal_bt.append_start_date(building.get_start_date())
+                temporal_bt.append_end_date(building.get_end_date())
+            return temporal_bt
+
+        return None
+
+    @staticmethod
+    def create_bounding_volume_extension(extension_name, ids, objects):
+        if extension_name == "temporal":
+            temporal_bv = TemporalBoundingVolume()
+            bounding_dates = temporal_extract_bounding_dates(objects)
+            temporal_bv.set_start_date(bounding_dates['start_date'])
+            temporal_bv.set_end_date(bounding_dates['end_date'])
+            return temporal_bv
         return None

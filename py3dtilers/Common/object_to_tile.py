@@ -21,7 +21,7 @@ class ObjectToTile(object):
         self.box = None
 
         # The centroid of the box
-        self.centroid = None
+        self.centroid = np.array([0, 0, 0])
 
         self.set_id(id)
 
@@ -133,14 +133,17 @@ class ObjectsToTile(object):
             object_to_tile.set_box()
 
     @staticmethod
-    def create_extension(extension_name, ids):
+    def create_batch_table_extension(extension_name, ids=None, objects=None):
         pass
 
-# Contains an instance of ObjectsToTile
-# It can also contain its own geometry
+    @staticmethod
+    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+        pass
 
 
 class ObjectsToTileWithGeometry():
+    """Contains an instance of ObjectsToTile
+    It can also contain its own geometry"""
     def __init__(self, objects_to_tile, geometry=None):
         self.objects_to_tile = objects_to_tile
         self.with_geometry = geometry is not None
