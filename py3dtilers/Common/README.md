@@ -1,5 +1,5 @@
-## [object_to_tile](Common/object_to_tile.py)
-### 🟠ObjectToTile
+## [object_to_tile](object_to_tile.py)
+### ObjectToTile
 An [🟠](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry and a bounding box.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
 To set the triangles of an [🟠](#objecttotile)&nbsp;_ObjectToTile_, use:  
@@ -18,7 +18,7 @@ The bounding box is a box containing the [🟠](#objecttotile)&nbsp;_ObjectToTil
 object_to_tile.set_box()
 ```
 
-### 🟣ObjectsToTile
+### ObjectsToTile
 An [🟣](#objectstotile)&nbsp;_ObjectsToTile_ instance contains a collection of [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_. To create an [🟣](#objectstotile)&nbsp;_ObjectsToTile_, use:
 ```
 objects = [object_to_tile] # List of ObjectToTile(s)
@@ -28,7 +28,7 @@ for object in objects_to_tile:
     print(object.get_id())
 ```
 
-### 🟢ObjectsToTileWithGeometry
+### ObjectsToTileWithGeometry
 An [🟢](#objectstotilewithgeometry)&nbsp;_ObjectsToTileWithGeometry_ contains objects to tile ([🟣](#objectstotile)&nbsp;_ObjectsToTile_) and can have its own geometry ([🟣](#objectstotile)&nbsp;_ObjectsToTile_).
 It can be created with:
 ```
@@ -37,7 +37,7 @@ objects_to_tile_with_geom = ObjectsToTileWithGeometry(objects_to_tile, geometry)
 objects_to_tile_with_geom = ObjectsToTileWithGeometry(objects_to_tile) # Instance without its own geometry
 ```
 
-## [kd_tree](Common/kd_tree.py)
+## [kd_tree](kd_tree.py)
 The kd_tree distributes the [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in an [🟣](#objectstotile)&nbsp;_ObjectsToTile_ into multiple [🟣](#objectstotile)&nbsp;_ObjectsToTile_. Each instance of [🟣](#objectstotile)&nbsp;_ObjectsToTile_ can have a maximum of `maxNumObjects`:
 ```
 # Takes : an ObjectsToTile
@@ -45,7 +45,7 @@ The kd_tree distributes the [🟠](#objecttotile)&nbsp;_ObjectToTile(s)_ contain
 distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per ObjectsToTile
 ```
 
-## [lod_tree](https://github.com/VCityTeam/py3dtilers/blob/CityTiler_with_LodTree/py3dtilers/Common/lod_tree.py)
+## [lod_tree](lod_tree.py)
 lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an [🟣](#objectstotile)&nbsp;_ObjectsToTile_ (the geometries of the node) and a list of child nodes.
 A node will correspond to a tile (.b3dm file) of the tileset.  
 The leafs of the tree contain the geometries with the most details. The parent node of each node contains a lower level of details.
