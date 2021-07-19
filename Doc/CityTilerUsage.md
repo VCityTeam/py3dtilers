@@ -2,7 +2,7 @@
 
 
 #### 4/ Configure the database description file
-You can customize the [CityTilerDBConfigReference.yml](CityTilerDBConfigReference.yml) reference file:
+You can customize the [CityTilerDBConfigReference.yml](../py3dtilers/CityTiler/CityTilerDBConfigReference.yml) reference file:
 ```
 (venv) pushd Tilers/CityTiler
 (venv) cp CityTilerDBConfigReference.yml CityTilerDBConfig.yml
@@ -43,7 +43,7 @@ python Tilers/CityTiler/CityTemporalTiler.py                   \
 
 ### OBSELETE: Visualizing the resulting tileset (debugging temporary notes)
 
-Once [installed and ran](Install.md) and in order to 3D visulalize the results produced by the Tilers you might
+Once installed and ran <!--[installed and ran](Install.md)--> and in order to 3D visulalize the results produced by the Tilers you might
 * install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples
   and point the resulting junk directory holding the produced tileset
   
