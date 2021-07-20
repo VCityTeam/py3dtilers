@@ -2,13 +2,14 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 from ..Common import create_lod_tree
+from ..Common import createTextureAtlas
 
 
-def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None, extension_name=None):
+def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None, extension_name=None, with_texture=False):
     """
     Recursively creates a tileset from the nodes of a LodTree
     """
-    lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path)
+    lod_tree = create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path, with_texture)
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:
@@ -24,7 +25,7 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
     tile = Tile()
     tile.set_geometric_error(node.geometric_error)
 
-    content_b3dm = create_tile_content(objects, extension_name)
+    content_b3dm = create_tile_content(objects, extension_name, node.has_texture())
     tile.set_content(content_b3dm)
 
     # Set the position of the tile. The position is relative to the parent tile's position
@@ -55,7 +56,7 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
         create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
 
-def create_tile_content(objects, extension_name=None):
+def create_tile_content(objects, extension_name=None, with_texture=False):
     """
     :param pre_tile: an array containing features of a single tile
 
@@ -63,12 +64,22 @@ def create_tile_content(objects, extension_name=None):
     """
     # create B3DM content
     arrays = []
-    for feature in objects:
-        arrays.append({
-            'position': feature.geom.getPositionArray(),
-            'normal': feature.geom.getNormalArray(),
-            'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()]
-        })
+    if with_texture:
+        tile_number = createTextureAtlas(objects)
+        for feature in objects:
+            arrays.append({
+                'position': feature.geom.getPositionArray(),
+                'normal': feature.geom.getNormalArray(),
+                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
+                'uv': feature.geom.getDataArray(0)
+            })
+    else:
+        for feature in objects:
+            arrays.append({
+                'position': feature.geom.getPositionArray(),
+                'normal': feature.geom.getNormalArray(),
+                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()]
+            })
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -83,7 +94,11 @@ def create_tile_content(objects, extension_name=None):
                           0, 0, -1, 0,
                           0, 1, 0, 0,
                           0, 0, 0, 1])
-    gltf = GlTF.from_binary_arrays(arrays, transform)
+    
+    if with_texture:
+        gltf = GlTF.from_binary_arrays(arrays, transform, textureUri='./ATLAS_' + str(tile_number) + '.png')
+    else:
+        gltf = GlTF.from_binary_arrays(arrays, transform)
 
     # Create a batch table and add the ID of each feature to it
     ids = [feature.get_id() for feature in objects]

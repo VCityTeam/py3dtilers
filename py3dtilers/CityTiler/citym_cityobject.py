@@ -119,3 +119,19 @@ class CityMCityObjects(ObjectsToTile):
         :return: no return value.
         """
         pass
+
+    @staticmethod
+    def retrieve_textures(cursor, image_uri, objects_type):
+        """
+        :param cursor: a database access cursor
+        :param city_object_ids: a list of (city)gml identifier corresponding to
+                       objects_type type objects whose geometries are sought.
+        :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be "CityMBuilding".
+        :rtype List[Dict]: a TileContent in the form a B3dm.
+        """
+        res = []
+        cursor.execute(objects_type.sql_query_textures(image_uri))
+        for t in cursor.fetchall():
+            res.append(t)
+        return(res)

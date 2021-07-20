@@ -112,6 +112,46 @@ class CityMBuildings(CityMCityObjects):
         return query
 
     @staticmethod
+    def sql_query_geometries_with_texture_coordinates(buildings):
+        """
+        :param offset: the offset (a 3D "vector" of floats) by which the
+                       geographical coordinates should be translated (the
+                       computation is done at the GIS level).
+        :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right SQL query that should be executed.
+        """
+        # Because the 3DCityDB's Building table regroups both the buildings mixed
+        # with their building's sub-divisions (Building is an "abstraction"
+        # from which inherits concrete building class as well building-subdivisions
+        # a.k.a. parts) we must first collect all the buildings and their parts:
+        query = ("SELECT surface_geometry.id, "
+        "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
+        "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+        "tex_image_uri AS uri FROM building JOIN "
+        "thematic_surface ON building.id=thematic_surface.building_id JOIN "
+        "surface_geometry ON surface_geometry.root_id="
+        "thematic_surface.lod2_multi_surface_id JOIN textureparam ON "
+        "textureparam.surface_geometry_id=surface_geometry.id "
+        "JOIN surface_data ON textureparam.surface_data_id=surface_data.id "
+        "JOIN tex_image ON surface_data.tex_image_id=tex_image.id "
+        "WHERE building.building_root_id IN " + buildings)
+        return query
+
+    @staticmethod
+    def sql_query_textures(image_uri):
+        """
+        :param buildings: a list of CityMBuilding type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
+        :return: a string containing the right SQL query that should be executed.
+        """
+
+        query = \
+            "SELECT tex_image_data FROM tex_image WHERE tex_image_uri = '" + image_uri + "' "
+        return query
+
+    @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
         if CityMBuildings.is_bth_set() and extension_name == "batch_table_hierarchy":
             cityobjects_ids = "("

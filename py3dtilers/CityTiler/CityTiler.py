@@ -1,8 +1,10 @@
 import argparse
+import pathlib
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 from ..Common import create_tileset
+from ..Common import getTexture
 from .citym_cityobject import CityMCityObjects, CityMCityObject
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
@@ -42,6 +44,11 @@ def parse_command_line():
                         dest='with_BTH',
                         action='store_true',
                         help='Adds a Batch Table Hierarchy when defined')
+
+    parser.add_argument('--with_texture',
+                        dest='with_texture',
+                        action='store_true',
+                        help='Adds texture to 3DTiles when defined')
 
     parser.add_argument('--split_surfaces',
                         dest='split_surfaces',
@@ -102,7 +109,32 @@ def get_surfaces_splitted(cursor, cityobjects, objects_type):
     return CityMCityObjects(surfaces)
 
 
-def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa_path=None, split_surfaces=False):
+def get_surfaces_with_texture(cursor, cityobjects, objects_type):
+    surfaces = list()
+    for cityobject in cityobjects:
+        id = '(' + str(cityobject.get_database_id()) + ')'
+        cursor.execute(objects_type.sql_query_geometries_with_texture_coordinates(id))
+        for t in cursor.fetchall():
+            surface_id = t[0]
+            geom_as_string = t[1]
+            uv_as_string = t[2]
+            texture_uri = t[3]
+            if geom_as_string is not None:
+                surface = CityMCityObject(surface_id)
+                try:
+                    associated_data = [uv_as_string]
+                    surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
+                    if len(surface.geom.triangles[0]) <= 0:
+                        continue
+                    surface.geom.triangles.append(texture_uri)
+                    surface.set_texture(getTexture(texture_uri, objects_type, cursor, surface.geom.triangles[1]))
+                    surface.set_box()
+                    surfaces.append(surface)
+                except ValueError:
+                    continue
+    return CityMCityObjects(surfaces)
+
+def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa_path=None, split_surfaces=False, with_texture=False):
     """
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -115,17 +147,25 @@ def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa
     if not cityobjects:
         raise ValueError(f'The database does not contain any {objects_type} object')
 
-    if split_surfaces:
-        objects_to_tile = get_surfaces_splitted(cursor, cityobjects, objects_type)
+    if with_texture:
+        objects_to_tile = get_surfaces_with_texture(cursor, cityobjects, objects_type)
     else:
-        objects_to_tile = get_surfaces_merged(cursor, cityobjects, objects_type)
+        if split_surfaces:
+            objects_to_tile = get_surfaces_splitted(cursor, cityobjects, objects_type)
+        else:
+            objects_to_tile = get_surfaces_merged(cursor, cityobjects, objects_type)
 
     extension_name = None
     if CityMBuildings.is_bth_set():
         extension_name = "batch_table_hierarchy"
 
-    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path, extension_name=extension_name)
+    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path, extension_name=extension_name, with_texture=with_texture)
 
+def create_directory(directory):
+    target_dir = pathlib.Path(directory).expanduser()
+    pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+    target_dir = pathlib.Path(directory+'/tiles').expanduser()
+    pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
 
 def main():
     """
@@ -139,6 +179,7 @@ def main():
 
     if args.object_type == "building":
         objects_type = CityMBuildings
+        create_directory('junk_buildings')
         if args.with_BTH:
             CityMBuildings.set_bth()
     elif args.object_type == "relief":
@@ -150,7 +191,9 @@ def main():
 
     objects_type.set_cursor(cursor)
 
-    tileset = from_3dcitydb(cursor, objects_type, args.lod1, create_loa, args.loa, args.split_surfaces)
+    split_surfaces = args.split_surfaces or args.with_texture
+
+    tileset = from_3dcitydb(cursor, objects_type, args.lod1, create_loa, args.loa, split_surfaces, args.with_texture)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:
