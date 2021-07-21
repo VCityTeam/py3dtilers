@@ -149,18 +149,3 @@ class ObjectsToTile(object):
     @staticmethod
     def create_bounding_volume_extension(extension_name, ids=None, objects=None):
         pass
-
-
-class ObjectsToTileWithGeometry():
-    """Contains an instance of ObjectsToTile
-    It can also contain its own geometry"""
-    def __init__(self, objects_to_tile, geometry=None):
-        self.objects_to_tile = objects_to_tile
-        self.with_geometry = geometry is not None
-        self.geometry = geometry
-
-    def get_centroid(self):
-        if self.with_geometry:
-            return self.geometry.get_centroid()
-        else:
-            return self.objects_to_tile.get_centroid()

@@ -5,7 +5,6 @@ import sys
 import numpy as np
 import json
 
-# from scipy.spatial import ConvexHull
 from shapely.geometry import Point, Polygon
 from alphashape import alphashape
 
@@ -133,8 +132,6 @@ class Geojson(ObjectToTile):
         if len(coords) >= 4:
             hull = alphashape(coords, 0.)
             coords = hull.exterior.coords[:-1]
-            # hull = ConvexHull(coords)
-            # coords = [coords[i] for i in reversed(hull.vertices)]
 
         coordsLenght = len(coords)
         vertices = [None] * (2 * (coordsLenght + 1))
