@@ -124,11 +124,10 @@ class CityMCityObjects(ObjectsToTile):
     def retrieve_textures(cursor, image_uri, objects_type):
         """
         :param cursor: a database access cursor
-        :param city_object_ids: a list of (city)gml identifier corresponding to
-                       objects_type type objects whose geometries are sought.
+        :param image_uri: the uri (as string) of the texture to select in the database
         :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be "CityMBuilding".
-        :rtype List[Dict]: a TileContent in the form a B3dm.
+        :rtype List: the binary data of the texture image
         """
         res = []
         cursor.execute(objects_type.sql_query_textures(image_uri))

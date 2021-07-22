@@ -16,6 +16,7 @@ def parse_command_line():
     # adding positional arguments
     parser.add_argument('--path',
                         nargs=1,
+                        type=str,
                         help='Path to the directory containing .geojson files')
 
     parser.add_argument('--group',
@@ -74,7 +75,7 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=False, create_loa=False, loa_path=None):
+def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None):
     """
     :param path: a path to a directory
 
@@ -89,7 +90,7 @@ def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=F
     else:
         print(str(len(objects)) + " features parsed")
 
-    return create_tileset(objects, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path)
+    return create_tileset(objects, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path)
 
 
 def main():

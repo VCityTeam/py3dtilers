@@ -26,7 +26,7 @@ class LodNode():
 
 
 class Lod1Node(LodNode):
-    def __init__(self, objects_to_tile, geometric_error):
+    def __init__(self, objects_to_tile, geometric_error=50):
         lod1_objects_to_tile = ObjectsToTile([ExtrudedPolygon.create_footprint_extrusion(object_to_tile) for object_to_tile in objects_to_tile])
         super().__init__(objects_to_tile=lod1_objects_to_tile, geometric_error=geometric_error)
 
@@ -35,7 +35,7 @@ class LoaNode(LodNode):
 
     loa_index = 0
 
-    def __init__(self, objects_to_tile, geometric_error, additional_points=list(), points_dict=dict()):
+    def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):
         loas = list()
         for key in points_dict:
             contained_objects = ObjectsToTile([objects_to_tile[i] for i in points_dict[key]])

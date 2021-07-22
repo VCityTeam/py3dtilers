@@ -127,9 +127,9 @@ class Geojson(ObjectToTile):
         height = self.height  # How high we extrude the polygon when creating the 3D geometry
         z = self.z  # Altitude of the polygon that will be extruded to create the 3D geometry
 
-        # If the feature has at least 4 coords, create a convex hull
-        # The convex hull reduces the number of points and the level of detail
-        if len(coords) >= 4:
+        # If the feature has at least 3 coords, create an alpha shape
+        # The alpha shape reduces the number of parasite points
+        if len(coords) >= 3:
             hull = alphashape(coords, 0.)
             coords = hull.exterior.coords[:-1]
 
@@ -157,6 +157,7 @@ class Geojson(ObjectToTile):
 
         self.set_box()
 
+        # keep vertices and triangles in order to create Obj model (when Obj flag is True)
         self.vertices = vertices
         self.triangles = triangles[1]
 
@@ -179,9 +180,10 @@ class Geojsons(ObjectsToTile):
     def __init__(self, objs=None):
         super().__init__(objs)
 
-    # Round the coordinate to the closest multiple of 'base'
     @staticmethod
     def round_coordinate(coordinate, base):
+        """Round the coordinate to the closest multiple of 'base'"""
+
         rounded_coord = coordinate
         for i in range(0, len(coordinate)):
             rounded_coord[i] = base * round(coordinate[i] / base)
@@ -229,9 +231,9 @@ class Geojsons(ObjectsToTile):
         polygons = p.create_polygons()
         return Geojsons.distribute_features_in_polygons(features, polygons)
 
-    # Group features which are in the same cube of size 'size'
     @staticmethod
     def group_features_by_cube(features, size):
+        """Group features which are in the same cube of size 'size'"""
         features_dict = {}
 
         # Create a dictionary key: cubes center (x,y,z); value: list of features index

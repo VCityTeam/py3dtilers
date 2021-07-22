@@ -135,7 +135,7 @@ def get_surfaces_with_texture(cursor, cityobjects, objects_type):
     return CityMCityObjects(surfaces)
 
 
-def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa_path=None, split_surfaces=False, with_texture=False):
+def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, polygons_path=None, split_surfaces=False, with_texture=False):
     """
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -160,7 +160,7 @@ def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa
     if CityMBuildings.is_bth_set():
         extension_name = "batch_table_hierarchy"
 
-    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path, extension_name=extension_name, with_texture=with_texture)
+    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path, extension_name=extension_name, with_texture=with_texture)
 
 
 def create_directory(directory):

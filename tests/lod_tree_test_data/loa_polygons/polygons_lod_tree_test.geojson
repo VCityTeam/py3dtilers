@@ -1,4 +1,5 @@
 {
+"__comment": "Made with QGIS from IGN open data. The data can be downloaded here https://geoservices.ign.fr/ressource/159380"
 "type": "FeatureCollection",
 "name": "polygons_lod_tree_test",
 "features": [

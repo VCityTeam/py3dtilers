@@ -10,7 +10,7 @@ class ExtrudedPolygon():
         self.max_height = max_height
 
     @staticmethod
-    def create_footprint(object_to_tile, override_points=False, other_points=None):
+    def create_footprint(object_to_tile, override_points=False, polygon=None):
         geom_triangles = object_to_tile.geom.triangles
         points = list()
         minZ = np.Inf
@@ -28,7 +28,7 @@ class ExtrudedPolygon():
             average_maxZ += maxZ
         average_maxZ /= len(geom_triangles)
         if override_points:
-            points = other_points
+            points = polygon
         else:
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
@@ -73,8 +73,8 @@ class ExtrudedPolygon():
         return vertices
 
     @staticmethod
-    def create_footprint_extrusion(object_to_tile, override_points=False, other_points=None):
-        polygon_to_extrude = ExtrudedPolygon.create_footprint(object_to_tile, override_points, other_points)
+    def create_footprint_extrusion(object_to_tile, override_points=False, polygon=None):
+        polygon_to_extrude = ExtrudedPolygon.create_footprint(object_to_tile, override_points, polygon)
         vertices = polygon_to_extrude.create_vertices()
         triangles = polygon_to_extrude.create_triangles(vertices)
         extruded_object = ObjectToTile(str(object_to_tile.get_id()) + "_extrude")

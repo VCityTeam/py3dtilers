@@ -91,9 +91,15 @@ ENV/
 # PyCharm
 .idea/
 
-# 3DTimes
+# 3DTiles
 junk/
 junk_buildings/
 junk_reliefs/
 profile_buildings/
 profile_reliefs/
+geojson_tilesets/
+
+# Tests output
+tests/test_lod_tree_tilesets/
+tests/geojson_tiler_test_data/generated_objs
+tests/geojson_tiler_test_data/generated_tilesets

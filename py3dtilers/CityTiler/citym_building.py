@@ -76,11 +76,10 @@ class CityMBuildings(CityMCityObjects):
     @staticmethod
     def sql_query_geometries(buildings_ids_arg, split_surfaces=False):
         """
-        :param offset: the offset (a 3D "vector" of floats) by which the
-                       geographical coordinates should be translated (the
-                       computation is done at the GIS level).
         :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
                             objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each building will stay
+                            splitted or be merged into one geometry
 
         :return: a string containing the right SQL query that should be executed.
         """
@@ -112,11 +111,8 @@ class CityMBuildings(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries_with_texture_coordinates(buildings):
+    def sql_query_geometries_with_texture_coordinates(buildings_ids_arg):
         """
-        :param offset: the offset (a 3D "vector" of floats) by which the
-                       geographical coordinates should be translated (the
-                       computation is done at the GIS level).
         :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
                             objects_type type objects whose geometries are sought.
         :return: a string containing the right SQL query that should be executed.
@@ -135,15 +131,13 @@ class CityMBuildings(CityMCityObjects):
                  "textureparam.surface_geometry_id=surface_geometry.id "
                  "JOIN surface_data ON textureparam.surface_data_id=surface_data.id "
                  "JOIN tex_image ON surface_data.tex_image_id=tex_image.id "
-                 "WHERE building.building_root_id IN " + buildings)
+                 "WHERE building.building_root_id IN " + buildings_ids_arg)
         return query
 
     @staticmethod
     def sql_query_textures(image_uri):
         """
-        :param buildings: a list of CityMBuilding type object that should be sought
-                        in the database. When this list is empty all the objects
-                        encountered in the database are returned.
+        :param buildings: a string which is the uri of the texture to select in the database
         :return: a string containing the right SQL query that should be executed.
         """
 
@@ -172,7 +166,7 @@ class CityMBuildings(CityMCityObjects):
         return None
 
     @staticmethod
-    def create_bounding_volume_extension(extension_name, ids, objects):
+    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
         if extension_name == "temporal":
             temporal_bv = TemporalBoundingVolume()
             bounding_dates = temporal_extract_bounding_dates(objects)

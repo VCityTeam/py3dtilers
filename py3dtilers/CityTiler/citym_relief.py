@@ -62,8 +62,10 @@ class CityMReliefs(CityMCityObjects):
     @staticmethod
     def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
         """
-        reliefs_ids is unused but is given in argument to preserve the same structure
-        as the sql_query_geometries method of parent class CityMCityObject.
+        :param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+                            splitted or be merged into one geometry
 
         :return: a string containing the right sql query that should be executed.
         """
@@ -93,9 +95,7 @@ class CityMReliefs(CityMCityObjects):
     @staticmethod
     def sql_query_textures(image_uri):
         """
-        :param buildings: a list of CityMBuilding type object that should be sought
-                        in the database. When this list is empty all the objects
-                        encountered in the database are returned.
+        :param buildings: a string which is the uri of the texture to select in the database
         :return: a string containing the right SQL query that should be executed.
         """
 
@@ -104,10 +104,10 @@ class CityMReliefs(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries_textures(reliefs_ids=None):
+    def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
         """
-        reliefs_ids is unused but is given in argument to preserve the same structure
-        as the sql_query_geometries method of parent class CityMCityObject.
+        param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
         :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of reliefs

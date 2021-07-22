@@ -60,8 +60,10 @@ class CityMWaterBodies(CityMCityObjects):
     @staticmethod
     def sql_query_geometries(waterbodies_ids=None, split_surfaces=False):
         """
-        waterbodies_ids is unused but is given in argument to preserve the same structure
-        as the sql_query_geometries method of parent class CityMCityObject.
+        :param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+                            splitted or be merged into one geometry
 
         :return: a string containing the right sql query that should be executed.
         """
