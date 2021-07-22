@@ -6,6 +6,7 @@ from shapely.geometry import Point, Polygon
 from ..Common import ObjectsToTile
 from ..Common import kd_tree
 
+
 class Group():
     """Contains an instance of ObjectsToTile
     It can also contain additional polygon points (used to create LOA nodes)"""

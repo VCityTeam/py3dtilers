@@ -60,15 +60,16 @@ class ObjectToTile(object):
         self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
                                   (bbox[0][1] + bbox[1][1]) / 2.0,
                                   (bbox[0][2] + bbox[0][2]) / 2.0])
-    
+
     def get_texture(self):
         return self.texture
-        
+
     def set_texture(self, texture):
         self.texture = texture
 
     def has_texture(self):
         return self.texture is not None
+
 
 class ObjectsToTile(object):
     """

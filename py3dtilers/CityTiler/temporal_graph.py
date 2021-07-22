@@ -76,12 +76,12 @@ class Node(object):
         ret_str += f'  Ending date: {self.end_date} \n'
         ret_str += f'  Status: {self.status} \n'
         if self.ancestor_edges:
-            ret_str += f'  Ancestors: '
+            ret_str += '  Ancestors: '
             for ancestor in self.get_ancestors():
                 ret_str += ancestor.globalid + ', '
             ret_str += '\n'
         if self.descendant_edges:
-            ret_str += f'  Descendants: '
+            ret_str += '  Descendants: '
             for descendant in self.get_descendants():
                 ret_str += descendant.globalid + ', '
             ret_str += '\n'
@@ -783,19 +783,19 @@ class Graph(object):
         fusion_edges_number = \
             len([e for e in self.edges if e.is_fusion()])
         unchanged_edges_number = \
-             len([e for e in self.edges if e.is_unchanged()])
+            len([e for e in self.edges if e.is_unchanged()])
         replacement_edges_number = modified_edges_number \
-                                   + re_ided_edges_number \
-                                   + subdivision_edges_number \
-                                   + fusion_edges_number \
-                                   + unchanged_edges_number
+            + re_ided_edges_number \
+            + subdivision_edges_number \
+            + fusion_edges_number \
+            + unchanged_edges_number
 
         print(indent + "Edges: total number", edges_number)
-        print(indent + "  - modified edges: ",    modified_edges_number)
-        print(indent + "  - re-ided edges: ",     re_ided_edges_number)
+        print(indent + "  - modified edges: ", modified_edges_number)
+        print(indent + "  - re-ided edges: ", re_ided_edges_number)
         print(indent + "  - subdivision edges: ", subdivision_edges_number)
-        print(indent + "  - fusion edges: ",      fusion_edges_number)
-        print(indent + "  - unchanged edges: ",   unchanged_edges_number)
+        print(indent + "  - fusion edges: ", fusion_edges_number)
+        print(indent + "  - unchanged edges: ", unchanged_edges_number)
         print(indent + "  - replace edges total", replacement_edges_number)
         if edges_number != replacement_edges_number:
             print(indent + "WARNING: missmatching number of edges")
@@ -811,6 +811,7 @@ class Graph(object):
         for edge in self.edges:
             print(edge)
 
+
 class GraphMLDecoder(json.JSONDecoder):
     def __init__(self):
         json.JSONDecoder.__init__(self, object_hook=self.dict_to_object)
@@ -818,11 +819,11 @@ class GraphMLDecoder(json.JSONDecoder):
     def dict_to_object(self, dct):
         if 'id' in dct and 'globalid' in dct:
             return Node(**dct)
-        if      'id'     in dct \
-            and 'source' in dct \
-            and 'target' in dct \
-            and 'type'   in dct \
-            and 'tags'   in dct:
+        if 'id' in dct \
+                and 'source' in dct \
+                and 'target' in dct \
+                and 'type' in dct \
+                and 'tags' in dct:
             edge = Edge(**dct)
             # Because the Json deserializer will make edge.tags a string
             # (as opposed to a list), and because we found it messy to
@@ -930,7 +931,7 @@ class TemporalGraph(Graph):
                 # (refering to) that edge because we knew both its endpoints
                 # that disconnecting the edge got those nodes informed
                 self.delete_edge(descendant_edge, False)
-                number_removed_edges +=1
+                number_removed_edges += 1
             else:
                 seen_node.add(descendant_id)
         return number_removed_edges
@@ -990,8 +991,7 @@ class TemporalGraph(Graph):
 
         debug_msg("  Stage 1: collapsing unchanged/re-ided 1 to 1 edges.")
         initial_number_one_to_one_edges = \
-            len([ e for e in self.edges if e.are_adjacent_nodes_one_to_one() \
-                                   and (e.is_unchanged() or e.is_re_ided())])
+            len([e for e in self.edges if e.are_adjacent_nodes_one_to_one() and (e.is_unchanged() or e.is_re_ided())])
         one_to_one_number = 0
         to_remove = self.edges.copy()
         for edge in to_remove:
@@ -1002,7 +1002,7 @@ class TemporalGraph(Graph):
                 descendant = edge.get_descendant()
                 descendant.set_start_date(ancestor.get_start_date())
                 self.collapse_edge_and_remove_ancestor(edge, debug_mode)
-                one_to_one_number +=1
+                one_to_one_number += 1
                 debug_msg_ne(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges} ')
         debug_msg(f'    Number of collapsed edges: {one_to_one_number} / {initial_number_one_to_one_edges}')
         if display_characteristics:
@@ -1012,7 +1012,7 @@ class TemporalGraph(Graph):
         # ############################
         debug_msg("  Stage 2: collapsing fusion edges.")
         initial_number_fusion_edges = \
-            len([ e for e in self.edges if e.is_fusion()])
+            len([e for e in self.edges if e.is_fusion()])
         fusion_edges_number = 0
         for time_stamp in time_stamps:
             current_nodes = self.get_nodes_with_time_stamp(time_stamp)
@@ -1031,11 +1031,11 @@ class TemporalGraph(Graph):
                 ancestor_edges = node.get_ancestor_edges().copy()
                 for ancestor_edge in ancestor_edges:
                     self.collapse_edge_and_remove_ancestor(ancestor_edge,
-                                                            debug_mode)
+                                                           debug_mode)
                 number_fusion_edges_left = \
-                    len([ e for e in self.edges if e.is_fusion()])
+                    len([e for e in self.edges if e.is_fusion()])
                 fusion_edges_number = initial_number_fusion_edges \
-                                      - number_fusion_edges_left
+                    - number_fusion_edges_left
                 debug_msg_ne(f'    Number of fusion edges: {fusion_edges_number} / {initial_number_fusion_edges} ')
         debug_msg(f'    Number of fusion edges: {fusion_edges_number} / {initial_number_fusion_edges} ')
         if display_characteristics:
@@ -1046,9 +1046,9 @@ class TemporalGraph(Graph):
         debug_msg("  Stage 3: collapsing subdivision edges.")
 
         initial_number_fusion_edges = \
-            len([ e for e in self.edges if e.is_subdivided()])
+            len([e for e in self.edges if e.is_subdivided()])
         number_deleted_edges = 0
-        debug_msg_ne( f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}')
+        debug_msg_ne(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}')
         for time_stamp in time_stamps:
             current_nodes = self.get_nodes_with_time_stamp(time_stamp)
             for node in current_nodes:
@@ -1080,7 +1080,7 @@ class TemporalGraph(Graph):
                     for descendant_edge in node.get_descendant_edges().copy():
                         self.disconnect_edge(descendant_edge)
                         self.delete_edge(descendant_edge, True)
-                        number_deleted_edges +=1
+                        number_deleted_edges += 1
                         debug_msg_ne(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}')
 
                     # We can proceed with the removal of the node:
@@ -1101,7 +1101,7 @@ class TemporalGraph(Graph):
                         print("Exiting")
                         sys.exit(1)
                     self.split_edge_and_remove_descendant(ancestor_edge,
-                                                           debug_mode)
+                                                          debug_mode)
                     number_deleted_edges += 1
                     debug_msg_ne(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}')
         debug_msg(f'   Deleted subdivision edges {number_deleted_edges} / {initial_number_fusion_edges}')

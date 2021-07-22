@@ -2,6 +2,7 @@ import numpy as np
 from ..Common import ObjectToTile
 from alphashape import alphashape
 
+
 class ExtrudedPolygon():
     def __init__(self, points, min_height, max_height):
         self.points = points

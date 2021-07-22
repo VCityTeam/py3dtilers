@@ -134,6 +134,7 @@ def get_surfaces_with_texture(cursor, cityobjects, objects_type):
                     continue
     return CityMCityObjects(surfaces)
 
+
 def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa_path=None, split_surfaces=False, with_texture=False):
     """
     :param cursor: a database access cursor.
@@ -161,11 +162,13 @@ def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, loa
 
     return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, loa_path=loa_path, extension_name=extension_name, with_texture=with_texture)
 
+
 def create_directory(directory):
     target_dir = pathlib.Path(directory).expanduser()
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-    target_dir = pathlib.Path(directory+'/tiles').expanduser()
+    target_dir = pathlib.Path(directory + '/tiles').expanduser()
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+
 
 def main():
     """

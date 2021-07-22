@@ -94,7 +94,7 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                           0, 0, -1, 0,
                           0, 1, 0, 0,
                           0, 0, 0, 1])
-    
+
     if with_texture:
         gltf = GlTF.from_binary_arrays(arrays, transform, textureUri='./ATLAS_' + str(tile_number) + '.png')
     else:

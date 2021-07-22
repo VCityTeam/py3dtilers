@@ -26,7 +26,7 @@ class Geojson(ObjectToTile):
     def __init__(self, id=None):
         super().__init__(id)
 
-        self.z = 0 
+        self.z = 0
         """Altitude of the polygon that will be extruded to create the 3D geometry"""
 
         self.height = 0
@@ -124,8 +124,8 @@ class Geojson(ObjectToTile):
         # ]
 
         coords = self.coords
-        height = self.height # How high we extrude the polygon when creating the 3D geometry
-        z = self.z # Altitude of the polygon that will be extruded to create the 3D geometry
+        height = self.height  # How high we extrude the polygon when creating the 3D geometry
+        z = self.z  # Altitude of the polygon that will be extruded to create the 3D geometry
 
         # If the feature has at least 4 coords, create a convex hull
         # The convex hull reduces the number of points and the level of detail

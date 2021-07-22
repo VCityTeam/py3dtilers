@@ -126,16 +126,16 @@ class CityMBuildings(CityMCityObjects):
         # from which inherits concrete building class as well building-subdivisions
         # a.k.a. parts) we must first collect all the buildings and their parts:
         query = ("SELECT surface_geometry.id, "
-        "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
-        "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
-        "tex_image_uri AS uri FROM building JOIN "
-        "thematic_surface ON building.id=thematic_surface.building_id JOIN "
-        "surface_geometry ON surface_geometry.root_id="
-        "thematic_surface.lod2_multi_surface_id JOIN textureparam ON "
-        "textureparam.surface_geometry_id=surface_geometry.id "
-        "JOIN surface_data ON textureparam.surface_data_id=surface_data.id "
-        "JOIN tex_image ON surface_data.tex_image_id=tex_image.id "
-        "WHERE building.building_root_id IN " + buildings)
+                 "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
+                 "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+                 "tex_image_uri AS uri FROM building JOIN "
+                 "thematic_surface ON building.id=thematic_surface.building_id JOIN "
+                 "surface_geometry ON surface_geometry.root_id="
+                 "thematic_surface.lod2_multi_surface_id JOIN textureparam ON "
+                 "textureparam.surface_geometry_id=surface_geometry.id "
+                 "JOIN surface_data ON textureparam.surface_data_id=surface_data.id "
+                 "JOIN tex_image ON surface_data.tex_image_id=tex_image.id "
+                 "WHERE building.building_root_id IN " + buildings)
         return query
 
     @staticmethod

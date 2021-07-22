@@ -1,6 +1,7 @@
 from ..Common import ObjectsToTile, ObjectToTile
 from ..Common import ExtrudedPolygon
 
+
 class LodNode():
     """
     Each node contains a collection of objects to tile
@@ -23,10 +24,12 @@ class LodNode():
     def has_texture(self):
         return self.with_texture
 
+
 class Lod1Node(LodNode):
     def __init__(self, objects_to_tile, geometric_error):
         lod1_objects_to_tile = ObjectsToTile([ExtrudedPolygon.create_footprint_extrusion(object_to_tile) for object_to_tile in objects_to_tile])
         super().__init__(objects_to_tile=lod1_objects_to_tile, geometric_error=geometric_error)
+
 
 class LoaNode(LodNode):
 

@@ -22,6 +22,7 @@ class CityMRelief(CityMCityObject):
     """
     Implementation of the Digital Terrain Model (DTM) objects from the CityGML model.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -30,6 +31,7 @@ class CityMReliefs(CityMCityObjects):
     """
     A decorated list of CityMRelief type objects.
     """
+
     def __init__(self, objects=None):
         super().__init__(objects)
 
@@ -111,20 +113,20 @@ class CityMReliefs(CityMCityObjects):
         # cityobjects_ids contains ids of reliefs
         query = \
             ("SELECT surface_geometry.id, "
-            "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
-            "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
-            "tex_image_uri AS uri "
-            "FROM relief_feature JOIN relief_feat_to_rel_comp "
-            "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id "
-            "JOIN tin_relief "
-            "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id "
-            "JOIN surface_geometry "
-            "ON surface_geometry.root_id=tin_relief.surface_geometry_id "
-            "JOIN textureparam "
-            "ON textureparam.surface_geometry_id=surface_geometry.id "
-            "JOIN surface_data "
-            "ON textureparam.surface_data_id=surface_data.id "
-            "JOIN tex_image "
-            "ON surface_data.tex_image_id=tex_image.id "
-            "WHERE relief_feature.id IN " + reliefs_ids)
+             "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
+             "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+             "tex_image_uri AS uri "
+             "FROM relief_feature JOIN relief_feat_to_rel_comp "
+             "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id "
+             "JOIN tin_relief "
+             "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id "
+             "JOIN surface_geometry "
+             "ON surface_geometry.root_id=tin_relief.surface_geometry_id "
+             "JOIN textureparam "
+             "ON textureparam.surface_geometry_id=surface_geometry.id "
+             "JOIN surface_data "
+             "ON textureparam.surface_data_id=surface_data.id "
+             "JOIN tex_image "
+             "ON surface_data.tex_image_id=tex_image.id "
+             "WHERE relief_feature.id IN " + reliefs_ids)
         return query

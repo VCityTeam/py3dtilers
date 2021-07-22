@@ -12,4 +12,12 @@ __all__ = ['kd_tree',
            'ObjectToTile',
            'ObjectsToTile',
            'TreeWithChildrenAndParent',
-           'create_tileset']
+           'create_tileset',
+           'Group',
+           'ExtrudedPolygon',
+           'LodNode',
+           'Lod1Node',
+           'LoaNode',
+           'LodTree',
+           'getTexture',
+           'createTextureAtlas']

@@ -1,5 +1,6 @@
 from ..Common import LodNode, Lod1Node, LoaNode, Group
 
+
 class LodTree():
     """
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
