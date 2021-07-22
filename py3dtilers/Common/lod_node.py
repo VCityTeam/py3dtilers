@@ -48,5 +48,5 @@ class LoaNode(LodNode):
         loa_geometry = ObjectToTile("loa_" + str(index))
         for object_to_tile in objects_to_tile:
             loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
-        loa_geometry = ExtrudedPolygon.create_footprint_extrusion(loa_geometry, override_points=True, other_points=polygon_points)
+        loa_geometry = ExtrudedPolygon.create_footprint_extrusion(loa_geometry, override_points=True, polygon=polygon_points)
         return loa_geometry

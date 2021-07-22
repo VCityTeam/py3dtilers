@@ -5,11 +5,11 @@ from ..Common import LodTree
 from ..Common import createTextureAtlas
 
 
-def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, loa_path=None, extension_name=None, with_texture=False):
+def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
     """
     Recursively creates a tileset from the nodes of a LodTree
     """
-    lod_tree = LodTree.create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, loa_path, with_texture)
+    lod_tree = LodTree.create_lod_tree(objects_to_tile, also_create_lod1, also_create_loa, polygons_path, with_texture)
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:

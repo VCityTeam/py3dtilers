@@ -112,7 +112,7 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, group, properties, create_loa=True, loa_path='tests/geojson_tiler_test_data/polygons/')
+        tileset = from_geojson_directory(path, group, properties, create_loa=True, polygons_path='tests/geojson_tiler_test_data/polygons/')
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "create_loa"
