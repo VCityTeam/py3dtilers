@@ -31,7 +31,7 @@ for object in objects_to_tile:
 ## [polygon_extrusion](polygon_extrusion.py)
 An instance of _ExtrudedPolygon_ contains a footprint (a polygon as list of points, and a point is a list of float), a minimal height and a maximal height.
 
-The static method `create_footprint_extrusion` from _ExtrutedPolygon_ allows to create an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ which is the extrusion of the footprint of another [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_. The height of the extrusion will be _max height - min height_ of the _ExtrudedPolygon_
+The static method `create_footprint_extrusion` from _ExtrudedPolygon_ allows to create an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ which is the extrusion of the footprint of another [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_. The height of the extrusion will be _max height - min height_ of the _ExtrudedPolygon_
 
 To create an extrusion, use:
 ```
@@ -80,7 +80,7 @@ To add a child to a node:
 node.add_child_node(other_node)
 ```
 ### Lod1Node
-_Lod1Node_ inherits from _LodNode_. When instancied, a _Lod1Node_ creates a 3D extrusion of the footprint of each [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ in the [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ parameter.
+_Lod1Node_ inherits from _LodNode_. When instanced, a _Lod1Node_ creates a 3D extrusion of the footprint of each [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ in the [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ parameter.
 
 To create a _Lod1Node_:
 ```
@@ -90,7 +90,7 @@ node = Lod1Node(objects_to_tile, geometric_error=20)
 ```
 
 ### LoaNode
-_LoaNode_ inherits from _LodNode_. When instancied, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter. The _LoaNode_ also takes a dictionary stocking the indexes of the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in each polygon.
+_LoaNode_ inherits from _LodNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter. The _LoaNode_ also takes a dictionary stocking the indexes of the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in each polygon.
 
 To create a _LoaNode_:
 ```
@@ -105,11 +105,11 @@ node = LoaNode(objects_to_tile, geometric_error=20, additional_points=polygons, 
 ## [lod_tree](lod_tree.py)
 lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ (the geometries of the node) and a list of child nodes.
 A node will correspond to a tile (.b3dm file) of the tileset.  
-The leafs of the tree contain the geometries with the most details. The parent node of each node contains a lower level of details.
+The leaves of the tree contain the geometries with the most details. The parent node of each node contains a lower level of details.
 
 The lod_tree creation takes an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ (containing [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
 
-The first step of the tree creation is the distribution of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ into groups. A group is an instance of [_Group_](#group) where the objects to tile ([:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_) are a group of detailled geometries. The group can also contains additional data which is polygons and a dictionary to stock the indexes of the geometries contained in each polygon, this additional data is used to create [_LoaNode(s)_](#loanode).  
+The first step of the tree creation is the distribution of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ into groups. A group is an instance of [_Group_](#group) where the objects to tile ([:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_) are a group of detailed geometries. The group can also contains additional data which is polygons and a dictionary to stock the indexes of the geometries contained in each polygon, this additional data is used to create [_LoaNode(s)_](#loanode).  
 The groups are either created with polygons or with the kd_tree (see [group](#group)).
 
 To create a tileset with LOA\*, use:

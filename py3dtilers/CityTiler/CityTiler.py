@@ -21,7 +21,7 @@ def parse_command_line():
     # adding positional arguments
     parser.add_argument('db_config_path',
                         nargs='?',
-                        default='CityTilerDBConfig.yml',
+                        default='py3dtilers/CityTiler/CityTilerDBConfig.yml',
                         type=str,  # why precise this if it is the default config ?
                         help='path to the database configuration file')
 
@@ -53,7 +53,7 @@ def parse_command_line():
     parser.add_argument('--split_surfaces',
                         dest='split_surfaces',
                         action='store_true',
-                        help='Keeps the surfaces of the cityObjects splitted when defined')
+                        help='Keeps the surfaces of the cityObjects split when defined')
 
     parser.add_argument('--lod1',
                         dest='lod1',
@@ -85,10 +85,10 @@ def get_surfaces_merged(cursor, cityobjects, objects_type):
     return objects_type(cityobjects_with_geom)
 
 
-def get_surfaces_splitted(cursor, cityobjects, objects_type):
+def get_surfaces_split(cursor, cityobjects, objects_type):
     """
     Get the surfaces of all the cityobjects and transform them into TriangleSoup
-    Surfaces of each cityObject are splitted into different geometries
+    Surfaces of each cityObject are split into different geometries
     Each surface will be an ObjectToTile
     """
     surfaces = list()
@@ -153,7 +153,7 @@ def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, pol
         objects_to_tile = get_surfaces_with_texture(cursor, cityobjects, objects_type)
     else:
         if split_surfaces:
-            objects_to_tile = get_surfaces_splitted(cursor, cityobjects, objects_type)
+            objects_to_tile = get_surfaces_split(cursor, cityobjects, objects_type)
         else:
             objects_to_tile = get_surfaces_merged(cursor, cityobjects, objects_type)
 

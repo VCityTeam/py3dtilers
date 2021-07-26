@@ -6,13 +6,13 @@ The tiler also creates .obj models.
 
 Geojson files contain _features_. Each feature corresponds to a building and has a _geometry_ field. The geometry has _coordinates_. A feature is tied to a _properties_ containing data about the feature (for example height, precision, feature type...).
 
-The Geojson files are computed with [QGIS](https://www.qgis.org/en/site/) from public data.
+The Geojson files are computed with [QGIS](https://www.qgis.org/en/site/) from [IGN public data](https://geoservices.ign.fr/telechargement).
 ## Installation
 See https://github.com/VCityTeam/py3dtilers/blob/master/README.md
 
 ## Use the Tiler
 ### Files path
-To execute the GeojsonTiler, use the flag `--path` followed by the path of a folder containning .json or .geojson files
+To execute the GeojsonTiler, use the flag `--path` followed by the path of a folder containing .json or .geojson files
 
 Example:
 ```
@@ -21,20 +21,20 @@ geojson-tiler --path ../../geojson/
 It will read all .geojson and .json in the _geojson_ directory and parse them into 3DTiles.
 
 ### LOA
-Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leafs of the created tree are the detailled features (features loaded from the data source) and their parents are LOA geometries of those detailled features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
 
 To use the LOA option:
 ```
 geojson-tiler --path <path> --loa <path-to-polygons>
 ```
 
-\*_LOA (level Of Abstraction): here, it is simple 3D extrusion of a polygon._
+\*_LOA (Level Of Abstraction): here, it is simple 3D extrusion of a polygon._
 
 ### LOD1
 ___Warning__: creating LOD1 can be useless if the features are already footprints._
 
 
-Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leafs of the created tree are the detailled features (features loaded from the data source) and their parents are LOD1 geometries of those detailled features. The LOD1 geometries are 3D extrusions of the footprints of the features.
+Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 geometries of those detailed features. The LOD1 geometries are 3D extrusions of the footprints of the features.
 
 To use the LOD1 option:
 ```
@@ -94,4 +94,4 @@ geojson-tiler --path <path> --group polygon
 ```
 The roads will be loaded from the directory _polygons_ in the \<path\>. This command will use _polygon group method_ with the polygons file in \<path\>/polygons/
   
-To polygonize the roads on QGIS, use the tool _Polygonize_ (_Processing --> Toolbox --> Vector Geometry --> Polygonize_)
+To polygonise the roads on QGIS, use the tool _Polygonize_ (_Processing --> Toolbox --> Vector Geometry --> Polygonize_)

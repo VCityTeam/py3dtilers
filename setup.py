@@ -28,8 +28,7 @@ requirements = (
      'shapely',
      'alphashape',
      'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
-     'Pillow',
-     'pathlib'
+     'Pillow'
      # 'ifcopenshell' requires specific treatment, refer to 
      # install_ifcopenshell_from_url() function definition.
 )

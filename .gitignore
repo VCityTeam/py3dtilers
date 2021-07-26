@@ -91,6 +91,9 @@ ENV/
 # PyCharm
 .idea/
 
+# Visual Studio Code settings
+.vscode/
+
 # 3DTiles
 junk/
 junk_buildings/
