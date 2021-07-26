@@ -9,7 +9,7 @@ triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
               np.array([1., 1., 0.], dtype=np.float32)],
              [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
               np.array([1., 0., 1.], dtype=np.float32),
-              np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is a vertice with [x, y, z] cordinnates
+              np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is a vertex with [x, y, z] coordinates
 object_to_tile = ObjectToTile("id")
 object_to_tile.geom.triangles.append()
 ```

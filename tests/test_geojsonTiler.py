@@ -24,7 +24,6 @@ class Test_Tile(unittest.TestCase):
             folder_name = "basic_case"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
-            
 
     def test_properties_with_other_name(self):
         path = 'tests/geojson_tiler_test_data/geojson_2/'
@@ -44,7 +43,6 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
-
     def test_group_cube_100(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_group_by_cube_100.obj'
@@ -62,7 +60,6 @@ class Test_Tile(unittest.TestCase):
             folder_name = "group_cube_100"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
-
 
     def test_group_road(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
@@ -82,7 +79,6 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
-
     def test_group_polygons(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_group_by_polygons.obj'
@@ -101,7 +97,6 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
-
     def test_create_loa(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
         group = ['none']
@@ -119,7 +114,6 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
-
     def test_create_lod1(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
         group = ['none']
@@ -136,5 +130,7 @@ class Test_Tile(unittest.TestCase):
             folder_name = "create_lod1"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
+
 if __name__ == '__main__':
     unittest.main()

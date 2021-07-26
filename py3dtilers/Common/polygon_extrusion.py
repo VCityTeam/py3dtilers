@@ -4,13 +4,7 @@ from alphashape import alphashape
 
 
 class ExtrudedPolygon():
-    def __init__(self, points, min_height, max_height):
-        self.points = points
-        self.min_height = min_height
-        self.max_height = max_height
-
-    @staticmethod
-    def create_footprint(object_to_tile, override_points=False, polygon=None):
+    def __init__(self, object_to_tile, override_points=False, polygon=None):
         geom_triangles = object_to_tile.geom.triangles
         points = list()
         minZ = np.Inf
@@ -32,7 +26,16 @@ class ExtrudedPolygon():
         else:
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
-        return ExtrudedPolygon(points, minZ, average_maxZ)
+
+        self.object_to_tile = object_to_tile
+        self.points = points
+        self.min_height = minZ
+        self.max_height = average_maxZ
+
+        self.extrude_footprint()
+
+    def get_extruded_object(self):
+        return self.extruded_object
 
     def create_triangles(self, vertices):
         length = len(self.points)
@@ -72,12 +75,10 @@ class ExtrudedPolygon():
             vertices[i + length + 2] = [points[i][0], points[i][1], maxZ]
         return vertices
 
-    @staticmethod
-    def create_footprint_extrusion(object_to_tile, override_points=False, polygon=None):
-        polygon_to_extrude = ExtrudedPolygon.create_footprint(object_to_tile, override_points, polygon)
-        vertices = polygon_to_extrude.create_vertices()
-        triangles = polygon_to_extrude.create_triangles(vertices)
-        extruded_object = ObjectToTile(str(object_to_tile.get_id()) + "_extrude")
+    def extrude_footprint(self):
+        vertices = self.create_vertices()
+        triangles = self.create_triangles(vertices)
+        extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + "_extrude")
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()
-        return extruded_object
+        self.extruded_object = extruded_object

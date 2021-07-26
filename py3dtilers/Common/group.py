@@ -20,17 +20,34 @@ class Group():
     def get_centroid(self):
         return self.objects_to_tile.get_centroid()
 
-    @staticmethod
-    def group_objects_with_kdtree(objects_to_tile):
+    def round_coordinates(self, coordinates, base):
+        rounded_coord = coordinates
+        for i in range(0, len(coordinates)):
+            rounded_coord[i] = base * round(coordinates[i] / base)
+        return rounded_coord
+
+
+class Groups():
+
+    def __init__(self, objects_to_tile, polygons_path=None):
+        self.objects_to_tile = objects_to_tile
+        if polygons_path is not None:
+            self.group_objects_by_polygons(polygons_path)
+        else:
+            self.group_objects_with_kdtree()
+
+    def get_groups_as_list(self):
+        return self.groups
+
+    def group_objects_with_kdtree(self):
         groups = list()
-        objects = kd_tree(objects_to_tile, 500)
+        objects = kd_tree(self.objects_to_tile, 500)
         for objects_to_tile in objects:
             group = Group(objects_to_tile)
             groups.append(group)
-        return groups
+        self.groups = groups
 
-    @staticmethod
-    def group_objects_by_polygons(objects_to_tile, polygons_path):
+    def group_objects_by_polygons(self, polygons_path):
         try:
             polygon_dir = listdir(polygons_path)
         except FileNotFoundError:
@@ -48,10 +65,10 @@ class Group():
                     if feature['geometry']['type'] == 'MultiPolygon':
                         coords = feature['geometry']['coordinates'][0][0][:-1]
                     polygons.append(Polygon(coords))
-        return Group.distribute_objects_in_polygons(objects_to_tile, polygons)
+        self.groups = self.distribute_objects_in_polygons(polygons)
 
-    @staticmethod
-    def distribute_objects_in_polygons(objects_to_tile, polygons):
+    def distribute_objects_in_polygons(self, polygons):
+        objects_to_tile = self.objects_to_tile
         objects_to_tile_dict = {}
         objects_to_tile_without_poly = {}
         for i, object_to_tile in enumerate(objects_to_tile):
@@ -79,17 +96,9 @@ class Group():
             group = Group(contained_objects)
             groups.append(group)
 
-        return Group.distribute_groups_in_cubes(groups, 300)
+        return self.distribute_groups_in_cubes(groups, 300)
 
-    @staticmethod
-    def round_coordinate(coordinate, base):
-        rounded_coord = coordinate
-        for i in range(0, len(coordinate)):
-            rounded_coord[i] = base * round(coordinate[i] / base)
-        return rounded_coord
-
-    @staticmethod
-    def distribute_groups_in_cubes(groups, cube_size=300):
+    def distribute_groups_in_cubes(self, groups, cube_size=300):
         """Merge together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid.
         To avoid conflicts, the groups with geometry are not merged with those without geometry."""
@@ -97,7 +106,7 @@ class Group():
 
         # Create a dictionary key: cubes center (x,y,z), with geometry (boolean); value: list of groups index
         for i in range(0, len(groups)):
-            closest_cube = Group.round_coordinate(groups[i].get_centroid(), cube_size)
+            closest_cube = groups[i].round_coordinates(groups[i].get_centroid(), cube_size)
             with_geometry = groups[i].with_geometry
             if (tuple(closest_cube), with_geometry) in groups_dict:
                 groups_dict[(tuple(closest_cube), with_geometry)].append(i)
@@ -108,12 +117,11 @@ class Group():
         groups_in_cube = list()
         for cube in groups_dict:
             with_geometry = cube[1]
-            groups_in_cube.append(Group.merge_groups_together(groups, groups_dict[cube], with_geometry))
+            groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube], with_geometry))
 
         return groups_in_cube
 
-    @staticmethod
-    def merge_groups_together(groups, group_indexes, with_geometry):
+    def merge_groups_together(self, groups, group_indexes, with_geometry):
         objects = list()
         additional_points_list = list()
         additional_points_dict = dict()

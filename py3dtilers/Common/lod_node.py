@@ -27,8 +27,11 @@ class LodNode():
 
 class Lod1Node(LodNode):
     def __init__(self, objects_to_tile, geometric_error=50):
-        lod1_objects_to_tile = ObjectsToTile([ExtrudedPolygon.create_footprint_extrusion(object_to_tile) for object_to_tile in objects_to_tile])
-        super().__init__(objects_to_tile=lod1_objects_to_tile, geometric_error=geometric_error)
+        lod1_list = list()
+        for object_to_tile in objects_to_tile:
+            extruded_polygon = ExtrudedPolygon(object_to_tile)
+            lod1_list.append(extruded_polygon.get_extruded_object())
+        super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)
 
 
 class LoaNode(LodNode):
@@ -48,5 +51,6 @@ class LoaNode(LodNode):
         loa_geometry = ObjectToTile("loa_" + str(index))
         for object_to_tile in objects_to_tile:
             loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
-        loa_geometry = ExtrudedPolygon.create_footprint_extrusion(loa_geometry, override_points=True, polygon=polygon_points)
-        return loa_geometry
+
+        extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
+        return extruded_polygon.get_extruded_object()
