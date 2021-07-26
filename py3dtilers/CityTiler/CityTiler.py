@@ -4,7 +4,7 @@ import pathlib
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
 from ..Common import create_tileset
-from ..Common import getTexture
+from ..Texture import Texture
 from .citym_cityobject import CityMCityObjects, CityMCityObject
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
@@ -127,7 +127,8 @@ def get_surfaces_with_texture(cursor, cityobjects, objects_type):
                     if len(surface.geom.triangles[0]) <= 0:
                         continue
                     surface.geom.triangles.append(texture_uri)
-                    surface.set_texture(getTexture(texture_uri, objects_type, cursor, surface.geom.triangles[1]))
+                    texture = Texture(texture_uri, objects_type, cursor, surface.geom.triangles[1])
+                    surface.set_texture(texture.get_texture_image())
                     surface.set_box()
                     surfaces.append(surface)
                 except ValueError:

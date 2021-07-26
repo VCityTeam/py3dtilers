@@ -2,7 +2,7 @@ import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 from ..Common import LodTree
-from ..Common import createTextureAtlas
+from ..Texture import Atlas
 
 
 def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
@@ -65,7 +65,7 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
     # create B3DM content
     arrays = []
     if with_texture:
-        tile_number = createTextureAtlas(objects)
+        tile_atlas = Atlas(objects)
         for feature in objects:
             arrays.append({
                 'position': feature.geom.getPositionArray(),
@@ -96,7 +96,7 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                           0, 0, 0, 1])
 
     if with_texture:
-        gltf = GlTF.from_binary_arrays(arrays, transform, textureUri='./ATLAS_' + str(tile_number) + '.png')
+        gltf = GlTF.from_binary_arrays(arrays, transform, textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.png')
     else:
         gltf = GlTF.from_binary_arrays(arrays, transform)
 
