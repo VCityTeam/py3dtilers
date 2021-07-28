@@ -1,6 +1,7 @@
 import numpy as np
 from ..Common import ObjectToTile
 from alphashape import alphashape
+import tripy
 
 
 class ExtrudedPolygon():
@@ -37,47 +38,35 @@ class ExtrudedPolygon():
     def get_extruded_object(self):
         return self.extruded_object
 
-    def create_triangles(self, vertices):
-        length = len(self.points)
-        # Contains the triangles vertices. Used to create 3D tiles
-        triangles = np.ndarray(shape=(length * 4, 3, 3))
-        k = 0
-        # Triangles in lower and upper faces
-        for j in range(1, length + 1):
-            # Lower
-            triangles[k] = [vertices[0], vertices[j], vertices[(j % length) + 1]]
-            # Upper
-            triangles[k + 1] = [vertices[(length + 1)], vertices[(length + 1) + (j % length) + 1], vertices[(length + 1) + j]]
-            k += 2
-        # Triangles in side faces
-        for i in range(1, length + 1):
-            triangles[k] = [vertices[i], vertices[(length + 1) + i], vertices[(length + 1) + (i % length) + 1]]
-            triangles[k + 1] = [vertices[i], vertices[(length + 1) + (i % length) + 1], vertices[(i % length) + 1]]
-            k += 2
-        return triangles
-
-    def create_vertices(self):
-        points = self.points
+    def extrude_footprint(self):
+        coordinates = self.points
+        length = len(coordinates)
+        vertices = [None] * (2 * length)
         minZ = self.min_height
         maxZ = self.max_height
-        length = len(points)
-        vertices = np.ndarray(shape=(2 * (length + 1), 3))
-        sum_x = np.sum([point[0] for point in points])
-        sum_y = np.sum([point[1] for point in points])
-        centroid = [sum_x / length, sum_y / length, minZ]
-        # Set bottom center vertice value
-        vertices[0] = centroid
-        # Set top center vertice value
-        vertices[length + 1] = [centroid[0], centroid[1], maxZ]
-        # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
-        for i in range(0, length):
-            vertices[i + 1] = [points[i][0], points[i][1], minZ]
-            vertices[i + length + 2] = [points[i][0], points[i][1], maxZ]
-        return vertices
 
-    def extrude_footprint(self):
-        vertices = self.create_vertices()
-        triangles = self.create_triangles(vertices)
+        for i, coord in enumerate(coordinates):
+            vertices[i] = np.array([coord[0], coord[1], minZ], dtype=np.float32)
+            vertices[i + length] = np.array([coord[0], coord[1], maxZ], dtype=np.float32)
+
+        # Contains the triangles vertices. Used to create 3D tiles
+        triangles = list()
+
+        # Triangulate the feature footprint
+        poly_triangles = tripy.earclip(coordinates)
+
+        # Create lower and upper faces triangles
+        for tri in poly_triangles:
+            lower_tri = [np.array([coord[0], coord[1], minZ], dtype=np.float32) for coord in reversed(tri)]
+            triangles.append(lower_tri)
+            upper_tri = [np.array([coord[0], coord[1], maxZ], dtype=np.float32) for coord in tri]
+            triangles.append(upper_tri)
+
+        # Create side triangles
+        for i in range(0, length):
+            triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
+            triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
+
         extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + "_extrude")
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()

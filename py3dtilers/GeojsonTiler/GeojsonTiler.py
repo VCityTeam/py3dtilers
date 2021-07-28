@@ -58,6 +58,12 @@ def parse_command_line():
                         help='Change the name of the propertie to look for in the feature for altitude precision.\
                               Default property name is PREC_ALTI')
 
+    parser.add_argument('--is_roof',
+                        dest='is_roof',
+                        action='store_true',
+                        help='When defined, the features from geojsons will be considered as rooftops.\
+                              We will thus substract the height from the coordinates to reach the floor.')
+
     result = parser.parse_args()
 
     if(result.group is None):
@@ -75,14 +81,14 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None):
+def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
     """
     :param path: a path to a directory
 
     :return: a tileset.
     """
 
-    objects = Geojsons.retrieve_geojsons(path, group, properties, obj_name)
+    objects = Geojsons.retrieve_geojsons(path, group, properties, obj_name, is_roof)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -107,14 +113,13 @@ def main():
     args = parse_command_line()
     path = args.path[0]
 
-    create_lod1 = args.lod1
     create_loa = args.loa is not None
 
     properties = ['height', args.height, 'prec', args.prec]
 
     if(os.path.isdir(path)):
         print("Writing " + path)
-        tileset = from_geojson_directory(path, args.group, properties, args.obj, create_lod1, create_loa, args.loa)
+        tileset = from_geojson_directory(path, args.group, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = path.split('/')[-1]

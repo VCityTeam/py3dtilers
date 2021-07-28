@@ -5,8 +5,8 @@ import sys
 import numpy as np
 import json
 
+import tripy
 from shapely.geometry import Point, Polygon
-from alphashape import alphashape
 
 from ..Common import ObjectToTile, ObjectsToTile
 from .PolygonDetection import PolygonDetector
@@ -39,38 +39,20 @@ class Geojson(ObjectToTile):
 
         self.coords = list()
 
+    def find_coordinate_index(self, coordinates, value):
+        for i, coord in enumerate(coordinates):
+            if coord[0] == value[0]:
+                if coord[1] == value[1]:
+                    return i
+        return None
+
     def get_center(self, coords):
         length = len(coords)
         sum_x = np.sum([coord[0] for coord in coords])
         sum_y = np.sum([coord[1] for coord in coords])
         return np.array([sum_x / length, sum_y / length, self.z], dtype=np.float32)
 
-    def create_triangles(self, vertices, coordsLenght):
-        # Contains the triangles vertices. Used to create 3D tiles
-        triangles = list()
-        # Contains the triangles vertices index. Used to create Objs
-        triangles_id = list()
-
-        # Triangles in lower and upper faces
-        for j in range(1, coordsLenght + 1):
-            # Lower
-            triangles.append([vertices[0], vertices[j], vertices[(j % coordsLenght) + 1]])
-            triangles_id.append([0, j, (j % coordsLenght) + 1])
-            # Upper
-            triangles.append([vertices[(coordsLenght + 1)], vertices[(coordsLenght + 1) + (j % coordsLenght) + 1], vertices[(coordsLenght + 1) + j]])
-            triangles_id.append([(coordsLenght + 1), (coordsLenght + 1) + (j % coordsLenght) + 1, (coordsLenght + 1) + j])
-
-        # Triangles in side faces
-        for i in range(1, coordsLenght + 1):
-            triangles.append([vertices[i], vertices[(coordsLenght + 1) + i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1]])
-            triangles_id.append([i, (coordsLenght + 1) + i, (coordsLenght + 1) + (i % coordsLenght) + 1])
-
-            triangles.append([vertices[i], vertices[(coordsLenght + 1) + (i % coordsLenght) + 1], vertices[(i % coordsLenght) + 1]])
-            triangles_id.append([i, (coordsLenght + 1) + (i % coordsLenght) + 1, (i % coordsLenght) + 1])
-
-        return [triangles, triangles_id]
-
-    def parse_geojson(self, feature, properties):
+    def parse_geojson(self, feature, properties, is_roof):
         # Current feature number
         Geojson.n_feature += 1
 
@@ -92,14 +74,16 @@ class Geojson(ObjectToTile):
                 return False
         else:
             print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature))
-            return False
+            self.height = 5
 
         if feature['geometry']['type'] == 'Polygon':
             coords = feature['geometry']['coordinates'][0]
         if feature['geometry']['type'] == 'MultiPolygon':
             coords = feature['geometry']['coordinates'][0][0]
 
-        self.z = min(coords, key=lambda x: x[2])[2] - self.height
+        self.z = min(coords, key=lambda x: x[2])[2]
+        if is_roof:
+            self.z -= self.height
 
         # Group coords into (x,y) arrays, the z will always be the same z
         # The last point in features is always the same as the first, so we remove the last point
@@ -110,56 +94,56 @@ class Geojson(ObjectToTile):
 
         return True
 
-    def parse_geom(self):
-        # Realize the geometry conversion from geojson to GLTF
-        # GLTF expect the geometry to only be triangles that contains
-        # the vertices position, i.e something in the form :
-        # [
-        #   [np.array([0., 0., 0,]),
-        #    np.array([0.5, 0.5, 0.5]),
-        #    np.array([1.0 ,1.0 ,1.0])]
-        #   [np.array([0.5, 0.5, 0,5]),
-        #    np.array([1., 1., 1.]),
-        #    np.array([-1.0 ,-1.0 ,-1.0])]
-        # ]
+    def parse_geom(self, create_obj=False):
+        coordinates = self.coords
+        length = len(coordinates)
+        vertices = [None] * (2 * length)
+        z = self.z
+        height = self.height
 
-        coords = self.coords
-        height = self.height  # How high we extrude the polygon when creating the 3D geometry
-        z = self.z  # Altitude of the polygon that will be extruded to create the 3D geometry
+        for i, coord in enumerate(coordinates):
+            vertices[i] = np.array([coord[0], coord[1], z], dtype=np.float32)
+            vertices[i + length] = np.array([coord[0], coord[1], z + height], dtype=np.float32)
 
-        # If the feature has at least 3 coords, create an alpha shape
-        # The alpha shape reduces the number of parasite points
-        if len(coords) >= 3:
-            hull = alphashape(coords, 0.)
-            coords = hull.exterior.coords[:-1]
+        # Contains the triangles vertices. Used to create 3D tiles
+        triangles = list()
+        # Contains the triangles vertices index. Used to create Objs
+        triangles_id = list()
 
-        coordsLenght = len(coords)
-        vertices = [None] * (2 * (coordsLenght + 1))
+        # Triangulate the feature footprint
+        poly_triangles = tripy.earclip(coordinates)
 
-        # Set bottom center vertice value
-        vertices[0] = self.get_center(coords)
-        # Set top center vertice value
-        vertices[coordsLenght + 1] = np.array([vertices[0][0], vertices[0][1], vertices[0][2] + height], dtype=np.float32)
+        # Create lower and upper faces triangles
+        for tri in poly_triangles:
+            lower_tri = [np.array([coord[0], coord[1], z], dtype=np.float32) for coord in reversed(tri)]
+            triangles.append(lower_tri)
+            upper_tri = [np.array([coord[0], coord[1], z + height], dtype=np.float32) for coord in tri]
+            triangles.append(upper_tri)
 
-        # For each coordinates, add a vertice at the coordinates and a vertice above at the same coordinates but with a Z-offset
-        for i in range(0, coordsLenght):
-            vertices[i + 1] = np.array([coords[i][0], coords[i][1], z], dtype=np.float32)
-            vertices[i + coordsLenght + 2] = np.array([coords[i][0], coords[i][1], z + height], dtype=np.float32)
+        # Create side triangles
+        for i in range(0, length):
+            triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
+            triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        if(len(vertices) == 0):
-            return False
+        # If the obj creation flag is defined, create triangles for the obj
+        if create_obj:
+            for tri in poly_triangles:
+                lower_tri = [self.find_coordinate_index(coordinates, coord) for coord in reversed(tri)]
+                triangles_id.append(lower_tri)
+                upper_tri = [self.find_coordinate_index(coordinates, coord) + length for coord in tri]
+                triangles_id.append(upper_tri)
 
-        # triangles[0] contains the triangles with coordinates ([[x1, y1, z1], [x2, y2, z2], [x3, y3, z3]) used for 3DTiles
-        # triangles[1] contains the triangles with indexes ([1, 2, 3]) used for Objs
-        triangles = self.create_triangles(vertices, coordsLenght)
+            for i in range(0, length):
+                triangles_id.append([i, length + i, length + ((i + 1) % length)])
+                triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
 
-        self.geom.triangles.append(triangles[0])
+            # keep vertices and triangles in order to create Obj model
+            self.vertices = vertices
+            self.triangles = triangles_id
+
+        self.geom.triangles.append(triangles)
 
         self.set_box()
-
-        # keep vertices and triangles in order to create Obj model (when Obj flag is True)
-        self.vertices = vertices
-        self.triangles = triangles[1]
 
         return True
 
@@ -295,7 +279,7 @@ class Geojsons(ObjectsToTile):
         return grouped_features
 
     @staticmethod
-    def retrieve_geojsons(path, group, properties, obj_name):
+    def retrieve_geojsons(path, group, properties, obj_name, is_roof):
         """
         :param path: a path to a directory
 
@@ -328,7 +312,7 @@ class Geojsons(ObjectsToTile):
                             feature_id = id + str(k)
                             k += 1
                         geojson = Geojson(feature_id)
-                        if(geojson.parse_geojson(feature, properties)):
+                        if(geojson.parse_geojson(feature, properties, is_roof)):
                             features.append(geojson)
 
         if 'road' in group:
@@ -344,12 +328,14 @@ class Geojsons(ObjectsToTile):
         else:
             grouped_features = features
 
+        create_obj = obj_name is not None
+
         for feature in grouped_features:
             # Create geometry as expected from GLTF from an geojson file
-            if(feature.parse_geom()):
+            if(feature.parse_geom(create_obj)):
                 objects.append(feature)
 
-                if obj_name is not None:
+                if create_obj:
                     # Add triangles and vertices to create an obj
                     for vertice in feature.vertices:
                         vertices.append(vertice)
@@ -359,7 +345,7 @@ class Geojsons(ObjectsToTile):
                     for i in range(0, len(feature.center)):
                         center[i] += feature.center[i]
 
-        if obj_name is not None:
+        if create_obj:
             center[:] = [c / len(objects) for c in center]
             file_name = obj_name
             f = open(os.path.join(file_name), "w")
