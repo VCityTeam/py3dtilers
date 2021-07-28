@@ -169,6 +169,7 @@ def create_directory(directory):
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
     target_dir = pathlib.Path(directory + '/tiles').expanduser()
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+    Texture.set_texture_folder(directory)
 
 
 def main():
@@ -187,6 +188,7 @@ def main():
         if args.with_BTH:
             CityMBuildings.set_bth()
     elif args.object_type == "relief":
+        create_directory('junk_reliefs')
         objects_type = CityMReliefs
     elif args.object_type == "water":
         objects_type = CityMWaterBodies

@@ -4,6 +4,9 @@ from PIL import Image
 
 
 class Texture():
+
+    folder = None
+
     def __init__(self, textureUri, objects_type, cursor, triangles):
         """
         :param textureUri : a texture Uri in the database
@@ -68,3 +71,11 @@ class Texture():
                 # warning : in order to be written correctly, the GLTF writter
                 # expects data to be in float32
                 uvs[i][y] = np.array([new_u, new_v], dtype=np.float32)
+
+    @staticmethod
+    def get_texture_folder():
+        return Texture.folder
+
+    @staticmethod
+    def set_texture_folder(folder):
+        Texture.folder = folder
