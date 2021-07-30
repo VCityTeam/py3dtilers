@@ -19,13 +19,6 @@ def parse_command_line():
                         type=str,
                         help='Path to the directory containing .geojson files')
 
-    parser.add_argument('--group',
-                        nargs='*',
-                        type=str,
-                        help='Method to merge features together.\
-                              The available choices are cube, road and polygon.\
-                              The cube option can be followed by the size of cubes (as int).')
-
     parser.add_argument('--obj',
                         nargs='?',
                         type=str,
@@ -66,9 +59,6 @@ def parse_command_line():
 
     result = parser.parse_args()
 
-    if(result.group is None):
-        result.group = ['none']
-
     if(result.obj is not None and '.obj' not in result.obj):
         result.obj = result.obj + '.obj'
 
@@ -81,14 +71,14 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
+def from_geojson_directory(path, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
     """
     :param path: a path to a directory
 
     :return: a tileset.
     """
 
-    objects = Geojsons.retrieve_geojsons(path, group, properties, obj_name, is_roof)
+    objects = Geojsons.retrieve_geojsons(path, properties, obj_name, is_roof)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -119,7 +109,7 @@ def main():
 
     if(os.path.isdir(path)):
         print("Writing " + path)
-        tileset = from_geojson_directory(path, args.group, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
+        tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = path.split('/')[-1]

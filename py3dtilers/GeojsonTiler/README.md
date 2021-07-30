@@ -69,35 +69,3 @@ If you want to skip the precision, you can set _prec_ to '_NONE_':
 ```
 geojson-tiler --path <path> --prec NONE
 ```
-
-### Group method
-You can also change the group method by using `--group` in command line:
-```
-geojson-tiler --path <path> --group <group_method> [<parameters>]*
-```
-Merging features together will reduce the __number of polygons__, but also the __level of detail__.  
-By default, the group method is '_none_', meaning it won't merge features.
-#### Cube
-The 'cube' group method will merge features which are contained in the same cube of size '_size x size x size_'. The default size is _60_, but it can be changed in command line:
-```
-geojson-tiler --path <path> --group cube 100
-```
-This line will call the tiler and group features into cubes with size _100 x 100 x 100_.
-
-#### Road
-The 'road' group method will create "_islets_" based on roads. The roads must be Geojson files containing _coordinates_ as _LineString_ and intersections between roads. The program will [create polygons](https://web.ist.utl.pt/alfredo.ferreira/publications/12EPCG-PolygonDetection.pdf) from a graph made with roads: each intersection of the roads is a vertex, each segment of road between two intersections is an edge.  
-The group method can be used with `--group road`:
-```
-geojson-tiler --path <path> --group road
-```
-The roads will be loaded from the directory _roads_ in the \<path\>. This command will use _road group method_ with the roads file in \<path\>/roads/
-  
-#### Polygon
-This solution follow the same process as the solution above, but in this case the polygons are __pre-computed__ with QGIS. In fact, the polygon detection described above takes a really long time when there is more than ~1000 vertices in the graph. Computing the polygons with QGIS before and loading them as a Geojson file at runtime is way faster.  
-The group method can be used with `--group polygon`:
-```
-geojson-tiler --path <path> --group polygon
-```
-The roads will be loaded from the directory _polygons_ in the \<path\>. This command will use _polygon group method_ with the polygons file in \<path\>/polygons/
-  
-To polygonise the roads on QGIS, use the tool _Polygonize_ (_Processing --> Toolbox --> Vector Geometry --> Polygonize_)

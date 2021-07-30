@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
 from os import listdir
-import sys
 import numpy as np
 import json
-
 import tripy
-from shapely.geometry import Point, Polygon
 
 from ..Common import ObjectToTile, ObjectsToTile
-from .PolygonDetection import PolygonDetector
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -165,122 +161,11 @@ class Geojsons(ObjectsToTile):
         A decorated list of ObjectsToTile type objects.
     """
 
-    defaultGroupOffset = 50
-
     def __init__(self, objects=None):
         super().__init__(objects)
 
     @staticmethod
-    def round_coordinate(coordinate, base):
-        """Round the coordinate to the closest multiple of 'base'"""
-
-        rounded_coord = coordinate
-        for i in range(0, len(coordinate)):
-            rounded_coord[i] = base * round(coordinate[i] / base)
-        return rounded_coord
-
-    def group_features_by_polygons(self, features, path):
-        try:
-            polygon_path = os.path.join(path, "polygons")
-            polygon_dir = listdir(polygon_path)
-        except FileNotFoundError:
-            print("No directory called 'polygons' in", path, ". Please, place the polygons to read in", polygon_path)
-            print("Exiting")
-            sys.exit(1)
-        polygons = list()
-        for polygon_file in polygon_dir:
-            if(".geojson" in polygon_file or ".json" in polygon_file):
-                with open(os.path.join(polygon_path, polygon_file)) as f:
-                    gjContent = json.load(f)
-                for feature in gjContent['features']:
-                    coords = feature['geometry']['coordinates'][0][:-1]
-                    polygons.append(Polygon(coords))
-        return self.distribute_features_in_polygons(features, polygons)
-
-    def group_features_by_roads(self, features, path):
-        try:
-            road_path = os.path.join(path, "roads")
-            road_dir = listdir(road_path)
-        except FileNotFoundError:
-            print("No directory called 'roads' in", path, ". Please, place the roads to read in", road_path)
-            print("Exiting")
-            sys.exit(1)
-        lines = list()
-        for road_file in road_dir:
-            if(".geojson" in road_file or ".json" in road_file):
-                with open(os.path.join(road_path, road_file)) as f:
-                    gjContent = json.load(f)
-                for feature in gjContent['features']:
-                    if 'type' in feature['geometry'] and feature['geometry']['type'] == 'LineString':
-                        lines.append(feature['geometry']['coordinates'])
-        print("Roads parsed from file")
-
-        p = PolygonDetector(lines)
-        polygons = p.create_polygons()
-        return self.distribute_features_in_polygons(features, polygons)
-
-    def group_features_by_cube(self, features, size):
-        """Group features which are in the same cube of size 'size'"""
-        features_dict = {}
-
-        # Create a dictionary key: cubes center (x,y,z); value: list of features index
-        for i in range(0, len(features)):
-            closest_cube = Geojsons.round_coordinate(features[i].center, size)
-            if tuple(closest_cube) in features_dict:
-                features_dict[tuple(closest_cube)].append(i)
-            else:
-                features_dict[tuple(closest_cube)] = [i]
-        return self.group_features(features, features_dict)
-
-    def group_features(self, features, dictionary):
-        k = 0
-        grouped_features = list()
-        grouped_features_dict = {}
-        for key in dictionary:
-            geojson = Geojson("group" + str(k))
-            z = np.Inf
-            height = 0
-            coords = list()
-            grouped_features_dict[k] = []
-            for j in dictionary[key]:
-                grouped_features_dict[k].append(j)
-                height += features[j].height
-                if z > features[j].z:
-                    z = features[j].z
-                for coord in features[j].coords:
-                    coords.append(coord)
-
-            geojson.coords = coords
-            geojson.z = z
-            geojson.height = height / len(dictionary[key])
-            center = geojson.get_center(coords)
-            geojson.center = [center[0], center[1], center[2] + geojson.height / 2]
-            grouped_features.append(geojson)
-            k += 1
-        return grouped_features
-
-    def distribute_features_in_polygons(self, features, polygons):
-        features_dict = {}
-        features_without_poly = list()
-        for i in range(0, len(features)):
-            p = Point(features[i].center)
-            in_polygon = False
-            for index, polygon in enumerate(polygons):
-                if p.within(polygon):
-                    if index in features_dict:
-                        features_dict[index].append(i)
-                    else:
-                        features_dict[index] = [i]
-                    in_polygon = True
-                    break
-            if not in_polygon:
-                features_without_poly.append(features[i])
-
-        grouped_features = self.group_features(features, features_dict)
-        return grouped_features
-
-    @staticmethod
-    def retrieve_geojsons(path, group, properties, obj_name, is_roof):
+    def retrieve_geojsons(path, properties, obj_name, is_roof):
         """
         :param path: a path to a directory
 
@@ -319,23 +204,9 @@ class Geojsons(ObjectsToTile):
                         if(geojson.parse_geojson(feature, properties, is_roof)):
                             features.append(geojson)
 
-        # Merges the features together if asked by the user
-        if 'road' in group:
-            grouped_features = geometries.group_features_by_roads(features, path)
-        elif 'polygon' in group:
-            grouped_features = geometries.group_features_by_polygons(features, path)
-        elif 'cube' in group:
-            try:
-                size = int(group[group.index('cube') + 1])
-            except IndexError:
-                size = Geojsons.defaultGroupOffset
-            grouped_features = geometries.group_features_by_cube(features, size)
-        else:
-            grouped_features = features
-
         create_obj = obj_name is not None
 
-        for feature in grouped_features:
+        for feature in features:
             # Create geometry as expected from GLTF from an geojson file
             if(feature.parse_geom(create_obj)):
                 geometries.append(feature)
