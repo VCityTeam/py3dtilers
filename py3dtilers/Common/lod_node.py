@@ -10,6 +10,10 @@ class LodNode():
     """
 
     def __init__(self, objects_to_tile=None, geometric_error=50):
+        """
+        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
+        :param geometric_error: the distance to display the 3D tile that will be created from this node.
+        """
         self.objects_to_tile = objects_to_tile
         self.child_nodes = list()
         self.geometric_error = geometric_error
@@ -26,6 +30,9 @@ class LodNode():
 
 
 class Lod1Node(LodNode):
+    """
+    Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
+    """
     def __init__(self, objects_to_tile, geometric_error=50):
         lod1_list = list()
         for object_to_tile in objects_to_tile:
@@ -35,7 +42,10 @@ class Lod1Node(LodNode):
 
 
 class LoaNode(LodNode):
-
+    """
+    Creates 3D extrusions of the polygons given as parameter.
+    The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
+    """
     loa_index = 0
 
     def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):

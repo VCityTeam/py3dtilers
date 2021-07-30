@@ -70,7 +70,7 @@ The Batch table hierarchy is a [Batch Table](https://github.com/CesiumGS/3d-tile
 
 To create the BatchTableHierarchy extension:
 ```
-citygml-tiler <path_to_file>/Config.yml --with_bth
+citygml-tiler <path_to_file>/Config.yml --with_BTH
 ```
 
 # City Temporal Tiler

@@ -6,10 +6,19 @@ import tripy
 
 class ExtrudedPolygon():
     def __init__(self, object_to_tile, override_points=False, polygon=None):
+        """
+        Creates a 3D extrusion of the footprint of an ObjectToTile
+        :param object_to_tile: an instance ObjectToTile containing triangles
+        :param override_points: when true, the polygon extruded won't be the footprint
+        but another polygon
+        :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
+        """
         geom_triangles = object_to_tile.geom.triangles
         points = list()
         minZ = np.Inf
         average_maxZ = 0
+
+        # Compute the footprint of the geometry
         for triangles in geom_triangles:
             maxZ = np.NINF
             for triangle in triangles:

@@ -46,6 +46,12 @@ The .obj model is created if the `--obj_` flag is present in command line. To cr
 geojson-tiler --path <path> --obj <obj_file_name>
 ```
 
+### Roofprint or footprint
+By default, the tiler considers that the polygons in the .geojson files are at the floor level. But sometimes, the coordinates can be at the roof level (especially for buildings). In this case, you can tell the tiler to consider the polygons as roofprints by adding the `--is_roof` flag. The tiler will substract the height of the feature from the coordinates to reach the floor level.
+
+```
+geojson-tiler --path <path> --is_roof
+```
 ### Properties
 The Tiler uses '_height_' property to create 3D tiles from features. It also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).
 

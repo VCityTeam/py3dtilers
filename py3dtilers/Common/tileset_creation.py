@@ -8,6 +8,7 @@ from ..Texture import Atlas
 def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
     """
     Recursively creates a tileset from the nodes of a LodTree
+    :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
     """
     lod_tree = LodTree(objects_to_tile, also_create_lod1, also_create_loa, polygons_path, with_texture)
     tileset = TileSet()

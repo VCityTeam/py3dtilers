@@ -53,7 +53,10 @@ class Geojson(ObjectToTile):
         return np.array([sum_x / length, sum_y / length, self.z], dtype=np.float32)
 
     def parse_geojson(self, feature, properties, is_roof):
-        # Current feature number
+        """
+        Parse a feature of the .geojson file to extract the height and the coordinates of the feature.
+        """
+        # Current feature number (used for debug)
         Geojson.n_feature += 1
 
         # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
@@ -95,6 +98,9 @@ class Geojson(ObjectToTile):
         return True
 
     def parse_geom(self, create_obj=False):
+        """
+        Creates the 3D extrusion of the feature.
+        """
         coordinates = self.coords
         length = len(coordinates)
         vertices = [None] * (2 * length)
@@ -161,8 +167,8 @@ class Geojsons(ObjectsToTile):
 
     defaultGroupOffset = 50
 
-    def __init__(self, objs=None):
-        super().__init__(objs)
+    def __init__(self, objects=None):
+        super().__init__(objects)
 
     @staticmethod
     def round_coordinate(coordinate, base):
@@ -173,8 +179,7 @@ class Geojsons(ObjectsToTile):
             rounded_coord[i] = base * round(coordinate[i] / base)
         return rounded_coord
 
-    @staticmethod
-    def group_features_by_polygons(features, path):
+    def group_features_by_polygons(self, features, path):
         try:
             polygon_path = os.path.join(path, "polygons")
             polygon_dir = listdir(polygon_path)
@@ -190,10 +195,9 @@ class Geojsons(ObjectsToTile):
                 for feature in gjContent['features']:
                     coords = feature['geometry']['coordinates'][0][:-1]
                     polygons.append(Polygon(coords))
-        return Geojsons.distribute_features_in_polygons(features, polygons)
+        return self.distribute_features_in_polygons(features, polygons)
 
-    @staticmethod
-    def group_features_by_roads(features, path):
+    def group_features_by_roads(self, features, path):
         try:
             road_path = os.path.join(path, "roads")
             road_dir = listdir(road_path)
@@ -213,10 +217,9 @@ class Geojsons(ObjectsToTile):
 
         p = PolygonDetector(lines)
         polygons = p.create_polygons()
-        return Geojsons.distribute_features_in_polygons(features, polygons)
+        return self.distribute_features_in_polygons(features, polygons)
 
-    @staticmethod
-    def group_features_by_cube(features, size):
+    def group_features_by_cube(self, features, size):
         """Group features which are in the same cube of size 'size'"""
         features_dict = {}
 
@@ -227,10 +230,9 @@ class Geojsons(ObjectsToTile):
                 features_dict[tuple(closest_cube)].append(i)
             else:
                 features_dict[tuple(closest_cube)] = [i]
-        return Geojsons.group_features(features, features_dict)
+        return self.group_features(features, features_dict)
 
-    @staticmethod
-    def group_features(features, dictionary):
+    def group_features(self, features, dictionary):
         k = 0
         grouped_features = list()
         grouped_features_dict = {}
@@ -257,8 +259,7 @@ class Geojsons(ObjectsToTile):
             k += 1
         return grouped_features
 
-    @staticmethod
-    def distribute_features_in_polygons(features, polygons):
+    def distribute_features_in_polygons(self, features, polygons):
         features_dict = {}
         features_without_poly = list()
         for i in range(0, len(features)):
@@ -275,7 +276,7 @@ class Geojsons(ObjectsToTile):
             if not in_polygon:
                 features_without_poly.append(features[i])
 
-        grouped_features = Geojsons.group_features(features, features_dict)
+        grouped_features = self.group_features(features, features_dict)
         return grouped_features
 
     @staticmethod
@@ -288,13 +289,16 @@ class Geojsons(ObjectsToTile):
 
         geojson_dir = listdir(path)
 
+        features = list()
+        geometries = Geojsons()
+
+        # Used only when creating an .obj model
         vertices = list()
         triangles = list()
-        features = list()
         vertice_offset = 1
         center = [0, 0, 0]
-        objects = list()
 
+        # Reads and parse every features from the file(s)
         for geojson_file in geojson_dir:
             if(os.path.isfile(os.path.join(path, geojson_file))):
                 if(".geojson" in geojson_file or ".json" in geojson_file):
@@ -315,16 +319,17 @@ class Geojsons(ObjectsToTile):
                         if(geojson.parse_geojson(feature, properties, is_roof)):
                             features.append(geojson)
 
+        # Merges the features together if asked by the user
         if 'road' in group:
-            grouped_features = Geojsons.group_features_by_roads(features, path)
+            grouped_features = geometries.group_features_by_roads(features, path)
         elif 'polygon' in group:
-            grouped_features = Geojsons.group_features_by_polygons(features, path)
+            grouped_features = geometries.group_features_by_polygons(features, path)
         elif 'cube' in group:
             try:
                 size = int(group[group.index('cube') + 1])
             except IndexError:
                 size = Geojsons.defaultGroupOffset
-            grouped_features = Geojsons.group_features_by_cube(features, size)
+            grouped_features = geometries.group_features_by_cube(features, size)
         else:
             grouped_features = features
 
@@ -333,7 +338,7 @@ class Geojsons(ObjectsToTile):
         for feature in grouped_features:
             # Create geometry as expected from GLTF from an geojson file
             if(feature.parse_geom(create_obj)):
-                objects.append(feature)
+                geometries.append(feature)
 
                 if create_obj:
                     # Add triangles and vertices to create an obj
@@ -346,7 +351,7 @@ class Geojsons(ObjectsToTile):
                         center[i] += feature.center[i]
 
         if create_obj:
-            center[:] = [c / len(objects) for c in center]
+            center[:] = [c / len(geometries) for c in center]
             file_name = obj_name
             f = open(os.path.join(file_name), "w")
             f.write("# " + file_name + "\n")
@@ -357,4 +362,4 @@ class Geojsons(ObjectsToTile):
             for triangle in triangles:
                 f.write("f " + str(int(triangle[0])) + " " + str(int(triangle[1])) + " " + str(int(triangle[2])) + "\n")
 
-        return Geojsons(objects)
+        return geometries
