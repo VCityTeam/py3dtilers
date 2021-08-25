@@ -1,7 +1,8 @@
 import numpy as np
 from ..Common import ObjectToTile
 from alphashape import alphashape
-import tripy
+from shapely.ops import triangulate
+from shapely.geometry import Polygon
 
 
 class ExtrudedPolygon():
@@ -62,12 +63,11 @@ class ExtrudedPolygon():
         triangles = list()
 
         # Triangulate the feature footprint
-        poly_triangles = tripy.earclip(coordinates)
+        polygon = Polygon(coordinates)
+        poly_triangles = [list(triangle.exterior.coords[:-1]) for triangle in triangulate(polygon) if triangle.within(polygon)]
 
-        # Create lower and upper faces triangles
+        # Create upper face triangles
         for tri in poly_triangles:
-            lower_tri = [np.array([coord[0], coord[1], minZ], dtype=np.float32) for coord in reversed(tri)]
-            triangles.append(lower_tri)
             upper_tri = [np.array([coord[0], coord[1], maxZ], dtype=np.float32) for coord in tri]
             triangles.append(upper_tri)
 

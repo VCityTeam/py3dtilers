@@ -3,7 +3,8 @@ import os
 from os import listdir
 import numpy as np
 import json
-import tripy
+from shapely.ops import triangulate
+from shapely.geometry import Polygon
 
 from ..Common import ObjectToTile, ObjectsToTile
 
@@ -18,6 +19,7 @@ from ..Common import ObjectToTile, ObjectsToTile
 class Geojson(ObjectToTile):
 
     n_feature = 0
+    default_height = 2
 
     def __init__(self, id=None):
         super().__init__(id)
@@ -63,7 +65,6 @@ class Geojson(ObjectToTile):
                     return False
             else:
                 print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
-                return False
 
         height_name = properties[properties.index('height') + 1]
         if height_name in feature['properties']:
@@ -72,8 +73,8 @@ class Geojson(ObjectToTile):
             else:
                 return False
         else:
-            print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature))
-            self.height = 5
+            print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
+            self.height = Geojson.default_height
 
         if feature['geometry']['type'] == 'Polygon':
             coords = feature['geometry']['coordinates'][0]
@@ -113,12 +114,11 @@ class Geojson(ObjectToTile):
         triangles_id = list()
 
         # Triangulate the feature footprint
-        poly_triangles = tripy.earclip(coordinates)
+        polygon = Polygon(coordinates)
+        poly_triangles = [list(triangle.exterior.coords[:-1]) for triangle in triangulate(polygon) if triangle.within(polygon)]
 
-        # Create lower and upper faces triangles
+        # Create upper face triangles
         for tri in poly_triangles:
-            lower_tri = [np.array([coord[0], coord[1], z], dtype=np.float32) for coord in reversed(tri)]
-            triangles.append(lower_tri)
             upper_tri = [np.array([coord[0], coord[1], z + height], dtype=np.float32) for coord in tri]
             triangles.append(upper_tri)
 

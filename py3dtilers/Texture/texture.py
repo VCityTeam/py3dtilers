@@ -21,9 +21,9 @@ class Texture():
             objects_type)
         LEFT_THUMB = imageBinaryData[0][0]
         stream = BytesIO(LEFT_THUMB)
-        image = Image.open(stream).convert("RGBA")
-
-        self.texture_image = self.cropImage(image, triangles)
+        image = Image.open(stream)
+        image = self.cropImage(image, triangles)
+        self.texture_image = image.convert("RGBA")
 
     def get_texture_image(self):
         return self.texture_image

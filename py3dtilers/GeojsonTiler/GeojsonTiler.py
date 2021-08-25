@@ -93,12 +93,8 @@ def main():
     """
     :return: no return value
 
-    this function creates either :
-    - a repository named "geojson_tileset" where the
-    tileset is stored if the directory does only contains geojson files.
-    - or a repository named "geojson_tilesets" that contains all tilesets are stored
-    created from sub_directories
-    and a classes.txt that contains the name of all tilesets
+    this function creates a repository named "geojson_tilesets" that contains a tileset
+    created from all the geojson files stored in the targeted directory
     """
     args = parse_command_line()
     path = args.path[0]
@@ -112,9 +108,10 @@ def main():
         tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-            folder_name = path.split('/')[-1]
-            print("tileset in geojson_tilesets/" + folder_name)
-            tileset.write_to_directory("geojson_tilesets/" + folder_name)
+            print("tileset in geojson_tilesets")
+            tileset.write_to_directory("geojson_tilesets")
+    else:
+        print(path, "is not a directory. Please target a directory containing geojson files.")
 
 
 if __name__ == '__main__':
