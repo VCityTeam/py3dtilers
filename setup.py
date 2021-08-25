@@ -28,6 +28,7 @@ requirements = (
      'shapely',
      'alphashape',
      'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
+     'earclip @ git+https://github.com/lionfish0/earclip',
      'Pillow'
      # 'ifcopenshell' requires specific treatment, refer to 
      # install_ifcopenshell_from_url() function definition.

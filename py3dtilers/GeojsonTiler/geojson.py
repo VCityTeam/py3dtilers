@@ -3,8 +3,8 @@ import os
 from os import listdir
 import numpy as np
 import json
-from shapely.ops import triangulate
-from shapely.geometry import Polygon
+from shapely.geometry import LinearRing
+from earclip import triangulate
 
 from ..Common import ObjectToTile, ObjectsToTile
 
@@ -30,12 +30,10 @@ class Geojson(ObjectToTile):
         self.height = 0
         """How high we extrude the polygon when creating the 3D geometry"""
 
-        self.center = []
-
         self.vertices = list()
         self.triangles = list()
 
-        self.coords = list()
+        self.polygons = list()
 
     def find_coordinate_index(self, coordinates, value):
         for i, coord in enumerate(coordinates):
@@ -43,12 +41,6 @@ class Geojson(ObjectToTile):
                 if coord[1] == value[1]:
                     return i
         return None
-
-    def get_center(self, coords):
-        length = len(coords)
-        sum_x = np.sum([coord[0] for coord in coords])
-        sum_y = np.sum([coord[1] for coord in coords])
-        return np.array([sum_x / length, sum_y / length, self.z], dtype=np.float32)
 
     def parse_geojson(self, feature, properties, is_roof):
         """
@@ -77,20 +69,26 @@ class Geojson(ObjectToTile):
             self.height = Geojson.default_height
 
         if feature['geometry']['type'] == 'Polygon':
-            coords = feature['geometry']['coordinates'][0]
-        if feature['geometry']['type'] == 'MultiPolygon':
-            coords = feature['geometry']['coordinates'][0][0]
+            coords = feature['geometry']['coordinates'][0][:-1]
+            self.z = min(coords, key=lambda x: x[2])[2]
+            coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords))]
+            self.polygons.append(coords)
 
-        self.z = min(coords, key=lambda x: x[2])[2]
+        if feature['geometry']['type'] == 'MultiPolygon':
+            z = np.inf
+            for polygon in feature['geometry']['coordinates'][0]:
+                coords = polygon[:-1]
+                # Check if the coordinates are clockwise. If they are clockwise, the polygon is a hole, so we skip it
+                if not LinearRing(coords).is_ccw:
+                    min_z = min(coords, key=lambda x: x[2])[2]
+                    if min_z < z:
+                        z = min_z
+                    coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords))]
+                    self.polygons.append(coords)
+            self.z = z
+
         if is_roof:
             self.z -= self.height
-
-        # Group coords into (x,y) arrays, the z will always be the same z
-        # The last point in features is always the same as the first, so we remove the last point
-        coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords) - 1)]
-        self.coords = coords
-        center = self.get_center(coords)
-        self.center = [center[0], center[1], center[2] + self.height / 2]
 
         return True
 
@@ -98,50 +96,55 @@ class Geojson(ObjectToTile):
         """
         Creates the 3D extrusion of the feature.
         """
-        coordinates = self.coords
-        length = len(coordinates)
-        vertices = [None] * (2 * length)
         z = self.z
         height = self.height
-
-        for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], z], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], z + height], dtype=np.float32)
 
         # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
         # Contains the triangles vertices index. Used to create Objs
         triangles_id = list()
 
-        # Triangulate the feature footprint
-        polygon = Polygon(coordinates)
-        poly_triangles = [list(triangle.exterior.coords[:-1]) for triangle in triangulate(polygon) if triangle.within(polygon)]
+        vertex_offset = 0
 
-        # Create upper face triangles
-        for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], z + height], dtype=np.float32) for coord in tri]
-            triangles.append(upper_tri)
+        for coordinates in self.polygons:
 
-        # Create side triangles
-        for i in range(0, length):
-            triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
-            triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
+            length = len(coordinates)
+            vertices = [None] * (2 * length)
 
-        # If the obj creation flag is defined, create triangles for the obj
-        if create_obj:
+            for i, coord in enumerate(coordinates):
+                vertices[i] = np.array([coord[0], coord[1], z], dtype=np.float32)
+                vertices[i + length] = np.array([coord[0], coord[1], z + height], dtype=np.float32)
+
+            # Triangulate the feature footprint
+            poly_triangles = triangulate(coordinates)
+
+            # Create upper face triangles
             for tri in poly_triangles:
-                lower_tri = [self.find_coordinate_index(coordinates, coord) for coord in reversed(tri)]
-                triangles_id.append(lower_tri)
-                upper_tri = [self.find_coordinate_index(coordinates, coord) + length for coord in tri]
-                triangles_id.append(upper_tri)
+                upper_tri = [np.array([coord[0], coord[1], z + height], dtype=np.float32) for coord in tri]
+                triangles.append(upper_tri)
 
+            # Create side triangles
             for i in range(0, length):
-                triangles_id.append([i, length + i, length + ((i + 1) % length)])
-                triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
+                triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
+                triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-            # keep vertices and triangles in order to create Obj model
-            self.vertices = vertices
-            self.triangles = triangles_id
+            # If the obj creation flag is defined, create triangles for the obj
+            if create_obj:
+                for tri in poly_triangles:
+                    lower_tri = [self.find_coordinate_index(coordinates, coord) + vertex_offset for coord in reversed(tri)]
+                    triangles_id.append(lower_tri)
+                    upper_tri = [self.find_coordinate_index(coordinates, coord) + length + vertex_offset for coord in tri]
+                    triangles_id.append(upper_tri)
+
+                for i in range(0, length):
+                    triangles_id.append([i, length + i, length + ((i + 1) % length)])
+                    triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
+
+                vertex_offset += len(vertices)
+
+                # keep vertices and triangles in order to create Obj model
+                self.vertices.extend(vertices)
+                self.triangles.extend(triangles_id)
 
         self.geom.triangles.append(triangles)
 
@@ -218,8 +221,9 @@ class Geojsons(ObjectsToTile):
                     for triangle in feature.triangles:
                         triangles.append([v + vertice_offset for v in triangle])
                     vertice_offset += len(feature.vertices)
-                    for i in range(0, len(feature.center)):
-                        center[i] += feature.center[i]
+                    centroid = feature.get_centroid()
+                    for i in range(0, len(centroid)):
+                        center[i] += centroid[i]
 
         if create_obj:
             center[:] = [c / len(geometries) for c in center]
