@@ -14,19 +14,15 @@ def open_data_base(db_config_file_path):
         try:
             db_config = yaml.load(db_config_file, Loader=yaml.FullLoader)
             db_config_file.close()
-        except:
+        except FileNotFoundError:
             print('ERROR: ', sys.exec_info()[0])
             db_config_file.close()
             sys.exit()
 
     # Check that db configuration is well defined
-    if (("PG_HOST" not in db_config)
-            or ("PG_USER" not in db_config)
-            or ("PG_NAME" not in db_config)
-            or ("PG_PORT" not in db_config)
-            or ("PG_PASSWORD" not in db_config)):
+    if (("PG_HOST" not in db_config) or ("PG_USER" not in db_config) or ("PG_NAME" not in db_config) or ("PG_PORT" not in db_config) or ("PG_PASSWORD" not in db_config)):
         print(("ERROR: Database is not properly defined in '{0}', please refer to README.md"
-              .format(args.db_config_path)))
+              .format(db_config_file_path)))
         sys.exit()
 
     # Connect to database
@@ -47,8 +43,8 @@ def open_data_base(db_config_file_path):
         keepalives_count=5
     )
     # Why using the keepalives flags in the above psycopg2 constructor ?
-    # In the context of having to tile cities, such a connection can be 
-    # used for bulk querries (think of retrieving the geometries of all the 
+    # In the context of having to tile cities, such a connection can be
+    # used for bulk querries (think of retrieving the geometries of all the
     # buildings of a large city). And it seems that dealing with bulk
     # querries in a dockerized context tends to (randomly) produce the
     # following error:
@@ -60,7 +56,7 @@ def open_data_base(db_config_file_path):
     #   - https://stackoverflow.com/questions/53188306/python-sqlalchemy-connection-pattern-disconnected-from-the-remote-server
     # The keepalives solution is provided by this StackOverflow:
     # https://stackoverflow.com/questions/56289874/postgres-closes-connection-during-query-after-a-few-hundred-seconds-when-using-p
-    # 
+    #
     # Concerning the keepalives connect parameters, refer to
     # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 

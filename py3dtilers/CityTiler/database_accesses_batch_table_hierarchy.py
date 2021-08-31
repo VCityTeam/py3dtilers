@@ -18,7 +18,7 @@ def retrieve_buildings_and_sub_parts(cursor, buildingIds, classes, hierarchy):
         "SELECT building.id, building_parent_id,"
         "       cityobject.gmlid, cityobject.objectclass_id "
         "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                        WHERE building_root_id IN %s", (buildingIds,))
+        "                        WHERE building_root_id IN " + buildingIds)
     for t in cursor.fetchall():
         buildindsAndSubParts.append(
             {'internalId': t[0], 'gmlid': t[2], 'class': t[3]})
@@ -47,7 +47,7 @@ def retrieve_geometric_instances(cursor, buildingIds, classes, hierarchy):
     cursor.execute(
         "SELECT building.id "
         "FROM building JOIN cityobject ON building.id=cityobject.id "
-        "                        WHERE building_root_id IN %s", (buildingIds,))
+        "                        WHERE building_root_id IN " + buildingIds)
 
     subBuildingIds = tuple([t[0] for t in cursor.fetchall()])
 

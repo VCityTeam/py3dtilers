@@ -1,8 +1,10 @@
 debug_mode = True
 
+
 def debug_msg(message):
     if debug_mode:
         print(message, flush=True)
+
 
 def debug_msg_ne(message):
     """

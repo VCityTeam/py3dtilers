@@ -4,7 +4,7 @@ import sys
 
 from py3dtiles import BoundingVolumeBox
 from .geojson import Geojsons
-from ..Common import create_lod_tree, create_tileset
+from ..Common import create_tileset
 
 
 def parse_command_line():
@@ -14,49 +14,55 @@ def parse_command_line():
     parser = argparse.ArgumentParser(description=text)
 
     # adding positional arguments
-    parser.add_argument('--paths',
-                        nargs='*',
+    parser.add_argument('--path',
+                        nargs=1,
                         type=str,
-                        help='path to the database configuration file')
-
-    parser.add_argument('--group',
-                        nargs='*',
-                        type=str,
-                        help='method to merge features together')
-
-    parser.add_argument('--properties',
-                        nargs='*',
-                        type=str,
-                        help='name of the properties to read in Geojson files')
+                        help='Path to the directory containing .geojson files')
 
     parser.add_argument('--obj',
-                        nargs='*',
+                        nargs='?',
                         type=str,
-                        help='create also obj model with specified name')
+                        help='When defined, also create an .obj model of the features.\
+                             The flag must be followed by the name of the obj that will be created.')
+
+    parser.add_argument('--loa',
+                        nargs='?',
+                        type=str,
+                        help='Creates a LOA when defined. The LOA is a 3D extrusion of polygons.\
+                              Objects in the same polygon are merged together.\
+                              Must be followed by the path to directory containing the polygons .geojson')
+
+    parser.add_argument('--lod1',
+                        dest='lod1',
+                        action='store_true',
+                        help='Creates a LOD1 when defined. The LOD1 is a 3D extrusion of the footprint of each object.')
+
+    parser.add_argument('--height',
+                        nargs='?',
+                        default='HAUTEUR',
+                        type=str,
+                        help='Change the name of the propertie to look for in the feature for height.\
+                              Default property name is HAUTEUR')
+
+    parser.add_argument('--prec',
+                        nargs='?',
+                        default='PREC_ALTI',
+                        type=str,
+                        help='Change the name of the propertie to look for in the feature for altitude precision.\
+                              Default property name is PREC_ALTI')
+
+    parser.add_argument('--is_roof',
+                        dest='is_roof',
+                        action='store_true',
+                        help='When defined, the features from geojsons will be considered as rooftops.\
+                              We will thus substract the height from the coordinates to reach the floor.')
 
     result = parser.parse_args()
 
-    if(result.group is None):
-        result.group = ['none']
+    if(result.obj is not None and '.obj' not in result.obj):
+        result.obj = result.obj + '.obj'
 
-    if(result.obj is None):
-        result.obj = ['']
-    elif(len(result.obj) == 0):
-        result.obj = ['result.obj']
-    elif('.obj' not in result.obj[0]):
-        result.obj[0] = result.obj[0] + '.obj'
-
-    if(result.properties is None or len(result.properties) % 2 != 0):
-        result.properties = ['height', 'HAUTEUR', 'z', 'Z_MAX', 'prec', 'PREC_ALTI']
-    else:
-        if('height' not in result.properties):
-            result.properties += ['height', 'HAUTEUR']
-        if('prec' not in result.properties):
-            result.properties += ['prec', 'PREC_ALTI']
-        if('z' not in result.properties):
-            result.properties += ['z', 'Z_MAX']
-
-    if(result.paths is None):
+    if(result.path is None):
         print("Please provide a path to a directory "
               "containing some geojson files")
         print("Exiting")
@@ -65,14 +71,14 @@ def parse_command_line():
     return result
 
 
-def from_geojson_directory(path, group, properties, obj_name):
+def from_geojson_directory(path, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
     """
     :param path: a path to a directory
 
     :return: a tileset.
     """
 
-    objects = Geojsons.retrieve_geojsons(path, group, properties, obj_name)
+    objects = Geojsons.retrieve_geojsons(path, properties, obj_name, is_roof)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
@@ -80,38 +86,32 @@ def from_geojson_directory(path, group, properties, obj_name):
     else:
         print(str(len(objects)) + " features parsed")
 
-    tree = create_lod_tree(objects, False)
-
-    if len(Geojsons.base_features) > 0:
-        for index, node in enumerate(tree.root_nodes):
-            features = [Geojsons.base_features[i] for i in Geojsons.features_dict[index]]
-            node.set_child_nodes(features)
-
-    return create_tileset(tree)
+    return create_tileset(objects, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path)
 
 
 def main():
     """
     :return: no return value
 
-    this function creates either :
-    - a repository named "geojson_tileset" where the
-    tileset is stored if the directory does only contains geojson files.
-    - or a repository named "geojson_tilesets" that contains all tilesets are stored
-    created from sub_directories
-    and a classes.txt that contains the name of all tilesets
+    this function creates a repository named "geojson_tilesets" that contains a tileset
+    created from all the geojson files stored in the targeted directory
     """
     args = parse_command_line()
-    path = args.paths[0]
-    obj_name = args.obj[0]
+    path = args.path[0]
+
+    create_loa = args.loa is not None
+
+    properties = ['height', args.height, 'prec', args.prec]
+
     if(os.path.isdir(path)):
         print("Writing " + path)
-        tileset = from_geojson_directory(path, args.group, args.properties, obj_name)
+        tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-            folder_name = path.split('/')[-1]
-            print("tileset in geojson_tilesets/" + folder_name)
-            tileset.write_to_directory("geojson_tilesets/" + folder_name)
+            print("tileset in geojson_tilesets")
+            tileset.write_to_directory("geojson_tilesets")
+    else:
+        print(path, "is not a directory. Please target a directory containing geojson files.")
 
 
 if __name__ == '__main__':

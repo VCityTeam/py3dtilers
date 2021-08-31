@@ -24,10 +24,12 @@ requirements = (
      'pyproj',
      'pywavefront',
      'pyyaml',
-     'rdp',
      'scipy',
      'shapely',
+     'alphashape',
      'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
+     'earclip @ git+https://github.com/lionfish0/earclip',
+     'Pillow'
      # 'ifcopenshell' requires specific treatment, refer to 
      # install_ifcopenshell_from_url() function definition.
 )
@@ -156,7 +158,8 @@ setup(
     entry_points={
         'console_scripts': ['citygml-tiler=py3dtilers.CityTiler:main',
                             'geojson-tiler=py3dtilers.GeojsonTiler:main',
-                            'ifc-tiler=py3dtilers.IfcTiler:main'],
+                            'ifc-tiler=py3dtilers.IfcTiler:main',
+                            'citygml-tiler-temporal=py3dtilers.CityTiler:main_temporal'],
     },
     data_files=[('py3dtilers/CityTiler',
                    ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']

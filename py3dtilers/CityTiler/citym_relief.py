@@ -22,6 +22,7 @@ class CityMRelief(CityMCityObject):
     """
     Implementation of the Digital Terrain Model (DTM) objects from the CityGML model.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -30,6 +31,7 @@ class CityMReliefs(CityMCityObjects):
     """
     A decorated list of CityMRelief type objects.
     """
+
     def __init__(self, objects=None):
         super().__init__(objects)
 
@@ -58,24 +60,73 @@ class CityMReliefs(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_geometries(offset, reliefs_ids=None):
+    def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
         """
-        reliefs_ids is unused but is given in argument to preserve the same structure
-        as the sql_query_geometries method of parent class CityMCityObject.
+        :param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+                            splitted or be merged into one geometry
 
         :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of reliefs
-        query = \
-            "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-            "ST_Translate(surface_geometry.geometry, " + \
-            str(-offset[0]) + ", " + str(-offset[1]) + ", " + str(-offset[2]) + \
-            ")))) " + \
-            "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
-            "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
-            "JOIN tin_relief " + \
-            "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
-            "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
-            "GROUP BY relief_feature.id "
+        if split_surfaces:
+            query = \
+                "SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) " + \
+                "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
+                "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
+                "JOIN tin_relief " + \
+                "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
+                "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+                "WHERE relief_feature.id IN " + reliefs_ids
+        else:
+            query = \
+                "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
+                "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
+                "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
+                "JOIN tin_relief " + \
+                "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
+                "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+                "WHERE relief_feature.id IN " + reliefs_ids + " " + \
+                "GROUP BY relief_feature.id "
 
+        return query
+
+    @staticmethod
+    def sql_query_textures(image_uri):
+        """
+        :param buildings: a string which is the uri of the texture to select in the database
+        :return: a string containing the right SQL query that should be executed.
+        """
+
+        query = \
+            "SELECT tex_image_data FROM tex_image WHERE tex_image_uri = '" + image_uri + "' "
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
+        """
+        param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right sql query that should be executed.
+        """
+        # cityobjects_ids contains ids of reliefs
+        query = \
+            ("SELECT surface_geometry.id, "
+             "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
+             "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+             "tex_image_uri AS uri "
+             "FROM relief_feature JOIN relief_feat_to_rel_comp "
+             "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id "
+             "JOIN tin_relief "
+             "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id "
+             "JOIN surface_geometry "
+             "ON surface_geometry.root_id=tin_relief.surface_geometry_id "
+             "JOIN textureparam "
+             "ON textureparam.surface_geometry_id=surface_geometry.id "
+             "JOIN surface_data "
+             "ON textureparam.surface_data_id=surface_data.id "
+             "JOIN tex_image "
+             "ON surface_data.tex_image_id=tex_image.id "
+             "WHERE relief_feature.id IN " + reliefs_ids)
         return query
