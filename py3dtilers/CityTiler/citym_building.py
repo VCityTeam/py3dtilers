@@ -60,7 +60,7 @@ class CityMBuildings(CityMCityObjects):
         if not buildings:
             # No specific buildings were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
+            query = "SELECT building.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
                     "FROM building JOIN cityobject ON building.id=cityobject.id " + \
                     "WHERE building.id=building.building_root_id"
         else:

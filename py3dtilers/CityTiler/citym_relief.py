@@ -47,7 +47,7 @@ class CityMReliefs(CityMCityObjects):
         if not reliefs:
             # No specific reliefs were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
+            query = "SELECT relief_feature.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
                     "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"
 
         else:

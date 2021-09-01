@@ -161,7 +161,7 @@ def from_3dcitydb(cursor, objects_type, create_lod1=False, create_loa=False, pol
     if CityMBuildings.is_bth_set():
         extension_name = "batch_table_hierarchy"
 
-    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path, extension_name=extension_name, with_texture=with_texture)
+    return create_tileset(objects_to_tile, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path, extension_name=extension_name, with_texture=with_texture, store_alt_id=True)
 
 
 def create_directory(directory):

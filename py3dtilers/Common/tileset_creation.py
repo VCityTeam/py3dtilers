@@ -5,7 +5,7 @@ from ..Common import LodTree
 from ..Texture import Atlas
 
 
-def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
+def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False, store_alt_id=False):
     """
     Recursively creates a tileset from the nodes of a LodTree
     :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
@@ -14,19 +14,19 @@ def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=Fals
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:
-        create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+        create_tile(root_node, tileset, centroid, centroid, 0, extension_name, store_alt_id)
 
     return tileset
 
 
-def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None, store_alt_id=False):
     objects = node.objects_to_tile
     objects.translate_tileset(centroid)
 
     tile = Tile()
     tile.set_geometric_error(node.geometric_error)
 
-    content_b3dm = create_tile_content(objects, extension_name, node.has_texture())
+    content_b3dm = create_tile_content(objects, extension_name, node.has_texture(), store_alt_id)
     tile.set_content(content_b3dm)
 
     # Set the position of the tile. The position is relative to the parent tile's position
@@ -54,10 +54,10 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
         parent.add_child(tile)
 
     for child_node in node.child_nodes:
-        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name, store_alt_id)
 
 
-def create_tile_content(objects, extension_name=None, with_texture=False):
+def create_tile_content(objects, extension_name=None, with_texture=False, store_alt_id=False):
     """
     :param pre_tile: an array containing features of a single tile
 
@@ -105,6 +105,9 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
     ids = [feature.get_id() for feature in objects]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
+    if store_alt_id:
+        alt_ids = [feature.get_alt_id() for feature in objects]
+        bt.add_property_from_array("alt_id", alt_ids)
 
     if extension_name is not None:
         extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)

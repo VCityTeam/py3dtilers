@@ -10,8 +10,9 @@ class CityMCityObject(ObjectToTile):
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
     """
 
-    def __init__(self, database_id=None):
+    def __init__(self, database_id=None, gml_id=None):
         super().__init__(database_id)
+        self.set_gml_id(gml_id)
 
     def get_database_id(self):
         return super().get_id()
@@ -20,14 +21,14 @@ class CityMCityObject(ObjectToTile):
         return super().set_id(id)
 
     def set_gml_id(self, gml_id):
-        self.gml_id = gml_id
+        return super().set_alt_id(gml_id)
 
     def get_gml_id(self):
         """
         :return: the (city)gml identifier of an object that should be encountered
                 in the database.
         """
-        return self.gml_id
+        return super().get_alt_id()
 
 
 class CityMCityObjects(ObjectsToTile):
@@ -98,13 +99,14 @@ class CityMCityObjects(ObjectsToTile):
                     continue
                 print("     Exiting (is the database corrupted ?)")
                 sys.exit(1)
+            gml_id = t[2]
             if no_input:
-                new_object = CityMCityObject(object_id)
+                new_object = CityMCityObject(object_id, gml_id=gml_id)
                 result_objects.append(new_object)
             else:
-                gml_id = t[2]
                 cityobject = objects_with_gmlid_key[gml_id]
                 cityobject.set_database_id(object_id)
+                cityobject.set_gml_id(gml_id)
         if no_input:
             return result_objects
         else:

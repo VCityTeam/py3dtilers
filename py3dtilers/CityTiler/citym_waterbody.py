@@ -45,7 +45,7 @@ class CityMWaterBodies(CityMCityObjects):
         if not waterbodies:
             # No specific waterbodies were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT waterbody.id, BOX3D(cityobject.envelope) " + \
+            query = "SELECT waterbody.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
                     "FROM waterbody JOIN cityobject ON waterbody.id=cityobject.id"
 
         else:
