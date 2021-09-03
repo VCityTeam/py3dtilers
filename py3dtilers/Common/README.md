@@ -121,7 +121,8 @@ create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
 \* _Level Of Abstraction_, it consists in a tile with a low level of details and an abstract geometry representing multiple geometries (for example a cube to represent a block of buildings).
 
 Resulting tilesets:
-Groups from `kd_tree` which __don't have__ their own geometry:
+
+If no level of details is added:
 
                             tileset
                               /\
@@ -131,7 +132,7 @@ Groups from `kd_tree` which __don't have__ their own geometry:
                           /        \
                detailled tile     detailled tile
                
-Groups from `create_loa` which __have__ their own geometry:
+If the LOA is created:
 
                             tileset
                               /\

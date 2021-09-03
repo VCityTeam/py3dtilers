@@ -19,6 +19,8 @@ from ..Common import ObjectToTile, ObjectsToTile
 class Geojson(ObjectToTile):
 
     n_feature = 0
+
+    # Default height will be used if no height is found when parsing the data
     default_height = 2
 
     def __init__(self, id=None):
@@ -59,14 +61,17 @@ class Geojson(ObjectToTile):
                 print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
 
         height_name = properties[properties.index('height') + 1]
-        if height_name in feature['properties']:
-            if feature['properties'][height_name] > 0:
-                self.height = feature['properties'][height_name]
-            else:
-                return False
+        if height_name.replace('.', '', 1).isdigit():
+            self.height = float(height_name)
         else:
-            print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
-            self.height = Geojson.default_height
+            if height_name in feature['properties']:
+                if feature['properties'][height_name] > 0:
+                    self.height = feature['properties'][height_name]
+                else:
+                    return False
+            else:
+                print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
+                self.height = Geojson.default_height
 
         if feature['geometry']['type'] == 'Polygon':
             coords = feature['geometry']['coordinates'][0][:-1]
