@@ -1,5 +1,4 @@
 import unittest
-import os
 import pathlib
 
 from py3dtiles import BoundingVolumeBox
@@ -10,12 +9,14 @@ from py3dtilers.CityTiler.citym_waterbody import CityMWaterBodies
 from py3dtilers.CityTiler.database_accesses import open_data_base
 from py3dtilers.CityTiler.CityTiler import from_3dcitydb
 
+
 def create_directory(directory):
     target_dir = pathlib.Path(directory).expanduser()
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
     target_dir = pathlib.Path(directory + '/tiles').expanduser()
     pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
     Texture.set_texture_folder(directory)
+
 
 class Test_Tile(unittest.TestCase):
 

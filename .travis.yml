@@ -29,6 +29,7 @@ jobs:
       - |
         pytest
         pytest -v
+        flake8 .
     - stage: "Markdown link checks"
       language: node_js
       node_js: 12

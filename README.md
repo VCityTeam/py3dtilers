@@ -56,6 +56,12 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
+To check if the code follows the coding style, run `flake8`
+
+```bash
+(venv)$ pip install flake8
+(venv)$ flake8 .
+```
 ### Developing py3dtilers together with py3dtiles
 
 By default, the py3dtilers' [`setup.py`](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) build stage uses [github's version of py3dtiles](https://github.com/VCityTeam/py3dtiles) (as opposed to using [Oslandia's version on Pypi](https://pypi.org/project/py3dtiles/).
@@ -72,7 +78,7 @@ $ source venv/bin/activate
 (venv)$ cd ..
 (venv)$ git clone https://github.com/VCityTeam/py3dtilers
 (venv)$ cd py3dtilers
-(venv$ # Edit setup.py and comment out py3dtiles reference
+(venv)$ # Edit setup.py and comment out py3dtiles reference
 (venv)$ pip install -e .
 (venv)$ pytest
 ```
