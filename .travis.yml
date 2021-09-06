@@ -1,17 +1,16 @@
 sudo: required
 dist: bionic
 
-language: python
-python:
-  - "3.6"
-
 addons:
+  postgresql: "9.4"
   apt:
     update: true
 
 jobs:
   include:
     - stage: tests
+      language: python
+      python: "3.6"
       install:
           ### Dealing with py3dtiles sub-dependencies
         - sudo add-apt-repository universe
@@ -21,6 +20,8 @@ jobs:
           # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
         - pip install -e .[extra]
         - python -c 'import ifcopenshell'  # Just to make sure
+      before_script:
+        - psql -U postgres -d test_tiler < test_tiler.sql
       script:
       - |
         pytest
@@ -37,4 +38,5 @@ jobs:
           if [ $warnings -gt $FAILURE_THRESHOLD ]; then
             exit 1;
           fi
+
 
