@@ -111,7 +111,7 @@ ALTER TYPE citydb_pkg.index_obj OWNER TO postgres;
 -- Name: box2envelope(public.box3d); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.box2envelope(box public.box3d) RETURNS public.geometry
+CREATE FUNCTION box2envelope(box public.box3d) RETURNS public.geometry
     LANGUAGE plpgsql STABLE STRICT
     AS $$
 DECLARE
@@ -120,7 +120,7 @@ DECLARE
 BEGIN
   -- get reference system of input geometry
   IF ST_SRID(box) = 0 THEN
-    SELECT srid INTO db_srid FROM citydb.database_srs;
+    SELECT srid INTO db_srid FROM database_srs;
   ELSE
     db_srid := ST_SRID(box);
   END IF;
@@ -140,41 +140,41 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.box2envelope(box public.box3d) OWNER TO postgres;
+ALTER FUNCTION box2envelope(box public.box3d) OWNER TO postgres;
 
 --
 -- TOC entry 1500 (class 1255 OID 284707)
 -- Name: cleanup_appearances(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.cleanup_appearances(only_global integer DEFAULT 1) RETURNS SETOF integer
+CREATE FUNCTION cleanup_appearances(only_global integer DEFAULT 1) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id int;
   app_id int;
 BEGIN
-  PERFORM citydb.del_surface_data(array_agg(s.id))
-    FROM citydb.surface_data s 
-    LEFT OUTER JOIN citydb.textureparam t ON s.id = t.surface_data_id
+  PERFORM del_surface_data(array_agg(s.id))
+    FROM surface_data s 
+    LEFT OUTER JOIN textureparam t ON s.id = t.surface_data_id
     WHERE t.surface_data_id IS NULL;
 
     IF only_global=1 THEN
       FOR app_id IN
-        SELECT a.id FROM citydb.appearance a
-          LEFT OUTER JOIN citydb.appear_to_surface_data asd ON a.id=asd.appearance_id
+        SELECT a.id FROM appearance a
+          LEFT OUTER JOIN appear_to_surface_data asd ON a.id=asd.appearance_id
             WHERE a.cityobject_id IS NULL AND asd.appearance_id IS NULL
       LOOP
-        DELETE FROM citydb.appearance WHERE id = app_id RETURNING id INTO deleted_id;
+        DELETE FROM appearance WHERE id = app_id RETURNING id INTO deleted_id;
         RETURN NEXT deleted_id;
       END LOOP;
     ELSE
       FOR app_id IN
-        SELECT a.id FROM citydb.appearance a
-          LEFT OUTER JOIN citydb.appear_to_surface_data asd ON a.id=asd.appearance_id
+        SELECT a.id FROM appearance a
+          LEFT OUTER JOIN appear_to_surface_data asd ON a.id=asd.appearance_id
             WHERE asd.appearance_id IS NULL
       LOOP
-        DELETE FROM citydb.appearance WHERE id = app_id RETURNING id INTO deleted_id;
+        DELETE FROM appearance WHERE id = app_id RETURNING id INTO deleted_id;
         RETURN NEXT deleted_id;
       END LOOP;
     END IF;
@@ -184,14 +184,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.cleanup_appearances(only_global integer) OWNER TO postgres;
+ALTER FUNCTION cleanup_appearances(only_global integer) OWNER TO postgres;
 
 --
 -- TOC entry 1501 (class 1255 OID 284708)
 -- Name: cleanup_schema(); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.cleanup_schema() RETURNS SETOF void
+CREATE FUNCTION cleanup_schema() RETURNS SETOF void
     LANGUAGE plpgsql
     AS $$
 -- Function for cleaning up data schema
@@ -210,7 +210,7 @@ BEGIN
     AND table_name <> 'aggregation_info'
     AND table_name NOT LIKE 'tmp_%'
   LOOP
-    EXECUTE format('TRUNCATE TABLE citydb.%I CASCADE', rec.table_name);
+    EXECUTE format('TRUNCATE TABLE %I CASCADE', rec.table_name);
   END LOOP;
 
   FOR rec IN 
@@ -218,20 +218,20 @@ BEGIN
     AND sequence_name <> 'ade_seq'
     AND sequence_name <> 'schema_seq'
   LOOP
-    EXECUTE format('ALTER SEQUENCE citydb.%I RESTART', rec.sequence_name);	
+    EXECUTE format('ALTER SEQUENCE %I RESTART', rec.sequence_name);	
   END LOOP;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.cleanup_schema() OWNER TO postgres;
+ALTER FUNCTION cleanup_schema() OWNER TO postgres;
 
 --
 -- TOC entry 1502 (class 1255 OID 284709)
 -- Name: cleanup_table(text); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.cleanup_table(tab_name text) RETURNS SETOF integer
+CREATE FUNCTION cleanup_table(tab_name text) RETURNS SETOF integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -306,33 +306,33 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.cleanup_table(tab_name text) OWNER TO postgres;
+ALTER FUNCTION cleanup_table(tab_name text) OWNER TO postgres;
 
 --
 -- TOC entry 1504 (class 1255 OID 284711)
 -- Name: del_address(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_address(pid integer) RETURNS integer
+CREATE FUNCTION del_address(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_address(ARRAY[pid]);
+  deleted_id := del_address(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_address(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_address(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1503 (class 1255 OID 284710)
 -- Name: del_address(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_address(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_address(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -343,10 +343,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.addresss
+  -- delete addresss
   WITH delete_objects AS (
     DELETE FROM
-      citydb.address t
+      address t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -371,33 +371,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_address(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_address(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1506 (class 1255 OID 284713)
 -- Name: del_appearance(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_appearance(pid integer) RETURNS integer
+CREATE FUNCTION del_appearance(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_appearance(ARRAY[pid]);
+  deleted_id := del_appearance(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_appearance(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_appearance(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1505 (class 1255 OID 284712)
 -- Name: del_appearance(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_appearance(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_appearance(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -412,7 +412,7 @@ BEGIN
   -- delete references to surface_datas
   WITH del_surface_data_refs AS (
     DELETE FROM
-      citydb.appear_to_surface_data t
+      appear_to_surface_data t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -427,22 +427,22 @@ BEGIN
   FROM
     del_surface_data_refs;
 
-  -- delete citydb.surface_data(s)
+  -- delete surface_data(s)
   IF -1 = ALL(surface_data_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_data(array_agg(a.a_id))
+      del_surface_data(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_data_ids) AS a_id) a
     LEFT JOIN
-      citydb.appear_to_surface_data n1
+      appear_to_surface_data n1
       ON n1.surface_data_id  = a.a_id
     WHERE n1.surface_data_id IS NULL;
   END IF;
 
-  -- delete citydb.appearances
+  -- delete appearances
   WITH delete_objects AS (
     DELETE FROM
-      citydb.appearance t
+      appearance t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -467,33 +467,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_appearance(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_appearance(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1508 (class 1255 OID 284715)
 -- Name: del_breakline_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_breakline_relief(pid integer) RETURNS integer
+CREATE FUNCTION del_breakline_relief(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_breakline_relief(ARRAY[pid]);
+  deleted_id := del_breakline_relief(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_breakline_relief(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_breakline_relief(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1507 (class 1255 OID 284714)
 -- Name: del_breakline_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_breakline_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_breakline_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -504,10 +504,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.breakline_reliefs
+  -- delete breakline_reliefs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.breakline_relief t
+      breakline_relief t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -524,7 +524,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete relief_component
-    PERFORM citydb.del_relief_component(deleted_ids, 2);
+    PERFORM del_relief_component(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -537,33 +537,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_breakline_relief(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_breakline_relief(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1510 (class 1255 OID 284717)
 -- Name: del_bridge(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge(ARRAY[pid]);
+  deleted_id := del_bridge(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1509 (class 1255 OID 284716)
 -- Name: del_bridge(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -578,9 +578,9 @@ DECLARE
 BEGIN
   -- delete referenced parts
   PERFORM
-    citydb.del_bridge(array_agg(t.id))
+    del_bridge(array_agg(t.id))
   FROM
-    citydb.bridge t,
+    bridge t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_parent_id = a.a_id
@@ -588,9 +588,9 @@ BEGIN
 
   -- delete referenced parts
   PERFORM
-    citydb.del_bridge(array_agg(t.id))
+    del_bridge(array_agg(t.id))
   FROM
-    citydb.bridge t,
+    bridge t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_root_id = a.a_id
@@ -599,7 +599,7 @@ BEGIN
   -- delete references to addresss
   WITH del_address_refs AS (
     DELETE FROM
-      citydb.address_to_bridge t
+      address_to_bridge t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -614,23 +614,23 @@ BEGIN
   FROM
     del_address_refs;
 
-  -- delete citydb.address(s)
+  -- delete address(s)
   IF -1 = ALL(address_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_address(array_agg(a.a_id))
+      del_address(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(address_ids) AS a_id) a
     LEFT JOIN
-      citydb.address_to_bridge n1
+      address_to_bridge n1
       ON n1.address_id  = a.a_id
     LEFT JOIN
-      citydb.address_to_building n2
+      address_to_building n2
       ON n2.address_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n3
+      bridge_opening n3
       ON n3.address_id  = a.a_id
     LEFT JOIN
-      citydb.opening n4
+      opening n4
       ON n4.address_id  = a.a_id
     WHERE n1.address_id IS NULL
       AND n2.address_id IS NULL
@@ -640,44 +640,44 @@ BEGIN
 
   --delete bridge_constr_elements
   PERFORM
-    citydb.del_bridge_constr_element(array_agg(t.id))
+    del_bridge_constr_element(array_agg(t.id))
   FROM
-    citydb.bridge_constr_element t,
+    bridge_constr_element t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_id = a.a_id;
 
   --delete bridge_installations
   PERFORM
-    citydb.del_bridge_installation(array_agg(t.id))
+    del_bridge_installation(array_agg(t.id))
   FROM
-    citydb.bridge_installation t,
+    bridge_installation t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_id = a.a_id;
 
   --delete bridge_rooms
   PERFORM
-    citydb.del_bridge_room(array_agg(t.id))
+    del_bridge_room(array_agg(t.id))
   FROM
-    citydb.bridge_room t,
+    bridge_room t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_id = a.a_id;
 
   --delete bridge_thematic_surfaces
   PERFORM
-    citydb.del_bridge_thematic_surface(array_agg(t.id))
+    del_bridge_thematic_surface(array_agg(t.id))
   FROM
-    citydb.bridge_thematic_surface t,
+    bridge_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_id = a.a_id;
 
-  -- delete citydb.bridges
+  -- delete bridges
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge t
+      bridge t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -709,17 +709,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -732,33 +732,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1512 (class 1255 OID 284719)
 -- Name: del_bridge_constr_element(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_constr_element(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_constr_element(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_constr_element(ARRAY[pid]);
+  deleted_id := del_bridge_constr_element(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_constr_element(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_constr_element(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1511 (class 1255 OID 284718)
 -- Name: del_bridge_constr_element(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_constr_element(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_constr_element(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -771,10 +771,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.bridge_constr_elements
+  -- delete bridge_constr_elements
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_constr_element t
+      bridge_constr_element t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -807,116 +807,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -955,17 +955,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -978,33 +978,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_constr_element(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_constr_element(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1514 (class 1255 OID 284721)
 -- Name: del_bridge_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_furniture(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_furniture(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_furniture(ARRAY[pid]);
+  deleted_id := del_bridge_furniture(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_furniture(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_furniture(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1513 (class 1255 OID 284720)
 -- Name: del_bridge_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1017,10 +1017,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.bridge_furnitures
+  -- delete bridge_furnitures
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_furniture t
+      bridge_furniture t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1041,116 +1041,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -1189,17 +1189,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -1212,33 +1212,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_furniture(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1516 (class 1255 OID 284723)
 -- Name: del_bridge_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_installation(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_installation(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_installation(ARRAY[pid]);
+  deleted_id := del_bridge_installation(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_installation(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_installation(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1515 (class 1255 OID 284722)
 -- Name: del_bridge_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1253,17 +1253,17 @@ DECLARE
 BEGIN
   --delete bridge_thematic_surfaces
   PERFORM
-    citydb.del_bridge_thematic_surface(array_agg(t.id))
+    del_bridge_thematic_surface(array_agg(t.id))
   FROM
-    citydb.bridge_thematic_surface t,
+    bridge_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_installation_id = a.a_id;
 
-  -- delete citydb.bridge_installations
+  -- delete bridge_installations
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_installation t
+      bridge_installation t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1292,116 +1292,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -1440,17 +1440,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -1463,33 +1463,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_installation(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_installation(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1518 (class 1255 OID 284725)
 -- Name: del_bridge_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_opening(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_opening(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_opening(ARRAY[pid]);
+  deleted_id := del_bridge_opening(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_opening(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_opening(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1517 (class 1255 OID 284724)
 -- Name: del_bridge_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1503,10 +1503,10 @@ DECLARE
   surface_geometry_ids int[] := '{}';
   address_ids int[] := '{}';
 BEGIN
-  -- delete citydb.bridge_openings
+  -- delete bridge_openings
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_opening t
+      bridge_opening t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1534,116 +1534,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -1682,31 +1682,31 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
-  -- delete citydb.address(s)
+  -- delete address(s)
   IF -1 = ALL(address_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_address(array_agg(a.a_id))
+      del_address(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(address_ids) AS a_id) a
     LEFT JOIN
-      citydb.address_to_bridge n1
+      address_to_bridge n1
       ON n1.address_id  = a.a_id
     LEFT JOIN
-      citydb.address_to_building n2
+      address_to_building n2
       ON n2.address_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n3
+      bridge_opening n3
       ON n3.address_id  = a.a_id
     LEFT JOIN
-      citydb.opening n4
+      opening n4
       ON n4.address_id  = a.a_id
     WHERE n1.address_id IS NULL
       AND n2.address_id IS NULL
@@ -1716,7 +1716,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -1729,33 +1729,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_opening(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_opening(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1520 (class 1255 OID 284727)
 -- Name: del_bridge_room(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_room(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_room(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_room(ARRAY[pid]);
+  deleted_id := del_bridge_room(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_room(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_room(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1519 (class 1255 OID 284726)
 -- Name: del_bridge_room(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_room(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_room(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1769,35 +1769,35 @@ DECLARE
 BEGIN
   --delete bridge_furnitures
   PERFORM
-    citydb.del_bridge_furniture(array_agg(t.id))
+    del_bridge_furniture(array_agg(t.id))
   FROM
-    citydb.bridge_furniture t,
+    bridge_furniture t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_room_id = a.a_id;
 
   --delete bridge_installations
   PERFORM
-    citydb.del_bridge_installation(array_agg(t.id))
+    del_bridge_installation(array_agg(t.id))
   FROM
-    citydb.bridge_installation t,
+    bridge_installation t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_room_id = a.a_id;
 
   --delete bridge_thematic_surfaces
   PERFORM
-    citydb.del_bridge_thematic_surface(array_agg(t.id))
+    del_bridge_thematic_surface(array_agg(t.id))
   FROM
-    citydb.bridge_thematic_surface t,
+    bridge_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.bridge_room_id = a.a_id;
 
-  -- delete citydb.bridge_rooms
+  -- delete bridge_rooms
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_room t
+      bridge_room t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1817,17 +1817,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -1840,33 +1840,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_room(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_room(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1522 (class 1255 OID 284729)
 -- Name: del_bridge_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_thematic_surface(pid integer) RETURNS integer
+CREATE FUNCTION del_bridge_thematic_surface(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_bridge_thematic_surface(ARRAY[pid]);
+  deleted_id := del_bridge_thematic_surface(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_bridge_thematic_surface(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_thematic_surface(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1521 (class 1255 OID 284728)
 -- Name: del_bridge_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_bridge_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_bridge_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1882,7 +1882,7 @@ BEGIN
   -- delete references to bridge_openings
   WITH del_bridge_opening_refs AS (
     DELETE FROM
-      citydb.bridge_open_to_them_srf t
+      bridge_open_to_them_srf t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1897,18 +1897,18 @@ BEGIN
   FROM
     del_bridge_opening_refs;
 
-  -- delete citydb.bridge_opening(s)
+  -- delete bridge_opening(s)
   IF -1 = ALL(bridge_opening_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_bridge_opening(array_agg(a.a_id))
+      del_bridge_opening(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(bridge_opening_ids) AS a_id) a;
   END IF;
 
-  -- delete citydb.bridge_thematic_surfaces
+  -- delete bridge_thematic_surfaces
   WITH delete_objects AS (
     DELETE FROM
-      citydb.bridge_thematic_surface t
+      bridge_thematic_surface t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -1930,17 +1930,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -1953,33 +1953,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_bridge_thematic_surface(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_bridge_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1524 (class 1255 OID 284731)
 -- Name: del_building(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building(pid integer) RETURNS integer
+CREATE FUNCTION del_building(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_building(ARRAY[pid]);
+  deleted_id := del_building(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_building(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_building(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1523 (class 1255 OID 284730)
 -- Name: del_building(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_building(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -1994,9 +1994,9 @@ DECLARE
 BEGIN
   -- delete referenced parts
   PERFORM
-    citydb.del_building(array_agg(t.id))
+    del_building(array_agg(t.id))
   FROM
-    citydb.building t,
+    building t,
     unnest($1) a(a_id)
   WHERE
     t.building_parent_id = a.a_id
@@ -2004,9 +2004,9 @@ BEGIN
 
   -- delete referenced parts
   PERFORM
-    citydb.del_building(array_agg(t.id))
+    del_building(array_agg(t.id))
   FROM
-    citydb.building t,
+    building t,
     unnest($1) a(a_id)
   WHERE
     t.building_root_id = a.a_id
@@ -2015,7 +2015,7 @@ BEGIN
   -- delete references to addresss
   WITH del_address_refs AS (
     DELETE FROM
-      citydb.address_to_building t
+      address_to_building t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2030,23 +2030,23 @@ BEGIN
   FROM
     del_address_refs;
 
-  -- delete citydb.address(s)
+  -- delete address(s)
   IF -1 = ALL(address_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_address(array_agg(a.a_id))
+      del_address(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(address_ids) AS a_id) a
     LEFT JOIN
-      citydb.address_to_bridge n1
+      address_to_bridge n1
       ON n1.address_id  = a.a_id
     LEFT JOIN
-      citydb.address_to_building n2
+      address_to_building n2
       ON n2.address_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n3
+      bridge_opening n3
       ON n3.address_id  = a.a_id
     LEFT JOIN
-      citydb.opening n4
+      opening n4
       ON n4.address_id  = a.a_id
     WHERE n1.address_id IS NULL
       AND n2.address_id IS NULL
@@ -2056,35 +2056,35 @@ BEGIN
 
   --delete building_installations
   PERFORM
-    citydb.del_building_installation(array_agg(t.id))
+    del_building_installation(array_agg(t.id))
   FROM
-    citydb.building_installation t,
+    building_installation t,
     unnest($1) a(a_id)
   WHERE
     t.building_id = a.a_id;
 
   --delete rooms
   PERFORM
-    citydb.del_room(array_agg(t.id))
+    del_room(array_agg(t.id))
   FROM
-    citydb.room t,
+    room t,
     unnest($1) a(a_id)
   WHERE
     t.building_id = a.a_id;
 
   --delete thematic_surfaces
   PERFORM
-    citydb.del_thematic_surface(array_agg(t.id))
+    del_thematic_surface(array_agg(t.id))
   FROM
-    citydb.thematic_surface t,
+    thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.building_id = a.a_id;
 
-  -- delete citydb.buildings
+  -- delete buildings
   WITH delete_objects AS (
     DELETE FROM
-      citydb.building t
+      building t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2120,17 +2120,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -2143,33 +2143,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_building(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_building(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1526 (class 1255 OID 284733)
 -- Name: del_building_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building_furniture(pid integer) RETURNS integer
+CREATE FUNCTION del_building_furniture(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_building_furniture(ARRAY[pid]);
+  deleted_id := del_building_furniture(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_building_furniture(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_building_furniture(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1525 (class 1255 OID 284732)
 -- Name: del_building_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_building_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -2182,10 +2182,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.building_furnitures
+  -- delete building_furnitures
   WITH delete_objects AS (
     DELETE FROM
-      citydb.building_furniture t
+      building_furniture t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2206,116 +2206,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -2354,17 +2354,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -2377,33 +2377,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_building_furniture(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_building_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1528 (class 1255 OID 284735)
 -- Name: del_building_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building_installation(pid integer) RETURNS integer
+CREATE FUNCTION del_building_installation(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_building_installation(ARRAY[pid]);
+  deleted_id := del_building_installation(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_building_installation(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_building_installation(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1527 (class 1255 OID 284734)
 -- Name: del_building_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_building_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_building_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -2418,17 +2418,17 @@ DECLARE
 BEGIN
   --delete thematic_surfaces
   PERFORM
-    citydb.del_thematic_surface(array_agg(t.id))
+    del_thematic_surface(array_agg(t.id))
   FROM
-    citydb.thematic_surface t,
+    thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.building_installation_id = a.a_id;
 
-  -- delete citydb.building_installations
+  -- delete building_installations
   WITH delete_objects AS (
     DELETE FROM
-      citydb.building_installation t
+      building_installation t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2457,116 +2457,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -2605,17 +2605,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -2628,33 +2628,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_building_installation(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_building_installation(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1530 (class 1255 OID 284737)
 -- Name: del_city_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_city_furniture(pid integer) RETURNS integer
+CREATE FUNCTION del_city_furniture(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_city_furniture(ARRAY[pid]);
+  deleted_id := del_city_furniture(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_city_furniture(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_city_furniture(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1529 (class 1255 OID 284736)
 -- Name: del_city_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_city_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_city_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -2667,10 +2667,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.city_furnitures
+  -- delete city_furnitures
   WITH delete_objects AS (
     DELETE FROM
-      citydb.city_furniture t
+      city_furniture t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2703,116 +2703,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -2851,17 +2851,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -2874,33 +2874,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_city_furniture(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_city_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1532 (class 1255 OID 284739)
 -- Name: del_citymodel(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_citymodel(pid integer) RETURNS integer
+CREATE FUNCTION del_citymodel(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_citymodel(ARRAY[pid]);
+  deleted_id := del_citymodel(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_citymodel(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_citymodel(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1531 (class 1255 OID 284738)
 -- Name: del_citymodel(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_citymodel(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_citymodel(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -2914,9 +2914,9 @@ DECLARE
 BEGIN
   --delete appearances
   PERFORM
-    citydb.del_appearance(array_agg(t.id))
+    del_appearance(array_agg(t.id))
   FROM
-    citydb.appearance t,
+    appearance t,
     unnest($1) a(a_id)
   WHERE
     t.citymodel_id = a.a_id;
@@ -2924,7 +2924,7 @@ BEGIN
   -- delete references to cityobjects
   WITH del_cityobject_refs AS (
     DELETE FROM
-      citydb.cityobject_member t
+      cityobject_member t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2939,26 +2939,26 @@ BEGIN
   FROM
     del_cityobject_refs;
 
-  -- delete citydb.cityobject(s)
+  -- delete cityobject(s)
   IF -1 = ALL(cityobject_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_cityobject(array_agg(a.a_id))
+      del_cityobject(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(cityobject_ids) AS a_id) a
     LEFT JOIN
-      citydb.cityobject_member n1
+      cityobject_member n1
       ON n1.cityobject_id  = a.a_id
     LEFT JOIN
-      citydb.group_to_cityobject n2
+      group_to_cityobject n2
       ON n2.cityobject_id  = a.a_id
     WHERE n1.cityobject_id IS NULL
       AND n2.cityobject_id IS NULL;
   END IF;
 
-  -- delete citydb.citymodels
+  -- delete citymodels
   WITH delete_objects AS (
     DELETE FROM
-      citydb.citymodel t
+      citymodel t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -2983,33 +2983,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_citymodel(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_citymodel(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1534 (class 1255 OID 284742)
 -- Name: del_cityobject(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobject(pid integer) RETURNS integer
+CREATE FUNCTION del_cityobject(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_cityobject(ARRAY[pid]);
+  deleted_id := del_cityobject(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_cityobject(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobject(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1533 (class 1255 OID 284740)
 -- Name: del_cityobject(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobject(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_cityobject(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3022,27 +3022,27 @@ DECLARE
 BEGIN
   --delete appearances
   PERFORM
-    citydb.del_appearance(array_agg(t.id))
+    del_appearance(array_agg(t.id))
   FROM
-    citydb.appearance t,
+    appearance t,
     unnest($1) a(a_id)
   WHERE
     t.cityobject_id = a.a_id;
 
   --delete cityobject_genericattribs
   PERFORM
-    citydb.del_cityobject_genericattrib(array_agg(t.id))
+    del_cityobject_genericattrib(array_agg(t.id))
   FROM
-    citydb.cityobject_genericattrib t,
+    cityobject_genericattrib t,
     unnest($1) a(a_id)
   WHERE
     t.cityobject_id = a.a_id;
 
   --delete external_references
   PERFORM
-    citydb.del_external_reference(array_agg(t.id))
+    del_external_reference(array_agg(t.id))
   FROM
-    citydb.external_reference t,
+    external_reference t,
     unnest($1) a(a_id)
   WHERE
     t.cityobject_id = a.a_id;
@@ -3052,7 +3052,7 @@ BEGIN
       SELECT
         co.id, co.objectclass_id
       FROM
-        citydb.cityobject co, unnest($1) a(a_id)
+        cityobject co, unnest($1) a(a_id)
       WHERE
         co.id = a.a_id
     LOOP
@@ -3061,286 +3061,286 @@ BEGIN
       CASE
         -- delete land_use
         WHEN objectclass_id = 4 THEN
-          dummy_id := citydb.del_land_use(array_agg(object_id), 1);
+          dummy_id := del_land_use(array_agg(object_id), 1);
         -- delete generic_cityobject
         WHEN objectclass_id = 5 THEN
-          dummy_id := citydb.del_generic_cityobject(array_agg(object_id), 1);
+          dummy_id := del_generic_cityobject(array_agg(object_id), 1);
         -- delete solitary_vegetat_object
         WHEN objectclass_id = 7 THEN
-          dummy_id := citydb.del_solitary_vegetat_object(array_agg(object_id), 1);
+          dummy_id := del_solitary_vegetat_object(array_agg(object_id), 1);
         -- delete plant_cover
         WHEN objectclass_id = 8 THEN
-          dummy_id := citydb.del_plant_cover(array_agg(object_id), 1);
+          dummy_id := del_plant_cover(array_agg(object_id), 1);
         -- delete waterbody
         WHEN objectclass_id = 9 THEN
-          dummy_id := citydb.del_waterbody(array_agg(object_id), 1);
+          dummy_id := del_waterbody(array_agg(object_id), 1);
         -- delete waterboundary_surface
         WHEN objectclass_id = 10 THEN
-          dummy_id := citydb.del_waterboundary_surface(array_agg(object_id), 1);
+          dummy_id := del_waterboundary_surface(array_agg(object_id), 1);
         -- delete waterboundary_surface
         WHEN objectclass_id = 11 THEN
-          dummy_id := citydb.del_waterboundary_surface(array_agg(object_id), 1);
+          dummy_id := del_waterboundary_surface(array_agg(object_id), 1);
         -- delete waterboundary_surface
         WHEN objectclass_id = 12 THEN
-          dummy_id := citydb.del_waterboundary_surface(array_agg(object_id), 1);
+          dummy_id := del_waterboundary_surface(array_agg(object_id), 1);
         -- delete waterboundary_surface
         WHEN objectclass_id = 13 THEN
-          dummy_id := citydb.del_waterboundary_surface(array_agg(object_id), 1);
+          dummy_id := del_waterboundary_surface(array_agg(object_id), 1);
         -- delete relief_feature
         WHEN objectclass_id = 14 THEN
-          dummy_id := citydb.del_relief_feature(array_agg(object_id), 1);
+          dummy_id := del_relief_feature(array_agg(object_id), 1);
         -- delete relief_component
         WHEN objectclass_id = 15 THEN
-          dummy_id := citydb.del_relief_component(array_agg(object_id), 1);
+          dummy_id := del_relief_component(array_agg(object_id), 1);
         -- delete tin_relief
         WHEN objectclass_id = 16 THEN
-          dummy_id := citydb.del_tin_relief(array_agg(object_id), 0);
+          dummy_id := del_tin_relief(array_agg(object_id), 0);
         -- delete masspoint_relief
         WHEN objectclass_id = 17 THEN
-          dummy_id := citydb.del_masspoint_relief(array_agg(object_id), 0);
+          dummy_id := del_masspoint_relief(array_agg(object_id), 0);
         -- delete breakline_relief
         WHEN objectclass_id = 18 THEN
-          dummy_id := citydb.del_breakline_relief(array_agg(object_id), 0);
+          dummy_id := del_breakline_relief(array_agg(object_id), 0);
         -- delete raster_relief
         WHEN objectclass_id = 19 THEN
-          dummy_id := citydb.del_raster_relief(array_agg(object_id), 0);
+          dummy_id := del_raster_relief(array_agg(object_id), 0);
         -- delete city_furniture
         WHEN objectclass_id = 21 THEN
-          dummy_id := citydb.del_city_furniture(array_agg(object_id), 1);
+          dummy_id := del_city_furniture(array_agg(object_id), 1);
         -- delete cityobjectgroup
         WHEN objectclass_id = 23 THEN
-          dummy_id := citydb.del_cityobjectgroup(array_agg(object_id), 1);
+          dummy_id := del_cityobjectgroup(array_agg(object_id), 1);
         -- delete building
         WHEN objectclass_id = 24 THEN
-          dummy_id := citydb.del_building(array_agg(object_id), 1);
+          dummy_id := del_building(array_agg(object_id), 1);
         -- delete building
         WHEN objectclass_id = 25 THEN
-          dummy_id := citydb.del_building(array_agg(object_id), 1);
+          dummy_id := del_building(array_agg(object_id), 1);
         -- delete building
         WHEN objectclass_id = 26 THEN
-          dummy_id := citydb.del_building(array_agg(object_id), 1);
+          dummy_id := del_building(array_agg(object_id), 1);
         -- delete building_installation
         WHEN objectclass_id = 27 THEN
-          dummy_id := citydb.del_building_installation(array_agg(object_id), 1);
+          dummy_id := del_building_installation(array_agg(object_id), 1);
         -- delete building_installation
         WHEN objectclass_id = 28 THEN
-          dummy_id := citydb.del_building_installation(array_agg(object_id), 1);
+          dummy_id := del_building_installation(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 29 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 30 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 31 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 32 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 33 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 34 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 35 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 36 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete opening
         WHEN objectclass_id = 37 THEN
-          dummy_id := citydb.del_opening(array_agg(object_id), 1);
+          dummy_id := del_opening(array_agg(object_id), 1);
         -- delete opening
         WHEN objectclass_id = 38 THEN
-          dummy_id := citydb.del_opening(array_agg(object_id), 1);
+          dummy_id := del_opening(array_agg(object_id), 1);
         -- delete opening
         WHEN objectclass_id = 39 THEN
-          dummy_id := citydb.del_opening(array_agg(object_id), 1);
+          dummy_id := del_opening(array_agg(object_id), 1);
         -- delete building_furniture
         WHEN objectclass_id = 40 THEN
-          dummy_id := citydb.del_building_furniture(array_agg(object_id), 1);
+          dummy_id := del_building_furniture(array_agg(object_id), 1);
         -- delete room
         WHEN objectclass_id = 41 THEN
-          dummy_id := citydb.del_room(array_agg(object_id), 1);
+          dummy_id := del_room(array_agg(object_id), 1);
         -- delete transportation_complex
         WHEN objectclass_id = 42 THEN
-          dummy_id := citydb.del_transportation_complex(array_agg(object_id), 1);
+          dummy_id := del_transportation_complex(array_agg(object_id), 1);
         -- delete transportation_complex
         WHEN objectclass_id = 43 THEN
-          dummy_id := citydb.del_transportation_complex(array_agg(object_id), 1);
+          dummy_id := del_transportation_complex(array_agg(object_id), 1);
         -- delete transportation_complex
         WHEN objectclass_id = 44 THEN
-          dummy_id := citydb.del_transportation_complex(array_agg(object_id), 1);
+          dummy_id := del_transportation_complex(array_agg(object_id), 1);
         -- delete transportation_complex
         WHEN objectclass_id = 45 THEN
-          dummy_id := citydb.del_transportation_complex(array_agg(object_id), 1);
+          dummy_id := del_transportation_complex(array_agg(object_id), 1);
         -- delete transportation_complex
         WHEN objectclass_id = 46 THEN
-          dummy_id := citydb.del_transportation_complex(array_agg(object_id), 1);
+          dummy_id := del_transportation_complex(array_agg(object_id), 1);
         -- delete traffic_area
         WHEN objectclass_id = 47 THEN
-          dummy_id := citydb.del_traffic_area(array_agg(object_id), 1);
+          dummy_id := del_traffic_area(array_agg(object_id), 1);
         -- delete traffic_area
         WHEN objectclass_id = 48 THEN
-          dummy_id := citydb.del_traffic_area(array_agg(object_id), 1);
+          dummy_id := del_traffic_area(array_agg(object_id), 1);
         -- delete appearance
         WHEN objectclass_id = 50 THEN
-          dummy_id := citydb.del_appearance(array_agg(object_id), 0);
+          dummy_id := del_appearance(array_agg(object_id), 0);
         -- delete surface_data
         WHEN objectclass_id = 51 THEN
-          dummy_id := citydb.del_surface_data(array_agg(object_id), 0);
+          dummy_id := del_surface_data(array_agg(object_id), 0);
         -- delete surface_data
         WHEN objectclass_id = 52 THEN
-          dummy_id := citydb.del_surface_data(array_agg(object_id), 0);
+          dummy_id := del_surface_data(array_agg(object_id), 0);
         -- delete surface_data
         WHEN objectclass_id = 53 THEN
-          dummy_id := citydb.del_surface_data(array_agg(object_id), 0);
+          dummy_id := del_surface_data(array_agg(object_id), 0);
         -- delete surface_data
         WHEN objectclass_id = 54 THEN
-          dummy_id := citydb.del_surface_data(array_agg(object_id), 0);
+          dummy_id := del_surface_data(array_agg(object_id), 0);
         -- delete surface_data
         WHEN objectclass_id = 55 THEN
-          dummy_id := citydb.del_surface_data(array_agg(object_id), 0);
+          dummy_id := del_surface_data(array_agg(object_id), 0);
         -- delete citymodel
         WHEN objectclass_id = 57 THEN
-          dummy_id := citydb.del_citymodel(array_agg(object_id), 0);
+          dummy_id := del_citymodel(array_agg(object_id), 0);
         -- delete address
         WHEN objectclass_id = 58 THEN
-          dummy_id := citydb.del_address(array_agg(object_id), 0);
+          dummy_id := del_address(array_agg(object_id), 0);
         -- delete implicit_geometry
         WHEN objectclass_id = 59 THEN
-          dummy_id := citydb.del_implicit_geometry(array_agg(object_id), 0);
+          dummy_id := del_implicit_geometry(array_agg(object_id), 0);
         -- delete thematic_surface
         WHEN objectclass_id = 60 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete thematic_surface
         WHEN objectclass_id = 61 THEN
-          dummy_id := citydb.del_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_thematic_surface(array_agg(object_id), 1);
         -- delete bridge
         WHEN objectclass_id = 62 THEN
-          dummy_id := citydb.del_bridge(array_agg(object_id), 1);
+          dummy_id := del_bridge(array_agg(object_id), 1);
         -- delete bridge
         WHEN objectclass_id = 63 THEN
-          dummy_id := citydb.del_bridge(array_agg(object_id), 1);
+          dummy_id := del_bridge(array_agg(object_id), 1);
         -- delete bridge
         WHEN objectclass_id = 64 THEN
-          dummy_id := citydb.del_bridge(array_agg(object_id), 1);
+          dummy_id := del_bridge(array_agg(object_id), 1);
         -- delete bridge_installation
         WHEN objectclass_id = 65 THEN
-          dummy_id := citydb.del_bridge_installation(array_agg(object_id), 1);
+          dummy_id := del_bridge_installation(array_agg(object_id), 1);
         -- delete bridge_installation
         WHEN objectclass_id = 66 THEN
-          dummy_id := citydb.del_bridge_installation(array_agg(object_id), 1);
+          dummy_id := del_bridge_installation(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 67 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 68 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 69 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 70 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 71 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 72 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 73 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 74 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 75 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_thematic_surface
         WHEN objectclass_id = 76 THEN
-          dummy_id := citydb.del_bridge_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_bridge_thematic_surface(array_agg(object_id), 1);
         -- delete bridge_opening
         WHEN objectclass_id = 77 THEN
-          dummy_id := citydb.del_bridge_opening(array_agg(object_id), 1);
+          dummy_id := del_bridge_opening(array_agg(object_id), 1);
         -- delete bridge_opening
         WHEN objectclass_id = 78 THEN
-          dummy_id := citydb.del_bridge_opening(array_agg(object_id), 1);
+          dummy_id := del_bridge_opening(array_agg(object_id), 1);
         -- delete bridge_opening
         WHEN objectclass_id = 79 THEN
-          dummy_id := citydb.del_bridge_opening(array_agg(object_id), 1);
+          dummy_id := del_bridge_opening(array_agg(object_id), 1);
         -- delete bridge_furniture
         WHEN objectclass_id = 80 THEN
-          dummy_id := citydb.del_bridge_furniture(array_agg(object_id), 1);
+          dummy_id := del_bridge_furniture(array_agg(object_id), 1);
         -- delete bridge_room
         WHEN objectclass_id = 81 THEN
-          dummy_id := citydb.del_bridge_room(array_agg(object_id), 1);
+          dummy_id := del_bridge_room(array_agg(object_id), 1);
         -- delete bridge_constr_element
         WHEN objectclass_id = 82 THEN
-          dummy_id := citydb.del_bridge_constr_element(array_agg(object_id), 1);
+          dummy_id := del_bridge_constr_element(array_agg(object_id), 1);
         -- delete tunnel
         WHEN objectclass_id = 83 THEN
-          dummy_id := citydb.del_tunnel(array_agg(object_id), 1);
+          dummy_id := del_tunnel(array_agg(object_id), 1);
         -- delete tunnel
         WHEN objectclass_id = 84 THEN
-          dummy_id := citydb.del_tunnel(array_agg(object_id), 1);
+          dummy_id := del_tunnel(array_agg(object_id), 1);
         -- delete tunnel
         WHEN objectclass_id = 85 THEN
-          dummy_id := citydb.del_tunnel(array_agg(object_id), 1);
+          dummy_id := del_tunnel(array_agg(object_id), 1);
         -- delete tunnel_installation
         WHEN objectclass_id = 86 THEN
-          dummy_id := citydb.del_tunnel_installation(array_agg(object_id), 1);
+          dummy_id := del_tunnel_installation(array_agg(object_id), 1);
         -- delete tunnel_installation
         WHEN objectclass_id = 87 THEN
-          dummy_id := citydb.del_tunnel_installation(array_agg(object_id), 1);
+          dummy_id := del_tunnel_installation(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 88 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 89 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 90 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 91 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 92 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 93 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 94 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 95 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 96 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_thematic_surface
         WHEN objectclass_id = 97 THEN
-          dummy_id := citydb.del_tunnel_thematic_surface(array_agg(object_id), 1);
+          dummy_id := del_tunnel_thematic_surface(array_agg(object_id), 1);
         -- delete tunnel_opening
         WHEN objectclass_id = 98 THEN
-          dummy_id := citydb.del_tunnel_opening(array_agg(object_id), 1);
+          dummy_id := del_tunnel_opening(array_agg(object_id), 1);
         -- delete tunnel_opening
         WHEN objectclass_id = 99 THEN
-          dummy_id := citydb.del_tunnel_opening(array_agg(object_id), 1);
+          dummy_id := del_tunnel_opening(array_agg(object_id), 1);
         -- delete tunnel_opening
         WHEN objectclass_id = 100 THEN
-          dummy_id := citydb.del_tunnel_opening(array_agg(object_id), 1);
+          dummy_id := del_tunnel_opening(array_agg(object_id), 1);
         -- delete tunnel_furniture
         WHEN objectclass_id = 101 THEN
-          dummy_id := citydb.del_tunnel_furniture(array_agg(object_id), 1);
+          dummy_id := del_tunnel_furniture(array_agg(object_id), 1);
         -- delete tunnel_hollow_space
         WHEN objectclass_id = 102 THEN
-          dummy_id := citydb.del_tunnel_hollow_space(array_agg(object_id), 1);
+          dummy_id := del_tunnel_hollow_space(array_agg(object_id), 1);
         ELSE
           dummy_id := NULL;
       END CASE;
@@ -3351,10 +3351,10 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- delete citydb.cityobjects
+  -- delete cityobjects
   WITH delete_objects AS (
     DELETE FROM
-      citydb.cityobject t
+      cityobject t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3379,33 +3379,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_cityobject(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobject(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1536 (class 1255 OID 284744)
 -- Name: del_cityobject_genericattrib(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobject_genericattrib(pid integer) RETURNS integer
+CREATE FUNCTION del_cityobject_genericattrib(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_cityobject_genericattrib(ARRAY[pid]);
+  deleted_id := del_cityobject_genericattrib(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_cityobject_genericattrib(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobject_genericattrib(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1535 (class 1255 OID 284743)
 -- Name: del_cityobject_genericattrib(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobject_genericattrib(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_cityobject_genericattrib(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3419,9 +3419,9 @@ DECLARE
 BEGIN
   -- delete referenced parts
   PERFORM
-    citydb.del_cityobject_genericattrib(array_agg(t.id))
+    del_cityobject_genericattrib(array_agg(t.id))
   FROM
-    citydb.cityobject_genericattrib t,
+    cityobject_genericattrib t,
     unnest($1) a(a_id)
   WHERE
     t.parent_genattrib_id = a.a_id
@@ -3429,18 +3429,18 @@ BEGIN
 
   -- delete referenced parts
   PERFORM
-    citydb.del_cityobject_genericattrib(array_agg(t.id))
+    del_cityobject_genericattrib(array_agg(t.id))
   FROM
-    citydb.cityobject_genericattrib t,
+    cityobject_genericattrib t,
     unnest($1) a(a_id)
   WHERE
     t.root_genattrib_id = a.a_id
     AND t.id <> a.a_id;
 
-  -- delete citydb.cityobject_genericattribs
+  -- delete cityobject_genericattribs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.cityobject_genericattrib t
+      cityobject_genericattrib t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3458,10 +3458,10 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
@@ -3476,33 +3476,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_cityobject_genericattrib(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobject_genericattrib(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1538 (class 1255 OID 284746)
 -- Name: del_cityobjectgroup(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobjectgroup(pid integer) RETURNS integer
+CREATE FUNCTION del_cityobjectgroup(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_cityobjectgroup(ARRAY[pid]);
+  deleted_id := del_cityobjectgroup(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_cityobjectgroup(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobjectgroup(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1537 (class 1255 OID 284745)
 -- Name: del_cityobjectgroup(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobjectgroup(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_cityobjectgroup(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3518,7 +3518,7 @@ BEGIN
   -- delete references to cityobjects
   WITH del_cityobject_refs AS (
     DELETE FROM
-      citydb.group_to_cityobject t
+      group_to_cityobject t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3533,26 +3533,26 @@ BEGIN
   FROM
     del_cityobject_refs;
 
-  -- delete citydb.cityobject(s)
+  -- delete cityobject(s)
   IF -1 = ALL(cityobject_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_cityobject(array_agg(a.a_id))
+      del_cityobject(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(cityobject_ids) AS a_id) a
     LEFT JOIN
-      citydb.cityobject_member n1
+      cityobject_member n1
       ON n1.cityobject_id  = a.a_id
     LEFT JOIN
-      citydb.group_to_cityobject n2
+      group_to_cityobject n2
       ON n2.cityobject_id  = a.a_id
     WHERE n1.cityobject_id IS NULL
       AND n2.cityobject_id IS NULL;
   END IF;
 
-  -- delete citydb.cityobjectgroups
+  -- delete cityobjectgroups
   WITH delete_objects AS (
     DELETE FROM
-      citydb.cityobjectgroup t
+      cityobjectgroup t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3570,17 +3570,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -3593,14 +3593,14 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_cityobjectgroup(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobjectgroup(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1539 (class 1255 OID 284747)
 -- Name: del_cityobjects_by_lineage(text, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_cityobjects_by_lineage(lineage_value text, objectclass_id integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_cityobjects_by_lineage(lineage_value text, objectclass_id integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 -- Function for deleting cityobjects by lineage value
@@ -3609,14 +3609,14 @@ DECLARE
 BEGIN
   IF $2 = 0 THEN
     SELECT array_agg(c.id) FROM
-      citydb.cityobject c
+      cityobject c
     INTO
       deleted_ids
     WHERE
       c.lineage = $1;
   ELSE
     SELECT array_agg(c.id) FROM
-      citydb.cityobject c
+      cityobject c
     INTO
       deleted_ids
     WHERE
@@ -3624,7 +3624,7 @@ BEGIN
   END IF;
 
   IF -1 = ALL(deleted_ids) IS NOT NULL THEN
-    PERFORM citydb.del_cityobject(deleted_ids);
+    PERFORM del_cityobject(deleted_ids);
   END IF;
 
   RETURN QUERY
@@ -3633,33 +3633,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_cityobjects_by_lineage(lineage_value text, objectclass_id integer) OWNER TO postgres;
+ALTER FUNCTION del_cityobjects_by_lineage(lineage_value text, objectclass_id integer) OWNER TO postgres;
 
 --
 -- TOC entry 1541 (class 1255 OID 284749)
 -- Name: del_external_reference(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_external_reference(pid integer) RETURNS integer
+CREATE FUNCTION del_external_reference(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_external_reference(ARRAY[pid]);
+  deleted_id := del_external_reference(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_external_reference(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_external_reference(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1540 (class 1255 OID 284748)
 -- Name: del_external_reference(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_external_reference(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_external_reference(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3670,10 +3670,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.external_references
+  -- delete external_references
   WITH delete_objects AS (
     DELETE FROM
-      citydb.external_reference t
+      external_reference t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3698,33 +3698,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_external_reference(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_external_reference(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1543 (class 1255 OID 284751)
 -- Name: del_generic_cityobject(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_generic_cityobject(pid integer) RETURNS integer
+CREATE FUNCTION del_generic_cityobject(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_generic_cityobject(ARRAY[pid]);
+  deleted_id := del_generic_cityobject(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_generic_cityobject(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_generic_cityobject(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1542 (class 1255 OID 284750)
 -- Name: del_generic_cityobject(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_generic_cityobject(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_generic_cityobject(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3737,10 +3737,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.generic_cityobjects
+  -- delete generic_cityobjects
   WITH delete_objects AS (
     DELETE FROM
-      citydb.generic_cityobject t
+      generic_cityobject t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -3777,116 +3777,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -3925,17 +3925,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -3948,33 +3948,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_generic_cityobject(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_generic_cityobject(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1545 (class 1255 OID 284753)
 -- Name: del_grid_coverage(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_grid_coverage(pid integer) RETURNS integer
+CREATE FUNCTION del_grid_coverage(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_grid_coverage(ARRAY[pid]);
+  deleted_id := del_grid_coverage(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_grid_coverage(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_grid_coverage(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1544 (class 1255 OID 284752)
 -- Name: del_grid_coverage(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_grid_coverage(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_grid_coverage(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -3985,10 +3985,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.grid_coverages
+  -- delete grid_coverages
   WITH delete_objects AS (
     DELETE FROM
-      citydb.grid_coverage t
+      grid_coverage t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4013,33 +4013,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_grid_coverage(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_grid_coverage(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1547 (class 1255 OID 284755)
 -- Name: del_implicit_geometry(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_implicit_geometry(pid integer) RETURNS integer
+CREATE FUNCTION del_implicit_geometry(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_implicit_geometry(ARRAY[pid]);
+  deleted_id := del_implicit_geometry(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_implicit_geometry(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_implicit_geometry(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1546 (class 1255 OID 284754)
 -- Name: del_implicit_geometry(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_implicit_geometry(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_implicit_geometry(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4051,10 +4051,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.implicit_geometrys
+  -- delete implicit_geometrys
   WITH delete_objects AS (
     DELETE FROM
-      citydb.implicit_geometry t
+      implicit_geometry t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4072,10 +4072,10 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
@@ -4090,33 +4090,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_implicit_geometry(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_implicit_geometry(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1549 (class 1255 OID 284757)
 -- Name: del_land_use(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_land_use(pid integer) RETURNS integer
+CREATE FUNCTION del_land_use(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_land_use(ARRAY[pid]);
+  deleted_id := del_land_use(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_land_use(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_land_use(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1548 (class 1255 OID 284756)
 -- Name: del_land_use(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_land_use(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_land_use(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4128,10 +4128,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.land_uses
+  -- delete land_uses
   WITH delete_objects AS (
     DELETE FROM
-      citydb.land_use t
+      land_use t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4157,17 +4157,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4180,33 +4180,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_land_use(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_land_use(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1551 (class 1255 OID 284759)
 -- Name: del_masspoint_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_masspoint_relief(pid integer) RETURNS integer
+CREATE FUNCTION del_masspoint_relief(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_masspoint_relief(ARRAY[pid]);
+  deleted_id := del_masspoint_relief(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_masspoint_relief(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_masspoint_relief(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1550 (class 1255 OID 284758)
 -- Name: del_masspoint_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_masspoint_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_masspoint_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4217,10 +4217,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.masspoint_reliefs
+  -- delete masspoint_reliefs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.masspoint_relief t
+      masspoint_relief t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4237,7 +4237,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete relief_component
-    PERFORM citydb.del_relief_component(deleted_ids, 2);
+    PERFORM del_relief_component(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4250,33 +4250,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_masspoint_relief(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_masspoint_relief(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1553 (class 1255 OID 284761)
 -- Name: del_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_opening(pid integer) RETURNS integer
+CREATE FUNCTION del_opening(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_opening(ARRAY[pid]);
+  deleted_id := del_opening(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_opening(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_opening(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1552 (class 1255 OID 284760)
 -- Name: del_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4290,10 +4290,10 @@ DECLARE
   surface_geometry_ids int[] := '{}';
   address_ids int[] := '{}';
 BEGIN
-  -- delete citydb.openings
+  -- delete openings
   WITH delete_objects AS (
     DELETE FROM
-      citydb.opening t
+      opening t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4321,116 +4321,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -4469,31 +4469,31 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
-  -- delete citydb.address(s)
+  -- delete address(s)
   IF -1 = ALL(address_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_address(array_agg(a.a_id))
+      del_address(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(address_ids) AS a_id) a
     LEFT JOIN
-      citydb.address_to_bridge n1
+      address_to_bridge n1
       ON n1.address_id  = a.a_id
     LEFT JOIN
-      citydb.address_to_building n2
+      address_to_building n2
       ON n2.address_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n3
+      bridge_opening n3
       ON n3.address_id  = a.a_id
     LEFT JOIN
-      citydb.opening n4
+      opening n4
       ON n4.address_id  = a.a_id
     WHERE n1.address_id IS NULL
       AND n2.address_id IS NULL
@@ -4503,7 +4503,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4516,33 +4516,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_opening(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_opening(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1555 (class 1255 OID 284763)
 -- Name: del_plant_cover(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_plant_cover(pid integer) RETURNS integer
+CREATE FUNCTION del_plant_cover(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_plant_cover(ARRAY[pid]);
+  deleted_id := del_plant_cover(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_plant_cover(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_plant_cover(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1554 (class 1255 OID 284762)
 -- Name: del_plant_cover(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_plant_cover(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_plant_cover(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4554,10 +4554,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.plant_covers
+  -- delete plant_covers
   WITH delete_objects AS (
     DELETE FROM
-      citydb.plant_cover t
+      plant_cover t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4589,17 +4589,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4612,33 +4612,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_plant_cover(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_plant_cover(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1557 (class 1255 OID 284765)
 -- Name: del_raster_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_raster_relief(pid integer) RETURNS integer
+CREATE FUNCTION del_raster_relief(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_raster_relief(ARRAY[pid]);
+  deleted_id := del_raster_relief(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_raster_relief(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_raster_relief(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1556 (class 1255 OID 284764)
 -- Name: del_raster_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_raster_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_raster_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4650,10 +4650,10 @@ DECLARE
   rec RECORD;
   grid_coverage_ids int[] := '{}';
 BEGIN
-  -- delete citydb.raster_reliefs
+  -- delete raster_reliefs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.raster_relief t
+      raster_relief t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4671,17 +4671,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.grid_coverage(s)
+  -- delete grid_coverage(s)
   IF -1 = ALL(grid_coverage_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_grid_coverage(array_agg(a.a_id))
+      del_grid_coverage(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(grid_coverage_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete relief_component
-    PERFORM citydb.del_relief_component(deleted_ids, 2);
+    PERFORM del_relief_component(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4694,33 +4694,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_raster_relief(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_raster_relief(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1559 (class 1255 OID 284767)
 -- Name: del_relief_component(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_relief_component(pid integer) RETURNS integer
+CREATE FUNCTION del_relief_component(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_relief_component(ARRAY[pid]);
+  deleted_id := del_relief_component(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_relief_component(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_relief_component(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1558 (class 1255 OID 284766)
 -- Name: del_relief_component(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_relief_component(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_relief_component(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4736,7 +4736,7 @@ BEGIN
       SELECT
         co.id, co.objectclass_id
       FROM
-        citydb.cityobject co, unnest($1) a(a_id)
+        cityobject co, unnest($1) a(a_id)
       WHERE
         co.id = a.a_id
     LOOP
@@ -4745,16 +4745,16 @@ BEGIN
       CASE
         -- delete tin_relief
         WHEN objectclass_id = 16 THEN
-          dummy_id := citydb.del_tin_relief(array_agg(object_id), 1);
+          dummy_id := del_tin_relief(array_agg(object_id), 1);
         -- delete masspoint_relief
         WHEN objectclass_id = 17 THEN
-          dummy_id := citydb.del_masspoint_relief(array_agg(object_id), 1);
+          dummy_id := del_masspoint_relief(array_agg(object_id), 1);
         -- delete breakline_relief
         WHEN objectclass_id = 18 THEN
-          dummy_id := citydb.del_breakline_relief(array_agg(object_id), 1);
+          dummy_id := del_breakline_relief(array_agg(object_id), 1);
         -- delete raster_relief
         WHEN objectclass_id = 19 THEN
-          dummy_id := citydb.del_raster_relief(array_agg(object_id), 1);
+          dummy_id := del_raster_relief(array_agg(object_id), 1);
         ELSE
           dummy_id := NULL;
       END CASE;
@@ -4765,10 +4765,10 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- delete citydb.relief_components
+  -- delete relief_components
   WITH delete_objects AS (
     DELETE FROM
-      citydb.relief_component t
+      relief_component t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4785,7 +4785,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4798,33 +4798,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_relief_component(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_relief_component(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1561 (class 1255 OID 284769)
 -- Name: del_relief_feature(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_relief_feature(pid integer) RETURNS integer
+CREATE FUNCTION del_relief_feature(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_relief_feature(ARRAY[pid]);
+  deleted_id := del_relief_feature(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_relief_feature(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_relief_feature(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1560 (class 1255 OID 284768)
 -- Name: del_relief_feature(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_relief_feature(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_relief_feature(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4839,7 +4839,7 @@ BEGIN
   -- delete references to relief_components
   WITH del_relief_component_refs AS (
     DELETE FROM
-      citydb.relief_feat_to_rel_comp t
+      relief_feat_to_rel_comp t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4854,22 +4854,22 @@ BEGIN
   FROM
     del_relief_component_refs;
 
-  -- delete citydb.relief_component(s)
+  -- delete relief_component(s)
   IF -1 = ALL(relief_component_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_relief_component(array_agg(a.a_id))
+      del_relief_component(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(relief_component_ids) AS a_id) a
     LEFT JOIN
-      citydb.relief_feat_to_rel_comp n1
+      relief_feat_to_rel_comp n1
       ON n1.relief_component_id  = a.a_id
     WHERE n1.relief_component_id IS NULL;
   END IF;
 
-  -- delete citydb.relief_features
+  -- delete relief_features
   WITH delete_objects AS (
     DELETE FROM
-      citydb.relief_feature t
+      relief_feature t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4886,7 +4886,7 @@ BEGIN
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -4899,33 +4899,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_relief_feature(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_relief_feature(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1563 (class 1255 OID 284771)
 -- Name: del_room(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_room(pid integer) RETURNS integer
+CREATE FUNCTION del_room(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_room(ARRAY[pid]);
+  deleted_id := del_room(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_room(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_room(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1562 (class 1255 OID 284770)
 -- Name: del_room(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_room(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_room(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -4939,35 +4939,35 @@ DECLARE
 BEGIN
   --delete building_furnitures
   PERFORM
-    citydb.del_building_furniture(array_agg(t.id))
+    del_building_furniture(array_agg(t.id))
   FROM
-    citydb.building_furniture t,
+    building_furniture t,
     unnest($1) a(a_id)
   WHERE
     t.room_id = a.a_id;
 
   --delete building_installations
   PERFORM
-    citydb.del_building_installation(array_agg(t.id))
+    del_building_installation(array_agg(t.id))
   FROM
-    citydb.building_installation t,
+    building_installation t,
     unnest($1) a(a_id)
   WHERE
     t.room_id = a.a_id;
 
   --delete thematic_surfaces
   PERFORM
-    citydb.del_thematic_surface(array_agg(t.id))
+    del_thematic_surface(array_agg(t.id))
   FROM
-    citydb.thematic_surface t,
+    thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.room_id = a.a_id;
 
-  -- delete citydb.rooms
+  -- delete rooms
   WITH delete_objects AS (
     DELETE FROM
-      citydb.room t
+      room t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -4987,17 +4987,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5010,33 +5010,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_room(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_room(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1565 (class 1255 OID 284773)
 -- Name: del_solitary_vegetat_object(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_solitary_vegetat_object(pid integer) RETURNS integer
+CREATE FUNCTION del_solitary_vegetat_object(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_solitary_vegetat_object(ARRAY[pid]);
+  deleted_id := del_solitary_vegetat_object(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_solitary_vegetat_object(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_solitary_vegetat_object(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1564 (class 1255 OID 284772)
 -- Name: del_solitary_vegetat_object(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_solitary_vegetat_object(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_solitary_vegetat_object(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5049,10 +5049,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.solitary_vegetat_objects
+  -- delete solitary_vegetat_objects
   WITH delete_objects AS (
     DELETE FROM
-      citydb.solitary_vegetat_object t
+      solitary_vegetat_object t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5085,116 +5085,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -5233,17 +5233,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5256,33 +5256,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_solitary_vegetat_object(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_solitary_vegetat_object(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1567 (class 1255 OID 284775)
 -- Name: del_surface_data(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_surface_data(pid integer) RETURNS integer
+CREATE FUNCTION del_surface_data(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_surface_data(ARRAY[pid]);
+  deleted_id := del_surface_data(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_surface_data(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_surface_data(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1566 (class 1255 OID 284774)
 -- Name: del_surface_data(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_surface_data(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_surface_data(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5294,10 +5294,10 @@ DECLARE
   rec RECORD;
   tex_image_ids int[] := '{}';
 BEGIN
-  -- delete citydb.surface_datas
+  -- delete surface_datas
   WITH delete_objects AS (
     DELETE FROM
-      citydb.surface_data t
+      surface_data t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5315,14 +5315,14 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.tex_image(s)
+  -- delete tex_image(s)
   IF -1 = ALL(tex_image_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_tex_image(array_agg(a.a_id))
+      del_tex_image(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(tex_image_ids) AS a_id) a
     LEFT JOIN
-      citydb.surface_data n1
+      surface_data n1
       ON n1.tex_image_id  = a.a_id
     WHERE n1.tex_image_id IS NULL;
   END IF;
@@ -5337,33 +5337,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_surface_data(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_surface_data(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1569 (class 1255 OID 284777)
 -- Name: del_surface_geometry(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_surface_geometry(pid integer) RETURNS integer
+CREATE FUNCTION del_surface_geometry(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_surface_geometry(ARRAY[pid]);
+  deleted_id := del_surface_geometry(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_surface_geometry(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_surface_geometry(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1568 (class 1255 OID 284776)
 -- Name: del_surface_geometry(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_surface_geometry(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_surface_geometry(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5376,9 +5376,9 @@ DECLARE
 BEGIN
   -- delete referenced parts
   PERFORM
-    citydb.del_surface_geometry(array_agg(t.id))
+    del_surface_geometry(array_agg(t.id))
   FROM
-    citydb.surface_geometry t,
+    surface_geometry t,
     unnest($1) a(a_id)
   WHERE
     t.parent_id = a.a_id
@@ -5386,18 +5386,18 @@ BEGIN
 
   -- delete referenced parts
   PERFORM
-    citydb.del_surface_geometry(array_agg(t.id))
+    del_surface_geometry(array_agg(t.id))
   FROM
-    citydb.surface_geometry t,
+    surface_geometry t,
     unnest($1) a(a_id)
   WHERE
     t.root_id = a.a_id
     AND t.id <> a.a_id;
 
-  -- delete citydb.surface_geometrys
+  -- delete surface_geometrys
   WITH delete_objects AS (
     DELETE FROM
-      citydb.surface_geometry t
+      surface_geometry t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5422,33 +5422,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_surface_geometry(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_surface_geometry(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1571 (class 1255 OID 284779)
 -- Name: del_tex_image(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tex_image(pid integer) RETURNS integer
+CREATE FUNCTION del_tex_image(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tex_image(ARRAY[pid]);
+  deleted_id := del_tex_image(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tex_image(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tex_image(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1570 (class 1255 OID 284778)
 -- Name: del_tex_image(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tex_image(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tex_image(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5459,10 +5459,10 @@ DECLARE
   objectclass_id integer;
   rec RECORD;
 BEGIN
-  -- delete citydb.tex_images
+  -- delete tex_images
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tex_image t
+      tex_image t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5487,33 +5487,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tex_image(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tex_image(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1573 (class 1255 OID 284781)
 -- Name: del_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_thematic_surface(pid integer) RETURNS integer
+CREATE FUNCTION del_thematic_surface(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_thematic_surface(ARRAY[pid]);
+  deleted_id := del_thematic_surface(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_thematic_surface(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_thematic_surface(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1572 (class 1255 OID 284780)
 -- Name: del_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5529,7 +5529,7 @@ BEGIN
   -- delete references to openings
   WITH del_opening_refs AS (
     DELETE FROM
-      citydb.opening_to_them_surface t
+      opening_to_them_surface t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5544,18 +5544,18 @@ BEGIN
   FROM
     del_opening_refs;
 
-  -- delete citydb.opening(s)
+  -- delete opening(s)
   IF -1 = ALL(opening_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_opening(array_agg(a.a_id))
+      del_opening(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(opening_ids) AS a_id) a;
   END IF;
 
-  -- delete citydb.thematic_surfaces
+  -- delete thematic_surfaces
   WITH delete_objects AS (
     DELETE FROM
-      citydb.thematic_surface t
+      thematic_surface t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5577,17 +5577,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5600,33 +5600,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_thematic_surface(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1575 (class 1255 OID 284783)
 -- Name: del_tin_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tin_relief(pid integer) RETURNS integer
+CREATE FUNCTION del_tin_relief(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tin_relief(ARRAY[pid]);
+  deleted_id := del_tin_relief(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tin_relief(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tin_relief(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1574 (class 1255 OID 284782)
 -- Name: del_tin_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tin_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tin_relief(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5638,10 +5638,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.tin_reliefs
+  -- delete tin_reliefs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tin_relief t
+      tin_relief t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5659,17 +5659,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete relief_component
-    PERFORM citydb.del_relief_component(deleted_ids, 2);
+    PERFORM del_relief_component(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5682,33 +5682,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tin_relief(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tin_relief(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1577 (class 1255 OID 284785)
 -- Name: del_traffic_area(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_traffic_area(pid integer) RETURNS integer
+CREATE FUNCTION del_traffic_area(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_traffic_area(ARRAY[pid]);
+  deleted_id := del_traffic_area(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_traffic_area(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_traffic_area(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1576 (class 1255 OID 284784)
 -- Name: del_traffic_area(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_traffic_area(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_traffic_area(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5720,10 +5720,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.traffic_areas
+  -- delete traffic_areas
   WITH delete_objects AS (
     DELETE FROM
-      citydb.traffic_area t
+      traffic_area t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5745,17 +5745,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5768,33 +5768,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_traffic_area(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_traffic_area(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1579 (class 1255 OID 284787)
 -- Name: del_transportation_complex(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_transportation_complex(pid integer) RETURNS integer
+CREATE FUNCTION del_transportation_complex(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_transportation_complex(ARRAY[pid]);
+  deleted_id := del_transportation_complex(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_transportation_complex(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_transportation_complex(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1578 (class 1255 OID 284786)
 -- Name: del_transportation_complex(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_transportation_complex(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_transportation_complex(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5808,17 +5808,17 @@ DECLARE
 BEGIN
   --delete traffic_areas
   PERFORM
-    citydb.del_traffic_area(array_agg(t.id))
+    del_traffic_area(array_agg(t.id))
   FROM
-    citydb.traffic_area t,
+    traffic_area t,
     unnest($1) a(a_id)
   WHERE
     t.transportation_complex_id = a.a_id;
 
-  -- delete citydb.transportation_complexs
+  -- delete transportation_complexs
   WITH delete_objects AS (
     DELETE FROM
-      citydb.transportation_complex t
+      transportation_complex t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5842,17 +5842,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -5865,33 +5865,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_transportation_complex(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_transportation_complex(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1581 (class 1255 OID 284789)
 -- Name: del_tunnel(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel(ARRAY[pid]);
+  deleted_id := del_tunnel(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1580 (class 1255 OID 284788)
 -- Name: del_tunnel(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -5905,9 +5905,9 @@ DECLARE
 BEGIN
   -- delete referenced parts
   PERFORM
-    citydb.del_tunnel(array_agg(t.id))
+    del_tunnel(array_agg(t.id))
   FROM
-    citydb.tunnel t,
+    tunnel t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_parent_id = a.a_id
@@ -5915,9 +5915,9 @@ BEGIN
 
   -- delete referenced parts
   PERFORM
-    citydb.del_tunnel(array_agg(t.id))
+    del_tunnel(array_agg(t.id))
   FROM
-    citydb.tunnel t,
+    tunnel t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_root_id = a.a_id
@@ -5925,35 +5925,35 @@ BEGIN
 
   --delete tunnel_hollow_spaces
   PERFORM
-    citydb.del_tunnel_hollow_space(array_agg(t.id))
+    del_tunnel_hollow_space(array_agg(t.id))
   FROM
-    citydb.tunnel_hollow_space t,
+    tunnel_hollow_space t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_id = a.a_id;
 
   --delete tunnel_installations
   PERFORM
-    citydb.del_tunnel_installation(array_agg(t.id))
+    del_tunnel_installation(array_agg(t.id))
   FROM
-    citydb.tunnel_installation t,
+    tunnel_installation t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_id = a.a_id;
 
   --delete tunnel_thematic_surfaces
   PERFORM
-    citydb.del_tunnel_thematic_surface(array_agg(t.id))
+    del_tunnel_thematic_surface(array_agg(t.id))
   FROM
-    citydb.tunnel_thematic_surface t,
+    tunnel_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_id = a.a_id;
 
-  -- delete citydb.tunnels
+  -- delete tunnels
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel t
+      tunnel t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -5985,17 +5985,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6008,33 +6008,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1583 (class 1255 OID 284791)
 -- Name: del_tunnel_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_furniture(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel_furniture(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel_furniture(ARRAY[pid]);
+  deleted_id := del_tunnel_furniture(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel_furniture(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_furniture(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1582 (class 1255 OID 284790)
 -- Name: del_tunnel_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel_furniture(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6047,10 +6047,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.tunnel_furnitures
+  -- delete tunnel_furnitures
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel_furniture t
+      tunnel_furniture t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6071,116 +6071,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -6219,17 +6219,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6242,33 +6242,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel_furniture(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1585 (class 1255 OID 284793)
 -- Name: del_tunnel_hollow_space(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_hollow_space(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel_hollow_space(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel_hollow_space(ARRAY[pid]);
+  deleted_id := del_tunnel_hollow_space(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel_hollow_space(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_hollow_space(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1584 (class 1255 OID 284792)
 -- Name: del_tunnel_hollow_space(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_hollow_space(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel_hollow_space(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6282,35 +6282,35 @@ DECLARE
 BEGIN
   --delete tunnel_furnitures
   PERFORM
-    citydb.del_tunnel_furniture(array_agg(t.id))
+    del_tunnel_furniture(array_agg(t.id))
   FROM
-    citydb.tunnel_furniture t,
+    tunnel_furniture t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_hollow_space_id = a.a_id;
 
   --delete tunnel_installations
   PERFORM
-    citydb.del_tunnel_installation(array_agg(t.id))
+    del_tunnel_installation(array_agg(t.id))
   FROM
-    citydb.tunnel_installation t,
+    tunnel_installation t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_hollow_space_id = a.a_id;
 
   --delete tunnel_thematic_surfaces
   PERFORM
-    citydb.del_tunnel_thematic_surface(array_agg(t.id))
+    del_tunnel_thematic_surface(array_agg(t.id))
   FROM
-    citydb.tunnel_thematic_surface t,
+    tunnel_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_hollow_space_id = a.a_id;
 
-  -- delete citydb.tunnel_hollow_spaces
+  -- delete tunnel_hollow_spaces
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel_hollow_space t
+      tunnel_hollow_space t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6330,17 +6330,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6353,33 +6353,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel_hollow_space(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_hollow_space(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1587 (class 1255 OID 284795)
 -- Name: del_tunnel_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_installation(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel_installation(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel_installation(ARRAY[pid]);
+  deleted_id := del_tunnel_installation(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel_installation(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_installation(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1586 (class 1255 OID 284794)
 -- Name: del_tunnel_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel_installation(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6394,17 +6394,17 @@ DECLARE
 BEGIN
   --delete tunnel_thematic_surfaces
   PERFORM
-    citydb.del_tunnel_thematic_surface(array_agg(t.id))
+    del_tunnel_thematic_surface(array_agg(t.id))
   FROM
-    citydb.tunnel_thematic_surface t,
+    tunnel_thematic_surface t,
     unnest($1) a(a_id)
   WHERE
     t.tunnel_installation_id = a.a_id;
 
-  -- delete citydb.tunnel_installations
+  -- delete tunnel_installations
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel_installation t
+      tunnel_installation t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6433,116 +6433,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -6581,17 +6581,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6604,33 +6604,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel_installation(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_installation(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1589 (class 1255 OID 284797)
 -- Name: del_tunnel_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_opening(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel_opening(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel_opening(ARRAY[pid]);
+  deleted_id := del_tunnel_opening(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel_opening(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_opening(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1588 (class 1255 OID 284796)
 -- Name: del_tunnel_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel_opening(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6643,10 +6643,10 @@ DECLARE
   implicit_geometry_ids int[] := '{}';
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.tunnel_openings
+  -- delete tunnel_openings
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel_opening t
+      tunnel_opening t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6671,116 +6671,116 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.implicit_geometry(s)
+  -- delete implicit_geometry(s)
   IF -1 = ALL(implicit_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_implicit_geometry(array_agg(a.a_id))
+      del_implicit_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(implicit_geometry_ids) AS a_id) a
     LEFT JOIN
-      citydb.bridge_constr_element n1
+      bridge_constr_element n1
       ON n1.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n2
+      bridge_constr_element n2
       ON n2.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n3
+      bridge_constr_element n3
       ON n3.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_constr_element n4
+      bridge_constr_element n4
       ON n4.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_furniture n5
+      bridge_furniture n5
       ON n5.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n6
+      bridge_installation n6
       ON n6.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n7
+      bridge_installation n7
       ON n7.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_installation n8
+      bridge_installation n8
       ON n8.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n9
+      bridge_opening n9
       ON n9.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.bridge_opening n10
+      bridge_opening n10
       ON n10.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_furniture n11
+      building_furniture n11
       ON n11.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n12
+      building_installation n12
       ON n12.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n13
+      building_installation n13
       ON n13.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.building_installation n14
+      building_installation n14
       ON n14.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n15
+      city_furniture n15
       ON n15.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n16
+      city_furniture n16
       ON n16.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n17
+      city_furniture n17
       ON n17.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.city_furniture n18
+      city_furniture n18
       ON n18.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n19
+      generic_cityobject n19
       ON n19.lod0_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n20
+      generic_cityobject n20
       ON n20.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n21
+      generic_cityobject n21
       ON n21.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n22
+      generic_cityobject n22
       ON n22.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.generic_cityobject n23
+      generic_cityobject n23
       ON n23.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n24
+      opening n24
       ON n24.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.opening n25
+      opening n25
       ON n25.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n26
+      solitary_vegetat_object n26
       ON n26.lod1_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n27
+      solitary_vegetat_object n27
       ON n27.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n28
+      solitary_vegetat_object n28
       ON n28.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.solitary_vegetat_object n29
+      solitary_vegetat_object n29
       ON n29.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_furniture n30
+      tunnel_furniture n30
       ON n30.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n31
+      tunnel_installation n31
       ON n31.lod2_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n32
+      tunnel_installation n32
       ON n32.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_installation n33
+      tunnel_installation n33
       ON n33.lod4_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n34
+      tunnel_opening n34
       ON n34.lod3_implicit_rep_id  = a.a_id
     LEFT JOIN
-      citydb.tunnel_opening n35
+      tunnel_opening n35
       ON n35.lod4_implicit_rep_id  = a.a_id
     WHERE n1.lod1_implicit_rep_id IS NULL
       AND n2.lod2_implicit_rep_id IS NULL
@@ -6819,17 +6819,17 @@ BEGIN
       AND n35.lod4_implicit_rep_id IS NULL;
   END IF;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6842,33 +6842,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel_opening(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_opening(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1591 (class 1255 OID 284799)
 -- Name: del_tunnel_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_thematic_surface(pid integer) RETURNS integer
+CREATE FUNCTION del_tunnel_thematic_surface(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_tunnel_thematic_surface(ARRAY[pid]);
+  deleted_id := del_tunnel_thematic_surface(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_tunnel_thematic_surface(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_thematic_surface(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1590 (class 1255 OID 284798)
 -- Name: del_tunnel_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_tunnel_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_tunnel_thematic_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6884,7 +6884,7 @@ BEGIN
   -- delete references to tunnel_openings
   WITH del_tunnel_opening_refs AS (
     DELETE FROM
-      citydb.tunnel_open_to_them_srf t
+      tunnel_open_to_them_srf t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6899,18 +6899,18 @@ BEGIN
   FROM
     del_tunnel_opening_refs;
 
-  -- delete citydb.tunnel_opening(s)
+  -- delete tunnel_opening(s)
   IF -1 = ALL(tunnel_opening_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_tunnel_opening(array_agg(a.a_id))
+      del_tunnel_opening(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(tunnel_opening_ids) AS a_id) a;
   END IF;
 
-  -- delete citydb.tunnel_thematic_surfaces
+  -- delete tunnel_thematic_surfaces
   WITH delete_objects AS (
     DELETE FROM
-      citydb.tunnel_thematic_surface t
+      tunnel_thematic_surface t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -6932,17 +6932,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -6955,33 +6955,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_tunnel_thematic_surface(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_tunnel_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1593 (class 1255 OID 284801)
 -- Name: del_waterbody(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_waterbody(pid integer) RETURNS integer
+CREATE FUNCTION del_waterbody(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_waterbody(ARRAY[pid]);
+  deleted_id := del_waterbody(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_waterbody(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_waterbody(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1592 (class 1255 OID 284800)
 -- Name: del_waterbody(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_waterbody(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_waterbody(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -6997,7 +6997,7 @@ BEGIN
   -- delete references to waterboundary_surfaces
   WITH del_waterboundary_surface_refs AS (
     DELETE FROM
-      citydb.waterbod_to_waterbnd_srf t
+      waterbod_to_waterbnd_srf t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -7012,22 +7012,22 @@ BEGIN
   FROM
     del_waterboundary_surface_refs;
 
-  -- delete citydb.waterboundary_surface(s)
+  -- delete waterboundary_surface(s)
   IF -1 = ALL(waterboundary_surface_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_waterboundary_surface(array_agg(a.a_id))
+      del_waterboundary_surface(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(waterboundary_surface_ids) AS a_id) a
     LEFT JOIN
-      citydb.waterbod_to_waterbnd_srf n1
+      waterbod_to_waterbnd_srf n1
       ON n1.waterboundary_surface_id  = a.a_id
     WHERE n1.waterboundary_surface_id IS NULL;
   END IF;
 
-  -- delete citydb.waterbodys
+  -- delete waterbodys
   WITH delete_objects AS (
     DELETE FROM
-      citydb.waterbody t
+      waterbody t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -7055,17 +7055,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -7078,33 +7078,33 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_waterbody(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_waterbody(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1595 (class 1255 OID 284803)
 -- Name: del_waterboundary_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_waterboundary_surface(pid integer) RETURNS integer
+CREATE FUNCTION del_waterboundary_surface(pid integer) RETURNS integer
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
   deleted_id integer;
 BEGIN
-  deleted_id := citydb.del_waterboundary_surface(ARRAY[pid]);
+  deleted_id := del_waterboundary_surface(ARRAY[pid]);
   RETURN deleted_id;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.del_waterboundary_surface(pid integer) OWNER TO postgres;
+ALTER FUNCTION del_waterboundary_surface(pid integer) OWNER TO postgres;
 
 --
 -- TOC entry 1594 (class 1255 OID 284802)
 -- Name: del_waterboundary_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.del_waterboundary_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
+CREATE FUNCTION del_waterboundary_surface(integer[], caller integer DEFAULT 0) RETURNS SETOF integer
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -7116,10 +7116,10 @@ DECLARE
   rec RECORD;
   surface_geometry_ids int[] := '{}';
 BEGIN
-  -- delete citydb.waterboundary_surfaces
+  -- delete waterboundary_surfaces
   WITH delete_objects AS (
     DELETE FROM
-      citydb.waterboundary_surface t
+      waterboundary_surface t
     USING
       unnest($1) a(a_id)
     WHERE
@@ -7141,17 +7141,17 @@ BEGIN
   FROM
     delete_objects;
 
-  -- delete citydb.surface_geometry(s)
+  -- delete surface_geometry(s)
   IF -1 = ALL(surface_geometry_ids) IS NOT NULL THEN
     PERFORM
-      citydb.del_surface_geometry(array_agg(a.a_id))
+      del_surface_geometry(array_agg(a.a_id))
     FROM
       (SELECT DISTINCT unnest(surface_geometry_ids) AS a_id) a;
   END IF;
 
   IF $2 <> 1 THEN
     -- delete cityobject
-    PERFORM citydb.del_cityobject(deleted_ids, 2);
+    PERFORM del_cityobject(deleted_ids, 2);
   END IF;
 
   IF array_length(deleted_child_ids, 1) > 0 THEN
@@ -7164,14 +7164,14 @@ END;
 $_$;
 
 
-ALTER FUNCTION citydb.del_waterboundary_surface(integer[], caller integer) OWNER TO postgres;
+ALTER FUNCTION del_waterboundary_surface(integer[], caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1455 (class 1255 OID 284661)
 -- Name: env_address(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_address(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_address(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7180,25 +7180,25 @@ DECLARE
   dummy_bbox GEOMETRY;
 BEGIN
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- multiPoint
-    SELECT multi_point AS geom FROM citydb.address WHERE id = co_id  AND multi_point IS NOT NULL
+    SELECT multi_point AS geom FROM address WHERE id = co_id  AND multi_point IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_address(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_address(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1456 (class 1255 OID 284662)
 -- Name: env_appearance(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_appearance(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_appearance(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7207,25 +7207,25 @@ DECLARE
   dummy_bbox GEOMETRY;
 BEGIN
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _SurfaceData
-    SELECT citydb.env_surface_data(c.id, set_envelope) AS geom FROM citydb.surface_data c, citydb.appear_to_surface_data p2c WHERE c.id = surface_data_id AND p2c.appearance_id = co_id
+    SELECT env_surface_data(c.id, set_envelope) AS geom FROM surface_data c, appear_to_surface_data p2c WHERE c.id = surface_data_id AND p2c.appearance_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_appearance(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_appearance(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1457 (class 1255 OID 284663)
 -- Name: env_breakline_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_breakline_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_breakline_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7235,33 +7235,33 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_relief_component(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_relief_component(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- ridgeOrValleyLines
-    SELECT ridge_or_valley_lines AS geom FROM citydb.breakline_relief WHERE id = co_id  AND ridge_or_valley_lines IS NOT NULL
+    SELECT ridge_or_valley_lines AS geom FROM breakline_relief WHERE id = co_id  AND ridge_or_valley_lines IS NOT NULL
       UNION ALL
     -- breaklines
-    SELECT break_lines AS geom FROM citydb.breakline_relief WHERE id = co_id  AND break_lines IS NOT NULL
+    SELECT break_lines AS geom FROM breakline_relief WHERE id = co_id  AND break_lines IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_breakline_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_breakline_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1458 (class 1255 OID 284664)
 -- Name: env_bridge(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7271,97 +7271,97 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.bridge WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM bridge WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiCurve
-    SELECT lod2_multi_curve AS geom FROM citydb.bridge WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
+    SELECT lod2_multi_curve AS geom FROM bridge WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.bridge WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM bridge WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiCurve
-    SELECT lod3_multi_curve AS geom FROM citydb.bridge WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
+    SELECT lod3_multi_curve AS geom FROM bridge WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.bridge WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM bridge WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiCurve
-    SELECT lod4_multi_curve AS geom FROM citydb.bridge WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
+    SELECT lod4_multi_curve AS geom FROM bridge WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.bridge WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM bridge WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- BridgeConstructionElement
-    SELECT citydb.env_bridge_constr_element(id, set_envelope) AS geom FROM citydb.bridge_constr_element WHERE bridge_id = co_id
+    SELECT env_bridge_constr_element(id, set_envelope) AS geom FROM bridge_constr_element WHERE bridge_id = co_id
       UNION ALL
     -- BridgeInstallation
-    SELECT citydb.env_bridge_installation(id, set_envelope) AS geom FROM citydb.bridge_installation WHERE bridge_id = co_id
+    SELECT env_bridge_installation(id, set_envelope) AS geom FROM bridge_installation WHERE bridge_id = co_id
       UNION ALL
     -- IntBridgeInstallation
-    SELECT citydb.env_bridge_installation(id, set_envelope) AS geom FROM citydb.bridge_installation WHERE bridge_id = co_id
+    SELECT env_bridge_installation(id, set_envelope) AS geom FROM bridge_installation WHERE bridge_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_bridge_thematic_surface(id, set_envelope) AS geom FROM citydb.bridge_thematic_surface WHERE bridge_id = co_id
+    SELECT env_bridge_thematic_surface(id, set_envelope) AS geom FROM bridge_thematic_surface WHERE bridge_id = co_id
       UNION ALL
     -- BridgeRoom
-    SELECT citydb.env_bridge_room(id, set_envelope) AS geom FROM citydb.bridge_room WHERE bridge_id = co_id
+    SELECT env_bridge_room(id, set_envelope) AS geom FROM bridge_room WHERE bridge_id = co_id
       UNION ALL
     -- BridgePart
-    SELECT citydb.env_bridge(id, set_envelope) AS geom FROM citydb.bridge WHERE bridge_parent_id = co_id
+    SELECT env_bridge(id, set_envelope) AS geom FROM bridge WHERE bridge_parent_id = co_id
       UNION ALL
     -- Address
-    SELECT citydb.env_address(c.id, set_envelope) AS geom FROM citydb.address c, citydb.address_to_bridge p2c WHERE c.id = address_id AND p2c.bridge_id = co_id
+    SELECT env_address(c.id, set_envelope) AS geom FROM address c, address_to_bridge p2c WHERE c.id = address_id AND p2c.bridge_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1459 (class 1255 OID 284665)
 -- Name: env_bridge_constr_element(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_constr_element(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_constr_element(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7371,75 +7371,75 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_constr_element t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_constr_element t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Geometry
-    SELECT lod1_other_geom AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod1_other_geom IS NOT NULL
+    SELECT lod1_other_geom AS geom FROM bridge_constr_element WHERE id = co_id  AND lod1_other_geom IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_constr_element t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_constr_element t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM bridge_constr_element WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_constr_element t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_constr_element t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM bridge_constr_element WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_constr_element t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_constr_element t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM bridge_constr_element WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM bridge_constr_element WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM bridge_constr_element WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM bridge_constr_element WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.bridge_constr_element WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM bridge_constr_element WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod1ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM citydb.bridge_constr_element WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM bridge_constr_element WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.bridge_constr_element WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM bridge_constr_element WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.bridge_constr_element WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM bridge_constr_element WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.bridge_constr_element WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM bridge_constr_element WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_constr_element(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_constr_element(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1460 (class 1255 OID 284666)
 -- Name: env_bridge_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7449,36 +7449,36 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.bridge_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM bridge_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.bridge_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM bridge_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1461 (class 1255 OID 284667)
 -- Name: env_bridge_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7488,73 +7488,73 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.bridge_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM bridge_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.bridge_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM bridge_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.bridge_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM bridge_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.bridge_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM bridge_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.bridge_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM bridge_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.bridge_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM bridge_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.bridge_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM bridge_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.bridge_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM bridge_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_bridge_thematic_surface(id, set_envelope) AS geom FROM citydb.bridge_thematic_surface WHERE bridge_installation_id = co_id
+    SELECT env_bridge_thematic_surface(id, set_envelope) AS geom FROM bridge_thematic_surface WHERE bridge_installation_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_bridge_thematic_surface(id, set_envelope) AS geom FROM citydb.bridge_thematic_surface WHERE bridge_installation_id = co_id
+    SELECT env_bridge_thematic_surface(id, set_envelope) AS geom FROM bridge_thematic_surface WHERE bridge_installation_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1462 (class 1255 OID 284668)
 -- Name: env_bridge_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7564,46 +7564,46 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.bridge_opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM bridge_opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.bridge_opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM bridge_opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- Address
-    SELECT citydb.env_address(c.id, set_envelope) AS geom FROM citydb.bridge_opening p, address c WHERE p.id = co_id AND p.address_id = c.id
+    SELECT env_address(c.id, set_envelope) AS geom FROM bridge_opening p, address c WHERE p.id = co_id AND p.address_id = c.id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1463 (class 1255 OID 284669)
 -- Name: env_bridge_room(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_room(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_room(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7613,46 +7613,46 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_room t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_room t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_room t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_room t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_bridge_thematic_surface(id, set_envelope) AS geom FROM citydb.bridge_thematic_surface WHERE bridge_room_id = co_id
+    SELECT env_bridge_thematic_surface(id, set_envelope) AS geom FROM bridge_thematic_surface WHERE bridge_room_id = co_id
       UNION ALL
     -- BridgeFurniture
-    SELECT citydb.env_bridge_furniture(id, set_envelope) AS geom FROM citydb.bridge_furniture WHERE bridge_room_id = co_id
+    SELECT env_bridge_furniture(id, set_envelope) AS geom FROM bridge_furniture WHERE bridge_room_id = co_id
       UNION ALL
     -- IntBridgeInstallation
-    SELECT citydb.env_bridge_installation(id, set_envelope) AS geom FROM citydb.bridge_installation WHERE bridge_room_id = co_id
+    SELECT env_bridge_installation(id, set_envelope) AS geom FROM bridge_installation WHERE bridge_room_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1464 (class 1255 OID 284670)
 -- Name: env_bridge_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_bridge_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_bridge_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7662,43 +7662,43 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.bridge_thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, bridge_thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BridgeOpening
-    SELECT citydb.env_bridge_opening(c.id, set_envelope) AS geom FROM citydb.bridge_opening c, citydb.bridge_open_to_them_srf p2c WHERE c.id = bridge_opening_id AND p2c.bridge_thematic_surface_id = co_id
+    SELECT env_bridge_opening(c.id, set_envelope) AS geom FROM bridge_opening c, bridge_open_to_them_srf p2c WHERE c.id = bridge_opening_id AND p2c.bridge_thematic_surface_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_bridge_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_bridge_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1465 (class 1255 OID 284671)
 -- Name: env_building(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_building(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_building(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7708,100 +7708,100 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod0FootPrint
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod0_footprint_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod0_footprint_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod0RoofEdge
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod0_roofprint_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod0_roofprint_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.building WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM building WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiCurve
-    SELECT lod2_multi_curve AS geom FROM citydb.building WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
+    SELECT lod2_multi_curve AS geom FROM building WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.building WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM building WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiCurve
-    SELECT lod3_multi_curve AS geom FROM citydb.building WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
+    SELECT lod3_multi_curve AS geom FROM building WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.building WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM building WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiCurve
-    SELECT lod4_multi_curve AS geom FROM citydb.building WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
+    SELECT lod4_multi_curve AS geom FROM building WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.building WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM building WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- BuildingInstallation
-    SELECT citydb.env_building_installation(id, set_envelope) AS geom FROM citydb.building_installation WHERE building_id = co_id
+    SELECT env_building_installation(id, set_envelope) AS geom FROM building_installation WHERE building_id = co_id
       UNION ALL
     -- IntBuildingInstallation
-    SELECT citydb.env_building_installation(id, set_envelope) AS geom FROM citydb.building_installation WHERE building_id = co_id
+    SELECT env_building_installation(id, set_envelope) AS geom FROM building_installation WHERE building_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_thematic_surface(id, set_envelope) AS geom FROM citydb.thematic_surface WHERE building_id = co_id
+    SELECT env_thematic_surface(id, set_envelope) AS geom FROM thematic_surface WHERE building_id = co_id
       UNION ALL
     -- Room
-    SELECT citydb.env_room(id, set_envelope) AS geom FROM citydb.room WHERE building_id = co_id
+    SELECT env_room(id, set_envelope) AS geom FROM room WHERE building_id = co_id
       UNION ALL
     -- BuildingPart
-    SELECT citydb.env_building(id, set_envelope) AS geom FROM citydb.building WHERE building_parent_id = co_id
+    SELECT env_building(id, set_envelope) AS geom FROM building WHERE building_parent_id = co_id
       UNION ALL
     -- Address
-    SELECT citydb.env_address(c.id, set_envelope) AS geom FROM citydb.address c, citydb.address_to_building p2c WHERE c.id = address_id AND p2c.building_id = co_id
+    SELECT env_address(c.id, set_envelope) AS geom FROM address c, address_to_building p2c WHERE c.id = address_id AND p2c.building_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_building(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_building(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1466 (class 1255 OID 284672)
 -- Name: env_building_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_building_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_building_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7811,36 +7811,36 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.building_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM building_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.building_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM building_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_building_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_building_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1467 (class 1255 OID 284673)
 -- Name: env_building_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_building_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_building_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7850,73 +7850,73 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.building_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM building_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.building_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM building_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.building_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM building_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.building_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM building_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.building_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM building_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.building_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM building_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.building_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, building_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.building_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM building_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.building_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM building_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_thematic_surface(id, set_envelope) AS geom FROM citydb.thematic_surface WHERE building_installation_id = co_id
+    SELECT env_thematic_surface(id, set_envelope) AS geom FROM thematic_surface WHERE building_installation_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_thematic_surface(id, set_envelope) AS geom FROM citydb.thematic_surface WHERE building_installation_id = co_id
+    SELECT env_thematic_surface(id, set_envelope) AS geom FROM thematic_surface WHERE building_installation_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_building_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_building_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1468 (class 1255 OID 284674)
 -- Name: env_city_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_city_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_city_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -7926,75 +7926,75 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.city_furniture t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, city_furniture t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Geometry
-    SELECT lod1_other_geom AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod1_other_geom IS NOT NULL
+    SELECT lod1_other_geom AS geom FROM city_furniture WHERE id = co_id  AND lod1_other_geom IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.city_furniture t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, city_furniture t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM city_furniture WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.city_furniture t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, city_furniture t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM city_furniture WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.city_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, city_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM city_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM city_furniture WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM city_furniture WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM city_furniture WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.city_furniture WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM city_furniture WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod1ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM citydb.city_furniture WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM city_furniture WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.city_furniture WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM city_furniture WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.city_furniture WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM city_furniture WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.city_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM city_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_city_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_city_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1469 (class 1255 OID 284675)
 -- Name: env_citymodel(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_citymodel(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_citymodel(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8007,14 +8007,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_citymodel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_citymodel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1470 (class 1255 OID 284676)
 -- Name: env_cityobject(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_cityobject(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_cityobject(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8023,313 +8023,313 @@ DECLARE
   dummy_bbox GEOMETRY;
 BEGIN
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- Appearance
-    SELECT citydb.env_appearance(id, set_envelope) AS geom FROM citydb.appearance WHERE cityobject_id = co_id
+    SELECT env_appearance(id, set_envelope) AS geom FROM appearance WHERE cityobject_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   IF caller <> 2 THEN
-    SELECT objectclass_id INTO class_id FROM citydb.cityobject WHERE id = co_id;
+    SELECT objectclass_id INTO class_id FROM cityobject WHERE id = co_id;
     CASE
       -- land_use
       WHEN class_id = 4 THEN
-        dummy_bbox := citydb.env_land_use(co_id, set_envelope, 1);
+        dummy_bbox := env_land_use(co_id, set_envelope, 1);
       -- generic_cityobject
       WHEN class_id = 5 THEN
-        dummy_bbox := citydb.env_generic_cityobject(co_id, set_envelope, 1);
+        dummy_bbox := env_generic_cityobject(co_id, set_envelope, 1);
       -- solitary_vegetat_object
       WHEN class_id = 7 THEN
-        dummy_bbox := citydb.env_solitary_vegetat_object(co_id, set_envelope, 1);
+        dummy_bbox := env_solitary_vegetat_object(co_id, set_envelope, 1);
       -- plant_cover
       WHEN class_id = 8 THEN
-        dummy_bbox := citydb.env_plant_cover(co_id, set_envelope, 1);
+        dummy_bbox := env_plant_cover(co_id, set_envelope, 1);
       -- waterbody
       WHEN class_id = 9 THEN
-        dummy_bbox := citydb.env_waterbody(co_id, set_envelope, 1);
+        dummy_bbox := env_waterbody(co_id, set_envelope, 1);
       -- waterboundary_surface
       WHEN class_id = 10 THEN
-        dummy_bbox := citydb.env_waterboundary_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_waterboundary_surface(co_id, set_envelope, 1);
       -- waterboundary_surface
       WHEN class_id = 11 THEN
-        dummy_bbox := citydb.env_waterboundary_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_waterboundary_surface(co_id, set_envelope, 1);
       -- waterboundary_surface
       WHEN class_id = 12 THEN
-        dummy_bbox := citydb.env_waterboundary_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_waterboundary_surface(co_id, set_envelope, 1);
       -- waterboundary_surface
       WHEN class_id = 13 THEN
-        dummy_bbox := citydb.env_waterboundary_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_waterboundary_surface(co_id, set_envelope, 1);
       -- relief_feature
       WHEN class_id = 14 THEN
-        dummy_bbox := citydb.env_relief_feature(co_id, set_envelope, 1);
+        dummy_bbox := env_relief_feature(co_id, set_envelope, 1);
       -- relief_component
       WHEN class_id = 15 THEN
-        dummy_bbox := citydb.env_relief_component(co_id, set_envelope, 1);
+        dummy_bbox := env_relief_component(co_id, set_envelope, 1);
       -- tin_relief
       WHEN class_id = 16 THEN
-        dummy_bbox := citydb.env_tin_relief(co_id, set_envelope, 0);
+        dummy_bbox := env_tin_relief(co_id, set_envelope, 0);
       -- masspoint_relief
       WHEN class_id = 17 THEN
-        dummy_bbox := citydb.env_masspoint_relief(co_id, set_envelope, 0);
+        dummy_bbox := env_masspoint_relief(co_id, set_envelope, 0);
       -- breakline_relief
       WHEN class_id = 18 THEN
-        dummy_bbox := citydb.env_breakline_relief(co_id, set_envelope, 0);
+        dummy_bbox := env_breakline_relief(co_id, set_envelope, 0);
       -- raster_relief
       WHEN class_id = 19 THEN
-        dummy_bbox := citydb.env_raster_relief(co_id, set_envelope, 0);
+        dummy_bbox := env_raster_relief(co_id, set_envelope, 0);
       -- city_furniture
       WHEN class_id = 21 THEN
-        dummy_bbox := citydb.env_city_furniture(co_id, set_envelope, 1);
+        dummy_bbox := env_city_furniture(co_id, set_envelope, 1);
       -- cityobjectgroup
       WHEN class_id = 23 THEN
-        dummy_bbox := citydb.env_cityobjectgroup(co_id, set_envelope, 1);
+        dummy_bbox := env_cityobjectgroup(co_id, set_envelope, 1);
       -- building
       WHEN class_id = 24 THEN
-        dummy_bbox := citydb.env_building(co_id, set_envelope, 1);
+        dummy_bbox := env_building(co_id, set_envelope, 1);
       -- building
       WHEN class_id = 25 THEN
-        dummy_bbox := citydb.env_building(co_id, set_envelope, 1);
+        dummy_bbox := env_building(co_id, set_envelope, 1);
       -- building
       WHEN class_id = 26 THEN
-        dummy_bbox := citydb.env_building(co_id, set_envelope, 1);
+        dummy_bbox := env_building(co_id, set_envelope, 1);
       -- building_installation
       WHEN class_id = 27 THEN
-        dummy_bbox := citydb.env_building_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_building_installation(co_id, set_envelope, 1);
       -- building_installation
       WHEN class_id = 28 THEN
-        dummy_bbox := citydb.env_building_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_building_installation(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 29 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 30 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 31 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 32 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 33 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 34 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 35 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 36 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- opening
       WHEN class_id = 37 THEN
-        dummy_bbox := citydb.env_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_opening(co_id, set_envelope, 1);
       -- opening
       WHEN class_id = 38 THEN
-        dummy_bbox := citydb.env_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_opening(co_id, set_envelope, 1);
       -- opening
       WHEN class_id = 39 THEN
-        dummy_bbox := citydb.env_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_opening(co_id, set_envelope, 1);
       -- building_furniture
       WHEN class_id = 40 THEN
-        dummy_bbox := citydb.env_building_furniture(co_id, set_envelope, 1);
+        dummy_bbox := env_building_furniture(co_id, set_envelope, 1);
       -- room
       WHEN class_id = 41 THEN
-        dummy_bbox := citydb.env_room(co_id, set_envelope, 1);
+        dummy_bbox := env_room(co_id, set_envelope, 1);
       -- transportation_complex
       WHEN class_id = 42 THEN
-        dummy_bbox := citydb.env_transportation_complex(co_id, set_envelope, 1);
+        dummy_bbox := env_transportation_complex(co_id, set_envelope, 1);
       -- transportation_complex
       WHEN class_id = 43 THEN
-        dummy_bbox := citydb.env_transportation_complex(co_id, set_envelope, 1);
+        dummy_bbox := env_transportation_complex(co_id, set_envelope, 1);
       -- transportation_complex
       WHEN class_id = 44 THEN
-        dummy_bbox := citydb.env_transportation_complex(co_id, set_envelope, 1);
+        dummy_bbox := env_transportation_complex(co_id, set_envelope, 1);
       -- transportation_complex
       WHEN class_id = 45 THEN
-        dummy_bbox := citydb.env_transportation_complex(co_id, set_envelope, 1);
+        dummy_bbox := env_transportation_complex(co_id, set_envelope, 1);
       -- transportation_complex
       WHEN class_id = 46 THEN
-        dummy_bbox := citydb.env_transportation_complex(co_id, set_envelope, 1);
+        dummy_bbox := env_transportation_complex(co_id, set_envelope, 1);
       -- traffic_area
       WHEN class_id = 47 THEN
-        dummy_bbox := citydb.env_traffic_area(co_id, set_envelope, 1);
+        dummy_bbox := env_traffic_area(co_id, set_envelope, 1);
       -- traffic_area
       WHEN class_id = 48 THEN
-        dummy_bbox := citydb.env_traffic_area(co_id, set_envelope, 1);
+        dummy_bbox := env_traffic_area(co_id, set_envelope, 1);
       -- appearance
       WHEN class_id = 50 THEN
-        dummy_bbox := citydb.env_appearance(co_id, set_envelope, 0);
+        dummy_bbox := env_appearance(co_id, set_envelope, 0);
       -- surface_data
       WHEN class_id = 51 THEN
-        dummy_bbox := citydb.env_surface_data(co_id, set_envelope, 0);
+        dummy_bbox := env_surface_data(co_id, set_envelope, 0);
       -- surface_data
       WHEN class_id = 52 THEN
-        dummy_bbox := citydb.env_surface_data(co_id, set_envelope, 0);
+        dummy_bbox := env_surface_data(co_id, set_envelope, 0);
       -- surface_data
       WHEN class_id = 53 THEN
-        dummy_bbox := citydb.env_surface_data(co_id, set_envelope, 0);
+        dummy_bbox := env_surface_data(co_id, set_envelope, 0);
       -- surface_data
       WHEN class_id = 54 THEN
-        dummy_bbox := citydb.env_surface_data(co_id, set_envelope, 0);
+        dummy_bbox := env_surface_data(co_id, set_envelope, 0);
       -- surface_data
       WHEN class_id = 55 THEN
-        dummy_bbox := citydb.env_surface_data(co_id, set_envelope, 0);
+        dummy_bbox := env_surface_data(co_id, set_envelope, 0);
       -- textureparam
       WHEN class_id = 56 THEN
-        dummy_bbox := citydb.env_textureparam(co_id, set_envelope, 0);
+        dummy_bbox := env_textureparam(co_id, set_envelope, 0);
       -- citymodel
       WHEN class_id = 57 THEN
-        dummy_bbox := citydb.env_citymodel(co_id, set_envelope, 0);
+        dummy_bbox := env_citymodel(co_id, set_envelope, 0);
       -- address
       WHEN class_id = 58 THEN
-        dummy_bbox := citydb.env_address(co_id, set_envelope, 0);
+        dummy_bbox := env_address(co_id, set_envelope, 0);
       -- implicit_geometry
       WHEN class_id = 59 THEN
-        dummy_bbox := citydb.env_implicit_geometry(co_id, set_envelope, 0);
+        dummy_bbox := env_implicit_geometry(co_id, set_envelope, 0);
       -- thematic_surface
       WHEN class_id = 60 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- thematic_surface
       WHEN class_id = 61 THEN
-        dummy_bbox := citydb.env_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_thematic_surface(co_id, set_envelope, 1);
       -- bridge
       WHEN class_id = 62 THEN
-        dummy_bbox := citydb.env_bridge(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge(co_id, set_envelope, 1);
       -- bridge
       WHEN class_id = 63 THEN
-        dummy_bbox := citydb.env_bridge(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge(co_id, set_envelope, 1);
       -- bridge
       WHEN class_id = 64 THEN
-        dummy_bbox := citydb.env_bridge(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge(co_id, set_envelope, 1);
       -- bridge_installation
       WHEN class_id = 65 THEN
-        dummy_bbox := citydb.env_bridge_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_installation(co_id, set_envelope, 1);
       -- bridge_installation
       WHEN class_id = 66 THEN
-        dummy_bbox := citydb.env_bridge_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_installation(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 67 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 68 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 69 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 70 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 71 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 72 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 73 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 74 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 75 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_thematic_surface
       WHEN class_id = 76 THEN
-        dummy_bbox := citydb.env_bridge_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_thematic_surface(co_id, set_envelope, 1);
       -- bridge_opening
       WHEN class_id = 77 THEN
-        dummy_bbox := citydb.env_bridge_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_opening(co_id, set_envelope, 1);
       -- bridge_opening
       WHEN class_id = 78 THEN
-        dummy_bbox := citydb.env_bridge_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_opening(co_id, set_envelope, 1);
       -- bridge_opening
       WHEN class_id = 79 THEN
-        dummy_bbox := citydb.env_bridge_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_opening(co_id, set_envelope, 1);
       -- bridge_furniture
       WHEN class_id = 80 THEN
-        dummy_bbox := citydb.env_bridge_furniture(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_furniture(co_id, set_envelope, 1);
       -- bridge_room
       WHEN class_id = 81 THEN
-        dummy_bbox := citydb.env_bridge_room(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_room(co_id, set_envelope, 1);
       -- bridge_constr_element
       WHEN class_id = 82 THEN
-        dummy_bbox := citydb.env_bridge_constr_element(co_id, set_envelope, 1);
+        dummy_bbox := env_bridge_constr_element(co_id, set_envelope, 1);
       -- tunnel
       WHEN class_id = 83 THEN
-        dummy_bbox := citydb.env_tunnel(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel(co_id, set_envelope, 1);
       -- tunnel
       WHEN class_id = 84 THEN
-        dummy_bbox := citydb.env_tunnel(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel(co_id, set_envelope, 1);
       -- tunnel
       WHEN class_id = 85 THEN
-        dummy_bbox := citydb.env_tunnel(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel(co_id, set_envelope, 1);
       -- tunnel_installation
       WHEN class_id = 86 THEN
-        dummy_bbox := citydb.env_tunnel_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_installation(co_id, set_envelope, 1);
       -- tunnel_installation
       WHEN class_id = 87 THEN
-        dummy_bbox := citydb.env_tunnel_installation(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_installation(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 88 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 89 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 90 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 91 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 92 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 93 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 94 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 95 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 96 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_thematic_surface
       WHEN class_id = 97 THEN
-        dummy_bbox := citydb.env_tunnel_thematic_surface(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_thematic_surface(co_id, set_envelope, 1);
       -- tunnel_opening
       WHEN class_id = 98 THEN
-        dummy_bbox := citydb.env_tunnel_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_opening(co_id, set_envelope, 1);
       -- tunnel_opening
       WHEN class_id = 99 THEN
-        dummy_bbox := citydb.env_tunnel_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_opening(co_id, set_envelope, 1);
       -- tunnel_opening
       WHEN class_id = 100 THEN
-        dummy_bbox := citydb.env_tunnel_opening(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_opening(co_id, set_envelope, 1);
       -- tunnel_furniture
       WHEN class_id = 101 THEN
-        dummy_bbox := citydb.env_tunnel_furniture(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_furniture(co_id, set_envelope, 1);
       -- tunnel_hollow_space
       WHEN class_id = 102 THEN
-        dummy_bbox := citydb.env_tunnel_hollow_space(co_id, set_envelope, 1);
+        dummy_bbox := env_tunnel_hollow_space(co_id, set_envelope, 1);
       -- textureparam
       WHEN class_id = 103 THEN
-        dummy_bbox := citydb.env_textureparam(co_id, set_envelope, 0);
+        dummy_bbox := env_textureparam(co_id, set_envelope, 0);
       -- textureparam
       WHEN class_id = 104 THEN
-        dummy_bbox := citydb.env_textureparam(co_id, set_envelope, 0);
+        dummy_bbox := env_textureparam(co_id, set_envelope, 0);
       ELSE
     END CASE;
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   IF set_envelope <> 0 THEN
-    UPDATE citydb.cityobject SET envelope = bbox WHERE id = co_id;
+    UPDATE cityobject SET envelope = bbox WHERE id = co_id;
   END IF;
 
   RETURN bbox;
@@ -8337,14 +8337,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1471 (class 1255 OID 284678)
 -- Name: env_cityobjectgroup(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_cityobjectgroup(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_cityobjectgroup(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8354,40 +8354,40 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.cityobjectgroup t WHERE sg.root_id = t.brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, cityobjectgroup t WHERE sg.root_id = t.brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- geometry
-    SELECT other_geom AS geom FROM citydb.cityobjectgroup WHERE id = co_id  AND other_geom IS NOT NULL
+    SELECT other_geom AS geom FROM cityobjectgroup WHERE id = co_id  AND other_geom IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _CityObject
-    SELECT citydb.env_cityobject(c.id, set_envelope) AS geom FROM citydb.cityobject c, citydb.group_to_cityobject p2c WHERE c.id = cityobject_id AND p2c.cityobjectgroup_id = co_id
+    SELECT env_cityobject(c.id, set_envelope) AS geom FROM cityobject c, group_to_cityobject p2c WHERE c.id = cityobject_id AND p2c.cityobjectgroup_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_cityobjectgroup(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_cityobjectgroup(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1472 (class 1255 OID 284679)
 -- Name: env_generic_cityobject(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_generic_cityobject(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_generic_cityobject(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8397,87 +8397,87 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod0Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.generic_cityobject t WHERE sg.root_id = t.lod0_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, generic_cityobject t WHERE sg.root_id = t.lod0_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod0Geometry
-    SELECT lod0_other_geom AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod0_other_geom IS NOT NULL
+    SELECT lod0_other_geom AS geom FROM generic_cityobject WHERE id = co_id  AND lod0_other_geom IS NOT NULL
       UNION ALL
     -- lod1Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.generic_cityobject t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, generic_cityobject t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Geometry
-    SELECT lod1_other_geom AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod1_other_geom IS NOT NULL
+    SELECT lod1_other_geom AS geom FROM generic_cityobject WHERE id = co_id  AND lod1_other_geom IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.generic_cityobject t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, generic_cityobject t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM generic_cityobject WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.generic_cityobject t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, generic_cityobject t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM generic_cityobject WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.generic_cityobject t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, generic_cityobject t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM generic_cityobject WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod0TerrainIntersection
-    SELECT lod0_terrain_intersection AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod0_terrain_intersection IS NOT NULL
+    SELECT lod0_terrain_intersection AS geom FROM generic_cityobject WHERE id = co_id  AND lod0_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM generic_cityobject WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM generic_cityobject WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM generic_cityobject WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.generic_cityobject WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM generic_cityobject WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod0ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod0_implicit_rep_id, lod0_implicit_ref_point, lod0_implicit_transformation) AS geom FROM citydb.generic_cityobject WHERE id = co_id AND lod0_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod0_implicit_rep_id, lod0_implicit_ref_point, lod0_implicit_transformation) AS geom FROM generic_cityobject WHERE id = co_id AND lod0_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod1ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM citydb.generic_cityobject WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM generic_cityobject WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.generic_cityobject WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM generic_cityobject WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.generic_cityobject WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM generic_cityobject WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.generic_cityobject WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM generic_cityobject WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_generic_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_generic_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1473 (class 1255 OID 284680)
 -- Name: env_implicit_geometry(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_implicit_geometry(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_implicit_geometry(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8490,14 +8490,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_implicit_geometry(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_implicit_geometry(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1474 (class 1255 OID 284681)
 -- Name: env_land_use(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_land_use(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_land_use(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8507,42 +8507,42 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod0MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.land_use t WHERE sg.root_id = t.lod0_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, land_use t WHERE sg.root_id = t.lod0_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.land_use t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, land_use t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.land_use t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, land_use t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.land_use t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, land_use t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.land_use t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, land_use t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_land_use(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_land_use(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1475 (class 1255 OID 284682)
 -- Name: env_masspoint_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_masspoint_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_masspoint_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8552,30 +8552,30 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_relief_component(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_relief_component(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- reliefPoints
-    SELECT relief_points AS geom FROM citydb.masspoint_relief WHERE id = co_id  AND relief_points IS NOT NULL
+    SELECT relief_points AS geom FROM masspoint_relief WHERE id = co_id  AND relief_points IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_masspoint_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_masspoint_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1476 (class 1255 OID 284683)
 -- Name: env_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8585,46 +8585,46 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- Address
-    SELECT citydb.env_address(c.id, set_envelope) AS geom FROM citydb.opening p, address c WHERE p.id = co_id AND p.address_id = c.id
+    SELECT env_address(c.id, set_envelope) AS geom FROM opening p, address c WHERE p.id = co_id AND p.address_id = c.id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1477 (class 1255 OID 284684)
 -- Name: env_plant_cover(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_plant_cover(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_plant_cover(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8634,51 +8634,51 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiSolid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod1_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod1_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSolid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod2_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod2_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSolid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod3_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod3_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSolid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.plant_cover t WHERE sg.root_id = t.lod4_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, plant_cover t WHERE sg.root_id = t.lod4_multi_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_plant_cover(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_plant_cover(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1478 (class 1255 OID 284685)
 -- Name: env_raster_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_raster_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_raster_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8688,8 +8688,8 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_relief_component(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_relief_component(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   RETURN bbox;
@@ -8697,14 +8697,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_raster_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_raster_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1479 (class 1255 OID 284686)
 -- Name: env_relief_component(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_relief_component(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_relief_component(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8714,35 +8714,35 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- extent
-    SELECT extent AS geom FROM citydb.relief_component WHERE id = co_id  AND extent IS NOT NULL
+    SELECT extent AS geom FROM relief_component WHERE id = co_id  AND extent IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   IF caller <> 2 THEN
-    SELECT objectclass_id INTO class_id FROM citydb.relief_component WHERE id = co_id;
+    SELECT objectclass_id INTO class_id FROM relief_component WHERE id = co_id;
     CASE
       -- tin_relief
       WHEN class_id = 16 THEN
-        dummy_bbox := citydb.env_tin_relief(co_id, set_envelope, 1);
+        dummy_bbox := env_tin_relief(co_id, set_envelope, 1);
       -- masspoint_relief
       WHEN class_id = 17 THEN
-        dummy_bbox := citydb.env_masspoint_relief(co_id, set_envelope, 1);
+        dummy_bbox := env_masspoint_relief(co_id, set_envelope, 1);
       -- breakline_relief
       WHEN class_id = 18 THEN
-        dummy_bbox := citydb.env_breakline_relief(co_id, set_envelope, 1);
+        dummy_bbox := env_breakline_relief(co_id, set_envelope, 1);
       -- raster_relief
       WHEN class_id = 19 THEN
-        dummy_bbox := citydb.env_raster_relief(co_id, set_envelope, 1);
+        dummy_bbox := env_raster_relief(co_id, set_envelope, 1);
       ELSE
     END CASE;
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   RETURN bbox;
@@ -8750,14 +8750,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_relief_component(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_relief_component(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1480 (class 1255 OID 284687)
 -- Name: env_relief_feature(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_relief_feature(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_relief_feature(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8767,30 +8767,30 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _ReliefComponent
-    SELECT citydb.env_relief_component(c.id, set_envelope) AS geom FROM citydb.relief_component c, citydb.relief_feat_to_rel_comp p2c WHERE c.id = relief_component_id AND p2c.relief_feature_id = co_id
+    SELECT env_relief_component(c.id, set_envelope) AS geom FROM relief_component c, relief_feat_to_rel_comp p2c WHERE c.id = relief_component_id AND p2c.relief_feature_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_relief_feature(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_relief_feature(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1481 (class 1255 OID 284688)
 -- Name: env_room(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_room(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_room(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8800,46 +8800,46 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.room t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, room t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.room t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, room t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_thematic_surface(id, set_envelope) AS geom FROM citydb.thematic_surface WHERE room_id = co_id
+    SELECT env_thematic_surface(id, set_envelope) AS geom FROM thematic_surface WHERE room_id = co_id
       UNION ALL
     -- BuildingFurniture
-    SELECT citydb.env_building_furniture(id, set_envelope) AS geom FROM citydb.building_furniture WHERE room_id = co_id
+    SELECT env_building_furniture(id, set_envelope) AS geom FROM building_furniture WHERE room_id = co_id
       UNION ALL
     -- IntBuildingInstallation
-    SELECT citydb.env_building_installation(id, set_envelope) AS geom FROM citydb.building_installation WHERE room_id = co_id
+    SELECT env_building_installation(id, set_envelope) AS geom FROM building_installation WHERE room_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1482 (class 1255 OID 284689)
 -- Name: env_solitary_vegetat_object(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_solitary_vegetat_object(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_solitary_vegetat_object(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8849,63 +8849,63 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.solitary_vegetat_object t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, solitary_vegetat_object t WHERE sg.root_id = t.lod1_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Geometry
-    SELECT lod1_other_geom AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id  AND lod1_other_geom IS NOT NULL
+    SELECT lod1_other_geom AS geom FROM solitary_vegetat_object WHERE id = co_id  AND lod1_other_geom IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.solitary_vegetat_object t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, solitary_vegetat_object t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM solitary_vegetat_object WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.solitary_vegetat_object t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, solitary_vegetat_object t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM solitary_vegetat_object WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.solitary_vegetat_object t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, solitary_vegetat_object t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM solitary_vegetat_object WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod1ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod1_implicit_rep_id, lod1_implicit_ref_point, lod1_implicit_transformation) AS geom FROM solitary_vegetat_object WHERE id = co_id AND lod1_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM solitary_vegetat_object WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM solitary_vegetat_object WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.solitary_vegetat_object WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM solitary_vegetat_object WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_solitary_vegetat_object(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_solitary_vegetat_object(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1483 (class 1255 OID 284690)
 -- Name: env_surface_data(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_surface_data(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_surface_data(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8914,25 +8914,25 @@ DECLARE
   dummy_bbox GEOMETRY;
 BEGIN
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- referencePoint
-    SELECT gt_reference_point AS geom FROM citydb.surface_data WHERE id = co_id  AND gt_reference_point IS NOT NULL
+    SELECT gt_reference_point AS geom FROM surface_data WHERE id = co_id  AND gt_reference_point IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_surface_data(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_surface_data(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1484 (class 1255 OID 284691)
 -- Name: env_textureparam(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_textureparam(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_textureparam(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8945,14 +8945,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.env_textureparam(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_textureparam(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1485 (class 1255 OID 284692)
 -- Name: env_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -8962,43 +8962,43 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _Opening
-    SELECT citydb.env_opening(c.id, set_envelope) AS geom FROM citydb.opening c, citydb.opening_to_them_surface p2c WHERE c.id = opening_id AND p2c.thematic_surface_id = co_id
+    SELECT env_opening(c.id, set_envelope) AS geom FROM opening c, opening_to_them_surface p2c WHERE c.id = opening_id AND p2c.thematic_surface_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1486 (class 1255 OID 284693)
 -- Name: env_tin_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tin_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tin_relief(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9008,30 +9008,30 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_relief_component(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_relief_component(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- tin
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tin_relief t WHERE sg.root_id = t.surface_geometry_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tin_relief t WHERE sg.root_id = t.surface_geometry_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tin_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tin_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1487 (class 1255 OID 284694)
 -- Name: env_traffic_area(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_traffic_area(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_traffic_area(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9041,45 +9041,45 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.traffic_area t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, traffic_area t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_traffic_area(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_traffic_area(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1488 (class 1255 OID 284695)
 -- Name: env_transportation_complex(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_transportation_complex(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_transportation_complex(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9089,52 +9089,52 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod0Network
-    SELECT lod0_network AS geom FROM citydb.transportation_complex WHERE id = co_id  AND lod0_network IS NOT NULL
+    SELECT lod0_network AS geom FROM transportation_complex WHERE id = co_id  AND lod0_network IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.transportation_complex t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, transportation_complex t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.transportation_complex t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, transportation_complex t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.transportation_complex t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, transportation_complex t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.transportation_complex t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, transportation_complex t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- TrafficArea
-    SELECT citydb.env_traffic_area(id, set_envelope) AS geom FROM citydb.traffic_area WHERE transportation_complex_id = co_id
+    SELECT env_traffic_area(id, set_envelope) AS geom FROM traffic_area WHERE transportation_complex_id = co_id
       UNION ALL
     -- AuxiliaryTrafficArea
-    SELECT citydb.env_traffic_area(id, set_envelope) AS geom FROM citydb.traffic_area WHERE transportation_complex_id = co_id
+    SELECT env_traffic_area(id, set_envelope) AS geom FROM traffic_area WHERE transportation_complex_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_transportation_complex(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_transportation_complex(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1489 (class 1255 OID 284696)
 -- Name: env_tunnel(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9144,91 +9144,91 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod1Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1TerrainIntersection
-    SELECT lod1_terrain_intersection AS geom FROM citydb.tunnel WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
+    SELECT lod1_terrain_intersection AS geom FROM tunnel WHERE id = co_id  AND lod1_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod2Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2MultiCurve
-    SELECT lod2_multi_curve AS geom FROM citydb.tunnel WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
+    SELECT lod2_multi_curve AS geom FROM tunnel WHERE id = co_id  AND lod2_multi_curve IS NOT NULL
       UNION ALL
     -- lod2TerrainIntersection
-    SELECT lod2_terrain_intersection AS geom FROM citydb.tunnel WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
+    SELECT lod2_terrain_intersection AS geom FROM tunnel WHERE id = co_id  AND lod2_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod3Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiCurve
-    SELECT lod3_multi_curve AS geom FROM citydb.tunnel WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
+    SELECT lod3_multi_curve AS geom FROM tunnel WHERE id = co_id  AND lod3_multi_curve IS NOT NULL
       UNION ALL
     -- lod3TerrainIntersection
-    SELECT lod3_terrain_intersection AS geom FROM citydb.tunnel WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
+    SELECT lod3_terrain_intersection AS geom FROM tunnel WHERE id = co_id  AND lod3_terrain_intersection IS NOT NULL
       UNION ALL
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiCurve
-    SELECT lod4_multi_curve AS geom FROM citydb.tunnel WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
+    SELECT lod4_multi_curve AS geom FROM tunnel WHERE id = co_id  AND lod4_multi_curve IS NOT NULL
       UNION ALL
     -- lod4TerrainIntersection
-    SELECT lod4_terrain_intersection AS geom FROM citydb.tunnel WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
+    SELECT lod4_terrain_intersection AS geom FROM tunnel WHERE id = co_id  AND lod4_terrain_intersection IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- TunnelInstallation
-    SELECT citydb.env_tunnel_installation(id, set_envelope) AS geom FROM citydb.tunnel_installation WHERE tunnel_id = co_id
+    SELECT env_tunnel_installation(id, set_envelope) AS geom FROM tunnel_installation WHERE tunnel_id = co_id
       UNION ALL
     -- IntTunnelInstallation
-    SELECT citydb.env_tunnel_installation(id, set_envelope) AS geom FROM citydb.tunnel_installation WHERE tunnel_id = co_id
+    SELECT env_tunnel_installation(id, set_envelope) AS geom FROM tunnel_installation WHERE tunnel_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_tunnel_thematic_surface(id, set_envelope) AS geom FROM citydb.tunnel_thematic_surface WHERE tunnel_id = co_id
+    SELECT env_tunnel_thematic_surface(id, set_envelope) AS geom FROM tunnel_thematic_surface WHERE tunnel_id = co_id
       UNION ALL
     -- HollowSpace
-    SELECT citydb.env_tunnel_hollow_space(id, set_envelope) AS geom FROM citydb.tunnel_hollow_space WHERE tunnel_id = co_id
+    SELECT env_tunnel_hollow_space(id, set_envelope) AS geom FROM tunnel_hollow_space WHERE tunnel_id = co_id
       UNION ALL
     -- TunnelPart
-    SELECT citydb.env_tunnel(id, set_envelope) AS geom FROM citydb.tunnel WHERE tunnel_parent_id = co_id
+    SELECT env_tunnel(id, set_envelope) AS geom FROM tunnel WHERE tunnel_parent_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1490 (class 1255 OID 284697)
 -- Name: env_tunnel_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel_furniture(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9238,36 +9238,36 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_furniture t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.tunnel_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM tunnel_furniture WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.tunnel_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM tunnel_furniture WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1491 (class 1255 OID 284698)
 -- Name: env_tunnel_hollow_space(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel_hollow_space(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel_hollow_space(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9277,46 +9277,46 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_hollow_space t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_hollow_space t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_hollow_space t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_hollow_space t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_tunnel_thematic_surface(id, set_envelope) AS geom FROM citydb.tunnel_thematic_surface WHERE tunnel_hollow_space_id = co_id
+    SELECT env_tunnel_thematic_surface(id, set_envelope) AS geom FROM tunnel_thematic_surface WHERE tunnel_hollow_space_id = co_id
       UNION ALL
     -- TunnelFurniture
-    SELECT citydb.env_tunnel_furniture(id, set_envelope) AS geom FROM citydb.tunnel_furniture WHERE tunnel_hollow_space_id = co_id
+    SELECT env_tunnel_furniture(id, set_envelope) AS geom FROM tunnel_furniture WHERE tunnel_hollow_space_id = co_id
       UNION ALL
     -- IntTunnelInstallation
-    SELECT citydb.env_tunnel_installation(id, set_envelope) AS geom FROM citydb.tunnel_installation WHERE tunnel_hollow_space_id = co_id
+    SELECT env_tunnel_installation(id, set_envelope) AS geom FROM tunnel_installation WHERE tunnel_hollow_space_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel_hollow_space(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel_hollow_space(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1492 (class 1255 OID 284699)
 -- Name: env_tunnel_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel_installation(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9326,73 +9326,73 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_installation t WHERE sg.root_id = t.lod2_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Geometry
-    SELECT lod2_other_geom AS geom FROM citydb.tunnel_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
+    SELECT lod2_other_geom AS geom FROM tunnel_installation WHERE id = co_id  AND lod2_other_geom IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_installation t WHERE sg.root_id = t.lod3_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Geometry
-    SELECT lod3_other_geom AS geom FROM citydb.tunnel_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
+    SELECT lod3_other_geom AS geom FROM tunnel_installation WHERE id = co_id  AND lod3_other_geom IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.tunnel_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM tunnel_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod2ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM citydb.tunnel_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod2_implicit_rep_id, lod2_implicit_ref_point, lod2_implicit_transformation) AS geom FROM tunnel_installation WHERE id = co_id AND lod2_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.tunnel_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM tunnel_installation WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.tunnel_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM tunnel_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_installation t WHERE sg.root_id = t.lod4_brep_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Geometry
-    SELECT lod4_other_geom AS geom FROM citydb.tunnel_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
+    SELECT lod4_other_geom AS geom FROM tunnel_installation WHERE id = co_id  AND lod4_other_geom IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.tunnel_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM tunnel_installation WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _BoundarySurface
-    SELECT citydb.env_tunnel_thematic_surface(id, set_envelope) AS geom FROM citydb.tunnel_thematic_surface WHERE tunnel_installation_id = co_id
+    SELECT env_tunnel_thematic_surface(id, set_envelope) AS geom FROM tunnel_thematic_surface WHERE tunnel_installation_id = co_id
       UNION ALL
     -- _BoundarySurface
-    SELECT citydb.env_tunnel_thematic_surface(id, set_envelope) AS geom FROM citydb.tunnel_thematic_surface WHERE tunnel_installation_id = co_id
+    SELECT env_tunnel_thematic_surface(id, set_envelope) AS geom FROM tunnel_thematic_surface WHERE tunnel_installation_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1493 (class 1255 OID 284700)
 -- Name: env_tunnel_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel_opening(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9402,39 +9402,39 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_opening t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_opening t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM citydb.tunnel_opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod3_implicit_rep_id, lod3_implicit_ref_point, lod3_implicit_transformation) AS geom FROM tunnel_opening WHERE id = co_id AND lod3_implicit_rep_id IS NOT NULL
       UNION ALL
     -- lod4ImplicitRepresentation
-    SELECT citydb.get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM citydb.tunnel_opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
+    SELECT get_envelope_implicit_geometry(lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) AS geom FROM tunnel_opening WHERE id = co_id AND lod4_implicit_rep_id IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1494 (class 1255 OID 284701)
 -- Name: env_tunnel_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_tunnel_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_tunnel_thematic_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9444,43 +9444,43 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_thematic_surface t WHERE sg.root_id = t.lod2_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_thematic_surface t WHERE sg.root_id = t.lod3_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.tunnel_thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, tunnel_thematic_surface t WHERE sg.root_id = t.lod4_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _Opening
-    SELECT citydb.env_tunnel_opening(c.id, set_envelope) AS geom FROM citydb.tunnel_opening c, citydb.tunnel_open_to_them_srf p2c WHERE c.id = tunnel_opening_id AND p2c.tunnel_thematic_surface_id = co_id
+    SELECT env_tunnel_opening(c.id, set_envelope) AS geom FROM tunnel_opening c, tunnel_open_to_them_srf p2c WHERE c.id = tunnel_opening_id AND p2c.tunnel_thematic_surface_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_tunnel_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_tunnel_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1495 (class 1255 OID 284702)
 -- Name: env_waterbody(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_waterbody(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_waterbody(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9490,58 +9490,58 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod0MultiCurve
-    SELECT lod0_multi_curve AS geom FROM citydb.waterbody WHERE id = co_id  AND lod0_multi_curve IS NOT NULL
+    SELECT lod0_multi_curve AS geom FROM waterbody WHERE id = co_id  AND lod0_multi_curve IS NOT NULL
       UNION ALL
     -- lod0MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod0_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod0_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1MultiCurve
-    SELECT lod1_multi_curve AS geom FROM citydb.waterbody WHERE id = co_id  AND lod1_multi_curve IS NOT NULL
+    SELECT lod1_multi_curve AS geom FROM waterbody WHERE id = co_id  AND lod1_multi_curve IS NOT NULL
       UNION ALL
     -- lod1MultiSurface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod1_multi_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod1Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod1_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod2Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod2_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod3_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Solid
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterbody t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterbody t WHERE sg.root_id = t.lod4_solid_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   -- bbox from aggregating objects
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- _WaterBoundarySurface
-    SELECT citydb.env_waterboundary_surface(c.id, set_envelope) AS geom FROM citydb.waterboundary_surface c, citydb.waterbod_to_waterbnd_srf p2c WHERE c.id = waterboundary_surface_id AND p2c.waterbody_id = co_id
+    SELECT env_waterboundary_surface(c.id, set_envelope) AS geom FROM waterboundary_surface c, waterbod_to_waterbnd_srf p2c WHERE c.id = waterboundary_surface_id AND p2c.waterbody_id = co_id
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_waterbody(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_waterbody(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1496 (class 1255 OID 284703)
 -- Name: env_waterboundary_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.env_waterboundary_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
+CREATE FUNCTION env_waterboundary_surface(co_id integer, set_envelope integer DEFAULT 0, caller integer DEFAULT 0) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $$
 DECLARE
@@ -9551,36 +9551,36 @@ DECLARE
 BEGIN
   -- bbox from parent table
   IF caller <> 1 THEN
-    dummy_bbox := citydb.env_cityobject(co_id, set_envelope, 2);
-    bbox := citydb.update_bounds(bbox, dummy_bbox);
+    dummy_bbox := env_cityobject(co_id, set_envelope, 2);
+    bbox := update_bounds(bbox, dummy_bbox);
   END IF;
 
   -- bbox from inline and referencing spatial columns
-  SELECT citydb.box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
+  SELECT box2envelope(ST_3DExtent(geom)) INTO dummy_bbox FROM (
     -- lod2Surface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterboundary_surface t WHERE sg.root_id = t.lod2_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterboundary_surface t WHERE sg.root_id = t.lod2_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod3Surface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterboundary_surface t WHERE sg.root_id = t.lod3_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterboundary_surface t WHERE sg.root_id = t.lod3_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
       UNION ALL
     -- lod4Surface
-    SELECT sg.geometry AS geom FROM citydb.surface_geometry sg, citydb.waterboundary_surface t WHERE sg.root_id = t.lod4_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
+    SELECT sg.geometry AS geom FROM surface_geometry sg, waterboundary_surface t WHERE sg.root_id = t.lod4_surface_id AND t.id = co_id AND sg.geometry IS NOT NULL
   ) g;
-  bbox := citydb.update_bounds(bbox, dummy_bbox);
+  bbox := update_bounds(bbox, dummy_bbox);
 
   RETURN bbox;
 END;
 $$;
 
 
-ALTER FUNCTION citydb.env_waterboundary_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
+ALTER FUNCTION env_waterboundary_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
 -- TOC entry 1497 (class 1255 OID 284704)
 -- Name: get_envelope_cityobjects(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.get_envelope_cityobjects(objclass_id integer DEFAULT 0, set_envelope integer DEFAULT 0, only_if_null integer DEFAULT 1) RETURNS public.geometry
+CREATE FUNCTION get_envelope_cityobjects(objclass_id integer DEFAULT 0, set_envelope integer DEFAULT 0, only_if_null integer DEFAULT 1) RETURNS public.geometry
     LANGUAGE plpgsql STRICT
     AS $_$
 DECLARE
@@ -9604,23 +9604,23 @@ BEGIN
     filter := '';
   END IF;
 
-  EXECUTE 'SELECT citydb.box2envelope(ST_3DExtent(geom)) FROM (
-    SELECT citydb.env_cityobject(id, $1) AS geom
-      FROM citydb.cityobject' || filter || ')g' INTO bbox USING set_envelope; 
+  EXECUTE 'SELECT box2envelope(ST_3DExtent(geom)) FROM (
+    SELECT env_cityobject(id, $1) AS geom
+      FROM cityobject' || filter || ')g' INTO bbox USING set_envelope; 
 
   RETURN bbox;
 END;
 $_$;
 
 
-ALTER FUNCTION citydb.get_envelope_cityobjects(objclass_id integer, set_envelope integer, only_if_null integer) OWNER TO postgres;
+ALTER FUNCTION get_envelope_cityobjects(objclass_id integer, set_envelope integer, only_if_null integer) OWNER TO postgres;
 
 --
 -- TOC entry 1498 (class 1255 OID 284705)
 -- Name: get_envelope_implicit_geometry(integer, public.geometry, character varying); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.get_envelope_implicit_geometry(implicit_rep_id integer, ref_pt public.geometry, transform4x4 character varying) RETURNS public.geometry
+CREATE FUNCTION get_envelope_implicit_geometry(implicit_rep_id integer, ref_pt public.geometry, transform4x4 character varying) RETURNS public.geometry
     LANGUAGE plpgsql STABLE
     AS $$
 DECLARE
@@ -9633,13 +9633,13 @@ BEGIN
     -- relative other geometry
 
     SELECT relative_other_geom AS geom 
-      FROM citydb.implicit_geometry
+      FROM implicit_geometry
         WHERE id = implicit_rep_id
           AND relative_other_geom IS NOT NULL
     UNION ALL
     -- relative brep geometry
     SELECT sg.implicit_geometry AS geom
-      FROM citydb.surface_geometry sg, citydb.implicit_geometry ig
+      FROM surface_geometry sg, implicit_geometry ig
         WHERE sg.root_id = ig.relative_brep_id 
           AND ig.id = implicit_rep_id 
           AND sg.implicit_geometry IS NOT NULL
@@ -9680,14 +9680,14 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.get_envelope_implicit_geometry(implicit_rep_id integer, ref_pt public.geometry, transform4x4 character varying) OWNER TO postgres;
+ALTER FUNCTION get_envelope_implicit_geometry(implicit_rep_id integer, ref_pt public.geometry, transform4x4 character varying) OWNER TO postgres;
 
 --
 -- TOC entry 1452 (class 1255 OID 284658)
 -- Name: objectclass_id_to_table_name(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.objectclass_id_to_table_name(class_id integer) RETURNS text
+CREATE FUNCTION objectclass_id_to_table_name(class_id integer) RETURNS text
     LANGUAGE sql STABLE STRICT
     AS $_$
 SELECT
@@ -9699,14 +9699,14 @@ WHERE
 $_$;
 
 
-ALTER FUNCTION citydb.objectclass_id_to_table_name(class_id integer) OWNER TO postgres;
+ALTER FUNCTION objectclass_id_to_table_name(class_id integer) OWNER TO postgres;
 
 --
 -- TOC entry 1453 (class 1255 OID 284659)
 -- Name: table_name_to_objectclass_ids(text); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.table_name_to_objectclass_ids(table_name text) RETURNS integer[]
+CREATE FUNCTION table_name_to_objectclass_ids(table_name text) RETURNS integer[]
     LANGUAGE sql STABLE STRICT
     AS $_$
 WITH RECURSIVE objectclass_tree (id, superclass_id) AS (
@@ -9734,14 +9734,14 @@ FROM
 $_$;
 
 
-ALTER FUNCTION citydb.table_name_to_objectclass_ids(table_name text) OWNER TO postgres;
+ALTER FUNCTION table_name_to_objectclass_ids(table_name text) OWNER TO postgres;
 
 --
 -- TOC entry 1499 (class 1255 OID 284706)
 -- Name: update_bounds(public.geometry, public.geometry); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
-CREATE FUNCTION citydb.update_bounds(old_box public.geometry, new_box public.geometry) RETURNS public.geometry
+CREATE FUNCTION update_bounds(old_box public.geometry, new_box public.geometry) RETURNS public.geometry
     LANGUAGE plpgsql STABLE
     AS $$
 DECLARE
@@ -9758,7 +9758,7 @@ BEGIN
       RETURN old_box;
     END IF;
 
-    updated_box := citydb.box2envelope(ST_3DExtent(ST_Collect(old_box, new_box)));
+    updated_box := box2envelope(ST_3DExtent(ST_Collect(old_box, new_box)));
   END IF;
 
   RETURN updated_box;
@@ -9766,7 +9766,7 @@ END;
 $$;
 
 
-ALTER FUNCTION citydb.update_bounds(old_box public.geometry, new_box public.geometry) OWNER TO postgres;
+ALTER FUNCTION update_bounds(old_box public.geometry, new_box public.geometry) OWNER TO postgres;
 
 --
 -- TOC entry 1629 (class 1255 OID 284841)
@@ -10760,7 +10760,7 @@ ALTER FUNCTION citydb_pkg.versioning_table(table_name text, schema_name text) OW
 -- Name: address_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.address_seq
+CREATE SEQUENCE address_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -10768,7 +10768,7 @@ CREATE SEQUENCE citydb.address_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.address_seq OWNER TO postgres;
+ALTER TABLE address_seq OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -10779,8 +10779,8 @@ SET default_with_oids = false;
 -- Name: address; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.address (
-    id integer DEFAULT nextval('citydb.address_seq'::regclass) NOT NULL,
+CREATE TABLE address (
+    id integer DEFAULT nextval('address_seq'::regclass) NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
     street character varying(1000),
@@ -10795,40 +10795,40 @@ CREATE TABLE citydb.address (
 );
 
 
-ALTER TABLE citydb.address OWNER TO postgres;
+ALTER TABLE address OWNER TO postgres;
 
 --
 -- TOC entry 273 (class 1259 OID 282659)
 -- Name: address_to_bridge; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.address_to_bridge (
+CREATE TABLE address_to_bridge (
     bridge_id integer NOT NULL,
     address_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.address_to_bridge OWNER TO postgres;
+ALTER TABLE address_to_bridge OWNER TO postgres;
 
 --
 -- TOC entry 230 (class 1259 OID 282361)
 -- Name: address_to_building; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.address_to_building (
+CREATE TABLE address_to_building (
     building_id integer NOT NULL,
     address_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.address_to_building OWNER TO postgres;
+ALTER TABLE address_to_building OWNER TO postgres;
 
 --
 -- TOC entry 287 (class 1259 OID 282767)
 -- Name: ade_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.ade_seq
+CREATE SEQUENCE ade_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -10836,15 +10836,15 @@ CREATE SEQUENCE citydb.ade_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.ade_seq OWNER TO postgres;
+ALTER TABLE ade_seq OWNER TO postgres;
 
 --
 -- TOC entry 291 (class 1259 OID 283167)
 -- Name: ade; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.ade (
-    id integer DEFAULT nextval('citydb.ade_seq'::regclass) NOT NULL,
+CREATE TABLE ade (
+    id integer DEFAULT nextval('ade_seq'::regclass) NOT NULL,
     adeid character varying(256) NOT NULL,
     name character varying(1000) NOT NULL,
     description character varying(4000),
@@ -10857,14 +10857,14 @@ CREATE TABLE citydb.ade (
 );
 
 
-ALTER TABLE citydb.ade OWNER TO postgres;
+ALTER TABLE ade OWNER TO postgres;
 
 --
 -- TOC entry 292 (class 1259 OID 283177)
 -- Name: aggregation_info; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.aggregation_info (
+CREATE TABLE aggregation_info (
     child_id integer NOT NULL,
     parent_id integer NOT NULL,
     join_table_or_column_name character varying(30) NOT NULL,
@@ -10874,27 +10874,27 @@ CREATE TABLE citydb.aggregation_info (
 );
 
 
-ALTER TABLE citydb.aggregation_info OWNER TO postgres;
+ALTER TABLE aggregation_info OWNER TO postgres;
 
 --
 -- TOC entry 241 (class 1259 OID 282428)
 -- Name: appear_to_surface_data; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.appear_to_surface_data (
+CREATE TABLE appear_to_surface_data (
     surface_data_id integer NOT NULL,
     appearance_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.appear_to_surface_data OWNER TO postgres;
+ALTER TABLE appear_to_surface_data OWNER TO postgres;
 
 --
 -- TOC entry 238 (class 1259 OID 282416)
 -- Name: appearance_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.appearance_seq
+CREATE SEQUENCE appearance_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -10902,15 +10902,15 @@ CREATE SEQUENCE citydb.appearance_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.appearance_seq OWNER TO postgres;
+ALTER TABLE appearance_seq OWNER TO postgres;
 
 --
 -- TOC entry 276 (class 1259 OID 282675)
 -- Name: appearance; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.appearance (
-    id integer DEFAULT nextval('citydb.appearance_seq'::regclass) NOT NULL,
+CREATE TABLE appearance (
+    id integer DEFAULT nextval('appearance_seq'::regclass) NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
     name character varying(1000),
@@ -10922,14 +10922,14 @@ CREATE TABLE citydb.appearance (
 );
 
 
-ALTER TABLE citydb.appearance OWNER TO postgres;
+ALTER TABLE appearance OWNER TO postgres;
 
 --
 -- TOC entry 242 (class 1259 OID 282433)
 -- Name: breakline_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.breakline_relief (
+CREATE TABLE breakline_relief (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     ridge_or_valley_lines public.geometry(MultiLineStringZ,3946),
@@ -10937,14 +10937,14 @@ CREATE TABLE citydb.breakline_relief (
 );
 
 
-ALTER TABLE citydb.breakline_relief OWNER TO postgres;
+ALTER TABLE breakline_relief OWNER TO postgres;
 
 --
 -- TOC entry 265 (class 1259 OID 282601)
 -- Name: bridge; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge (
+CREATE TABLE bridge (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     bridge_parent_id integer,
@@ -10976,14 +10976,14 @@ CREATE TABLE citydb.bridge (
 );
 
 
-ALTER TABLE citydb.bridge OWNER TO postgres;
+ALTER TABLE bridge OWNER TO postgres;
 
 --
 -- TOC entry 272 (class 1259 OID 282651)
 -- Name: bridge_constr_element; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_constr_element (
+CREATE TABLE bridge_constr_element (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11020,14 +11020,14 @@ CREATE TABLE citydb.bridge_constr_element (
 );
 
 
-ALTER TABLE citydb.bridge_constr_element OWNER TO postgres;
+ALTER TABLE bridge_constr_element OWNER TO postgres;
 
 --
 -- TOC entry 266 (class 1259 OID 282609)
 -- Name: bridge_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_furniture (
+CREATE TABLE bridge_furniture (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11045,14 +11045,14 @@ CREATE TABLE citydb.bridge_furniture (
 );
 
 
-ALTER TABLE citydb.bridge_furniture OWNER TO postgres;
+ALTER TABLE bridge_furniture OWNER TO postgres;
 
 --
 -- TOC entry 267 (class 1259 OID 282617)
 -- Name: bridge_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_installation (
+CREATE TABLE bridge_installation (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11081,27 +11081,27 @@ CREATE TABLE citydb.bridge_installation (
 );
 
 
-ALTER TABLE citydb.bridge_installation OWNER TO postgres;
+ALTER TABLE bridge_installation OWNER TO postgres;
 
 --
 -- TOC entry 269 (class 1259 OID 282633)
 -- Name: bridge_open_to_them_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_open_to_them_srf (
+CREATE TABLE bridge_open_to_them_srf (
     bridge_opening_id integer NOT NULL,
     bridge_thematic_surface_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.bridge_open_to_them_srf OWNER TO postgres;
+ALTER TABLE bridge_open_to_them_srf OWNER TO postgres;
 
 --
 -- TOC entry 268 (class 1259 OID 282625)
 -- Name: bridge_opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_opening (
+CREATE TABLE bridge_opening (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     address_id integer,
@@ -11116,14 +11116,14 @@ CREATE TABLE citydb.bridge_opening (
 );
 
 
-ALTER TABLE citydb.bridge_opening OWNER TO postgres;
+ALTER TABLE bridge_opening OWNER TO postgres;
 
 --
 -- TOC entry 270 (class 1259 OID 282638)
 -- Name: bridge_room; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_room (
+CREATE TABLE bridge_room (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11138,14 +11138,14 @@ CREATE TABLE citydb.bridge_room (
 );
 
 
-ALTER TABLE citydb.bridge_room OWNER TO postgres;
+ALTER TABLE bridge_room OWNER TO postgres;
 
 --
 -- TOC entry 271 (class 1259 OID 282646)
 -- Name: bridge_thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.bridge_thematic_surface (
+CREATE TABLE bridge_thematic_surface (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     bridge_id integer,
@@ -11158,14 +11158,14 @@ CREATE TABLE citydb.bridge_thematic_surface (
 );
 
 
-ALTER TABLE citydb.bridge_thematic_surface OWNER TO postgres;
+ALTER TABLE bridge_thematic_surface OWNER TO postgres;
 
 --
 -- TOC entry 231 (class 1259 OID 282366)
 -- Name: building; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.building (
+CREATE TABLE building (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     building_parent_id integer,
@@ -11208,14 +11208,14 @@ CREATE TABLE citydb.building (
 );
 
 
-ALTER TABLE citydb.building OWNER TO postgres;
+ALTER TABLE building OWNER TO postgres;
 
 --
 -- TOC entry 232 (class 1259 OID 282374)
 -- Name: building_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.building_furniture (
+CREATE TABLE building_furniture (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11233,14 +11233,14 @@ CREATE TABLE citydb.building_furniture (
 );
 
 
-ALTER TABLE citydb.building_furniture OWNER TO postgres;
+ALTER TABLE building_furniture OWNER TO postgres;
 
 --
 -- TOC entry 233 (class 1259 OID 282382)
 -- Name: building_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.building_installation (
+CREATE TABLE building_installation (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11269,14 +11269,14 @@ CREATE TABLE citydb.building_installation (
 );
 
 
-ALTER TABLE citydb.building_installation OWNER TO postgres;
+ALTER TABLE building_installation OWNER TO postgres;
 
 --
 -- TOC entry 226 (class 1259 OID 282341)
 -- Name: city_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.city_furniture (
+CREATE TABLE city_furniture (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11312,14 +11312,14 @@ CREATE TABLE citydb.city_furniture (
 );
 
 
-ALTER TABLE citydb.city_furniture OWNER TO postgres;
+ALTER TABLE city_furniture OWNER TO postgres;
 
 --
 -- TOC entry 215 (class 1259 OID 282292)
 -- Name: citymodel_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.citymodel_seq
+CREATE SEQUENCE citymodel_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11327,15 +11327,15 @@ CREATE SEQUENCE citydb.citymodel_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.citymodel_seq OWNER TO postgres;
+ALTER TABLE citymodel_seq OWNER TO postgres;
 
 --
 -- TOC entry 281 (class 1259 OID 282720)
 -- Name: citymodel; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.citymodel (
-    id integer DEFAULT nextval('citydb.citymodel_seq'::regclass) NOT NULL,
+CREATE TABLE citymodel (
+    id integer DEFAULT nextval('citymodel_seq'::regclass) NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
     name character varying(1000),
@@ -11351,14 +11351,14 @@ CREATE TABLE citydb.citymodel (
 );
 
 
-ALTER TABLE citydb.citymodel OWNER TO postgres;
+ALTER TABLE citymodel OWNER TO postgres;
 
 --
 -- TOC entry 216 (class 1259 OID 282294)
 -- Name: cityobject_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.cityobject_seq
+CREATE SEQUENCE cityobject_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11366,15 +11366,15 @@ CREATE SEQUENCE citydb.cityobject_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.cityobject_seq OWNER TO postgres;
+ALTER TABLE cityobject_seq OWNER TO postgres;
 
 --
 -- TOC entry 275 (class 1259 OID 282666)
 -- Name: cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.cityobject (
-    id integer DEFAULT nextval('citydb.cityobject_seq'::regclass) NOT NULL,
+CREATE TABLE cityobject (
+    id integer DEFAULT nextval('cityobject_seq'::regclass) NOT NULL,
     objectclass_id integer NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
@@ -11394,14 +11394,14 @@ CREATE TABLE citydb.cityobject (
 );
 
 
-ALTER TABLE citydb.cityobject OWNER TO postgres;
+ALTER TABLE cityobject OWNER TO postgres;
 
 --
 -- TOC entry 227 (class 1259 OID 282349)
 -- Name: cityobject_genericatt_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.cityobject_genericatt_seq
+CREATE SEQUENCE cityobject_genericatt_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11409,15 +11409,15 @@ CREATE SEQUENCE citydb.cityobject_genericatt_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.cityobject_genericatt_seq OWNER TO postgres;
+ALTER TABLE cityobject_genericatt_seq OWNER TO postgres;
 
 --
 -- TOC entry 282 (class 1259 OID 282729)
 -- Name: cityobject_genericattrib; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.cityobject_genericattrib (
-    id integer DEFAULT nextval('citydb.cityobject_genericatt_seq'::regclass) NOT NULL,
+CREATE TABLE cityobject_genericattrib (
+    id integer DEFAULT nextval('cityobject_genericatt_seq'::regclass) NOT NULL,
     parent_genattrib_id integer,
     root_genattrib_id integer,
     attrname character varying(256) NOT NULL,
@@ -11436,27 +11436,27 @@ CREATE TABLE citydb.cityobject_genericattrib (
 );
 
 
-ALTER TABLE citydb.cityobject_genericattrib OWNER TO postgres;
+ALTER TABLE cityobject_genericattrib OWNER TO postgres;
 
 --
 -- TOC entry 217 (class 1259 OID 282296)
 -- Name: cityobject_member; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.cityobject_member (
+CREATE TABLE cityobject_member (
     citymodel_id integer NOT NULL,
     cityobject_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.cityobject_member OWNER TO postgres;
+ALTER TABLE cityobject_member OWNER TO postgres;
 
 --
 -- TOC entry 221 (class 1259 OID 282310)
 -- Name: cityobjectgroup; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.cityobjectgroup (
+CREATE TABLE cityobjectgroup (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11471,27 +11471,27 @@ CREATE TABLE citydb.cityobjectgroup (
 );
 
 
-ALTER TABLE citydb.cityobjectgroup OWNER TO postgres;
+ALTER TABLE cityobjectgroup OWNER TO postgres;
 
 --
 -- TOC entry 223 (class 1259 OID 282323)
 -- Name: database_srs; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.database_srs (
+CREATE TABLE database_srs (
     srid integer NOT NULL,
     gml_srs_name character varying(1000)
 );
 
 
-ALTER TABLE citydb.database_srs OWNER TO postgres;
+ALTER TABLE database_srs OWNER TO postgres;
 
 --
 -- TOC entry 218 (class 1259 OID 282301)
 -- Name: external_ref_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.external_ref_seq
+CREATE SEQUENCE external_ref_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11499,15 +11499,15 @@ CREATE SEQUENCE citydb.external_ref_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.external_ref_seq OWNER TO postgres;
+ALTER TABLE external_ref_seq OWNER TO postgres;
 
 --
 -- TOC entry 283 (class 1259 OID 282738)
 -- Name: external_reference; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.external_reference (
-    id integer DEFAULT nextval('citydb.external_ref_seq'::regclass) NOT NULL,
+CREATE TABLE external_reference (
+    id integer DEFAULT nextval('external_ref_seq'::regclass) NOT NULL,
     infosys character varying(4000),
     name character varying(4000),
     uri character varying(4000),
@@ -11515,27 +11515,27 @@ CREATE TABLE citydb.external_reference (
 );
 
 
-ALTER TABLE citydb.external_reference OWNER TO postgres;
+ALTER TABLE external_reference OWNER TO postgres;
 
 --
 -- TOC entry 219 (class 1259 OID 282303)
 -- Name: generalization; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.generalization (
+CREATE TABLE generalization (
     cityobject_id integer NOT NULL,
     generalizes_to_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.generalization OWNER TO postgres;
+ALTER TABLE generalization OWNER TO postgres;
 
 --
 -- TOC entry 228 (class 1259 OID 282351)
 -- Name: generic_cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.generic_cityobject (
+CREATE TABLE generic_cityobject (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11577,14 +11577,14 @@ CREATE TABLE citydb.generic_cityobject (
 );
 
 
-ALTER TABLE citydb.generic_cityobject OWNER TO postgres;
+ALTER TABLE generic_cityobject OWNER TO postgres;
 
 --
 -- TOC entry 274 (class 1259 OID 282664)
 -- Name: grid_coverage_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.grid_coverage_seq
+CREATE SEQUENCE grid_coverage_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11592,41 +11592,41 @@ CREATE SEQUENCE citydb.grid_coverage_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.grid_coverage_seq OWNER TO postgres;
+ALTER TABLE grid_coverage_seq OWNER TO postgres;
 
 --
 -- TOC entry 285 (class 1259 OID 282756)
 -- Name: grid_coverage; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.grid_coverage (
-    id integer DEFAULT nextval('citydb.grid_coverage_seq'::regclass) NOT NULL,
+CREATE TABLE grid_coverage (
+    id integer DEFAULT nextval('grid_coverage_seq'::regclass) NOT NULL,
     rasterproperty public.raster
 );
 
 
-ALTER TABLE citydb.grid_coverage OWNER TO postgres;
+ALTER TABLE grid_coverage OWNER TO postgres;
 
 --
 -- TOC entry 222 (class 1259 OID 282318)
 -- Name: group_to_cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.group_to_cityobject (
+CREATE TABLE group_to_cityobject (
     cityobject_id integer NOT NULL,
     cityobjectgroup_id integer NOT NULL,
     role character varying(256)
 );
 
 
-ALTER TABLE citydb.group_to_cityobject OWNER TO postgres;
+ALTER TABLE group_to_cityobject OWNER TO postgres;
 
 --
 -- TOC entry 225 (class 1259 OID 282339)
 -- Name: implicit_geometry_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.implicit_geometry_seq
+CREATE SEQUENCE implicit_geometry_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11634,15 +11634,15 @@ CREATE SEQUENCE citydb.implicit_geometry_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.implicit_geometry_seq OWNER TO postgres;
+ALTER TABLE implicit_geometry_seq OWNER TO postgres;
 
 --
 -- TOC entry 277 (class 1259 OID 282684)
 -- Name: implicit_geometry; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.implicit_geometry (
-    id integer DEFAULT nextval('citydb.implicit_geometry_seq'::regclass) NOT NULL,
+CREATE TABLE implicit_geometry (
+    id integer DEFAULT nextval('implicit_geometry_seq'::regclass) NOT NULL,
     mime_type character varying(256),
     reference_to_library character varying(4000),
     library_object bytea,
@@ -11651,27 +11651,27 @@ CREATE TABLE citydb.implicit_geometry (
 );
 
 
-ALTER TABLE citydb.implicit_geometry OWNER TO postgres;
+ALTER TABLE implicit_geometry OWNER TO postgres;
 
 --
 -- TOC entry 295 (class 1259 OID 284847)
 -- Name: index_table; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.index_table (
+CREATE TABLE index_table (
     id integer NOT NULL,
     obj citydb_pkg.index_obj
 );
 
 
-ALTER TABLE citydb.index_table OWNER TO postgres;
+ALTER TABLE index_table OWNER TO postgres;
 
 --
 -- TOC entry 294 (class 1259 OID 284845)
 -- Name: index_table_id_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.index_table_id_seq
+CREATE SEQUENCE index_table_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -11680,7 +11680,7 @@ CREATE SEQUENCE citydb.index_table_id_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.index_table_id_seq OWNER TO postgres;
+ALTER TABLE index_table_id_seq OWNER TO postgres;
 
 --
 -- TOC entry 5616 (class 0 OID 0)
@@ -11688,7 +11688,7 @@ ALTER TABLE citydb.index_table_id_seq OWNER TO postgres;
 -- Name: index_table_id_seq; Type: SEQUENCE OWNED BY; Schema: citydb; Owner: postgres
 --
 
-ALTER SEQUENCE citydb.index_table_id_seq OWNED BY citydb.index_table.id;
+ALTER SEQUENCE index_table_id_seq OWNED BY index_table.id;
 
 
 --
@@ -11696,7 +11696,7 @@ ALTER SEQUENCE citydb.index_table_id_seq OWNED BY citydb.index_table.id;
 -- Name: land_use; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.land_use (
+CREATE TABLE land_use (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11713,28 +11713,28 @@ CREATE TABLE citydb.land_use (
 );
 
 
-ALTER TABLE citydb.land_use OWNER TO postgres;
+ALTER TABLE land_use OWNER TO postgres;
 
 --
 -- TOC entry 243 (class 1259 OID 282441)
 -- Name: masspoint_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.masspoint_relief (
+CREATE TABLE masspoint_relief (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     relief_points public.geometry(MultiPointZ,3946)
 );
 
 
-ALTER TABLE citydb.masspoint_relief OWNER TO postgres;
+ALTER TABLE masspoint_relief OWNER TO postgres;
 
 --
 -- TOC entry 224 (class 1259 OID 282331)
 -- Name: objectclass; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.objectclass (
+CREATE TABLE objectclass (
     id integer NOT NULL,
     is_ade_class numeric,
     is_toplevel numeric,
@@ -11746,14 +11746,14 @@ CREATE TABLE citydb.objectclass (
 );
 
 
-ALTER TABLE citydb.objectclass OWNER TO postgres;
+ALTER TABLE objectclass OWNER TO postgres;
 
 --
 -- TOC entry 234 (class 1259 OID 282390)
 -- Name: opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.opening (
+CREATE TABLE opening (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     address_id integer,
@@ -11768,27 +11768,27 @@ CREATE TABLE citydb.opening (
 );
 
 
-ALTER TABLE citydb.opening OWNER TO postgres;
+ALTER TABLE opening OWNER TO postgres;
 
 --
 -- TOC entry 235 (class 1259 OID 282398)
 -- Name: opening_to_them_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.opening_to_them_surface (
+CREATE TABLE opening_to_them_surface (
     opening_id integer NOT NULL,
     thematic_surface_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.opening_to_them_surface OWNER TO postgres;
+ALTER TABLE opening_to_them_surface OWNER TO postgres;
 
 --
 -- TOC entry 251 (class 1259 OID 282504)
 -- Name: plant_cover; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.plant_cover (
+CREATE TABLE plant_cover (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11810,14 +11810,14 @@ CREATE TABLE citydb.plant_cover (
 );
 
 
-ALTER TABLE citydb.plant_cover OWNER TO postgres;
+ALTER TABLE plant_cover OWNER TO postgres;
 
 --
 -- TOC entry 256 (class 1259 OID 282541)
 -- Name: raster_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.raster_relief (
+CREATE TABLE raster_relief (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     raster_uri character varying(4000),
@@ -11825,14 +11825,14 @@ CREATE TABLE citydb.raster_relief (
 );
 
 
-ALTER TABLE citydb.raster_relief OWNER TO postgres;
+ALTER TABLE raster_relief OWNER TO postgres;
 
 --
 -- TOC entry 244 (class 1259 OID 282449)
 -- Name: relief_component; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.relief_component (
+CREATE TABLE relief_component (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     lod numeric,
@@ -11841,27 +11841,27 @@ CREATE TABLE citydb.relief_component (
 );
 
 
-ALTER TABLE citydb.relief_component OWNER TO postgres;
+ALTER TABLE relief_component OWNER TO postgres;
 
 --
 -- TOC entry 245 (class 1259 OID 282458)
 -- Name: relief_feat_to_rel_comp; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.relief_feat_to_rel_comp (
+CREATE TABLE relief_feat_to_rel_comp (
     relief_component_id integer NOT NULL,
     relief_feature_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.relief_feat_to_rel_comp OWNER TO postgres;
+ALTER TABLE relief_feat_to_rel_comp OWNER TO postgres;
 
 --
 -- TOC entry 246 (class 1259 OID 282463)
 -- Name: relief_feature; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.relief_feature (
+CREATE TABLE relief_feature (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     lod numeric,
@@ -11869,14 +11869,14 @@ CREATE TABLE citydb.relief_feature (
 );
 
 
-ALTER TABLE citydb.relief_feature OWNER TO postgres;
+ALTER TABLE relief_feature OWNER TO postgres;
 
 --
 -- TOC entry 236 (class 1259 OID 282403)
 -- Name: room; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.room (
+CREATE TABLE room (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11891,14 +11891,14 @@ CREATE TABLE citydb.room (
 );
 
 
-ALTER TABLE citydb.room OWNER TO postgres;
+ALTER TABLE room OWNER TO postgres;
 
 --
 -- TOC entry 286 (class 1259 OID 282765)
 -- Name: schema_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.schema_seq
+CREATE SEQUENCE schema_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -11906,15 +11906,15 @@ CREATE SEQUENCE citydb.schema_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.schema_seq OWNER TO postgres;
+ALTER TABLE schema_seq OWNER TO postgres;
 
 --
 -- TOC entry 288 (class 1259 OID 283121)
 -- Name: schema; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.schema (
-    id integer DEFAULT nextval('citydb.schema_seq'::regclass) NOT NULL,
+CREATE TABLE schema (
+    id integer DEFAULT nextval('schema_seq'::regclass) NOT NULL,
     is_ade_root numeric NOT NULL,
     citygml_version character varying(50) NOT NULL,
     xml_namespace_uri character varying(4000) NOT NULL,
@@ -11926,40 +11926,40 @@ CREATE TABLE citydb.schema (
 );
 
 
-ALTER TABLE citydb.schema OWNER TO postgres;
+ALTER TABLE schema OWNER TO postgres;
 
 --
 -- TOC entry 290 (class 1259 OID 283138)
 -- Name: schema_referencing; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.schema_referencing (
+CREATE TABLE schema_referencing (
     referencing_id integer NOT NULL,
     referenced_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.schema_referencing OWNER TO postgres;
+ALTER TABLE schema_referencing OWNER TO postgres;
 
 --
 -- TOC entry 289 (class 1259 OID 283130)
 -- Name: schema_to_objectclass; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.schema_to_objectclass (
+CREATE TABLE schema_to_objectclass (
     schema_id integer NOT NULL,
     objectclass_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.schema_to_objectclass OWNER TO postgres;
+ALTER TABLE schema_to_objectclass OWNER TO postgres;
 
 --
 -- TOC entry 252 (class 1259 OID 282512)
 -- Name: solitary_vegetat_object; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.solitary_vegetat_object (
+CREATE TABLE solitary_vegetat_object (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -11999,14 +11999,14 @@ CREATE TABLE citydb.solitary_vegetat_object (
 );
 
 
-ALTER TABLE citydb.solitary_vegetat_object OWNER TO postgres;
+ALTER TABLE solitary_vegetat_object OWNER TO postgres;
 
 --
 -- TOC entry 239 (class 1259 OID 282418)
 -- Name: surface_data_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.surface_data_seq
+CREATE SEQUENCE surface_data_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -12014,15 +12014,15 @@ CREATE SEQUENCE citydb.surface_data_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.surface_data_seq OWNER TO postgres;
+ALTER TABLE surface_data_seq OWNER TO postgres;
 
 --
 -- TOC entry 280 (class 1259 OID 282711)
 -- Name: surface_data; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.surface_data (
-    id integer DEFAULT nextval('citydb.surface_data_seq'::regclass) NOT NULL,
+CREATE TABLE surface_data (
+    id integer DEFAULT nextval('surface_data_seq'::regclass) NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
     name character varying(1000),
@@ -12047,14 +12047,14 @@ CREATE TABLE citydb.surface_data (
 );
 
 
-ALTER TABLE citydb.surface_data OWNER TO postgres;
+ALTER TABLE surface_data OWNER TO postgres;
 
 --
 -- TOC entry 220 (class 1259 OID 282308)
 -- Name: surface_geometry_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.surface_geometry_seq
+CREATE SEQUENCE surface_geometry_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -12062,15 +12062,15 @@ CREATE SEQUENCE citydb.surface_geometry_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.surface_geometry_seq OWNER TO postgres;
+ALTER TABLE surface_geometry_seq OWNER TO postgres;
 
 --
 -- TOC entry 278 (class 1259 OID 282693)
 -- Name: surface_geometry; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.surface_geometry (
-    id integer DEFAULT nextval('citydb.surface_geometry_seq'::regclass) NOT NULL,
+CREATE TABLE surface_geometry (
+    id integer DEFAULT nextval('surface_geometry_seq'::regclass) NOT NULL,
     gmlid character varying(256),
     gmlid_codespace character varying(1000),
     parent_id integer,
@@ -12087,14 +12087,14 @@ CREATE TABLE citydb.surface_geometry (
 );
 
 
-ALTER TABLE citydb.surface_geometry OWNER TO postgres;
+ALTER TABLE surface_geometry OWNER TO postgres;
 
 --
 -- TOC entry 261 (class 1259 OID 282575)
 -- Name: tex_image_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
-CREATE SEQUENCE citydb.tex_image_seq
+CREATE SEQUENCE tex_image_seq
     START WITH 1
     INCREMENT BY 1
     MINVALUE 0
@@ -12102,15 +12102,15 @@ CREATE SEQUENCE citydb.tex_image_seq
     CACHE 1;
 
 
-ALTER TABLE citydb.tex_image_seq OWNER TO postgres;
+ALTER TABLE tex_image_seq OWNER TO postgres;
 
 --
 -- TOC entry 284 (class 1259 OID 282747)
 -- Name: tex_image; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tex_image (
-    id integer DEFAULT nextval('citydb.tex_image_seq'::regclass) NOT NULL,
+CREATE TABLE tex_image (
+    id integer DEFAULT nextval('tex_image_seq'::regclass) NOT NULL,
     tex_image_uri character varying(4000),
     tex_image_data bytea,
     tex_mime_type character varying(256),
@@ -12118,14 +12118,14 @@ CREATE TABLE citydb.tex_image (
 );
 
 
-ALTER TABLE citydb.tex_image OWNER TO postgres;
+ALTER TABLE tex_image OWNER TO postgres;
 
 --
 -- TOC entry 240 (class 1259 OID 282420)
 -- Name: textureparam; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.textureparam (
+CREATE TABLE textureparam (
     surface_geometry_id integer NOT NULL,
     is_texture_parametrization numeric,
     world_to_texture character varying(1000),
@@ -12134,14 +12134,14 @@ CREATE TABLE citydb.textureparam (
 );
 
 
-ALTER TABLE citydb.textureparam OWNER TO postgres;
+ALTER TABLE textureparam OWNER TO postgres;
 
 --
 -- TOC entry 237 (class 1259 OID 282411)
 -- Name: thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.thematic_surface (
+CREATE TABLE thematic_surface (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     building_id integer,
@@ -12153,14 +12153,14 @@ CREATE TABLE citydb.thematic_surface (
 );
 
 
-ALTER TABLE citydb.thematic_surface OWNER TO postgres;
+ALTER TABLE thematic_surface OWNER TO postgres;
 
 --
 -- TOC entry 247 (class 1259 OID 282472)
 -- Name: tin_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tin_relief (
+CREATE TABLE tin_relief (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     max_length double precision,
@@ -12172,14 +12172,14 @@ CREATE TABLE citydb.tin_relief (
 );
 
 
-ALTER TABLE citydb.tin_relief OWNER TO postgres;
+ALTER TABLE tin_relief OWNER TO postgres;
 
 --
 -- TOC entry 249 (class 1259 OID 282488)
 -- Name: traffic_area; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.traffic_area (
+CREATE TABLE traffic_area (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12197,14 +12197,14 @@ CREATE TABLE citydb.traffic_area (
 );
 
 
-ALTER TABLE citydb.traffic_area OWNER TO postgres;
+ALTER TABLE traffic_area OWNER TO postgres;
 
 --
 -- TOC entry 248 (class 1259 OID 282480)
 -- Name: transportation_complex; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.transportation_complex (
+CREATE TABLE transportation_complex (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12221,14 +12221,14 @@ CREATE TABLE citydb.transportation_complex (
 );
 
 
-ALTER TABLE citydb.transportation_complex OWNER TO postgres;
+ALTER TABLE transportation_complex OWNER TO postgres;
 
 --
 -- TOC entry 257 (class 1259 OID 282549)
 -- Name: tunnel; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel (
+CREATE TABLE tunnel (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     tunnel_parent_id integer,
@@ -12259,14 +12259,14 @@ CREATE TABLE citydb.tunnel (
 );
 
 
-ALTER TABLE citydb.tunnel OWNER TO postgres;
+ALTER TABLE tunnel OWNER TO postgres;
 
 --
 -- TOC entry 264 (class 1259 OID 282593)
 -- Name: tunnel_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_furniture (
+CREATE TABLE tunnel_furniture (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12284,14 +12284,14 @@ CREATE TABLE citydb.tunnel_furniture (
 );
 
 
-ALTER TABLE citydb.tunnel_furniture OWNER TO postgres;
+ALTER TABLE tunnel_furniture OWNER TO postgres;
 
 --
 -- TOC entry 259 (class 1259 OID 282562)
 -- Name: tunnel_hollow_space; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_hollow_space (
+CREATE TABLE tunnel_hollow_space (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12306,14 +12306,14 @@ CREATE TABLE citydb.tunnel_hollow_space (
 );
 
 
-ALTER TABLE citydb.tunnel_hollow_space OWNER TO postgres;
+ALTER TABLE tunnel_hollow_space OWNER TO postgres;
 
 --
 -- TOC entry 263 (class 1259 OID 282585)
 -- Name: tunnel_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_installation (
+CREATE TABLE tunnel_installation (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12342,27 +12342,27 @@ CREATE TABLE citydb.tunnel_installation (
 );
 
 
-ALTER TABLE citydb.tunnel_installation OWNER TO postgres;
+ALTER TABLE tunnel_installation OWNER TO postgres;
 
 --
 -- TOC entry 258 (class 1259 OID 282557)
 -- Name: tunnel_open_to_them_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_open_to_them_srf (
+CREATE TABLE tunnel_open_to_them_srf (
     tunnel_opening_id integer NOT NULL,
     tunnel_thematic_surface_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.tunnel_open_to_them_srf OWNER TO postgres;
+ALTER TABLE tunnel_open_to_them_srf OWNER TO postgres;
 
 --
 -- TOC entry 262 (class 1259 OID 282577)
 -- Name: tunnel_opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_opening (
+CREATE TABLE tunnel_opening (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     lod3_multi_surface_id integer,
@@ -12376,14 +12376,14 @@ CREATE TABLE citydb.tunnel_opening (
 );
 
 
-ALTER TABLE citydb.tunnel_opening OWNER TO postgres;
+ALTER TABLE tunnel_opening OWNER TO postgres;
 
 --
 -- TOC entry 260 (class 1259 OID 282570)
 -- Name: tunnel_thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.tunnel_thematic_surface (
+CREATE TABLE tunnel_thematic_surface (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     tunnel_id integer,
@@ -12395,27 +12395,27 @@ CREATE TABLE citydb.tunnel_thematic_surface (
 );
 
 
-ALTER TABLE citydb.tunnel_thematic_surface OWNER TO postgres;
+ALTER TABLE tunnel_thematic_surface OWNER TO postgres;
 
 --
 -- TOC entry 254 (class 1259 OID 282528)
 -- Name: waterbod_to_waterbnd_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.waterbod_to_waterbnd_srf (
+CREATE TABLE waterbod_to_waterbnd_srf (
     waterboundary_surface_id integer NOT NULL,
     waterbody_id integer NOT NULL
 );
 
 
-ALTER TABLE citydb.waterbod_to_waterbnd_srf OWNER TO postgres;
+ALTER TABLE waterbod_to_waterbnd_srf OWNER TO postgres;
 
 --
 -- TOC entry 253 (class 1259 OID 282520)
 -- Name: waterbody; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.waterbody (
+CREATE TABLE waterbody (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     class character varying(256),
@@ -12435,14 +12435,14 @@ CREATE TABLE citydb.waterbody (
 );
 
 
-ALTER TABLE citydb.waterbody OWNER TO postgres;
+ALTER TABLE waterbody OWNER TO postgres;
 
 --
 -- TOC entry 255 (class 1259 OID 282533)
 -- Name: waterboundary_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
-CREATE TABLE citydb.waterboundary_surface (
+CREATE TABLE waterboundary_surface (
     id integer NOT NULL,
     objectclass_id integer NOT NULL,
     water_level character varying(256),
@@ -12453,14 +12453,14 @@ CREATE TABLE citydb.waterboundary_surface (
 );
 
 
-ALTER TABLE citydb.waterboundary_surface OWNER TO postgres;
+ALTER TABLE waterboundary_surface OWNER TO postgres;
 
 --
 -- TOC entry 4588 (class 2604 OID 284850)
 -- Name: index_table id; Type: DEFAULT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.index_table ALTER COLUMN id SET DEFAULT nextval('citydb.index_table_id_seq'::regclass);
+ALTER TABLE ONLY index_table ALTER COLUMN id SET DEFAULT nextval('index_table_id_seq'::regclass);
 
 
 --
@@ -12469,7 +12469,7 @@ ALTER TABLE ONLY citydb.index_table ALTER COLUMN id SET DEFAULT nextval('citydb.
 -- Data for Name: address; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address (id, gmlid, gmlid_codespace, street, house_number, po_box, zip_code, city, state, country, multi_point, xal_source) FROM stdin;
+COPY address (id, gmlid, gmlid_codespace, street, house_number, po_box, zip_code, city, state, country, multi_point, xal_source) FROM stdin;
 \.
 
 
@@ -12479,7 +12479,7 @@ COPY citydb.address (id, gmlid, gmlid_codespace, street, house_number, po_box, z
 -- Data for Name: address_to_bridge; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address_to_bridge (bridge_id, address_id) FROM stdin;
+COPY address_to_bridge (bridge_id, address_id) FROM stdin;
 \.
 
 
@@ -12489,7 +12489,7 @@ COPY citydb.address_to_bridge (bridge_id, address_id) FROM stdin;
 -- Data for Name: address_to_building; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address_to_building (building_id, address_id) FROM stdin;
+COPY address_to_building (building_id, address_id) FROM stdin;
 \.
 
 
@@ -12499,7 +12499,7 @@ COPY citydb.address_to_building (building_id, address_id) FROM stdin;
 -- Data for Name: ade; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.ade (id, adeid, name, description, version, db_prefix, xml_schemamapping_file, drop_db_script, creation_date, creation_person) FROM stdin;
+COPY ade (id, adeid, name, description, version, db_prefix, xml_schemamapping_file, drop_db_script, creation_date, creation_person) FROM stdin;
 \.
 
 
@@ -12509,7 +12509,7 @@ COPY citydb.ade (id, adeid, name, description, version, db_prefix, xml_schemamap
 -- Data for Name: aggregation_info; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) FROM stdin;
+COPY aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) FROM stdin;
 3	57	cityobject_member	0	\N	0
 110	3	cityobject_id	0	\N	1
 106	108	root_id	0	\N	1
@@ -12720,7 +12720,7 @@ COPY citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, mi
 -- Data for Name: appear_to_surface_data; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.appear_to_surface_data (surface_data_id, appearance_id) FROM stdin;
+COPY appear_to_surface_data (surface_data_id, appearance_id) FROM stdin;
 \.
 
 
@@ -12730,7 +12730,7 @@ COPY citydb.appear_to_surface_data (surface_data_id, appearance_id) FROM stdin;
 -- Data for Name: appearance; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.appearance (id, gmlid, gmlid_codespace, name, name_codespace, description, theme, citymodel_id, cityobject_id) FROM stdin;
+COPY appearance (id, gmlid, gmlid_codespace, name, name_codespace, description, theme, citymodel_id, cityobject_id) FROM stdin;
 \.
 
 
@@ -12740,7 +12740,7 @@ COPY citydb.appearance (id, gmlid, gmlid_codespace, name, name_codespace, descri
 -- Data for Name: breakline_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.breakline_relief (id, objectclass_id, ridge_or_valley_lines, break_lines) FROM stdin;
+COPY breakline_relief (id, objectclass_id, ridge_or_valley_lines, break_lines) FROM stdin;
 \.
 
 
@@ -12750,7 +12750,7 @@ COPY citydb.breakline_relief (id, objectclass_id, ridge_or_valley_lines, break_l
 -- Data for Name: bridge; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge (id, objectclass_id, bridge_parent_id, bridge_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, is_movable, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
+COPY bridge (id, objectclass_id, bridge_parent_id, bridge_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, is_movable, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -12760,7 +12760,7 @@ COPY citydb.bridge (id, objectclass_id, bridge_parent_id, bridge_root_id, class,
 -- Data for Name: bridge_constr_element; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_constr_element (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY bridge_constr_element (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12770,7 +12770,7 @@ COPY citydb.bridge_constr_element (id, objectclass_id, class, class_codespace, f
 -- Data for Name: bridge_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
+COPY bridge_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12780,7 +12780,7 @@ COPY citydb.bridge_furniture (id, objectclass_id, class, class_codespace, functi
 -- Data for Name: bridge_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, bridge_room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY bridge_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, bridge_room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12790,7 +12790,7 @@ COPY citydb.bridge_installation (id, objectclass_id, class, class_codespace, fun
 -- Data for Name: bridge_open_to_them_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_open_to_them_srf (bridge_opening_id, bridge_thematic_surface_id) FROM stdin;
+COPY bridge_open_to_them_srf (bridge_opening_id, bridge_thematic_surface_id) FROM stdin;
 \.
 
 
@@ -12800,7 +12800,7 @@ COPY citydb.bridge_open_to_them_srf (bridge_opening_id, bridge_thematic_surface_
 -- Data for Name: bridge_opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY bridge_opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12810,7 +12810,7 @@ COPY citydb.bridge_opening (id, objectclass_id, address_id, lod3_multi_surface_i
 -- Data for Name: bridge_room; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
+COPY bridge_room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -12820,7 +12820,7 @@ COPY citydb.bridge_room (id, objectclass_id, class, class_codespace, function, f
 -- Data for Name: bridge_thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_thematic_surface (id, objectclass_id, bridge_id, bridge_room_id, bridge_installation_id, bridge_constr_element_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
+COPY bridge_thematic_surface (id, objectclass_id, bridge_id, bridge_room_id, bridge_installation_id, bridge_constr_element_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
 \.
 
 
@@ -12830,7 +12830,7 @@ COPY citydb.bridge_thematic_surface (id, objectclass_id, bridge_id, bridge_room_
 -- Data for Name: building; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building (id, objectclass_id, building_parent_id, building_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, roof_type, roof_type_codespace, measured_height, measured_height_unit, storeys_above_ground, storeys_below_ground, storey_heights_above_ground, storey_heights_ag_unit, storey_heights_below_ground, storey_heights_bg_unit, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod0_footprint_id, lod0_roofprint_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
+COPY building (id, objectclass_id, building_parent_id, building_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, roof_type, roof_type_codespace, measured_height, measured_height_unit, storeys_above_ground, storeys_below_ground, storey_heights_above_ground, storey_heights_ag_unit, storey_heights_below_ground, storey_heights_bg_unit, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod0_footprint_id, lod0_roofprint_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
 1	25	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	26.928000000000001	#m	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1	\N	\N
 37	25	\N	37	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	24.120999999999999	#m	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	330	\N	\N
 97	25	\N	97	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	28.584	#m	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	591	\N	\N
@@ -12848,7 +12848,7 @@ COPY citydb.building (id, objectclass_id, building_parent_id, building_root_id, 
 -- Data for Name: building_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
+COPY building_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12858,7 +12858,7 @@ COPY citydb.building_furniture (id, objectclass_id, class, class_codespace, func
 -- Data for Name: building_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY building_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12868,7 +12868,7 @@ COPY citydb.building_installation (id, objectclass_id, class, class_codespace, f
 -- Data for Name: city_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.city_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY city_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -12878,7 +12878,7 @@ COPY citydb.city_furniture (id, objectclass_id, class, class_codespace, function
 -- Data for Name: citymodel; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.citymodel (id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, last_modification_date, updating_person, reason_for_update, lineage) FROM stdin;
+COPY citymodel (id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, last_modification_date, updating_person, reason_for_update, lineage) FROM stdin;
 \.
 
 
@@ -12888,7 +12888,7 @@ COPY citydb.citymodel (id, gmlid, gmlid_codespace, name, name_codespace, descrip
 -- Data for Name: cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) FROM stdin;
+COPY cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) FROM stdin;
 1	25	BU_69381AV77_1	\N	\N	\N	\N	01030000A06A0F000001000000050000007724EA0C8E1E3C41E1F1ED8549BE53416666666666F664409CA564A1981E3C41E1F1ED8549BE53416666666666F664409CA564A1981E3C41BC7135194FBE534134A0DE8C1A5468407724EA0C8E1E3C41BC7135194FBE534134A0DE8C1A5468407724EA0C8E1E3C41E1F1ED8549BE53416666666666F66440	2021-09-06 11:48:36.21+02	\N	\N	\N	2021-09-06 11:48:36.21+02	postgres	\N	\N	\N
 3	33	UUID_465d1df7-6d69-434d-90f0-f81101d84c6f	\N	\N	\N	\N	01030000A06A0F00000100000005000000C0064468951E3C412E1B9D8A49BE53414B3B35979B5467409CA564A1981E3C412E1B9D8A49BE53414B3B35979B5467409CA564A1981E3C41B763EA844ABE534191B75CFDD8DC6740C0064468951E3C41B763EA844ABE534191B75CFDD8DC6740C0064468951E3C412E1B9D8A49BE53414B3B35979B546740	2021-09-06 11:48:36.21+02	\N	\N	\N	2021-09-06 11:48:36.21+02	postgres	\N	\N	\N
 4	33	UUID_7aeb6122-f48d-4dca-a394-a019b2454218	\N	\N	\N	\N	01030000A06A0F0000010000000500000046459C2E901E3C414B3CA0464ABE5341A3737E8AE32268403621AD05931E3C414B3CA0464ABE5341A3737E8AE32268403621AD05931E3C418AABCAAF4BBE53414223D8B87E53684046459C2E901E3C418AABCAAF4BBE53414223D8B87E53684046459C2E901E3C414B3CA0464ABE5341A3737E8AE3226840	2021-09-06 11:48:36.21+02	\N	\N	\N	2021-09-06 11:48:36.21+02	postgres	\N	\N	\N
@@ -13208,7 +13208,7 @@ COPY citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_c
 -- Data for Name: cityobject_genericattrib; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject_genericattrib (id, parent_genattrib_id, root_genattrib_id, attrname, datatype, strval, intval, realval, urival, dateval, unit, genattribset_codespace, blobval, geomval, surface_geometry_id, cityobject_id) FROM stdin;
+COPY cityobject_genericattrib (id, parent_genattrib_id, root_genattrib_id, attrname, datatype, strval, intval, realval, urival, dateval, unit, genattribset_codespace, blobval, geomval, surface_geometry_id, cityobject_id) FROM stdin;
 \.
 
 
@@ -13218,7 +13218,7 @@ COPY citydb.cityobject_genericattrib (id, parent_genattrib_id, root_genattrib_id
 -- Data for Name: cityobject_member; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject_member (citymodel_id, cityobject_id) FROM stdin;
+COPY cityobject_member (citymodel_id, cityobject_id) FROM stdin;
 \.
 
 
@@ -13228,7 +13228,7 @@ COPY citydb.cityobject_member (citymodel_id, cityobject_id) FROM stdin;
 -- Data for Name: cityobjectgroup; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobjectgroup (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, brep_id, other_geom, parent_cityobject_id) FROM stdin;
+COPY cityobjectgroup (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, brep_id, other_geom, parent_cityobject_id) FROM stdin;
 \.
 
 
@@ -13238,7 +13238,7 @@ COPY citydb.cityobjectgroup (id, objectclass_id, class, class_codespace, functio
 -- Data for Name: database_srs; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.database_srs (srid, gml_srs_name) FROM stdin;
+COPY database_srs (srid, gml_srs_name) FROM stdin;
 3946	urn:ogc:def:crs:EPSG::3946
 \.
 
@@ -13249,7 +13249,7 @@ COPY citydb.database_srs (srid, gml_srs_name) FROM stdin;
 -- Data for Name: external_reference; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.external_reference (id, infosys, name, uri, cityobject_id) FROM stdin;
+COPY external_reference (id, infosys, name, uri, cityobject_id) FROM stdin;
 \.
 
 
@@ -13259,7 +13259,7 @@ COPY citydb.external_reference (id, infosys, name, uri, cityobject_id) FROM stdi
 -- Data for Name: generalization; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.generalization (cityobject_id, generalizes_to_id) FROM stdin;
+COPY generalization (cityobject_id, generalizes_to_id) FROM stdin;
 \.
 
 
@@ -13269,7 +13269,7 @@ COPY citydb.generalization (cityobject_id, generalizes_to_id) FROM stdin;
 -- Data for Name: generic_cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.generic_cityobject (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_terrain_intersection, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod0_brep_id, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod0_other_geom, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod0_implicit_rep_id, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod0_implicit_ref_point, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod0_implicit_transformation, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY generic_cityobject (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_terrain_intersection, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod0_brep_id, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod0_other_geom, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod0_implicit_rep_id, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod0_implicit_ref_point, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod0_implicit_transformation, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -13279,7 +13279,7 @@ COPY citydb.generic_cityobject (id, objectclass_id, class, class_codespace, func
 -- Data for Name: grid_coverage; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.grid_coverage (id, rasterproperty) FROM stdin;
+COPY grid_coverage (id, rasterproperty) FROM stdin;
 \.
 
 
@@ -13289,7 +13289,7 @@ COPY citydb.grid_coverage (id, rasterproperty) FROM stdin;
 -- Data for Name: group_to_cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.group_to_cityobject (cityobject_id, cityobjectgroup_id, role) FROM stdin;
+COPY group_to_cityobject (cityobject_id, cityobjectgroup_id, role) FROM stdin;
 \.
 
 
@@ -13299,7 +13299,7 @@ COPY citydb.group_to_cityobject (cityobject_id, cityobjectgroup_id, role) FROM s
 -- Data for Name: implicit_geometry; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.implicit_geometry (id, mime_type, reference_to_library, library_object, relative_brep_id, relative_other_geom) FROM stdin;
+COPY implicit_geometry (id, mime_type, reference_to_library, library_object, relative_brep_id, relative_other_geom) FROM stdin;
 \.
 
 
@@ -13309,7 +13309,7 @@ COPY citydb.implicit_geometry (id, mime_type, reference_to_library, library_obje
 -- Data for Name: index_table; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.index_table (id, obj) FROM stdin;
+COPY index_table (id, obj) FROM stdin;
 1	(cityobject_envelope_spx,cityobject,envelope,1,0,0)
 2	(surface_geom_spx,surface_geometry,geometry,1,0,0)
 3	(surface_geom_solid_spx,surface_geometry,solid_geometry,1,0,0)
@@ -13332,7 +13332,7 @@ COPY citydb.index_table (id, obj) FROM stdin;
 -- Data for Name: land_use; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.land_use (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_surface_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
+COPY land_use (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_surface_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
 \.
 
 
@@ -13342,7 +13342,7 @@ COPY citydb.land_use (id, objectclass_id, class, class_codespace, function, func
 -- Data for Name: masspoint_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.masspoint_relief (id, objectclass_id, relief_points) FROM stdin;
+COPY masspoint_relief (id, objectclass_id, relief_points) FROM stdin;
 \.
 
 
@@ -13352,7 +13352,7 @@ COPY citydb.masspoint_relief (id, objectclass_id, relief_points) FROM stdin;
 -- Data for Name: objectclass; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) FROM stdin;
+COPY objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) FROM stdin;
 0	0	0	Undefined	\N	\N	\N	\N
 1	0	0	_GML	cityobject	\N	\N	\N
 2	0	0	_Feature	cityobject	1	1	\N
@@ -13476,7 +13476,7 @@ COPY citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, su
 -- Data for Name: opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -13486,7 +13486,7 @@ COPY citydb.opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4
 -- Data for Name: opening_to_them_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.opening_to_them_surface (opening_id, thematic_surface_id) FROM stdin;
+COPY opening_to_them_surface (opening_id, thematic_surface_id) FROM stdin;
 \.
 
 
@@ -13496,7 +13496,7 @@ COPY citydb.opening_to_them_surface (opening_id, thematic_surface_id) FROM stdin
 -- Data for Name: plant_cover; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.plant_cover (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, average_height, average_height_unit, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_multi_solid_id, lod2_multi_solid_id, lod3_multi_solid_id, lod4_multi_solid_id) FROM stdin;
+COPY plant_cover (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, average_height, average_height_unit, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_multi_solid_id, lod2_multi_solid_id, lod3_multi_solid_id, lod4_multi_solid_id) FROM stdin;
 \.
 
 
@@ -13506,7 +13506,7 @@ COPY citydb.plant_cover (id, objectclass_id, class, class_codespace, function, f
 -- Data for Name: raster_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.raster_relief (id, objectclass_id, raster_uri, coverage_id) FROM stdin;
+COPY raster_relief (id, objectclass_id, raster_uri, coverage_id) FROM stdin;
 \.
 
 
@@ -13516,7 +13516,7 @@ COPY citydb.raster_relief (id, objectclass_id, raster_uri, coverage_id) FROM std
 -- Data for Name: relief_component; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_component (id, objectclass_id, lod, extent) FROM stdin;
+COPY relief_component (id, objectclass_id, lod, extent) FROM stdin;
 \.
 
 
@@ -13526,7 +13526,7 @@ COPY citydb.relief_component (id, objectclass_id, lod, extent) FROM stdin;
 -- Data for Name: relief_feat_to_rel_comp; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_feat_to_rel_comp (relief_component_id, relief_feature_id) FROM stdin;
+COPY relief_feat_to_rel_comp (relief_component_id, relief_feature_id) FROM stdin;
 \.
 
 
@@ -13536,7 +13536,7 @@ COPY citydb.relief_feat_to_rel_comp (relief_component_id, relief_feature_id) FRO
 -- Data for Name: relief_feature; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_feature (id, objectclass_id, lod) FROM stdin;
+COPY relief_feature (id, objectclass_id, lod) FROM stdin;
 \.
 
 
@@ -13546,7 +13546,7 @@ COPY citydb.relief_feature (id, objectclass_id, lod) FROM stdin;
 -- Data for Name: room; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
+COPY room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -13556,7 +13556,7 @@ COPY citydb.room (id, objectclass_id, class, class_codespace, function, function
 -- Data for Name: schema; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema (id, is_ade_root, citygml_version, xml_namespace_uri, xml_namespace_prefix, xml_schema_location, xml_schemafile, xml_schemafile_type, ade_id) FROM stdin;
+COPY schema (id, is_ade_root, citygml_version, xml_namespace_uri, xml_namespace_prefix, xml_schema_location, xml_schemafile, xml_schemafile_type, ade_id) FROM stdin;
 \.
 
 
@@ -13566,7 +13566,7 @@ COPY citydb.schema (id, is_ade_root, citygml_version, xml_namespace_uri, xml_nam
 -- Data for Name: schema_referencing; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema_referencing (referencing_id, referenced_id) FROM stdin;
+COPY schema_referencing (referencing_id, referenced_id) FROM stdin;
 \.
 
 
@@ -13576,7 +13576,7 @@ COPY citydb.schema_referencing (referencing_id, referenced_id) FROM stdin;
 -- Data for Name: schema_to_objectclass; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema_to_objectclass (schema_id, objectclass_id) FROM stdin;
+COPY schema_to_objectclass (schema_id, objectclass_id) FROM stdin;
 \.
 
 
@@ -13586,7 +13586,7 @@ COPY citydb.schema_to_objectclass (schema_id, objectclass_id) FROM stdin;
 -- Data for Name: solitary_vegetat_object; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.solitary_vegetat_object (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, species, species_codespace, height, height_unit, trunk_diameter, trunk_diameter_unit, crown_diameter, crown_diameter_unit, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY solitary_vegetat_object (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, species, species_codespace, height, height_unit, trunk_diameter, trunk_diameter_unit, crown_diameter, crown_diameter_unit, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -13596,7 +13596,7 @@ COPY citydb.solitary_vegetat_object (id, objectclass_id, class, class_codespace,
 -- Data for Name: surface_data; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.surface_data (id, gmlid, gmlid_codespace, name, name_codespace, description, is_front, objectclass_id, x3d_shininess, x3d_transparency, x3d_ambient_intensity, x3d_specular_color, x3d_diffuse_color, x3d_emissive_color, x3d_is_smooth, tex_image_id, tex_texture_type, tex_wrap_mode, tex_border_color, gt_prefer_worldfile, gt_orientation, gt_reference_point) FROM stdin;
+COPY surface_data (id, gmlid, gmlid_codespace, name, name_codespace, description, is_front, objectclass_id, x3d_shininess, x3d_transparency, x3d_ambient_intensity, x3d_specular_color, x3d_diffuse_color, x3d_emissive_color, x3d_is_smooth, tex_image_id, tex_texture_type, tex_wrap_mode, tex_border_color, gt_prefer_worldfile, gt_orientation, gt_reference_point) FROM stdin;
 \.
 
 
@@ -13606,7 +13606,7 @@ COPY citydb.surface_data (id, gmlid, gmlid_codespace, name, name_codespace, desc
 -- Data for Name: surface_geometry; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) FROM stdin;
+COPY surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) FROM stdin;
 1	UUID_d76ada43-013b-4b57-bb0c-f62f5c9a990f	\N	\N	1	1	0	0	0	0	010F0000A06A0F00001900000001030000800100000005000000DE1E8458981E3C41B763EA844ABE53414B3B35979B546740C0064468951E3C419F3E027B4ABE53414B3B35979B5467402AAC5494951E3C412E1B9D8A49BE534191B75CFDD8DC67409CA564A1981E3C417E39B39049BE534191B75CFDD8DC6740DE1E8458981E3C41B763EA844ABE53414B3B35979B54674001030000800100000006000000B29E5A8D971E3C415D4F74784CBE53410D8729BA233A6840A7163A6E971E3C4111EF8E0D4DBE53412524D236FE4E68407DF33456921E3C41896639FF4CBE534114C04139B950684036B05536951E3C415B40688B4BBE53412BDEC83CF21A68404338EABB971E3C4194656B994BBE53412BDEC83CF21A6840B29E5A8D971E3C415D4F74784CBE53410D8729BA233A6840010300008001000000060000007DF33456921E3C41896639FF4CBE534114C04139B950684075C1E800971E3C41BC7135194FBE5341B0ABC953D6D867407724EA0C8E1E3C4187054CD04EBE5341B0ABC953D6D8674091EF52368E1E3C410FEECE134DBE53414EF2237E054768409DE051398E1E3C41418FA6F34CBE53412524D236FE4E68407DF33456921E3C41896639FF4CBE534114C04139B950684001030000800100000004000000A7163A6E971E3C4111EF8E0D4DBE53412524D236FE4E684075C1E800971E3C41BC7135194FBE5341B0ABC953D6D867407DF33456921E3C41896639FF4CBE534114C04139B9506840A7163A6E971E3C4111EF8E0D4DBE53412524D236FE4E6840010300008001000000050000003621AD05931E3C417218CC554ABE53414223D8B87E53684046459C2E901E3C418AABCAAF4BBE5341A3737E8AE3226840044DB645901E3C41B5A50E4D4ABE5341D83DE4F3EB2368408C852146901E3C414B3CA0464ABE5341A35C1ABFF02368403621AD05931E3C417218CC554ABE53414223D8B87E536840010300008001000000040000003621AD05931E3C417218CC554ABE53414223D8B87E5368407DF33456921E3C41896639FF4CBE534114C04139B950684046459C2E901E3C418AABCAAF4BBE5341A3737E8AE32268403621AD05931E3C417218CC554ABE53414223D8B87E536840010300008001000000040000008AF44F7C931E3C4123D46F8649BE5341133D19B1E94D68403621AD05931E3C417218CC554ABE53414223D8B87E536840C0EB333B931E3C41E1F1ED8549BE534134A0DE8C1A5468408AF44F7C931E3C4123D46F8649BE5341133D19B1E94D6840010300008001000000040000002AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A68403621AD05931E3C417218CC554ABE53414223D8B87E5368408AF44F7C931E3C4123D46F8649BE5341133D19B1E94D68402AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A68400103000080010000000400000036B05536951E3C415B40688B4BBE53412BDEC83CF21A68407DF33456921E3C41896639FF4CBE534114C04139B95068403621AD05931E3C417218CC554ABE53414223D8B87E53684036B05536951E3C415B40688B4BBE53412BDEC83CF21A684001030000800100000004000000C0064468951E3C419F3E027B4ABE53412BDEC83CF21A684036B05536951E3C415B40688B4BBE53412BDEC83CF21A68403621AD05931E3C417218CC554ABE53414223D8B87E536840C0064468951E3C419F3E027B4ABE53412BDEC83CF21A6840010300008001000000040000002AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A6840C0064468951E3C419F3E027B4ABE53412BDEC83CF21A68403621AD05931E3C417218CC554ABE53414223D8B87E5368402AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A6840010300008001000000050000007DF33456921E3C41896639FF4CBE534114C04139B95068409DE051398E1E3C41418FA6F34CBE53412524D236FE4E68401D1EE3578E1E3C4111378AAB4BBE534122C15433EB22684046459C2E901E3C418AABCAAF4BBE5341A3737E8AE32268407DF33456921E3C41896639FF4CBE534114C04139B950684001030000800100000005000000DE1E8458981E3C41B763EA844ABE53416666666666F66440C0064468951E3C419F3E027B4ABE53416666666666F66440C0064468951E3C419F3E027B4ABE53414B3B35979B546740DE1E8458981E3C41B763EA844ABE53414B3B35979B546740DE1E8458981E3C41B763EA844ABE53416666666666F664400103000080010000000C0000009CA564A1981E3C417E39B39049BE53416666666666F664409CA564A1981E3C417E39B39049BE534191B75CFDD8DC67402AAC5494951E3C412E1B9D8A49BE534191B75CFDD8DC67402AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A68408AF44F7C931E3C4123D46F8649BE5341133D19B1E94D6840C0EB333B931E3C41E1F1ED8549BE534134A0DE8C1A546840C0EB333B931E3C41E1F1ED8549BE53416666666666F6644025F0C15B931E3C4102E32E8649BE53416666666666F664408AF44F7C931E3C4123D46F8649BE53416666666666F664405A505288941E3C41A977868849BE53416666666666F664402AAC5494951E3C412E1B9D8A49BE53416666666666F664409CA564A1981E3C417E39B39049BE53416666666666F66440010300008001000000050000009CA564A1981E3C417E39B39049BE53416666666666F66440DE1E8458981E3C41B763EA844ABE53416666666666F66440DE1E8458981E3C41B763EA844ABE53414B3B35979B5467409CA564A1981E3C417E39B39049BE534191B75CFDD8DC67409CA564A1981E3C417E39B39049BE53416666666666F66440010300008001000000080000002AAC5494951E3C412E1B9D8A49BE534191B75CFDD8DC6740C0064468951E3C419F3E027B4ABE53414B3B35979B546740C0064468951E3C419F3E027B4ABE53416666666666F6644036B05536951E3C415B40688B4BBE53416666666666F6644036B05536951E3C415B40688B4BBE53412BDEC83CF21A6840C0064468951E3C419F3E027B4ABE53412BDEC83CF21A68402AAC5494951E3C412E1B9D8A49BE53412BDEC83CF21A68402AAC5494951E3C412E1B9D8A49BE534191B75CFDD8DC6740010300008001000000050000004338EABB971E3C4194656B994BBE53412BDEC83CF21A684036B05536951E3C415B40688B4BBE53412BDEC83CF21A684036B05536951E3C415B40688B4BBE53416666666666F664404338EABB971E3C4194656B994BBE53416666666666F664404338EABB971E3C4194656B994BBE53412BDEC83CF21A68400103000080010000000B0000007A6BA2A4971E3C4179DAEF084CBE53416666666666F66440B29E5A8D971E3C415D4F74784CBE53416666666666F66440AD5ACA7D971E3C413C9F01C34CBE53416666666666F66440A7163A6E971E3C4111EF8E0D4DBE53416666666666F6644075C1E800971E3C41BC7135194FBE53416666666666F6644075C1E800971E3C41BC7135194FBE5341B0ABC953D6D86740A7163A6E971E3C4111EF8E0D4DBE53412524D236FE4E6840B29E5A8D971E3C415D4F74784CBE53410D8729BA233A68404338EABB971E3C4194656B994BBE53412BDEC83CF21A68404338EABB971E3C4194656B994BBE53416666666666F664407A6BA2A4971E3C4179DAEF084CBE53416666666666F664400103000080010000000500000075C1E800971E3C41BC7135194FBE53416666666666F664407724EA0C8E1E3C4187054CD04EBE53416666666666F664407724EA0C8E1E3C4187054CD04EBE5341B0ABC953D6D8674075C1E800971E3C41BC7135194FBE5341B0ABC953D6D8674075C1E800971E3C41BC7135194FBE53416666666666F664400103000080010000000B0000001D1EE3578E1E3C4111378AAB4BBE53416666666666F664401D1EE3578E1E3C4111378AAB4BBE534122C15433EB2268409DE051398E1E3C41418FA6F34CBE53412524D236FE4E684091EF52368E1E3C410FEECE134DBE53414EF2237E054768407724EA0C8E1E3C4187054CD04EBE5341B0ABC953D6D867407724EA0C8E1E3C4187054CD04EBE53416666666666F66440EE899E218E1E3C41D1790DF24DBE53416666666666F6644091EF52368E1E3C410FEECE134DBE53416666666666F664401768D2378E1E3C41ADBEBA034DBE53416666666666F664409DE051398E1E3C41418FA6F34CBE53416666666666F664401D1EE3578E1E3C4111378AAB4BBE53416666666666F664400103000080010000000500000046459C2E901E3C418AABCAAF4BBE5341A3737E8AE32268401D1EE3578E1E3C4111378AAB4BBE534122C15433EB2268401D1EE3578E1E3C4111378AAB4BBE53416666666666F6644046459C2E901E3C418AABCAAF4BBE53416666666666F6644046459C2E901E3C418AABCAAF4BBE5341A3737E8AE3226840010300008001000000080000008C852146901E3C414B3CA0464ABE53416666666666F664408C852146901E3C414B3CA0464ABE5341A35C1ABFF0236840044DB645901E3C41B5A50E4D4ABE5341D83DE4F3EB23684046459C2E901E3C418AABCAAF4BBE5341A3737E8AE322684046459C2E901E3C418AABCAAF4BBE53416666666666F664402549293A901E3C41A0A86CFE4ABE53416666666666F66440044DB645901E3C41B5A50E4D4ABE53416666666666F664408C852146901E3C414B3CA0464ABE53416666666666F66440010300008001000000050000003621AD05931E3C417218CC554ABE53414223D8B87E5368408C852146901E3C414B3CA0464ABE5341A35C1ABFF02368408C852146901E3C414B3CA0464ABE53416666666666F664403621AD05931E3C417218CC554ABE53416666666666F664403621AD05931E3C417218CC554ABE53414223D8B87E53684001030000800100000006000000C0EB333B931E3C41E1F1ED8549BE53416666666666F66440C0EB333B931E3C41E1F1ED8549BE534134A0DE8C1A5468403621AD05931E3C417218CC554ABE53414223D8B87E5368403621AD05931E3C417218CC554ABE53416666666666F664407B867020931E3C412905DDED49BE53416666666666F66440C0EB333B931E3C41E1F1ED8549BE53416666666666F664400103000080010000001C0000008AF44F7C931E3C4123D46F8649BE53416666666666F6644025F0C15B931E3C4102E32E8649BE53416666666666F66440C0EB333B931E3C41E1F1ED8549BE53416666666666F664407B867020931E3C412905DDED49BE53416666666666F664403621AD05931E3C417218CC554ABE53416666666666F664408C852146901E3C414B3CA0464ABE53416666666666F66440044DB645901E3C41B5A50E4D4ABE53416666666666F664402549293A901E3C41A0A86CFE4ABE53416666666666F6644046459C2E901E3C418AABCAAF4BBE53416666666666F664401D1EE3578E1E3C4111378AAB4BBE53416666666666F664409DE051398E1E3C41418FA6F34CBE53416666666666F664401768D2378E1E3C41ADBEBA034DBE53416666666666F6644091EF52368E1E3C410FEECE134DBE53416666666666F66440EE899E218E1E3C41D1790DF24DBE53416666666666F664407724EA0C8E1E3C4187054CD04EBE53416666666666F6644075C1E800971E3C41BC7135194FBE53416666666666F66440A7163A6E971E3C4111EF8E0D4DBE53416666666666F66440AD5ACA7D971E3C413C9F01C34CBE53416666666666F66440B29E5A8D971E3C415D4F74784CBE53416666666666F664407A6BA2A4971E3C4179DAEF084CBE53416666666666F664404338EABB971E3C4194656B994BBE53416666666666F6644036B05536951E3C415B40688B4BBE53416666666666F66440C0064468951E3C419F3E027B4ABE53416666666666F66440DE1E8458981E3C41B763EA844ABE53416666666666F664409CA564A1981E3C417E39B39049BE53416666666666F664402AAC5494951E3C412E1B9D8A49BE53416666666666F664405A505288941E3C41A977868849BE53416666666666F664408AF44F7C931E3C4123D46F8649BE53416666666666F66440	\N	\N	1
 2	UUID_40ba18cf-077e-4af2-a898-2a55d27a8cc8	\N	1	1	0	1	0	0	0	\N	\N	\N	1
 3	UUID_408259ec-5832-4192-b07b-05dd1c01bffc	\N	2	1	0	0	0	2	0	\N	01030000A06A0F00000100000005000000DE1E8458981E3C41B763EA844ABE53414B3B35979B546740C0064468951E3C419F3E027B4ABE53414B3B35979B5467402AAC5494951E3C412E1B9D8A49BE534191B75CFDD8DC67409CA564A1981E3C417E39B39049BE534191B75CFDD8DC6740DE1E8458981E3C41B763EA844ABE53414B3B35979B546740	\N	1
@@ -16301,7 +16301,7 @@ COPY citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is
 -- Data for Name: tex_image; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tex_image (id, tex_image_uri, tex_image_data, tex_mime_type, tex_mime_type_codespace) FROM stdin;
+COPY tex_image (id, tex_image_uri, tex_image_data, tex_mime_type, tex_mime_type_codespace) FROM stdin;
 \.
 
 
@@ -16311,7 +16311,7 @@ COPY citydb.tex_image (id, tex_image_uri, tex_image_data, tex_mime_type, tex_mim
 -- Data for Name: textureparam; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.textureparam (surface_geometry_id, is_texture_parametrization, world_to_texture, texture_coordinates, surface_data_id) FROM stdin;
+COPY textureparam (surface_geometry_id, is_texture_parametrization, world_to_texture, texture_coordinates, surface_data_id) FROM stdin;
 \.
 
 
@@ -16321,7 +16321,7 @@ COPY citydb.textureparam (surface_geometry_id, is_texture_parametrization, world
 -- Data for Name: thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.thematic_surface (id, objectclass_id, building_id, room_id, building_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
+COPY thematic_surface (id, objectclass_id, building_id, room_id, building_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
 3	33	1	\N	\N	217	\N	\N
 4	33	1	\N	\N	220	\N	\N
 5	33	1	\N	\N	223	\N	\N
@@ -16627,7 +16627,7 @@ COPY citydb.thematic_surface (id, objectclass_id, building_id, room_id, building
 -- Data for Name: tin_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tin_relief (id, objectclass_id, max_length, max_length_unit, stop_lines, break_lines, control_points, surface_geometry_id) FROM stdin;
+COPY tin_relief (id, objectclass_id, max_length, max_length_unit, stop_lines, break_lines, control_points, surface_geometry_id) FROM stdin;
 \.
 
 
@@ -16637,7 +16637,7 @@ COPY citydb.tin_relief (id, objectclass_id, max_length, max_length_unit, stop_li
 -- Data for Name: traffic_area; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.traffic_area (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, surface_material, surface_material_codespace, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, transportation_complex_id) FROM stdin;
+COPY traffic_area (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, surface_material, surface_material_codespace, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, transportation_complex_id) FROM stdin;
 \.
 
 
@@ -16647,7 +16647,7 @@ COPY citydb.traffic_area (id, objectclass_id, class, class_codespace, function, 
 -- Data for Name: transportation_complex; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.transportation_complex (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_network, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
+COPY transportation_complex (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_network, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
 \.
 
 
@@ -16657,7 +16657,7 @@ COPY citydb.transportation_complex (id, objectclass_id, class, class_codespace, 
 -- Data for Name: tunnel; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel (id, objectclass_id, tunnel_parent_id, tunnel_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
+COPY tunnel (id, objectclass_id, tunnel_parent_id, tunnel_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -16667,7 +16667,7 @@ COPY citydb.tunnel (id, objectclass_id, tunnel_parent_id, tunnel_root_id, class,
 -- Data for Name: tunnel_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_hollow_space_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
+COPY tunnel_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_hollow_space_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -16677,7 +16677,7 @@ COPY citydb.tunnel_furniture (id, objectclass_id, class, class_codespace, functi
 -- Data for Name: tunnel_hollow_space; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_hollow_space (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
+COPY tunnel_hollow_space (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -16687,7 +16687,7 @@ COPY citydb.tunnel_hollow_space (id, objectclass_id, class, class_codespace, fun
 -- Data for Name: tunnel_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, tunnel_hollow_space_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY tunnel_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, tunnel_hollow_space_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -16697,7 +16697,7 @@ COPY citydb.tunnel_installation (id, objectclass_id, class, class_codespace, fun
 -- Data for Name: tunnel_open_to_them_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_open_to_them_srf (tunnel_opening_id, tunnel_thematic_surface_id) FROM stdin;
+COPY tunnel_open_to_them_srf (tunnel_opening_id, tunnel_thematic_surface_id) FROM stdin;
 \.
 
 
@@ -16707,7 +16707,7 @@ COPY citydb.tunnel_open_to_them_srf (tunnel_opening_id, tunnel_thematic_surface_
 -- Data for Name: tunnel_opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_opening (id, objectclass_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
+COPY tunnel_opening (id, objectclass_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
 \.
 
 
@@ -16717,7 +16717,7 @@ COPY citydb.tunnel_opening (id, objectclass_id, lod3_multi_surface_id, lod4_mult
 -- Data for Name: tunnel_thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_thematic_surface (id, objectclass_id, tunnel_id, tunnel_hollow_space_id, tunnel_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
+COPY tunnel_thematic_surface (id, objectclass_id, tunnel_id, tunnel_hollow_space_id, tunnel_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
 \.
 
 
@@ -16727,7 +16727,7 @@ COPY citydb.tunnel_thematic_surface (id, objectclass_id, tunnel_id, tunnel_hollo
 -- Data for Name: waterbod_to_waterbnd_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterbod_to_waterbnd_srf (waterboundary_surface_id, waterbody_id) FROM stdin;
+COPY waterbod_to_waterbnd_srf (waterboundary_surface_id, waterbody_id) FROM stdin;
 \.
 
 
@@ -16737,7 +16737,7 @@ COPY citydb.waterbod_to_waterbnd_srf (waterboundary_surface_id, waterbody_id) FR
 -- Data for Name: waterbody; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterbody (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_curve, lod1_multi_curve, lod0_multi_surface_id, lod1_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
+COPY waterbody (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_curve, lod1_multi_curve, lod0_multi_surface_id, lod1_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
 \.
 
 
@@ -16747,7 +16747,7 @@ COPY citydb.waterbody (id, objectclass_id, class, class_codespace, function, fun
 -- Data for Name: waterboundary_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterboundary_surface (id, objectclass_id, water_level, water_level_codespace, lod2_surface_id, lod3_surface_id, lod4_surface_id) FROM stdin;
+COPY waterboundary_surface (id, objectclass_id, water_level, water_level_codespace, lod2_surface_id, lod3_surface_id, lod4_surface_id) FROM stdin;
 306	11	\N	\N	\N	1646	\N
 309	11	\N	\N	\N	3261	\N
 305	11	\N	\N	\N	1599	\N
@@ -16773,7 +16773,7 @@ COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM
 -- Name: address_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.address_seq', 1, false);
+SELECT pg_catalog.setval('address_seq', 1, false);
 
 
 --
@@ -16782,7 +16782,7 @@ SELECT pg_catalog.setval('citydb.address_seq', 1, false);
 -- Name: ade_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.ade_seq', 1, false);
+SELECT pg_catalog.setval('ade_seq', 1, false);
 
 
 --
@@ -16791,7 +16791,7 @@ SELECT pg_catalog.setval('citydb.ade_seq', 1, false);
 -- Name: appearance_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.appearance_seq', 1, false);
+SELECT pg_catalog.setval('appearance_seq', 1, false);
 
 
 --
@@ -16800,7 +16800,7 @@ SELECT pg_catalog.setval('citydb.appearance_seq', 1, false);
 -- Name: citymodel_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.citymodel_seq', 1, false);
+SELECT pg_catalog.setval('citymodel_seq', 1, false);
 
 
 --
@@ -16809,7 +16809,7 @@ SELECT pg_catalog.setval('citydb.citymodel_seq', 1, false);
 -- Name: cityobject_genericatt_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.cityobject_genericatt_seq', 1, false);
+SELECT pg_catalog.setval('cityobject_genericatt_seq', 1, false);
 
 
 --
@@ -16818,7 +16818,7 @@ SELECT pg_catalog.setval('citydb.cityobject_genericatt_seq', 1, false);
 -- Name: cityobject_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.cityobject_seq', 310, true);
+SELECT pg_catalog.setval('cityobject_seq', 310, true);
 
 
 --
@@ -16827,7 +16827,7 @@ SELECT pg_catalog.setval('citydb.cityobject_seq', 310, true);
 -- Name: external_ref_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.external_ref_seq', 1, false);
+SELECT pg_catalog.setval('external_ref_seq', 1, false);
 
 
 --
@@ -16836,7 +16836,7 @@ SELECT pg_catalog.setval('citydb.external_ref_seq', 1, false);
 -- Name: grid_coverage_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.grid_coverage_seq', 1, false);
+SELECT pg_catalog.setval('grid_coverage_seq', 1, false);
 
 
 --
@@ -16845,7 +16845,7 @@ SELECT pg_catalog.setval('citydb.grid_coverage_seq', 1, false);
 -- Name: implicit_geometry_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.implicit_geometry_seq', 1, false);
+SELECT pg_catalog.setval('implicit_geometry_seq', 1, false);
 
 
 --
@@ -16854,7 +16854,7 @@ SELECT pg_catalog.setval('citydb.implicit_geometry_seq', 1, false);
 -- Name: index_table_id_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.index_table_id_seq', 13, true);
+SELECT pg_catalog.setval('index_table_id_seq', 13, true);
 
 
 --
@@ -16863,7 +16863,7 @@ SELECT pg_catalog.setval('citydb.index_table_id_seq', 13, true);
 -- Name: schema_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.schema_seq', 1, false);
+SELECT pg_catalog.setval('schema_seq', 1, false);
 
 
 --
@@ -16872,7 +16872,7 @@ SELECT pg_catalog.setval('citydb.schema_seq', 1, false);
 -- Name: surface_data_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.surface_data_seq', 1, false);
+SELECT pg_catalog.setval('surface_data_seq', 1, false);
 
 
 --
@@ -16881,7 +16881,7 @@ SELECT pg_catalog.setval('citydb.surface_data_seq', 1, false);
 -- Name: surface_geometry_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.surface_geometry_seq', 5058, true);
+SELECT pg_catalog.setval('surface_geometry_seq', 5058, true);
 
 
 --
@@ -16890,7 +16890,7 @@ SELECT pg_catalog.setval('citydb.surface_geometry_seq', 5058, true);
 -- Name: tex_image_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
-SELECT pg_catalog.setval('citydb.tex_image_seq', 1, false);
+SELECT pg_catalog.setval('tex_image_seq', 1, false);
 
 
 --
@@ -16898,7 +16898,7 @@ SELECT pg_catalog.setval('citydb.tex_image_seq', 1, false);
 -- Name: address address_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address
+ALTER TABLE ONLY address
     ADD CONSTRAINT address_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16907,7 +16907,7 @@ ALTER TABLE ONLY citydb.address
 -- Name: address_to_bridge address_to_bridge_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_bridge
+ALTER TABLE ONLY address_to_bridge
     ADD CONSTRAINT address_to_bridge_pk PRIMARY KEY (bridge_id, address_id) WITH (fillfactor='100');
 
 
@@ -16916,7 +16916,7 @@ ALTER TABLE ONLY citydb.address_to_bridge
 -- Name: address_to_building address_to_building_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_building
+ALTER TABLE ONLY address_to_building
     ADD CONSTRAINT address_to_building_pk PRIMARY KEY (building_id, address_id) WITH (fillfactor='100');
 
 
@@ -16925,7 +16925,7 @@ ALTER TABLE ONLY citydb.address_to_building
 -- Name: ade ade_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.ade
+ALTER TABLE ONLY ade
     ADD CONSTRAINT ade_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16934,7 +16934,7 @@ ALTER TABLE ONLY citydb.ade
 -- Name: aggregation_info aggregation_info_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.aggregation_info
+ALTER TABLE ONLY aggregation_info
     ADD CONSTRAINT aggregation_info_pk PRIMARY KEY (child_id, parent_id, join_table_or_column_name);
 
 
@@ -16943,7 +16943,7 @@ ALTER TABLE ONLY citydb.aggregation_info
 -- Name: appear_to_surface_data appear_to_surface_data_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appear_to_surface_data
+ALTER TABLE ONLY appear_to_surface_data
     ADD CONSTRAINT appear_to_surface_data_pk PRIMARY KEY (surface_data_id, appearance_id) WITH (fillfactor='100');
 
 
@@ -16952,7 +16952,7 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 -- Name: appearance appearance_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appearance
+ALTER TABLE ONLY appearance
     ADD CONSTRAINT appearance_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16961,7 +16961,7 @@ ALTER TABLE ONLY citydb.appearance
 -- Name: breakline_relief breakline_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.breakline_relief
+ALTER TABLE ONLY breakline_relief
     ADD CONSTRAINT breakline_relief_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16970,7 +16970,7 @@ ALTER TABLE ONLY citydb.breakline_relief
 -- Name: bridge_constr_element bridge_constr_element_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
+ALTER TABLE ONLY bridge_constr_element
     ADD CONSTRAINT bridge_constr_element_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16979,7 +16979,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_furniture bridge_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
+ALTER TABLE ONLY bridge_furniture
     ADD CONSTRAINT bridge_furniture_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16988,7 +16988,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_installation bridge_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
+ALTER TABLE ONLY bridge_installation
     ADD CONSTRAINT bridge_installation_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -16997,7 +16997,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_open_to_them_srf bridge_open_to_them_srf_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_open_to_them_srf
+ALTER TABLE ONLY bridge_open_to_them_srf
     ADD CONSTRAINT bridge_open_to_them_srf_pk PRIMARY KEY (bridge_opening_id, bridge_thematic_surface_id) WITH (fillfactor='100');
 
 
@@ -17006,7 +17006,7 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 -- Name: bridge_opening bridge_opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
+ALTER TABLE ONLY bridge_opening
     ADD CONSTRAINT bridge_opening_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17015,7 +17015,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge bridge_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
+ALTER TABLE ONLY bridge
     ADD CONSTRAINT bridge_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17024,7 +17024,7 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge_room bridge_room_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
+ALTER TABLE ONLY bridge_room
     ADD CONSTRAINT bridge_room_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17033,7 +17033,7 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge_thematic_surface bridge_thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
+ALTER TABLE ONLY bridge_thematic_surface
     ADD CONSTRAINT bridge_thematic_surface_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17042,7 +17042,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: building_furniture building_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
+ALTER TABLE ONLY building_furniture
     ADD CONSTRAINT building_furniture_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17051,7 +17051,7 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_installation building_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
+ALTER TABLE ONLY building_installation
     ADD CONSTRAINT building_installation_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17060,7 +17060,7 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building building_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
+ALTER TABLE ONLY building
     ADD CONSTRAINT building_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17069,7 +17069,7 @@ ALTER TABLE ONLY citydb.building
 -- Name: city_furniture city_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
+ALTER TABLE ONLY city_furniture
     ADD CONSTRAINT city_furniture_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17078,7 +17078,7 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: citymodel citymodel_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.citymodel
+ALTER TABLE ONLY citymodel
     ADD CONSTRAINT citymodel_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17087,7 +17087,7 @@ ALTER TABLE ONLY citydb.citymodel
 -- Name: cityobject_genericattrib cityobj_genericattrib_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_genericattrib
+ALTER TABLE ONLY cityobject_genericattrib
     ADD CONSTRAINT cityobj_genericattrib_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17096,7 +17096,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 -- Name: cityobject_member cityobject_member_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_member
+ALTER TABLE ONLY cityobject_member
     ADD CONSTRAINT cityobject_member_pk PRIMARY KEY (citymodel_id, cityobject_id) WITH (fillfactor='100');
 
 
@@ -17105,7 +17105,7 @@ ALTER TABLE ONLY citydb.cityobject_member
 -- Name: cityobject cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject
+ALTER TABLE ONLY cityobject
     ADD CONSTRAINT cityobject_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17114,7 +17114,7 @@ ALTER TABLE ONLY citydb.cityobject
 -- Name: cityobjectgroup cityobjectgroup_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobjectgroup
+ALTER TABLE ONLY cityobjectgroup
     ADD CONSTRAINT cityobjectgroup_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17123,7 +17123,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 -- Name: database_srs database_srs_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.database_srs
+ALTER TABLE ONLY database_srs
     ADD CONSTRAINT database_srs_pk PRIMARY KEY (srid) WITH (fillfactor='100');
 
 
@@ -17132,7 +17132,7 @@ ALTER TABLE ONLY citydb.database_srs
 -- Name: external_reference external_reference_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.external_reference
+ALTER TABLE ONLY external_reference
     ADD CONSTRAINT external_reference_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17141,7 +17141,7 @@ ALTER TABLE ONLY citydb.external_reference
 -- Name: generalization generalization_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generalization
+ALTER TABLE ONLY generalization
     ADD CONSTRAINT generalization_pk PRIMARY KEY (cityobject_id, generalizes_to_id) WITH (fillfactor='100');
 
 
@@ -17150,7 +17150,7 @@ ALTER TABLE ONLY citydb.generalization
 -- Name: generic_cityobject generic_cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
+ALTER TABLE ONLY generic_cityobject
     ADD CONSTRAINT generic_cityobject_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17159,7 +17159,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: grid_coverage grid_coverage_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.grid_coverage
+ALTER TABLE ONLY grid_coverage
     ADD CONSTRAINT grid_coverage_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17168,7 +17168,7 @@ ALTER TABLE ONLY citydb.grid_coverage
 -- Name: group_to_cityobject group_to_cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.group_to_cityobject
+ALTER TABLE ONLY group_to_cityobject
     ADD CONSTRAINT group_to_cityobject_pk PRIMARY KEY (cityobject_id, cityobjectgroup_id) WITH (fillfactor='100');
 
 
@@ -17177,7 +17177,7 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 -- Name: implicit_geometry implicit_geometry_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.implicit_geometry
+ALTER TABLE ONLY implicit_geometry
     ADD CONSTRAINT implicit_geometry_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17186,7 +17186,7 @@ ALTER TABLE ONLY citydb.implicit_geometry
 -- Name: index_table index_table_pkey; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.index_table
+ALTER TABLE ONLY index_table
     ADD CONSTRAINT index_table_pkey PRIMARY KEY (id);
 
 
@@ -17195,7 +17195,7 @@ ALTER TABLE ONLY citydb.index_table
 -- Name: land_use land_use_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
+ALTER TABLE ONLY land_use
     ADD CONSTRAINT land_use_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17204,7 +17204,7 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: masspoint_relief masspoint_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.masspoint_relief
+ALTER TABLE ONLY masspoint_relief
     ADD CONSTRAINT masspoint_relief_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17213,7 +17213,7 @@ ALTER TABLE ONLY citydb.masspoint_relief
 -- Name: objectclass objectclass_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.objectclass
+ALTER TABLE ONLY objectclass
     ADD CONSTRAINT objectclass_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17222,7 +17222,7 @@ ALTER TABLE ONLY citydb.objectclass
 -- Name: opening opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
+ALTER TABLE ONLY opening
     ADD CONSTRAINT opening_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17231,7 +17231,7 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening_to_them_surface opening_to_them_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening_to_them_surface
+ALTER TABLE ONLY opening_to_them_surface
     ADD CONSTRAINT opening_to_them_surface_pk PRIMARY KEY (opening_id, thematic_surface_id) WITH (fillfactor='100');
 
 
@@ -17240,7 +17240,7 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 -- Name: plant_cover plant_cover_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
+ALTER TABLE ONLY plant_cover
     ADD CONSTRAINT plant_cover_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17249,7 +17249,7 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: raster_relief raster_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.raster_relief
+ALTER TABLE ONLY raster_relief
     ADD CONSTRAINT raster_relief_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17258,7 +17258,7 @@ ALTER TABLE ONLY citydb.raster_relief
 -- Name: relief_component relief_component_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_component
+ALTER TABLE ONLY relief_component
     ADD CONSTRAINT relief_component_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17267,7 +17267,7 @@ ALTER TABLE ONLY citydb.relief_component
 -- Name: relief_feat_to_rel_comp relief_feat_to_rel_comp_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
+ALTER TABLE ONLY relief_feat_to_rel_comp
     ADD CONSTRAINT relief_feat_to_rel_comp_pk PRIMARY KEY (relief_component_id, relief_feature_id) WITH (fillfactor='100');
 
 
@@ -17276,7 +17276,7 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 -- Name: relief_feature relief_feature_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feature
+ALTER TABLE ONLY relief_feature
     ADD CONSTRAINT relief_feature_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17285,7 +17285,7 @@ ALTER TABLE ONLY citydb.relief_feature
 -- Name: room room_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
+ALTER TABLE ONLY room
     ADD CONSTRAINT room_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17294,7 +17294,7 @@ ALTER TABLE ONLY citydb.room
 -- Name: schema schema_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema
+ALTER TABLE ONLY schema
     ADD CONSTRAINT schema_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17303,7 +17303,7 @@ ALTER TABLE ONLY citydb.schema
 -- Name: schema_referencing schema_referencing_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_referencing
+ALTER TABLE ONLY schema_referencing
     ADD CONSTRAINT schema_referencing_pk PRIMARY KEY (referenced_id, referencing_id) WITH (fillfactor='100');
 
 
@@ -17312,7 +17312,7 @@ ALTER TABLE ONLY citydb.schema_referencing
 -- Name: schema_to_objectclass schema_to_objectclass_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_to_objectclass
+ALTER TABLE ONLY schema_to_objectclass
     ADD CONSTRAINT schema_to_objectclass_pk PRIMARY KEY (schema_id, objectclass_id) WITH (fillfactor='100');
 
 
@@ -17321,7 +17321,7 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 -- Name: solitary_vegetat_object solitary_veg_object_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
+ALTER TABLE ONLY solitary_vegetat_object
     ADD CONSTRAINT solitary_veg_object_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17330,7 +17330,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: surface_data surface_data_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_data
+ALTER TABLE ONLY surface_data
     ADD CONSTRAINT surface_data_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17339,7 +17339,7 @@ ALTER TABLE ONLY citydb.surface_data
 -- Name: surface_geometry surface_geometry_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_geometry
+ALTER TABLE ONLY surface_geometry
     ADD CONSTRAINT surface_geometry_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17348,7 +17348,7 @@ ALTER TABLE ONLY citydb.surface_geometry
 -- Name: tex_image tex_image_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tex_image
+ALTER TABLE ONLY tex_image
     ADD CONSTRAINT tex_image_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17357,7 +17357,7 @@ ALTER TABLE ONLY citydb.tex_image
 -- Name: textureparam textureparam_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.textureparam
+ALTER TABLE ONLY textureparam
     ADD CONSTRAINT textureparam_pk PRIMARY KEY (surface_geometry_id, surface_data_id) WITH (fillfactor='100');
 
 
@@ -17366,7 +17366,7 @@ ALTER TABLE ONLY citydb.textureparam
 -- Name: thematic_surface thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
+ALTER TABLE ONLY thematic_surface
     ADD CONSTRAINT thematic_surface_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17375,7 +17375,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: tin_relief tin_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tin_relief
+ALTER TABLE ONLY tin_relief
     ADD CONSTRAINT tin_relief_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17384,7 +17384,7 @@ ALTER TABLE ONLY citydb.tin_relief
 -- Name: traffic_area traffic_area_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
+ALTER TABLE ONLY traffic_area
     ADD CONSTRAINT traffic_area_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17393,7 +17393,7 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: transportation_complex transportation_complex_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
+ALTER TABLE ONLY transportation_complex
     ADD CONSTRAINT transportation_complex_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17402,7 +17402,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: tunnel_furniture tunnel_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
+ALTER TABLE ONLY tunnel_furniture
     ADD CONSTRAINT tunnel_furniture_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17411,7 +17411,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_hollow_space tunnel_hollow_space_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
+ALTER TABLE ONLY tunnel_hollow_space
     ADD CONSTRAINT tunnel_hollow_space_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17420,7 +17420,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_installation tunnel_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
+ALTER TABLE ONLY tunnel_installation
     ADD CONSTRAINT tunnel_installation_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17429,7 +17429,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_open_to_them_srf tunnel_open_to_them_srf_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
+ALTER TABLE ONLY tunnel_open_to_them_srf
     ADD CONSTRAINT tunnel_open_to_them_srf_pk PRIMARY KEY (tunnel_opening_id, tunnel_thematic_surface_id) WITH (fillfactor='100');
 
 
@@ -17438,7 +17438,7 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 -- Name: tunnel_opening tunnel_opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
+ALTER TABLE ONLY tunnel_opening
     ADD CONSTRAINT tunnel_opening_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17447,7 +17447,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel tunnel_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
+ALTER TABLE ONLY tunnel
     ADD CONSTRAINT tunnel_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17456,7 +17456,7 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel_thematic_surface tunnel_thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
+ALTER TABLE ONLY tunnel_thematic_surface
     ADD CONSTRAINT tunnel_thematic_surface_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17465,7 +17465,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
+ALTER TABLE ONLY waterbod_to_waterbnd_srf
     ADD CONSTRAINT waterbod_to_waterbnd_pk PRIMARY KEY (waterboundary_surface_id, waterbody_id) WITH (fillfactor='100');
 
 
@@ -17474,7 +17474,7 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 -- Name: waterbody waterbody_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
+ALTER TABLE ONLY waterbody
     ADD CONSTRAINT waterbody_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17483,7 +17483,7 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterboundary_surface waterboundary_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
+ALTER TABLE ONLY waterboundary_surface
     ADD CONSTRAINT waterboundary_surface_pk PRIMARY KEY (id) WITH (fillfactor='100');
 
 
@@ -17492,7 +17492,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: address_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_inx ON citydb.address USING btree (gmlid, gmlid_codespace);
+CREATE INDEX address_inx ON address USING btree (gmlid, gmlid_codespace);
 
 
 --
@@ -17500,7 +17500,7 @@ CREATE INDEX address_inx ON citydb.address USING btree (gmlid, gmlid_codespace);
 -- Name: address_point_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_point_spx ON citydb.address USING gist (multi_point);
+CREATE INDEX address_point_spx ON address USING gist (multi_point);
 
 
 --
@@ -17508,7 +17508,7 @@ CREATE INDEX address_point_spx ON citydb.address USING gist (multi_point);
 -- Name: address_to_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_to_bridge_fkx ON citydb.address_to_bridge USING btree (address_id) WITH (fillfactor='90');
+CREATE INDEX address_to_bridge_fkx ON address_to_bridge USING btree (address_id) WITH (fillfactor='90');
 
 
 --
@@ -17516,7 +17516,7 @@ CREATE INDEX address_to_bridge_fkx ON citydb.address_to_bridge USING btree (addr
 -- Name: address_to_bridge_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_to_bridge_fkx1 ON citydb.address_to_bridge USING btree (bridge_id) WITH (fillfactor='90');
+CREATE INDEX address_to_bridge_fkx1 ON address_to_bridge USING btree (bridge_id) WITH (fillfactor='90');
 
 
 --
@@ -17524,7 +17524,7 @@ CREATE INDEX address_to_bridge_fkx1 ON citydb.address_to_bridge USING btree (bri
 -- Name: address_to_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_to_building_fkx ON citydb.address_to_building USING btree (address_id) WITH (fillfactor='90');
+CREATE INDEX address_to_building_fkx ON address_to_building USING btree (address_id) WITH (fillfactor='90');
 
 
 --
@@ -17532,7 +17532,7 @@ CREATE INDEX address_to_building_fkx ON citydb.address_to_building USING btree (
 -- Name: address_to_building_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX address_to_building_fkx1 ON citydb.address_to_building USING btree (building_id) WITH (fillfactor='90');
+CREATE INDEX address_to_building_fkx1 ON address_to_building USING btree (building_id) WITH (fillfactor='90');
 
 
 --
@@ -17540,7 +17540,7 @@ CREATE INDEX address_to_building_fkx1 ON citydb.address_to_building USING btree 
 -- Name: app_to_surf_data_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX app_to_surf_data_fkx ON citydb.appear_to_surface_data USING btree (surface_data_id) WITH (fillfactor='90');
+CREATE INDEX app_to_surf_data_fkx ON appear_to_surface_data USING btree (surface_data_id) WITH (fillfactor='90');
 
 
 --
@@ -17548,7 +17548,7 @@ CREATE INDEX app_to_surf_data_fkx ON citydb.appear_to_surface_data USING btree (
 -- Name: app_to_surf_data_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX app_to_surf_data_fkx1 ON citydb.appear_to_surface_data USING btree (appearance_id) WITH (fillfactor='90');
+CREATE INDEX app_to_surf_data_fkx1 ON appear_to_surface_data USING btree (appearance_id) WITH (fillfactor='90');
 
 
 --
@@ -17556,7 +17556,7 @@ CREATE INDEX app_to_surf_data_fkx1 ON citydb.appear_to_surface_data USING btree 
 -- Name: appearance_citymodel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX appearance_citymodel_fkx ON citydb.appearance USING btree (citymodel_id) WITH (fillfactor='90');
+CREATE INDEX appearance_citymodel_fkx ON appearance USING btree (citymodel_id) WITH (fillfactor='90');
 
 
 --
@@ -17564,7 +17564,7 @@ CREATE INDEX appearance_citymodel_fkx ON citydb.appearance USING btree (citymode
 -- Name: appearance_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX appearance_cityobject_fkx ON citydb.appearance USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX appearance_cityobject_fkx ON appearance USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -17572,7 +17572,7 @@ CREATE INDEX appearance_cityobject_fkx ON citydb.appearance USING btree (cityobj
 -- Name: appearance_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX appearance_inx ON citydb.appearance USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
+CREATE INDEX appearance_inx ON appearance USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
 
 
 --
@@ -17580,7 +17580,7 @@ CREATE INDEX appearance_inx ON citydb.appearance USING btree (gmlid, gmlid_codes
 -- Name: appearance_theme_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX appearance_theme_inx ON citydb.appearance USING btree (theme) WITH (fillfactor='90');
+CREATE INDEX appearance_theme_inx ON appearance USING btree (theme) WITH (fillfactor='90');
 
 
 --
@@ -17588,7 +17588,7 @@ CREATE INDEX appearance_theme_inx ON citydb.appearance USING btree (theme) WITH 
 -- Name: bldg_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_lod4brep_fkx ON citydb.building_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_furn_lod4brep_fkx ON building_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17596,7 +17596,7 @@ CREATE INDEX bldg_furn_lod4brep_fkx ON citydb.building_furniture USING btree (lo
 -- Name: bldg_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_lod4impl_fkx ON citydb.building_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_furn_lod4impl_fkx ON building_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17604,7 +17604,7 @@ CREATE INDEX bldg_furn_lod4impl_fkx ON citydb.building_furniture USING btree (lo
 -- Name: bldg_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_lod4refpt_spx ON citydb.building_furniture USING gist (lod4_implicit_ref_point);
+CREATE INDEX bldg_furn_lod4refpt_spx ON building_furniture USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -17612,7 +17612,7 @@ CREATE INDEX bldg_furn_lod4refpt_spx ON citydb.building_furniture USING gist (lo
 -- Name: bldg_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_lod4xgeom_spx ON citydb.building_furniture USING gist (lod4_other_geom);
+CREATE INDEX bldg_furn_lod4xgeom_spx ON building_furniture USING gist (lod4_other_geom);
 
 
 --
@@ -17620,7 +17620,7 @@ CREATE INDEX bldg_furn_lod4xgeom_spx ON citydb.building_furniture USING gist (lo
 -- Name: bldg_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_objclass_fkx ON citydb.building_furniture USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bldg_furn_objclass_fkx ON building_furniture USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -17628,7 +17628,7 @@ CREATE INDEX bldg_furn_objclass_fkx ON citydb.building_furniture USING btree (ob
 -- Name: bldg_furn_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_furn_room_fkx ON citydb.building_furniture USING btree (room_id) WITH (fillfactor='90');
+CREATE INDEX bldg_furn_room_fkx ON building_furniture USING btree (room_id) WITH (fillfactor='90');
 
 
 --
@@ -17636,7 +17636,7 @@ CREATE INDEX bldg_furn_room_fkx ON citydb.building_furniture USING btree (room_i
 -- Name: bldg_inst_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_building_fkx ON citydb.building_installation USING btree (building_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_building_fkx ON building_installation USING btree (building_id) WITH (fillfactor='90');
 
 
 --
@@ -17644,7 +17644,7 @@ CREATE INDEX bldg_inst_building_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod2brep_fkx ON citydb.building_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod2brep_fkx ON building_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17652,7 +17652,7 @@ CREATE INDEX bldg_inst_lod2brep_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod2impl_fkx ON citydb.building_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod2impl_fkx ON building_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17660,7 +17660,7 @@ CREATE INDEX bldg_inst_lod2impl_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod2refpt_spx ON citydb.building_installation USING gist (lod2_implicit_ref_point);
+CREATE INDEX bldg_inst_lod2refpt_spx ON building_installation USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -17668,7 +17668,7 @@ CREATE INDEX bldg_inst_lod2refpt_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod2xgeom_spx ON citydb.building_installation USING gist (lod2_other_geom);
+CREATE INDEX bldg_inst_lod2xgeom_spx ON building_installation USING gist (lod2_other_geom);
 
 
 --
@@ -17676,7 +17676,7 @@ CREATE INDEX bldg_inst_lod2xgeom_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod3brep_fkx ON citydb.building_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod3brep_fkx ON building_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17684,7 +17684,7 @@ CREATE INDEX bldg_inst_lod3brep_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod3impl_fkx ON citydb.building_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod3impl_fkx ON building_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17692,7 +17692,7 @@ CREATE INDEX bldg_inst_lod3impl_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod3refpt_spx ON citydb.building_installation USING gist (lod3_implicit_ref_point);
+CREATE INDEX bldg_inst_lod3refpt_spx ON building_installation USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -17700,7 +17700,7 @@ CREATE INDEX bldg_inst_lod3refpt_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod3xgeom_spx ON citydb.building_installation USING gist (lod3_other_geom);
+CREATE INDEX bldg_inst_lod3xgeom_spx ON building_installation USING gist (lod3_other_geom);
 
 
 --
@@ -17708,7 +17708,7 @@ CREATE INDEX bldg_inst_lod3xgeom_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod4brep_fkx ON citydb.building_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod4brep_fkx ON building_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17716,7 +17716,7 @@ CREATE INDEX bldg_inst_lod4brep_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod4impl_fkx ON citydb.building_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_lod4impl_fkx ON building_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17724,7 +17724,7 @@ CREATE INDEX bldg_inst_lod4impl_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod4refpt_spx ON citydb.building_installation USING gist (lod4_implicit_ref_point);
+CREATE INDEX bldg_inst_lod4refpt_spx ON building_installation USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -17732,7 +17732,7 @@ CREATE INDEX bldg_inst_lod4refpt_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_lod4xgeom_spx ON citydb.building_installation USING gist (lod4_other_geom);
+CREATE INDEX bldg_inst_lod4xgeom_spx ON building_installation USING gist (lod4_other_geom);
 
 
 --
@@ -17740,7 +17740,7 @@ CREATE INDEX bldg_inst_lod4xgeom_spx ON citydb.building_installation USING gist 
 -- Name: bldg_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_objclass_fkx ON citydb.building_installation USING btree (objectclass_id);
+CREATE INDEX bldg_inst_objclass_fkx ON building_installation USING btree (objectclass_id);
 
 
 --
@@ -17748,7 +17748,7 @@ CREATE INDEX bldg_inst_objclass_fkx ON citydb.building_installation USING btree 
 -- Name: bldg_inst_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bldg_inst_room_fkx ON citydb.building_installation USING btree (room_id) WITH (fillfactor='90');
+CREATE INDEX bldg_inst_room_fkx ON building_installation USING btree (room_id) WITH (fillfactor='90');
 
 
 --
@@ -17756,7 +17756,7 @@ CREATE INDEX bldg_inst_room_fkx ON citydb.building_installation USING btree (roo
 -- Name: brd_open_to_them_srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_open_to_them_srf_fkx ON citydb.bridge_open_to_them_srf USING btree (bridge_opening_id) WITH (fillfactor='90');
+CREATE INDEX brd_open_to_them_srf_fkx ON bridge_open_to_them_srf USING btree (bridge_opening_id) WITH (fillfactor='90');
 
 
 --
@@ -17764,7 +17764,7 @@ CREATE INDEX brd_open_to_them_srf_fkx ON citydb.bridge_open_to_them_srf USING bt
 -- Name: brd_open_to_them_srf_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_open_to_them_srf_fkx1 ON citydb.bridge_open_to_them_srf USING btree (bridge_thematic_surface_id) WITH (fillfactor='90');
+CREATE INDEX brd_open_to_them_srf_fkx1 ON bridge_open_to_them_srf USING btree (bridge_thematic_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -17772,7 +17772,7 @@ CREATE INDEX brd_open_to_them_srf_fkx1 ON citydb.bridge_open_to_them_srf USING b
 -- Name: brd_them_srf_brd_const_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_brd_const_fkx ON citydb.bridge_thematic_surface USING btree (bridge_constr_element_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_brd_const_fkx ON bridge_thematic_surface USING btree (bridge_constr_element_id) WITH (fillfactor='90');
 
 
 --
@@ -17780,7 +17780,7 @@ CREATE INDEX brd_them_srf_brd_const_fkx ON citydb.bridge_thematic_surface USING 
 -- Name: brd_them_srf_brd_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_brd_inst_fkx ON citydb.bridge_thematic_surface USING btree (bridge_installation_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_brd_inst_fkx ON bridge_thematic_surface USING btree (bridge_installation_id) WITH (fillfactor='90');
 
 
 --
@@ -17788,7 +17788,7 @@ CREATE INDEX brd_them_srf_brd_inst_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: brd_them_srf_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_brd_room_fkx ON citydb.bridge_thematic_surface USING btree (bridge_room_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_brd_room_fkx ON bridge_thematic_surface USING btree (bridge_room_id) WITH (fillfactor='90');
 
 
 --
@@ -17796,7 +17796,7 @@ CREATE INDEX brd_them_srf_brd_room_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: brd_them_srf_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_bridge_fkx ON citydb.bridge_thematic_surface USING btree (bridge_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_bridge_fkx ON bridge_thematic_surface USING btree (bridge_id) WITH (fillfactor='90');
 
 
 --
@@ -17804,7 +17804,7 @@ CREATE INDEX brd_them_srf_bridge_fkx ON citydb.bridge_thematic_surface USING btr
 -- Name: brd_them_srf_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_lod2msrf_fkx ON citydb.bridge_thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_lod2msrf_fkx ON bridge_thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -17812,7 +17812,7 @@ CREATE INDEX brd_them_srf_lod2msrf_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: brd_them_srf_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_lod3msrf_fkx ON citydb.bridge_thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_lod3msrf_fkx ON bridge_thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -17820,7 +17820,7 @@ CREATE INDEX brd_them_srf_lod3msrf_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: brd_them_srf_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_lod4msrf_fkx ON citydb.bridge_thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_lod4msrf_fkx ON bridge_thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -17828,7 +17828,7 @@ CREATE INDEX brd_them_srf_lod4msrf_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: brd_them_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX brd_them_srf_objclass_fkx ON citydb.bridge_thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX brd_them_srf_objclass_fkx ON bridge_thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -17836,7 +17836,7 @@ CREATE INDEX brd_them_srf_objclass_fkx ON citydb.bridge_thematic_surface USING b
 -- Name: breakline_break_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX breakline_break_spx ON citydb.breakline_relief USING gist (break_lines);
+CREATE INDEX breakline_break_spx ON breakline_relief USING gist (break_lines);
 
 
 --
@@ -17844,7 +17844,7 @@ CREATE INDEX breakline_break_spx ON citydb.breakline_relief USING gist (break_li
 -- Name: breakline_rel_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX breakline_rel_objclass_fkx ON citydb.breakline_relief USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX breakline_rel_objclass_fkx ON breakline_relief USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -17852,7 +17852,7 @@ CREATE INDEX breakline_rel_objclass_fkx ON citydb.breakline_relief USING btree (
 -- Name: breakline_ridge_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX breakline_ridge_spx ON citydb.breakline_relief USING gist (ridge_or_valley_lines);
+CREATE INDEX breakline_ridge_spx ON breakline_relief USING gist (ridge_or_valley_lines);
 
 
 --
@@ -17860,7 +17860,7 @@ CREATE INDEX breakline_ridge_spx ON citydb.breakline_relief USING gist (ridge_or
 -- Name: bridge_const_lod1refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod1refpt_spx ON citydb.bridge_constr_element USING gist (lod1_implicit_ref_point);
+CREATE INDEX bridge_const_lod1refpt_spx ON bridge_constr_element USING gist (lod1_implicit_ref_point);
 
 
 --
@@ -17868,7 +17868,7 @@ CREATE INDEX bridge_const_lod1refpt_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod1xgeom_spx ON citydb.bridge_constr_element USING gist (lod1_other_geom);
+CREATE INDEX bridge_const_lod1xgeom_spx ON bridge_constr_element USING gist (lod1_other_geom);
 
 
 --
@@ -17876,7 +17876,7 @@ CREATE INDEX bridge_const_lod1xgeom_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod2refpt_spx ON citydb.bridge_constr_element USING gist (lod2_implicit_ref_point);
+CREATE INDEX bridge_const_lod2refpt_spx ON bridge_constr_element USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -17884,7 +17884,7 @@ CREATE INDEX bridge_const_lod2refpt_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod2xgeom_spx ON citydb.bridge_constr_element USING gist (lod2_other_geom);
+CREATE INDEX bridge_const_lod2xgeom_spx ON bridge_constr_element USING gist (lod2_other_geom);
 
 
 --
@@ -17892,7 +17892,7 @@ CREATE INDEX bridge_const_lod2xgeom_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod3refpt_spx ON citydb.bridge_constr_element USING gist (lod3_implicit_ref_point);
+CREATE INDEX bridge_const_lod3refpt_spx ON bridge_constr_element USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -17900,7 +17900,7 @@ CREATE INDEX bridge_const_lod3refpt_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod3xgeom_spx ON citydb.bridge_constr_element USING gist (lod3_other_geom);
+CREATE INDEX bridge_const_lod3xgeom_spx ON bridge_constr_element USING gist (lod3_other_geom);
 
 
 --
@@ -17908,7 +17908,7 @@ CREATE INDEX bridge_const_lod3xgeom_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod4refpt_spx ON citydb.bridge_constr_element USING gist (lod4_implicit_ref_point);
+CREATE INDEX bridge_const_lod4refpt_spx ON bridge_constr_element USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -17916,7 +17916,7 @@ CREATE INDEX bridge_const_lod4refpt_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_const_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_const_lod4xgeom_spx ON citydb.bridge_constr_element USING gist (lod4_other_geom);
+CREATE INDEX bridge_const_lod4xgeom_spx ON bridge_constr_element USING gist (lod4_other_geom);
 
 
 --
@@ -17924,7 +17924,7 @@ CREATE INDEX bridge_const_lod4xgeom_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_constr_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_bridge_fkx ON citydb.bridge_constr_element USING btree (bridge_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_bridge_fkx ON bridge_constr_element USING btree (bridge_id) WITH (fillfactor='90');
 
 
 --
@@ -17932,7 +17932,7 @@ CREATE INDEX bridge_constr_bridge_fkx ON citydb.bridge_constr_element USING btre
 -- Name: bridge_constr_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod1brep_fkx ON citydb.bridge_constr_element USING btree (lod1_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod1brep_fkx ON bridge_constr_element USING btree (lod1_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17940,7 +17940,7 @@ CREATE INDEX bridge_constr_lod1brep_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod1impl_fkx ON citydb.bridge_constr_element USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod1impl_fkx ON bridge_constr_element USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17948,7 +17948,7 @@ CREATE INDEX bridge_constr_lod1impl_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod1terr_spx ON citydb.bridge_constr_element USING gist (lod1_terrain_intersection);
+CREATE INDEX bridge_constr_lod1terr_spx ON bridge_constr_element USING gist (lod1_terrain_intersection);
 
 
 --
@@ -17956,7 +17956,7 @@ CREATE INDEX bridge_constr_lod1terr_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_constr_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod2brep_fkx ON citydb.bridge_constr_element USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod2brep_fkx ON bridge_constr_element USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17964,7 +17964,7 @@ CREATE INDEX bridge_constr_lod2brep_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod2impl_fkx ON citydb.bridge_constr_element USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod2impl_fkx ON bridge_constr_element USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17972,7 +17972,7 @@ CREATE INDEX bridge_constr_lod2impl_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod2terr_spx ON citydb.bridge_constr_element USING gist (lod2_terrain_intersection);
+CREATE INDEX bridge_constr_lod2terr_spx ON bridge_constr_element USING gist (lod2_terrain_intersection);
 
 
 --
@@ -17980,7 +17980,7 @@ CREATE INDEX bridge_constr_lod2terr_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_constr_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod3brep_fkx ON citydb.bridge_constr_element USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod3brep_fkx ON bridge_constr_element USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -17988,7 +17988,7 @@ CREATE INDEX bridge_constr_lod3brep_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod3impl_fkx ON citydb.bridge_constr_element USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod3impl_fkx ON bridge_constr_element USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -17996,7 +17996,7 @@ CREATE INDEX bridge_constr_lod3impl_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod3terr_spx ON citydb.bridge_constr_element USING gist (lod3_terrain_intersection);
+CREATE INDEX bridge_constr_lod3terr_spx ON bridge_constr_element USING gist (lod3_terrain_intersection);
 
 
 --
@@ -18004,7 +18004,7 @@ CREATE INDEX bridge_constr_lod3terr_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_constr_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod4brep_fkx ON citydb.bridge_constr_element USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod4brep_fkx ON bridge_constr_element USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18012,7 +18012,7 @@ CREATE INDEX bridge_constr_lod4brep_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod4impl_fkx ON citydb.bridge_constr_element USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_lod4impl_fkx ON bridge_constr_element USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18020,7 +18020,7 @@ CREATE INDEX bridge_constr_lod4impl_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_constr_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_lod4terr_spx ON citydb.bridge_constr_element USING gist (lod4_terrain_intersection);
+CREATE INDEX bridge_constr_lod4terr_spx ON bridge_constr_element USING gist (lod4_terrain_intersection);
 
 
 --
@@ -18028,7 +18028,7 @@ CREATE INDEX bridge_constr_lod4terr_spx ON citydb.bridge_constr_element USING gi
 -- Name: bridge_constr_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_constr_objclass_fkx ON citydb.bridge_constr_element USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bridge_constr_objclass_fkx ON bridge_constr_element USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18036,7 +18036,7 @@ CREATE INDEX bridge_constr_objclass_fkx ON citydb.bridge_constr_element USING bt
 -- Name: bridge_furn_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_brd_room_fkx ON citydb.bridge_furniture USING btree (bridge_room_id) WITH (fillfactor='90');
+CREATE INDEX bridge_furn_brd_room_fkx ON bridge_furniture USING btree (bridge_room_id) WITH (fillfactor='90');
 
 
 --
@@ -18044,7 +18044,7 @@ CREATE INDEX bridge_furn_brd_room_fkx ON citydb.bridge_furniture USING btree (br
 -- Name: bridge_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_lod4brep_fkx ON citydb.bridge_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_furn_lod4brep_fkx ON bridge_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18052,7 +18052,7 @@ CREATE INDEX bridge_furn_lod4brep_fkx ON citydb.bridge_furniture USING btree (lo
 -- Name: bridge_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_lod4impl_fkx ON citydb.bridge_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_furn_lod4impl_fkx ON bridge_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18060,7 +18060,7 @@ CREATE INDEX bridge_furn_lod4impl_fkx ON citydb.bridge_furniture USING btree (lo
 -- Name: bridge_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_lod4refpt_spx ON citydb.bridge_furniture USING gist (lod4_implicit_ref_point);
+CREATE INDEX bridge_furn_lod4refpt_spx ON bridge_furniture USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -18068,7 +18068,7 @@ CREATE INDEX bridge_furn_lod4refpt_spx ON citydb.bridge_furniture USING gist (lo
 -- Name: bridge_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_lod4xgeom_spx ON citydb.bridge_furniture USING gist (lod4_other_geom);
+CREATE INDEX bridge_furn_lod4xgeom_spx ON bridge_furniture USING gist (lod4_other_geom);
 
 
 --
@@ -18076,7 +18076,7 @@ CREATE INDEX bridge_furn_lod4xgeom_spx ON citydb.bridge_furniture USING gist (lo
 -- Name: bridge_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_furn_objclass_fkx ON citydb.bridge_furniture USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bridge_furn_objclass_fkx ON bridge_furniture USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18084,7 +18084,7 @@ CREATE INDEX bridge_furn_objclass_fkx ON citydb.bridge_furniture USING btree (ob
 -- Name: bridge_inst_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_brd_room_fkx ON citydb.bridge_installation USING btree (bridge_room_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_brd_room_fkx ON bridge_installation USING btree (bridge_room_id) WITH (fillfactor='90');
 
 
 --
@@ -18092,7 +18092,7 @@ CREATE INDEX bridge_inst_brd_room_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_bridge_fkx ON citydb.bridge_installation USING btree (bridge_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_bridge_fkx ON bridge_installation USING btree (bridge_id) WITH (fillfactor='90');
 
 
 --
@@ -18100,7 +18100,7 @@ CREATE INDEX bridge_inst_bridge_fkx ON citydb.bridge_installation USING btree (b
 -- Name: bridge_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod2brep_fkx ON citydb.bridge_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod2brep_fkx ON bridge_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18108,7 +18108,7 @@ CREATE INDEX bridge_inst_lod2brep_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod2impl_fkx ON citydb.bridge_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod2impl_fkx ON bridge_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18116,7 +18116,7 @@ CREATE INDEX bridge_inst_lod2impl_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod2refpt_spx ON citydb.bridge_installation USING gist (lod2_implicit_ref_point);
+CREATE INDEX bridge_inst_lod2refpt_spx ON bridge_installation USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -18124,7 +18124,7 @@ CREATE INDEX bridge_inst_lod2refpt_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod2xgeom_spx ON citydb.bridge_installation USING gist (lod2_other_geom);
+CREATE INDEX bridge_inst_lod2xgeom_spx ON bridge_installation USING gist (lod2_other_geom);
 
 
 --
@@ -18132,7 +18132,7 @@ CREATE INDEX bridge_inst_lod2xgeom_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod3brep_fkx ON citydb.bridge_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod3brep_fkx ON bridge_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18140,7 +18140,7 @@ CREATE INDEX bridge_inst_lod3brep_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod3impl_fkx ON citydb.bridge_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod3impl_fkx ON bridge_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18148,7 +18148,7 @@ CREATE INDEX bridge_inst_lod3impl_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod3refpt_spx ON citydb.bridge_installation USING gist (lod3_implicit_ref_point);
+CREATE INDEX bridge_inst_lod3refpt_spx ON bridge_installation USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -18156,7 +18156,7 @@ CREATE INDEX bridge_inst_lod3refpt_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod3xgeom_spx ON citydb.bridge_installation USING gist (lod3_other_geom);
+CREATE INDEX bridge_inst_lod3xgeom_spx ON bridge_installation USING gist (lod3_other_geom);
 
 
 --
@@ -18164,7 +18164,7 @@ CREATE INDEX bridge_inst_lod3xgeom_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod4brep_fkx ON citydb.bridge_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod4brep_fkx ON bridge_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18172,7 +18172,7 @@ CREATE INDEX bridge_inst_lod4brep_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod4impl_fkx ON citydb.bridge_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_inst_lod4impl_fkx ON bridge_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18180,7 +18180,7 @@ CREATE INDEX bridge_inst_lod4impl_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod4refpt_spx ON citydb.bridge_installation USING gist (lod4_implicit_ref_point);
+CREATE INDEX bridge_inst_lod4refpt_spx ON bridge_installation USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -18188,7 +18188,7 @@ CREATE INDEX bridge_inst_lod4refpt_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_lod4xgeom_spx ON citydb.bridge_installation USING gist (lod4_other_geom);
+CREATE INDEX bridge_inst_lod4xgeom_spx ON bridge_installation USING gist (lod4_other_geom);
 
 
 --
@@ -18196,7 +18196,7 @@ CREATE INDEX bridge_inst_lod4xgeom_spx ON citydb.bridge_installation USING gist 
 -- Name: bridge_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_inst_objclass_fkx ON citydb.bridge_installation USING btree (objectclass_id);
+CREATE INDEX bridge_inst_objclass_fkx ON bridge_installation USING btree (objectclass_id);
 
 
 --
@@ -18204,7 +18204,7 @@ CREATE INDEX bridge_inst_objclass_fkx ON citydb.bridge_installation USING btree 
 -- Name: bridge_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod1msrf_fkx ON citydb.bridge USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod1msrf_fkx ON bridge USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18212,7 +18212,7 @@ CREATE INDEX bridge_lod1msrf_fkx ON citydb.bridge USING btree (lod1_multi_surfac
 -- Name: bridge_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod1solid_fkx ON citydb.bridge USING btree (lod1_solid_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod1solid_fkx ON bridge USING btree (lod1_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18220,7 +18220,7 @@ CREATE INDEX bridge_lod1solid_fkx ON citydb.bridge USING btree (lod1_solid_id) W
 -- Name: bridge_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod1terr_spx ON citydb.bridge USING gist (lod1_terrain_intersection);
+CREATE INDEX bridge_lod1terr_spx ON bridge USING gist (lod1_terrain_intersection);
 
 
 --
@@ -18228,7 +18228,7 @@ CREATE INDEX bridge_lod1terr_spx ON citydb.bridge USING gist (lod1_terrain_inter
 -- Name: bridge_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod2curve_spx ON citydb.bridge USING gist (lod2_multi_curve);
+CREATE INDEX bridge_lod2curve_spx ON bridge USING gist (lod2_multi_curve);
 
 
 --
@@ -18236,7 +18236,7 @@ CREATE INDEX bridge_lod2curve_spx ON citydb.bridge USING gist (lod2_multi_curve)
 -- Name: bridge_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod2msrf_fkx ON citydb.bridge USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod2msrf_fkx ON bridge USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18244,7 +18244,7 @@ CREATE INDEX bridge_lod2msrf_fkx ON citydb.bridge USING btree (lod2_multi_surfac
 -- Name: bridge_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod2solid_fkx ON citydb.bridge USING btree (lod2_solid_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod2solid_fkx ON bridge USING btree (lod2_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18252,7 +18252,7 @@ CREATE INDEX bridge_lod2solid_fkx ON citydb.bridge USING btree (lod2_solid_id) W
 -- Name: bridge_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod2terr_spx ON citydb.bridge USING gist (lod2_terrain_intersection);
+CREATE INDEX bridge_lod2terr_spx ON bridge USING gist (lod2_terrain_intersection);
 
 
 --
@@ -18260,7 +18260,7 @@ CREATE INDEX bridge_lod2terr_spx ON citydb.bridge USING gist (lod2_terrain_inter
 -- Name: bridge_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod3curve_spx ON citydb.bridge USING gist (lod3_multi_curve);
+CREATE INDEX bridge_lod3curve_spx ON bridge USING gist (lod3_multi_curve);
 
 
 --
@@ -18268,7 +18268,7 @@ CREATE INDEX bridge_lod3curve_spx ON citydb.bridge USING gist (lod3_multi_curve)
 -- Name: bridge_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod3msrf_fkx ON citydb.bridge USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod3msrf_fkx ON bridge USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18276,7 +18276,7 @@ CREATE INDEX bridge_lod3msrf_fkx ON citydb.bridge USING btree (lod3_multi_surfac
 -- Name: bridge_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod3solid_fkx ON citydb.bridge USING btree (lod3_solid_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod3solid_fkx ON bridge USING btree (lod3_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18284,7 +18284,7 @@ CREATE INDEX bridge_lod3solid_fkx ON citydb.bridge USING btree (lod3_solid_id) W
 -- Name: bridge_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod3terr_spx ON citydb.bridge USING gist (lod3_terrain_intersection);
+CREATE INDEX bridge_lod3terr_spx ON bridge USING gist (lod3_terrain_intersection);
 
 
 --
@@ -18292,7 +18292,7 @@ CREATE INDEX bridge_lod3terr_spx ON citydb.bridge USING gist (lod3_terrain_inter
 -- Name: bridge_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod4curve_spx ON citydb.bridge USING gist (lod4_multi_curve);
+CREATE INDEX bridge_lod4curve_spx ON bridge USING gist (lod4_multi_curve);
 
 
 --
@@ -18300,7 +18300,7 @@ CREATE INDEX bridge_lod4curve_spx ON citydb.bridge USING gist (lod4_multi_curve)
 -- Name: bridge_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod4msrf_fkx ON citydb.bridge USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod4msrf_fkx ON bridge USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18308,7 +18308,7 @@ CREATE INDEX bridge_lod4msrf_fkx ON citydb.bridge USING btree (lod4_multi_surfac
 -- Name: bridge_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod4solid_fkx ON citydb.bridge USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX bridge_lod4solid_fkx ON bridge USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18316,7 +18316,7 @@ CREATE INDEX bridge_lod4solid_fkx ON citydb.bridge USING btree (lod4_solid_id) W
 -- Name: bridge_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_lod4terr_spx ON citydb.bridge USING gist (lod4_terrain_intersection);
+CREATE INDEX bridge_lod4terr_spx ON bridge USING gist (lod4_terrain_intersection);
 
 
 --
@@ -18324,7 +18324,7 @@ CREATE INDEX bridge_lod4terr_spx ON citydb.bridge USING gist (lod4_terrain_inter
 -- Name: bridge_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_objectclass_fkx ON citydb.bridge USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bridge_objectclass_fkx ON bridge USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18332,7 +18332,7 @@ CREATE INDEX bridge_objectclass_fkx ON citydb.bridge USING btree (objectclass_id
 -- Name: bridge_open_address_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_address_fkx ON citydb.bridge_opening USING btree (address_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_address_fkx ON bridge_opening USING btree (address_id) WITH (fillfactor='90');
 
 
 --
@@ -18340,7 +18340,7 @@ CREATE INDEX bridge_open_address_fkx ON citydb.bridge_opening USING btree (addre
 -- Name: bridge_open_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod3impl_fkx ON citydb.bridge_opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_lod3impl_fkx ON bridge_opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18348,7 +18348,7 @@ CREATE INDEX bridge_open_lod3impl_fkx ON citydb.bridge_opening USING btree (lod3
 -- Name: bridge_open_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod3msrf_fkx ON citydb.bridge_opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_lod3msrf_fkx ON bridge_opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18356,7 +18356,7 @@ CREATE INDEX bridge_open_lod3msrf_fkx ON citydb.bridge_opening USING btree (lod3
 -- Name: bridge_open_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod3refpt_spx ON citydb.bridge_opening USING gist (lod3_implicit_ref_point);
+CREATE INDEX bridge_open_lod3refpt_spx ON bridge_opening USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -18364,7 +18364,7 @@ CREATE INDEX bridge_open_lod3refpt_spx ON citydb.bridge_opening USING gist (lod3
 -- Name: bridge_open_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod4impl_fkx ON citydb.bridge_opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_lod4impl_fkx ON bridge_opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18372,7 +18372,7 @@ CREATE INDEX bridge_open_lod4impl_fkx ON citydb.bridge_opening USING btree (lod4
 -- Name: bridge_open_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod4msrf_fkx ON citydb.bridge_opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_lod4msrf_fkx ON bridge_opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18380,7 +18380,7 @@ CREATE INDEX bridge_open_lod4msrf_fkx ON citydb.bridge_opening USING btree (lod4
 -- Name: bridge_open_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_lod4refpt_spx ON citydb.bridge_opening USING gist (lod4_implicit_ref_point);
+CREATE INDEX bridge_open_lod4refpt_spx ON bridge_opening USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -18388,7 +18388,7 @@ CREATE INDEX bridge_open_lod4refpt_spx ON citydb.bridge_opening USING gist (lod4
 -- Name: bridge_open_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_open_objclass_fkx ON citydb.bridge_opening USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bridge_open_objclass_fkx ON bridge_opening USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18396,7 +18396,7 @@ CREATE INDEX bridge_open_objclass_fkx ON citydb.bridge_opening USING btree (obje
 -- Name: bridge_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_parent_fkx ON citydb.bridge USING btree (bridge_parent_id) WITH (fillfactor='90');
+CREATE INDEX bridge_parent_fkx ON bridge USING btree (bridge_parent_id) WITH (fillfactor='90');
 
 
 --
@@ -18404,7 +18404,7 @@ CREATE INDEX bridge_parent_fkx ON citydb.bridge USING btree (bridge_parent_id) W
 -- Name: bridge_room_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_room_bridge_fkx ON citydb.bridge_room USING btree (bridge_id) WITH (fillfactor='90');
+CREATE INDEX bridge_room_bridge_fkx ON bridge_room USING btree (bridge_id) WITH (fillfactor='90');
 
 
 --
@@ -18412,7 +18412,7 @@ CREATE INDEX bridge_room_bridge_fkx ON citydb.bridge_room USING btree (bridge_id
 -- Name: bridge_room_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_room_lod4msrf_fkx ON citydb.bridge_room USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX bridge_room_lod4msrf_fkx ON bridge_room USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18420,7 +18420,7 @@ CREATE INDEX bridge_room_lod4msrf_fkx ON citydb.bridge_room USING btree (lod4_mu
 -- Name: bridge_room_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_room_lod4solid_fkx ON citydb.bridge_room USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX bridge_room_lod4solid_fkx ON bridge_room USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18428,7 +18428,7 @@ CREATE INDEX bridge_room_lod4solid_fkx ON citydb.bridge_room USING btree (lod4_s
 -- Name: bridge_room_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_room_objclass_fkx ON citydb.bridge_room USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX bridge_room_objclass_fkx ON bridge_room USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18436,7 +18436,7 @@ CREATE INDEX bridge_room_objclass_fkx ON citydb.bridge_room USING btree (objectc
 -- Name: bridge_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX bridge_root_fkx ON citydb.bridge USING btree (bridge_root_id) WITH (fillfactor='90');
+CREATE INDEX bridge_root_fkx ON bridge USING btree (bridge_root_id) WITH (fillfactor='90');
 
 
 --
@@ -18444,7 +18444,7 @@ CREATE INDEX bridge_root_fkx ON citydb.bridge USING btree (bridge_root_id) WITH 
 -- Name: building_lod0footprint_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod0footprint_fkx ON citydb.building USING btree (lod0_footprint_id) WITH (fillfactor='90');
+CREATE INDEX building_lod0footprint_fkx ON building USING btree (lod0_footprint_id) WITH (fillfactor='90');
 
 
 --
@@ -18452,7 +18452,7 @@ CREATE INDEX building_lod0footprint_fkx ON citydb.building USING btree (lod0_foo
 -- Name: building_lod0roofprint_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod0roofprint_fkx ON citydb.building USING btree (lod0_roofprint_id) WITH (fillfactor='90');
+CREATE INDEX building_lod0roofprint_fkx ON building USING btree (lod0_roofprint_id) WITH (fillfactor='90');
 
 
 --
@@ -18460,7 +18460,7 @@ CREATE INDEX building_lod0roofprint_fkx ON citydb.building USING btree (lod0_roo
 -- Name: building_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod1msrf_fkx ON citydb.building USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX building_lod1msrf_fkx ON building USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18468,7 +18468,7 @@ CREATE INDEX building_lod1msrf_fkx ON citydb.building USING btree (lod1_multi_su
 -- Name: building_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod1solid_fkx ON citydb.building USING btree (lod1_solid_id) WITH (fillfactor='90');
+CREATE INDEX building_lod1solid_fkx ON building USING btree (lod1_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18476,7 +18476,7 @@ CREATE INDEX building_lod1solid_fkx ON citydb.building USING btree (lod1_solid_i
 -- Name: building_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod1terr_spx ON citydb.building USING gist (lod1_terrain_intersection);
+CREATE INDEX building_lod1terr_spx ON building USING gist (lod1_terrain_intersection);
 
 
 --
@@ -18484,7 +18484,7 @@ CREATE INDEX building_lod1terr_spx ON citydb.building USING gist (lod1_terrain_i
 -- Name: building_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod2curve_spx ON citydb.building USING gist (lod2_multi_curve);
+CREATE INDEX building_lod2curve_spx ON building USING gist (lod2_multi_curve);
 
 
 --
@@ -18492,7 +18492,7 @@ CREATE INDEX building_lod2curve_spx ON citydb.building USING gist (lod2_multi_cu
 -- Name: building_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod2msrf_fkx ON citydb.building USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX building_lod2msrf_fkx ON building USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18500,7 +18500,7 @@ CREATE INDEX building_lod2msrf_fkx ON citydb.building USING btree (lod2_multi_su
 -- Name: building_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod2solid_fkx ON citydb.building USING btree (lod2_solid_id) WITH (fillfactor='90');
+CREATE INDEX building_lod2solid_fkx ON building USING btree (lod2_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18508,7 +18508,7 @@ CREATE INDEX building_lod2solid_fkx ON citydb.building USING btree (lod2_solid_i
 -- Name: building_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod2terr_spx ON citydb.building USING gist (lod2_terrain_intersection);
+CREATE INDEX building_lod2terr_spx ON building USING gist (lod2_terrain_intersection);
 
 
 --
@@ -18516,7 +18516,7 @@ CREATE INDEX building_lod2terr_spx ON citydb.building USING gist (lod2_terrain_i
 -- Name: building_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod3curve_spx ON citydb.building USING gist (lod3_multi_curve);
+CREATE INDEX building_lod3curve_spx ON building USING gist (lod3_multi_curve);
 
 
 --
@@ -18524,7 +18524,7 @@ CREATE INDEX building_lod3curve_spx ON citydb.building USING gist (lod3_multi_cu
 -- Name: building_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod3msrf_fkx ON citydb.building USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX building_lod3msrf_fkx ON building USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18532,7 +18532,7 @@ CREATE INDEX building_lod3msrf_fkx ON citydb.building USING btree (lod3_multi_su
 -- Name: building_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod3solid_fkx ON citydb.building USING btree (lod3_solid_id) WITH (fillfactor='90');
+CREATE INDEX building_lod3solid_fkx ON building USING btree (lod3_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18540,7 +18540,7 @@ CREATE INDEX building_lod3solid_fkx ON citydb.building USING btree (lod3_solid_i
 -- Name: building_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod3terr_spx ON citydb.building USING gist (lod3_terrain_intersection);
+CREATE INDEX building_lod3terr_spx ON building USING gist (lod3_terrain_intersection);
 
 
 --
@@ -18548,7 +18548,7 @@ CREATE INDEX building_lod3terr_spx ON citydb.building USING gist (lod3_terrain_i
 -- Name: building_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod4curve_spx ON citydb.building USING gist (lod4_multi_curve);
+CREATE INDEX building_lod4curve_spx ON building USING gist (lod4_multi_curve);
 
 
 --
@@ -18556,7 +18556,7 @@ CREATE INDEX building_lod4curve_spx ON citydb.building USING gist (lod4_multi_cu
 -- Name: building_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod4msrf_fkx ON citydb.building USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX building_lod4msrf_fkx ON building USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -18564,7 +18564,7 @@ CREATE INDEX building_lod4msrf_fkx ON citydb.building USING btree (lod4_multi_su
 -- Name: building_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod4solid_fkx ON citydb.building USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX building_lod4solid_fkx ON building USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -18572,7 +18572,7 @@ CREATE INDEX building_lod4solid_fkx ON citydb.building USING btree (lod4_solid_i
 -- Name: building_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_lod4terr_spx ON citydb.building USING gist (lod4_terrain_intersection);
+CREATE INDEX building_lod4terr_spx ON building USING gist (lod4_terrain_intersection);
 
 
 --
@@ -18580,7 +18580,7 @@ CREATE INDEX building_lod4terr_spx ON citydb.building USING gist (lod4_terrain_i
 -- Name: building_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_objectclass_fkx ON citydb.building USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX building_objectclass_fkx ON building USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18588,7 +18588,7 @@ CREATE INDEX building_objectclass_fkx ON citydb.building USING btree (objectclas
 -- Name: building_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_parent_fkx ON citydb.building USING btree (building_parent_id) WITH (fillfactor='90');
+CREATE INDEX building_parent_fkx ON building USING btree (building_parent_id) WITH (fillfactor='90');
 
 
 --
@@ -18596,7 +18596,7 @@ CREATE INDEX building_parent_fkx ON citydb.building USING btree (building_parent
 -- Name: building_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX building_root_fkx ON citydb.building USING btree (building_root_id) WITH (fillfactor='90');
+CREATE INDEX building_root_fkx ON building USING btree (building_root_id) WITH (fillfactor='90');
 
 
 --
@@ -18604,7 +18604,7 @@ CREATE INDEX building_root_fkx ON citydb.building USING btree (building_root_id)
 -- Name: city_furn_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod1brep_fkx ON citydb.city_furniture USING btree (lod1_brep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod1brep_fkx ON city_furniture USING btree (lod1_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18612,7 +18612,7 @@ CREATE INDEX city_furn_lod1brep_fkx ON citydb.city_furniture USING btree (lod1_b
 -- Name: city_furn_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod1impl_fkx ON citydb.city_furniture USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod1impl_fkx ON city_furniture USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18620,7 +18620,7 @@ CREATE INDEX city_furn_lod1impl_fkx ON citydb.city_furniture USING btree (lod1_i
 -- Name: city_furn_lod1refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod1refpnt_spx ON citydb.city_furniture USING gist (lod1_implicit_ref_point);
+CREATE INDEX city_furn_lod1refpnt_spx ON city_furniture USING gist (lod1_implicit_ref_point);
 
 
 --
@@ -18628,7 +18628,7 @@ CREATE INDEX city_furn_lod1refpnt_spx ON citydb.city_furniture USING gist (lod1_
 -- Name: city_furn_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod1terr_spx ON citydb.city_furniture USING gist (lod1_terrain_intersection);
+CREATE INDEX city_furn_lod1terr_spx ON city_furniture USING gist (lod1_terrain_intersection);
 
 
 --
@@ -18636,7 +18636,7 @@ CREATE INDEX city_furn_lod1terr_spx ON citydb.city_furniture USING gist (lod1_te
 -- Name: city_furn_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod1xgeom_spx ON citydb.city_furniture USING gist (lod1_other_geom);
+CREATE INDEX city_furn_lod1xgeom_spx ON city_furniture USING gist (lod1_other_geom);
 
 
 --
@@ -18644,7 +18644,7 @@ CREATE INDEX city_furn_lod1xgeom_spx ON citydb.city_furniture USING gist (lod1_o
 -- Name: city_furn_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod2brep_fkx ON citydb.city_furniture USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod2brep_fkx ON city_furniture USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18652,7 +18652,7 @@ CREATE INDEX city_furn_lod2brep_fkx ON citydb.city_furniture USING btree (lod2_b
 -- Name: city_furn_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod2impl_fkx ON citydb.city_furniture USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod2impl_fkx ON city_furniture USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18660,7 +18660,7 @@ CREATE INDEX city_furn_lod2impl_fkx ON citydb.city_furniture USING btree (lod2_i
 -- Name: city_furn_lod2refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod2refpnt_spx ON citydb.city_furniture USING gist (lod2_implicit_ref_point);
+CREATE INDEX city_furn_lod2refpnt_spx ON city_furniture USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -18668,7 +18668,7 @@ CREATE INDEX city_furn_lod2refpnt_spx ON citydb.city_furniture USING gist (lod2_
 -- Name: city_furn_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod2terr_spx ON citydb.city_furniture USING gist (lod2_terrain_intersection);
+CREATE INDEX city_furn_lod2terr_spx ON city_furniture USING gist (lod2_terrain_intersection);
 
 
 --
@@ -18676,7 +18676,7 @@ CREATE INDEX city_furn_lod2terr_spx ON citydb.city_furniture USING gist (lod2_te
 -- Name: city_furn_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod2xgeom_spx ON citydb.city_furniture USING gist (lod2_other_geom);
+CREATE INDEX city_furn_lod2xgeom_spx ON city_furniture USING gist (lod2_other_geom);
 
 
 --
@@ -18684,7 +18684,7 @@ CREATE INDEX city_furn_lod2xgeom_spx ON citydb.city_furniture USING gist (lod2_o
 -- Name: city_furn_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod3brep_fkx ON citydb.city_furniture USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod3brep_fkx ON city_furniture USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18692,7 +18692,7 @@ CREATE INDEX city_furn_lod3brep_fkx ON citydb.city_furniture USING btree (lod3_b
 -- Name: city_furn_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod3impl_fkx ON citydb.city_furniture USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod3impl_fkx ON city_furniture USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18700,7 +18700,7 @@ CREATE INDEX city_furn_lod3impl_fkx ON citydb.city_furniture USING btree (lod3_i
 -- Name: city_furn_lod3refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod3refpnt_spx ON citydb.city_furniture USING gist (lod3_implicit_ref_point);
+CREATE INDEX city_furn_lod3refpnt_spx ON city_furniture USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -18708,7 +18708,7 @@ CREATE INDEX city_furn_lod3refpnt_spx ON citydb.city_furniture USING gist (lod3_
 -- Name: city_furn_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod3terr_spx ON citydb.city_furniture USING gist (lod3_terrain_intersection);
+CREATE INDEX city_furn_lod3terr_spx ON city_furniture USING gist (lod3_terrain_intersection);
 
 
 --
@@ -18716,7 +18716,7 @@ CREATE INDEX city_furn_lod3terr_spx ON citydb.city_furniture USING gist (lod3_te
 -- Name: city_furn_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod3xgeom_spx ON citydb.city_furniture USING gist (lod3_other_geom);
+CREATE INDEX city_furn_lod3xgeom_spx ON city_furniture USING gist (lod3_other_geom);
 
 
 --
@@ -18724,7 +18724,7 @@ CREATE INDEX city_furn_lod3xgeom_spx ON citydb.city_furniture USING gist (lod3_o
 -- Name: city_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod4brep_fkx ON citydb.city_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod4brep_fkx ON city_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18732,7 +18732,7 @@ CREATE INDEX city_furn_lod4brep_fkx ON citydb.city_furniture USING btree (lod4_b
 -- Name: city_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod4impl_fkx ON citydb.city_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_lod4impl_fkx ON city_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18740,7 +18740,7 @@ CREATE INDEX city_furn_lod4impl_fkx ON citydb.city_furniture USING btree (lod4_i
 -- Name: city_furn_lod4refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod4refpnt_spx ON citydb.city_furniture USING gist (lod4_implicit_ref_point);
+CREATE INDEX city_furn_lod4refpnt_spx ON city_furniture USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -18748,7 +18748,7 @@ CREATE INDEX city_furn_lod4refpnt_spx ON citydb.city_furniture USING gist (lod4_
 -- Name: city_furn_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod4terr_spx ON citydb.city_furniture USING gist (lod4_terrain_intersection);
+CREATE INDEX city_furn_lod4terr_spx ON city_furniture USING gist (lod4_terrain_intersection);
 
 
 --
@@ -18756,7 +18756,7 @@ CREATE INDEX city_furn_lod4terr_spx ON citydb.city_furniture USING gist (lod4_te
 -- Name: city_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_lod4xgeom_spx ON citydb.city_furniture USING gist (lod4_other_geom);
+CREATE INDEX city_furn_lod4xgeom_spx ON city_furniture USING gist (lod4_other_geom);
 
 
 --
@@ -18764,7 +18764,7 @@ CREATE INDEX city_furn_lod4xgeom_spx ON citydb.city_furniture USING gist (lod4_o
 -- Name: city_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX city_furn_objclass_fkx ON citydb.city_furniture USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX city_furn_objclass_fkx ON city_furniture USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18772,7 +18772,7 @@ CREATE INDEX city_furn_objclass_fkx ON citydb.city_furniture USING btree (object
 -- Name: citymodel_envelope_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX citymodel_envelope_spx ON citydb.citymodel USING gist (envelope);
+CREATE INDEX citymodel_envelope_spx ON citymodel USING gist (envelope);
 
 
 --
@@ -18780,7 +18780,7 @@ CREATE INDEX citymodel_envelope_spx ON citydb.citymodel USING gist (envelope);
 -- Name: citymodel_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX citymodel_inx ON citydb.citymodel USING btree (gmlid, gmlid_codespace);
+CREATE INDEX citymodel_inx ON citymodel USING btree (gmlid, gmlid_codespace);
 
 
 --
@@ -18788,7 +18788,7 @@ CREATE INDEX citymodel_inx ON citydb.citymodel USING btree (gmlid, gmlid_codespa
 -- Name: cityobj_creation_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobj_creation_date_inx ON citydb.cityobject USING btree (creation_date) WITH (fillfactor='90');
+CREATE INDEX cityobj_creation_date_inx ON cityobject USING btree (creation_date) WITH (fillfactor='90');
 
 
 --
@@ -18796,7 +18796,7 @@ CREATE INDEX cityobj_creation_date_inx ON citydb.cityobject USING btree (creatio
 -- Name: cityobj_last_mod_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobj_last_mod_date_inx ON citydb.cityobject USING btree (last_modification_date) WITH (fillfactor='90');
+CREATE INDEX cityobj_last_mod_date_inx ON cityobject USING btree (last_modification_date) WITH (fillfactor='90');
 
 
 --
@@ -18804,7 +18804,7 @@ CREATE INDEX cityobj_last_mod_date_inx ON citydb.cityobject USING btree (last_mo
 -- Name: cityobj_term_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobj_term_date_inx ON citydb.cityobject USING btree (termination_date) WITH (fillfactor='90');
+CREATE INDEX cityobj_term_date_inx ON cityobject USING btree (termination_date) WITH (fillfactor='90');
 
 
 --
@@ -18812,7 +18812,7 @@ CREATE INDEX cityobj_term_date_inx ON citydb.cityobject USING btree (termination
 -- Name: cityobject_envelope_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_envelope_spx ON citydb.cityobject USING gist (envelope);
+CREATE INDEX cityobject_envelope_spx ON cityobject USING gist (envelope);
 
 
 --
@@ -18820,7 +18820,7 @@ CREATE INDEX cityobject_envelope_spx ON citydb.cityobject USING gist (envelope);
 -- Name: cityobject_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_inx ON citydb.cityobject USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
+CREATE INDEX cityobject_inx ON cityobject USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
 
 
 --
@@ -18828,7 +18828,7 @@ CREATE INDEX cityobject_inx ON citydb.cityobject USING btree (gmlid, gmlid_codes
 -- Name: cityobject_lineage_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_lineage_inx ON citydb.cityobject USING btree (lineage);
+CREATE INDEX cityobject_lineage_inx ON cityobject USING btree (lineage);
 
 
 --
@@ -18836,7 +18836,7 @@ CREATE INDEX cityobject_lineage_inx ON citydb.cityobject USING btree (lineage);
 -- Name: cityobject_member_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_member_fkx ON citydb.cityobject_member USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX cityobject_member_fkx ON cityobject_member USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -18844,7 +18844,7 @@ CREATE INDEX cityobject_member_fkx ON citydb.cityobject_member USING btree (city
 -- Name: cityobject_member_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_member_fkx1 ON citydb.cityobject_member USING btree (citymodel_id) WITH (fillfactor='90');
+CREATE INDEX cityobject_member_fkx1 ON cityobject_member USING btree (citymodel_id) WITH (fillfactor='90');
 
 
 --
@@ -18852,7 +18852,7 @@ CREATE INDEX cityobject_member_fkx1 ON citydb.cityobject_member USING btree (cit
 -- Name: cityobject_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX cityobject_objectclass_fkx ON citydb.cityobject USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX cityobject_objectclass_fkx ON cityobject USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -18860,7 +18860,7 @@ CREATE INDEX cityobject_objectclass_fkx ON citydb.cityobject USING btree (object
 -- Name: ext_ref_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX ext_ref_cityobject_fkx ON citydb.external_reference USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX ext_ref_cityobject_fkx ON external_reference USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -18868,7 +18868,7 @@ CREATE INDEX ext_ref_cityobject_fkx ON citydb.external_reference USING btree (ci
 -- Name: gen_object_lod0brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod0brep_fkx ON citydb.generic_cityobject USING btree (lod0_brep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod0brep_fkx ON generic_cityobject USING btree (lod0_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18876,7 +18876,7 @@ CREATE INDEX gen_object_lod0brep_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod0impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod0impl_fkx ON citydb.generic_cityobject USING btree (lod0_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod0impl_fkx ON generic_cityobject USING btree (lod0_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18884,7 +18884,7 @@ CREATE INDEX gen_object_lod0impl_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod0refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod0refpnt_spx ON citydb.generic_cityobject USING gist (lod0_implicit_ref_point);
+CREATE INDEX gen_object_lod0refpnt_spx ON generic_cityobject USING gist (lod0_implicit_ref_point);
 
 
 --
@@ -18892,7 +18892,7 @@ CREATE INDEX gen_object_lod0refpnt_spx ON citydb.generic_cityobject USING gist (
 -- Name: gen_object_lod0terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod0terr_spx ON citydb.generic_cityobject USING gist (lod0_terrain_intersection);
+CREATE INDEX gen_object_lod0terr_spx ON generic_cityobject USING gist (lod0_terrain_intersection);
 
 
 --
@@ -18900,7 +18900,7 @@ CREATE INDEX gen_object_lod0terr_spx ON citydb.generic_cityobject USING gist (lo
 -- Name: gen_object_lod0xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod0xgeom_spx ON citydb.generic_cityobject USING gist (lod0_other_geom);
+CREATE INDEX gen_object_lod0xgeom_spx ON generic_cityobject USING gist (lod0_other_geom);
 
 
 --
@@ -18908,7 +18908,7 @@ CREATE INDEX gen_object_lod0xgeom_spx ON citydb.generic_cityobject USING gist (l
 -- Name: gen_object_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod1brep_fkx ON citydb.generic_cityobject USING btree (lod1_brep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod1brep_fkx ON generic_cityobject USING btree (lod1_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18916,7 +18916,7 @@ CREATE INDEX gen_object_lod1brep_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod1impl_fkx ON citydb.generic_cityobject USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod1impl_fkx ON generic_cityobject USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18924,7 +18924,7 @@ CREATE INDEX gen_object_lod1impl_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod1refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod1refpnt_spx ON citydb.generic_cityobject USING gist (lod1_implicit_ref_point);
+CREATE INDEX gen_object_lod1refpnt_spx ON generic_cityobject USING gist (lod1_implicit_ref_point);
 
 
 --
@@ -18932,7 +18932,7 @@ CREATE INDEX gen_object_lod1refpnt_spx ON citydb.generic_cityobject USING gist (
 -- Name: gen_object_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod1terr_spx ON citydb.generic_cityobject USING gist (lod1_terrain_intersection);
+CREATE INDEX gen_object_lod1terr_spx ON generic_cityobject USING gist (lod1_terrain_intersection);
 
 
 --
@@ -18940,7 +18940,7 @@ CREATE INDEX gen_object_lod1terr_spx ON citydb.generic_cityobject USING gist (lo
 -- Name: gen_object_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod1xgeom_spx ON citydb.generic_cityobject USING gist (lod1_other_geom);
+CREATE INDEX gen_object_lod1xgeom_spx ON generic_cityobject USING gist (lod1_other_geom);
 
 
 --
@@ -18948,7 +18948,7 @@ CREATE INDEX gen_object_lod1xgeom_spx ON citydb.generic_cityobject USING gist (l
 -- Name: gen_object_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod2brep_fkx ON citydb.generic_cityobject USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod2brep_fkx ON generic_cityobject USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18956,7 +18956,7 @@ CREATE INDEX gen_object_lod2brep_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod2impl_fkx ON citydb.generic_cityobject USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod2impl_fkx ON generic_cityobject USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -18964,7 +18964,7 @@ CREATE INDEX gen_object_lod2impl_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod2refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod2refpnt_spx ON citydb.generic_cityobject USING gist (lod2_implicit_ref_point);
+CREATE INDEX gen_object_lod2refpnt_spx ON generic_cityobject USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -18972,7 +18972,7 @@ CREATE INDEX gen_object_lod2refpnt_spx ON citydb.generic_cityobject USING gist (
 -- Name: gen_object_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod2terr_spx ON citydb.generic_cityobject USING gist (lod2_terrain_intersection);
+CREATE INDEX gen_object_lod2terr_spx ON generic_cityobject USING gist (lod2_terrain_intersection);
 
 
 --
@@ -18980,7 +18980,7 @@ CREATE INDEX gen_object_lod2terr_spx ON citydb.generic_cityobject USING gist (lo
 -- Name: gen_object_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod2xgeom_spx ON citydb.generic_cityobject USING gist (lod2_other_geom);
+CREATE INDEX gen_object_lod2xgeom_spx ON generic_cityobject USING gist (lod2_other_geom);
 
 
 --
@@ -18988,7 +18988,7 @@ CREATE INDEX gen_object_lod2xgeom_spx ON citydb.generic_cityobject USING gist (l
 -- Name: gen_object_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod3brep_fkx ON citydb.generic_cityobject USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod3brep_fkx ON generic_cityobject USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -18996,7 +18996,7 @@ CREATE INDEX gen_object_lod3brep_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod3impl_fkx ON citydb.generic_cityobject USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod3impl_fkx ON generic_cityobject USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19004,7 +19004,7 @@ CREATE INDEX gen_object_lod3impl_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod3refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod3refpnt_spx ON citydb.generic_cityobject USING gist (lod3_implicit_ref_point);
+CREATE INDEX gen_object_lod3refpnt_spx ON generic_cityobject USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -19012,7 +19012,7 @@ CREATE INDEX gen_object_lod3refpnt_spx ON citydb.generic_cityobject USING gist (
 -- Name: gen_object_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod3terr_spx ON citydb.generic_cityobject USING gist (lod3_terrain_intersection);
+CREATE INDEX gen_object_lod3terr_spx ON generic_cityobject USING gist (lod3_terrain_intersection);
 
 
 --
@@ -19020,7 +19020,7 @@ CREATE INDEX gen_object_lod3terr_spx ON citydb.generic_cityobject USING gist (lo
 -- Name: gen_object_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod3xgeom_spx ON citydb.generic_cityobject USING gist (lod3_other_geom);
+CREATE INDEX gen_object_lod3xgeom_spx ON generic_cityobject USING gist (lod3_other_geom);
 
 
 --
@@ -19028,7 +19028,7 @@ CREATE INDEX gen_object_lod3xgeom_spx ON citydb.generic_cityobject USING gist (l
 -- Name: gen_object_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod4brep_fkx ON citydb.generic_cityobject USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod4brep_fkx ON generic_cityobject USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19036,7 +19036,7 @@ CREATE INDEX gen_object_lod4brep_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod4impl_fkx ON citydb.generic_cityobject USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_lod4impl_fkx ON generic_cityobject USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19044,7 +19044,7 @@ CREATE INDEX gen_object_lod4impl_fkx ON citydb.generic_cityobject USING btree (l
 -- Name: gen_object_lod4refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod4refpnt_spx ON citydb.generic_cityobject USING gist (lod4_implicit_ref_point);
+CREATE INDEX gen_object_lod4refpnt_spx ON generic_cityobject USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -19052,7 +19052,7 @@ CREATE INDEX gen_object_lod4refpnt_spx ON citydb.generic_cityobject USING gist (
 -- Name: gen_object_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod4terr_spx ON citydb.generic_cityobject USING gist (lod4_terrain_intersection);
+CREATE INDEX gen_object_lod4terr_spx ON generic_cityobject USING gist (lod4_terrain_intersection);
 
 
 --
@@ -19060,7 +19060,7 @@ CREATE INDEX gen_object_lod4terr_spx ON citydb.generic_cityobject USING gist (lo
 -- Name: gen_object_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_lod4xgeom_spx ON citydb.generic_cityobject USING gist (lod4_other_geom);
+CREATE INDEX gen_object_lod4xgeom_spx ON generic_cityobject USING gist (lod4_other_geom);
 
 
 --
@@ -19068,7 +19068,7 @@ CREATE INDEX gen_object_lod4xgeom_spx ON citydb.generic_cityobject USING gist (l
 -- Name: gen_object_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX gen_object_objclass_fkx ON citydb.generic_cityobject USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX gen_object_objclass_fkx ON generic_cityobject USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19076,7 +19076,7 @@ CREATE INDEX gen_object_objclass_fkx ON citydb.generic_cityobject USING btree (o
 -- Name: general_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX general_cityobject_fkx ON citydb.generalization USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX general_cityobject_fkx ON generalization USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -19084,7 +19084,7 @@ CREATE INDEX general_cityobject_fkx ON citydb.generalization USING btree (cityob
 -- Name: general_generalizes_to_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX general_generalizes_to_fkx ON citydb.generalization USING btree (generalizes_to_id) WITH (fillfactor='90');
+CREATE INDEX general_generalizes_to_fkx ON generalization USING btree (generalizes_to_id) WITH (fillfactor='90');
 
 
 --
@@ -19092,7 +19092,7 @@ CREATE INDEX general_generalizes_to_fkx ON citydb.generalization USING btree (ge
 -- Name: genericattrib_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX genericattrib_cityobj_fkx ON citydb.cityobject_genericattrib USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX genericattrib_cityobj_fkx ON cityobject_genericattrib USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -19100,7 +19100,7 @@ CREATE INDEX genericattrib_cityobj_fkx ON citydb.cityobject_genericattrib USING 
 -- Name: genericattrib_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX genericattrib_geom_fkx ON citydb.cityobject_genericattrib USING btree (surface_geometry_id) WITH (fillfactor='90');
+CREATE INDEX genericattrib_geom_fkx ON cityobject_genericattrib USING btree (surface_geometry_id) WITH (fillfactor='90');
 
 
 --
@@ -19108,7 +19108,7 @@ CREATE INDEX genericattrib_geom_fkx ON citydb.cityobject_genericattrib USING btr
 -- Name: genericattrib_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX genericattrib_parent_fkx ON citydb.cityobject_genericattrib USING btree (parent_genattrib_id) WITH (fillfactor='90');
+CREATE INDEX genericattrib_parent_fkx ON cityobject_genericattrib USING btree (parent_genattrib_id) WITH (fillfactor='90');
 
 
 --
@@ -19116,7 +19116,7 @@ CREATE INDEX genericattrib_parent_fkx ON citydb.cityobject_genericattrib USING b
 -- Name: genericattrib_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX genericattrib_root_fkx ON citydb.cityobject_genericattrib USING btree (root_genattrib_id) WITH (fillfactor='90');
+CREATE INDEX genericattrib_root_fkx ON cityobject_genericattrib USING btree (root_genattrib_id) WITH (fillfactor='90');
 
 
 --
@@ -19124,7 +19124,7 @@ CREATE INDEX genericattrib_root_fkx ON citydb.cityobject_genericattrib USING btr
 -- Name: grid_coverage_raster_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX grid_coverage_raster_spx ON citydb.grid_coverage USING gist (public.st_convexhull(rasterproperty));
+CREATE INDEX grid_coverage_raster_spx ON grid_coverage USING gist (public.st_convexhull(rasterproperty));
 
 
 --
@@ -19132,7 +19132,7 @@ CREATE INDEX grid_coverage_raster_spx ON citydb.grid_coverage USING gist (public
 -- Name: group_brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_brep_fkx ON citydb.cityobjectgroup USING btree (brep_id) WITH (fillfactor='90');
+CREATE INDEX group_brep_fkx ON cityobjectgroup USING btree (brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19140,7 +19140,7 @@ CREATE INDEX group_brep_fkx ON citydb.cityobjectgroup USING btree (brep_id) WITH
 -- Name: group_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_objectclass_fkx ON citydb.cityobjectgroup USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX group_objectclass_fkx ON cityobjectgroup USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19148,7 +19148,7 @@ CREATE INDEX group_objectclass_fkx ON citydb.cityobjectgroup USING btree (object
 -- Name: group_parent_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_parent_cityobj_fkx ON citydb.cityobjectgroup USING btree (parent_cityobject_id) WITH (fillfactor='90');
+CREATE INDEX group_parent_cityobj_fkx ON cityobjectgroup USING btree (parent_cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -19156,7 +19156,7 @@ CREATE INDEX group_parent_cityobj_fkx ON citydb.cityobjectgroup USING btree (par
 -- Name: group_to_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_to_cityobject_fkx ON citydb.group_to_cityobject USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX group_to_cityobject_fkx ON group_to_cityobject USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -19164,7 +19164,7 @@ CREATE INDEX group_to_cityobject_fkx ON citydb.group_to_cityobject USING btree (
 -- Name: group_to_cityobject_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_to_cityobject_fkx1 ON citydb.group_to_cityobject USING btree (cityobjectgroup_id) WITH (fillfactor='90');
+CREATE INDEX group_to_cityobject_fkx1 ON group_to_cityobject USING btree (cityobjectgroup_id) WITH (fillfactor='90');
 
 
 --
@@ -19172,7 +19172,7 @@ CREATE INDEX group_to_cityobject_fkx1 ON citydb.group_to_cityobject USING btree 
 -- Name: group_xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX group_xgeom_spx ON citydb.cityobjectgroup USING gist (other_geom);
+CREATE INDEX group_xgeom_spx ON cityobjectgroup USING gist (other_geom);
 
 
 --
@@ -19180,7 +19180,7 @@ CREATE INDEX group_xgeom_spx ON citydb.cityobjectgroup USING gist (other_geom);
 -- Name: implicit_geom_brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX implicit_geom_brep_fkx ON citydb.implicit_geometry USING btree (relative_brep_id) WITH (fillfactor='90');
+CREATE INDEX implicit_geom_brep_fkx ON implicit_geometry USING btree (relative_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19188,7 +19188,7 @@ CREATE INDEX implicit_geom_brep_fkx ON citydb.implicit_geometry USING btree (rel
 -- Name: implicit_geom_ref2lib_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX implicit_geom_ref2lib_inx ON citydb.implicit_geometry USING btree (reference_to_library) WITH (fillfactor='90');
+CREATE INDEX implicit_geom_ref2lib_inx ON implicit_geometry USING btree (reference_to_library) WITH (fillfactor='90');
 
 
 --
@@ -19196,7 +19196,7 @@ CREATE INDEX implicit_geom_ref2lib_inx ON citydb.implicit_geometry USING btree (
 -- Name: land_use_lod0msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_lod0msrf_fkx ON citydb.land_use USING btree (lod0_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX land_use_lod0msrf_fkx ON land_use USING btree (lod0_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19204,7 +19204,7 @@ CREATE INDEX land_use_lod0msrf_fkx ON citydb.land_use USING btree (lod0_multi_su
 -- Name: land_use_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_lod1msrf_fkx ON citydb.land_use USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX land_use_lod1msrf_fkx ON land_use USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19212,7 +19212,7 @@ CREATE INDEX land_use_lod1msrf_fkx ON citydb.land_use USING btree (lod1_multi_su
 -- Name: land_use_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_lod2msrf_fkx ON citydb.land_use USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX land_use_lod2msrf_fkx ON land_use USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19220,7 +19220,7 @@ CREATE INDEX land_use_lod2msrf_fkx ON citydb.land_use USING btree (lod2_multi_su
 -- Name: land_use_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_lod3msrf_fkx ON citydb.land_use USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX land_use_lod3msrf_fkx ON land_use USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19228,7 +19228,7 @@ CREATE INDEX land_use_lod3msrf_fkx ON citydb.land_use USING btree (lod3_multi_su
 -- Name: land_use_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_lod4msrf_fkx ON citydb.land_use USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX land_use_lod4msrf_fkx ON land_use USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19236,7 +19236,7 @@ CREATE INDEX land_use_lod4msrf_fkx ON citydb.land_use USING btree (lod4_multi_su
 -- Name: land_use_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX land_use_objclass_fkx ON citydb.land_use USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX land_use_objclass_fkx ON land_use USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19244,7 +19244,7 @@ CREATE INDEX land_use_objclass_fkx ON citydb.land_use USING btree (objectclass_i
 -- Name: masspoint_rel_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX masspoint_rel_objclass_fkx ON citydb.masspoint_relief USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX masspoint_rel_objclass_fkx ON masspoint_relief USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19252,7 +19252,7 @@ CREATE INDEX masspoint_rel_objclass_fkx ON citydb.masspoint_relief USING btree (
 -- Name: masspoint_relief_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX masspoint_relief_spx ON citydb.masspoint_relief USING gist (relief_points);
+CREATE INDEX masspoint_relief_spx ON masspoint_relief USING gist (relief_points);
 
 
 --
@@ -19260,7 +19260,7 @@ CREATE INDEX masspoint_relief_spx ON citydb.masspoint_relief USING gist (relief_
 -- Name: objectclass_baseclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX objectclass_baseclass_fkx ON citydb.objectclass USING btree (baseclass_id) WITH (fillfactor='90');
+CREATE INDEX objectclass_baseclass_fkx ON objectclass USING btree (baseclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19268,7 +19268,7 @@ CREATE INDEX objectclass_baseclass_fkx ON citydb.objectclass USING btree (basecl
 -- Name: objectclass_superclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX objectclass_superclass_fkx ON citydb.objectclass USING btree (superclass_id) WITH (fillfactor='90');
+CREATE INDEX objectclass_superclass_fkx ON objectclass USING btree (superclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19276,7 +19276,7 @@ CREATE INDEX objectclass_superclass_fkx ON citydb.objectclass USING btree (super
 -- Name: open_to_them_surface_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX open_to_them_surface_fkx ON citydb.opening_to_them_surface USING btree (opening_id) WITH (fillfactor='90');
+CREATE INDEX open_to_them_surface_fkx ON opening_to_them_surface USING btree (opening_id) WITH (fillfactor='90');
 
 
 --
@@ -19284,7 +19284,7 @@ CREATE INDEX open_to_them_surface_fkx ON citydb.opening_to_them_surface USING bt
 -- Name: open_to_them_surface_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX open_to_them_surface_fkx1 ON citydb.opening_to_them_surface USING btree (thematic_surface_id) WITH (fillfactor='90');
+CREATE INDEX open_to_them_surface_fkx1 ON opening_to_them_surface USING btree (thematic_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19292,7 +19292,7 @@ CREATE INDEX open_to_them_surface_fkx1 ON citydb.opening_to_them_surface USING b
 -- Name: opening_address_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_address_fkx ON citydb.opening USING btree (address_id) WITH (fillfactor='90');
+CREATE INDEX opening_address_fkx ON opening USING btree (address_id) WITH (fillfactor='90');
 
 
 --
@@ -19300,7 +19300,7 @@ CREATE INDEX opening_address_fkx ON citydb.opening USING btree (address_id) WITH
 -- Name: opening_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod3impl_fkx ON citydb.opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX opening_lod3impl_fkx ON opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19308,7 +19308,7 @@ CREATE INDEX opening_lod3impl_fkx ON citydb.opening USING btree (lod3_implicit_r
 -- Name: opening_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod3msrf_fkx ON citydb.opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX opening_lod3msrf_fkx ON opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19316,7 +19316,7 @@ CREATE INDEX opening_lod3msrf_fkx ON citydb.opening USING btree (lod3_multi_surf
 -- Name: opening_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod3refpt_spx ON citydb.opening USING gist (lod3_implicit_ref_point);
+CREATE INDEX opening_lod3refpt_spx ON opening USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -19324,7 +19324,7 @@ CREATE INDEX opening_lod3refpt_spx ON citydb.opening USING gist (lod3_implicit_r
 -- Name: opening_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod4impl_fkx ON citydb.opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX opening_lod4impl_fkx ON opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19332,7 +19332,7 @@ CREATE INDEX opening_lod4impl_fkx ON citydb.opening USING btree (lod4_implicit_r
 -- Name: opening_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod4msrf_fkx ON citydb.opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX opening_lod4msrf_fkx ON opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19340,7 +19340,7 @@ CREATE INDEX opening_lod4msrf_fkx ON citydb.opening USING btree (lod4_multi_surf
 -- Name: opening_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_lod4refpt_spx ON citydb.opening USING gist (lod4_implicit_ref_point);
+CREATE INDEX opening_lod4refpt_spx ON opening USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -19348,7 +19348,7 @@ CREATE INDEX opening_lod4refpt_spx ON citydb.opening USING gist (lod4_implicit_r
 -- Name: opening_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX opening_objectclass_fkx ON citydb.opening USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX opening_objectclass_fkx ON opening USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19356,7 +19356,7 @@ CREATE INDEX opening_objectclass_fkx ON citydb.opening USING btree (objectclass_
 -- Name: plant_cover_lod1msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod1msolid_fkx ON citydb.plant_cover USING btree (lod1_multi_solid_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod1msolid_fkx ON plant_cover USING btree (lod1_multi_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19364,7 +19364,7 @@ CREATE INDEX plant_cover_lod1msolid_fkx ON citydb.plant_cover USING btree (lod1_
 -- Name: plant_cover_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod1msrf_fkx ON citydb.plant_cover USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod1msrf_fkx ON plant_cover USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19372,7 +19372,7 @@ CREATE INDEX plant_cover_lod1msrf_fkx ON citydb.plant_cover USING btree (lod1_mu
 -- Name: plant_cover_lod2msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod2msolid_fkx ON citydb.plant_cover USING btree (lod2_multi_solid_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod2msolid_fkx ON plant_cover USING btree (lod2_multi_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19380,7 +19380,7 @@ CREATE INDEX plant_cover_lod2msolid_fkx ON citydb.plant_cover USING btree (lod2_
 -- Name: plant_cover_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod2msrf_fkx ON citydb.plant_cover USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod2msrf_fkx ON plant_cover USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19388,7 +19388,7 @@ CREATE INDEX plant_cover_lod2msrf_fkx ON citydb.plant_cover USING btree (lod2_mu
 -- Name: plant_cover_lod3msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod3msolid_fkx ON citydb.plant_cover USING btree (lod3_multi_solid_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod3msolid_fkx ON plant_cover USING btree (lod3_multi_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19396,7 +19396,7 @@ CREATE INDEX plant_cover_lod3msolid_fkx ON citydb.plant_cover USING btree (lod3_
 -- Name: plant_cover_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod3msrf_fkx ON citydb.plant_cover USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod3msrf_fkx ON plant_cover USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19404,7 +19404,7 @@ CREATE INDEX plant_cover_lod3msrf_fkx ON citydb.plant_cover USING btree (lod3_mu
 -- Name: plant_cover_lod4msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod4msolid_fkx ON citydb.plant_cover USING btree (lod4_multi_solid_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod4msolid_fkx ON plant_cover USING btree (lod4_multi_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19412,7 +19412,7 @@ CREATE INDEX plant_cover_lod4msolid_fkx ON citydb.plant_cover USING btree (lod4_
 -- Name: plant_cover_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_lod4msrf_fkx ON citydb.plant_cover USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_lod4msrf_fkx ON plant_cover USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19420,7 +19420,7 @@ CREATE INDEX plant_cover_lod4msrf_fkx ON citydb.plant_cover USING btree (lod4_mu
 -- Name: plant_cover_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX plant_cover_objclass_fkx ON citydb.plant_cover USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX plant_cover_objclass_fkx ON plant_cover USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19428,7 +19428,7 @@ CREATE INDEX plant_cover_objclass_fkx ON citydb.plant_cover USING btree (objectc
 -- Name: raster_relief_coverage_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX raster_relief_coverage_fkx ON citydb.raster_relief USING btree (coverage_id) WITH (fillfactor='90');
+CREATE INDEX raster_relief_coverage_fkx ON raster_relief USING btree (coverage_id) WITH (fillfactor='90');
 
 
 --
@@ -19436,7 +19436,7 @@ CREATE INDEX raster_relief_coverage_fkx ON citydb.raster_relief USING btree (cov
 -- Name: raster_relief_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX raster_relief_objclass_fkx ON citydb.raster_relief USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX raster_relief_objclass_fkx ON raster_relief USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19444,7 +19444,7 @@ CREATE INDEX raster_relief_objclass_fkx ON citydb.raster_relief USING btree (obj
 -- Name: rel_feat_to_rel_comp_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX rel_feat_to_rel_comp_fkx ON citydb.relief_feat_to_rel_comp USING btree (relief_component_id) WITH (fillfactor='90');
+CREATE INDEX rel_feat_to_rel_comp_fkx ON relief_feat_to_rel_comp USING btree (relief_component_id) WITH (fillfactor='90');
 
 
 --
@@ -19452,7 +19452,7 @@ CREATE INDEX rel_feat_to_rel_comp_fkx ON citydb.relief_feat_to_rel_comp USING bt
 -- Name: rel_feat_to_rel_comp_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX rel_feat_to_rel_comp_fkx1 ON citydb.relief_feat_to_rel_comp USING btree (relief_feature_id) WITH (fillfactor='90');
+CREATE INDEX rel_feat_to_rel_comp_fkx1 ON relief_feat_to_rel_comp USING btree (relief_feature_id) WITH (fillfactor='90');
 
 
 --
@@ -19460,7 +19460,7 @@ CREATE INDEX rel_feat_to_rel_comp_fkx1 ON citydb.relief_feat_to_rel_comp USING b
 -- Name: relief_comp_extent_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX relief_comp_extent_spx ON citydb.relief_component USING gist (extent);
+CREATE INDEX relief_comp_extent_spx ON relief_component USING gist (extent);
 
 
 --
@@ -19468,7 +19468,7 @@ CREATE INDEX relief_comp_extent_spx ON citydb.relief_component USING gist (exten
 -- Name: relief_comp_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX relief_comp_objclass_fkx ON citydb.relief_component USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX relief_comp_objclass_fkx ON relief_component USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19476,7 +19476,7 @@ CREATE INDEX relief_comp_objclass_fkx ON citydb.relief_component USING btree (ob
 -- Name: relief_feat_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX relief_feat_objclass_fkx ON citydb.relief_feature USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX relief_feat_objclass_fkx ON relief_feature USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19484,7 +19484,7 @@ CREATE INDEX relief_feat_objclass_fkx ON citydb.relief_feature USING btree (obje
 -- Name: room_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX room_building_fkx ON citydb.room USING btree (building_id) WITH (fillfactor='90');
+CREATE INDEX room_building_fkx ON room USING btree (building_id) WITH (fillfactor='90');
 
 
 --
@@ -19492,7 +19492,7 @@ CREATE INDEX room_building_fkx ON citydb.room USING btree (building_id) WITH (fi
 -- Name: room_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX room_lod4msrf_fkx ON citydb.room USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX room_lod4msrf_fkx ON room USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19500,7 +19500,7 @@ CREATE INDEX room_lod4msrf_fkx ON citydb.room USING btree (lod4_multi_surface_id
 -- Name: room_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX room_lod4solid_fkx ON citydb.room USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX room_lod4solid_fkx ON room USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19508,7 +19508,7 @@ CREATE INDEX room_lod4solid_fkx ON citydb.room USING btree (lod4_solid_id) WITH 
 -- Name: room_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX room_objectclass_fkx ON citydb.room USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX room_objectclass_fkx ON room USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19516,7 +19516,7 @@ CREATE INDEX room_objectclass_fkx ON citydb.room USING btree (objectclass_id) WI
 -- Name: schema_referencing_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX schema_referencing_fkx1 ON citydb.schema_referencing USING btree (referenced_id) WITH (fillfactor='90');
+CREATE INDEX schema_referencing_fkx1 ON schema_referencing USING btree (referenced_id) WITH (fillfactor='90');
 
 
 --
@@ -19524,7 +19524,7 @@ CREATE INDEX schema_referencing_fkx1 ON citydb.schema_referencing USING btree (r
 -- Name: schema_referencing_fkx2; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX schema_referencing_fkx2 ON citydb.schema_referencing USING btree (referencing_id) WITH (fillfactor='90');
+CREATE INDEX schema_referencing_fkx2 ON schema_referencing USING btree (referencing_id) WITH (fillfactor='90');
 
 
 --
@@ -19532,7 +19532,7 @@ CREATE INDEX schema_referencing_fkx2 ON citydb.schema_referencing USING btree (r
 -- Name: schema_to_objectclass_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX schema_to_objectclass_fkx1 ON citydb.schema_to_objectclass USING btree (schema_id) WITH (fillfactor='90');
+CREATE INDEX schema_to_objectclass_fkx1 ON schema_to_objectclass USING btree (schema_id) WITH (fillfactor='90');
 
 
 --
@@ -19540,7 +19540,7 @@ CREATE INDEX schema_to_objectclass_fkx1 ON citydb.schema_to_objectclass USING bt
 -- Name: schema_to_objectclass_fkx2; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX schema_to_objectclass_fkx2 ON citydb.schema_to_objectclass USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX schema_to_objectclass_fkx2 ON schema_to_objectclass USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19548,7 +19548,7 @@ CREATE INDEX schema_to_objectclass_fkx2 ON citydb.schema_to_objectclass USING bt
 -- Name: sol_veg_obj_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod1brep_fkx ON citydb.solitary_vegetat_object USING btree (lod1_brep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod1brep_fkx ON solitary_vegetat_object USING btree (lod1_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19556,7 +19556,7 @@ CREATE INDEX sol_veg_obj_lod1brep_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod1impl_fkx ON citydb.solitary_vegetat_object USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod1impl_fkx ON solitary_vegetat_object USING btree (lod1_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19564,7 +19564,7 @@ CREATE INDEX sol_veg_obj_lod1impl_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod1refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod1refpt_spx ON citydb.solitary_vegetat_object USING gist (lod1_implicit_ref_point);
+CREATE INDEX sol_veg_obj_lod1refpt_spx ON solitary_vegetat_object USING gist (lod1_implicit_ref_point);
 
 
 --
@@ -19572,7 +19572,7 @@ CREATE INDEX sol_veg_obj_lod1refpt_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod1xgeom_spx ON citydb.solitary_vegetat_object USING gist (lod1_other_geom);
+CREATE INDEX sol_veg_obj_lod1xgeom_spx ON solitary_vegetat_object USING gist (lod1_other_geom);
 
 
 --
@@ -19580,7 +19580,7 @@ CREATE INDEX sol_veg_obj_lod1xgeom_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod2brep_fkx ON citydb.solitary_vegetat_object USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod2brep_fkx ON solitary_vegetat_object USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19588,7 +19588,7 @@ CREATE INDEX sol_veg_obj_lod2brep_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod2impl_fkx ON citydb.solitary_vegetat_object USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod2impl_fkx ON solitary_vegetat_object USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19596,7 +19596,7 @@ CREATE INDEX sol_veg_obj_lod2impl_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod2refpt_spx ON citydb.solitary_vegetat_object USING gist (lod2_implicit_ref_point);
+CREATE INDEX sol_veg_obj_lod2refpt_spx ON solitary_vegetat_object USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -19604,7 +19604,7 @@ CREATE INDEX sol_veg_obj_lod2refpt_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod2xgeom_spx ON citydb.solitary_vegetat_object USING gist (lod2_other_geom);
+CREATE INDEX sol_veg_obj_lod2xgeom_spx ON solitary_vegetat_object USING gist (lod2_other_geom);
 
 
 --
@@ -19612,7 +19612,7 @@ CREATE INDEX sol_veg_obj_lod2xgeom_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod3brep_fkx ON citydb.solitary_vegetat_object USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod3brep_fkx ON solitary_vegetat_object USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19620,7 +19620,7 @@ CREATE INDEX sol_veg_obj_lod3brep_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod3impl_fkx ON citydb.solitary_vegetat_object USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod3impl_fkx ON solitary_vegetat_object USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19628,7 +19628,7 @@ CREATE INDEX sol_veg_obj_lod3impl_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod3refpt_spx ON citydb.solitary_vegetat_object USING gist (lod3_implicit_ref_point);
+CREATE INDEX sol_veg_obj_lod3refpt_spx ON solitary_vegetat_object USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -19636,7 +19636,7 @@ CREATE INDEX sol_veg_obj_lod3refpt_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod3xgeom_spx ON citydb.solitary_vegetat_object USING gist (lod3_other_geom);
+CREATE INDEX sol_veg_obj_lod3xgeom_spx ON solitary_vegetat_object USING gist (lod3_other_geom);
 
 
 --
@@ -19644,7 +19644,7 @@ CREATE INDEX sol_veg_obj_lod3xgeom_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod4brep_fkx ON citydb.solitary_vegetat_object USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod4brep_fkx ON solitary_vegetat_object USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -19652,7 +19652,7 @@ CREATE INDEX sol_veg_obj_lod4brep_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod4impl_fkx ON citydb.solitary_vegetat_object USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_lod4impl_fkx ON solitary_vegetat_object USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -19660,7 +19660,7 @@ CREATE INDEX sol_veg_obj_lod4impl_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: sol_veg_obj_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod4refpt_spx ON citydb.solitary_vegetat_object USING gist (lod4_implicit_ref_point);
+CREATE INDEX sol_veg_obj_lod4refpt_spx ON solitary_vegetat_object USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -19668,7 +19668,7 @@ CREATE INDEX sol_veg_obj_lod4refpt_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_lod4xgeom_spx ON citydb.solitary_vegetat_object USING gist (lod4_other_geom);
+CREATE INDEX sol_veg_obj_lod4xgeom_spx ON solitary_vegetat_object USING gist (lod4_other_geom);
 
 
 --
@@ -19676,7 +19676,7 @@ CREATE INDEX sol_veg_obj_lod4xgeom_spx ON citydb.solitary_vegetat_object USING g
 -- Name: sol_veg_obj_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX sol_veg_obj_objclass_fkx ON citydb.solitary_vegetat_object USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX sol_veg_obj_objclass_fkx ON solitary_vegetat_object USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19684,7 +19684,7 @@ CREATE INDEX sol_veg_obj_objclass_fkx ON citydb.solitary_vegetat_object USING bt
 -- Name: surface_data_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_data_inx ON citydb.surface_data USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
+CREATE INDEX surface_data_inx ON surface_data USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
 
 
 --
@@ -19692,7 +19692,7 @@ CREATE INDEX surface_data_inx ON citydb.surface_data USING btree (gmlid, gmlid_c
 -- Name: surface_data_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_data_objclass_fkx ON citydb.surface_data USING btree (objectclass_id);
+CREATE INDEX surface_data_objclass_fkx ON surface_data USING btree (objectclass_id);
 
 
 --
@@ -19700,7 +19700,7 @@ CREATE INDEX surface_data_objclass_fkx ON citydb.surface_data USING btree (objec
 -- Name: surface_data_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_data_spx ON citydb.surface_data USING gist (gt_reference_point);
+CREATE INDEX surface_data_spx ON surface_data USING gist (gt_reference_point);
 
 
 --
@@ -19708,7 +19708,7 @@ CREATE INDEX surface_data_spx ON citydb.surface_data USING gist (gt_reference_po
 -- Name: surface_data_tex_image_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_data_tex_image_fkx ON citydb.surface_data USING btree (tex_image_id);
+CREATE INDEX surface_data_tex_image_fkx ON surface_data USING btree (tex_image_id);
 
 
 --
@@ -19716,7 +19716,7 @@ CREATE INDEX surface_data_tex_image_fkx ON citydb.surface_data USING btree (tex_
 -- Name: surface_geom_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_cityobj_fkx ON citydb.surface_geometry USING btree (cityobject_id) WITH (fillfactor='90');
+CREATE INDEX surface_geom_cityobj_fkx ON surface_geometry USING btree (cityobject_id) WITH (fillfactor='90');
 
 
 --
@@ -19724,7 +19724,7 @@ CREATE INDEX surface_geom_cityobj_fkx ON citydb.surface_geometry USING btree (ci
 -- Name: surface_geom_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_inx ON citydb.surface_geometry USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
+CREATE INDEX surface_geom_inx ON surface_geometry USING btree (gmlid, gmlid_codespace) WITH (fillfactor='90');
 
 
 --
@@ -19732,7 +19732,7 @@ CREATE INDEX surface_geom_inx ON citydb.surface_geometry USING btree (gmlid, gml
 -- Name: surface_geom_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_parent_fkx ON citydb.surface_geometry USING btree (parent_id) WITH (fillfactor='90');
+CREATE INDEX surface_geom_parent_fkx ON surface_geometry USING btree (parent_id) WITH (fillfactor='90');
 
 
 --
@@ -19740,7 +19740,7 @@ CREATE INDEX surface_geom_parent_fkx ON citydb.surface_geometry USING btree (par
 -- Name: surface_geom_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_root_fkx ON citydb.surface_geometry USING btree (root_id) WITH (fillfactor='90');
+CREATE INDEX surface_geom_root_fkx ON surface_geometry USING btree (root_id) WITH (fillfactor='90');
 
 
 --
@@ -19748,7 +19748,7 @@ CREATE INDEX surface_geom_root_fkx ON citydb.surface_geometry USING btree (root_
 -- Name: surface_geom_solid_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_solid_spx ON citydb.surface_geometry USING gist (solid_geometry);
+CREATE INDEX surface_geom_solid_spx ON surface_geometry USING gist (solid_geometry);
 
 
 --
@@ -19756,7 +19756,7 @@ CREATE INDEX surface_geom_solid_spx ON citydb.surface_geometry USING gist (solid
 -- Name: surface_geom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX surface_geom_spx ON citydb.surface_geometry USING gist (geometry);
+CREATE INDEX surface_geom_spx ON surface_geometry USING gist (geometry);
 
 
 --
@@ -19764,7 +19764,7 @@ CREATE INDEX surface_geom_spx ON citydb.surface_geometry USING gist (geometry);
 -- Name: texparam_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX texparam_geom_fkx ON citydb.textureparam USING btree (surface_geometry_id) WITH (fillfactor='90');
+CREATE INDEX texparam_geom_fkx ON textureparam USING btree (surface_geometry_id) WITH (fillfactor='90');
 
 
 --
@@ -19772,7 +19772,7 @@ CREATE INDEX texparam_geom_fkx ON citydb.textureparam USING btree (surface_geome
 -- Name: texparam_surface_data_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX texparam_surface_data_fkx ON citydb.textureparam USING btree (surface_data_id) WITH (fillfactor='90');
+CREATE INDEX texparam_surface_data_fkx ON textureparam USING btree (surface_data_id) WITH (fillfactor='90');
 
 
 --
@@ -19780,7 +19780,7 @@ CREATE INDEX texparam_surface_data_fkx ON citydb.textureparam USING btree (surfa
 -- Name: them_surface_bldg_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_bldg_inst_fkx ON citydb.thematic_surface USING btree (building_installation_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_bldg_inst_fkx ON thematic_surface USING btree (building_installation_id) WITH (fillfactor='90');
 
 
 --
@@ -19788,7 +19788,7 @@ CREATE INDEX them_surface_bldg_inst_fkx ON citydb.thematic_surface USING btree (
 -- Name: them_surface_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_building_fkx ON citydb.thematic_surface USING btree (building_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_building_fkx ON thematic_surface USING btree (building_id) WITH (fillfactor='90');
 
 
 --
@@ -19796,7 +19796,7 @@ CREATE INDEX them_surface_building_fkx ON citydb.thematic_surface USING btree (b
 -- Name: them_surface_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_lod2msrf_fkx ON citydb.thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_lod2msrf_fkx ON thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19804,7 +19804,7 @@ CREATE INDEX them_surface_lod2msrf_fkx ON citydb.thematic_surface USING btree (l
 -- Name: them_surface_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_lod3msrf_fkx ON citydb.thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_lod3msrf_fkx ON thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19812,7 +19812,7 @@ CREATE INDEX them_surface_lod3msrf_fkx ON citydb.thematic_surface USING btree (l
 -- Name: them_surface_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_lod4msrf_fkx ON citydb.thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_lod4msrf_fkx ON thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19820,7 +19820,7 @@ CREATE INDEX them_surface_lod4msrf_fkx ON citydb.thematic_surface USING btree (l
 -- Name: them_surface_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_objclass_fkx ON citydb.thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_objclass_fkx ON thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19828,7 +19828,7 @@ CREATE INDEX them_surface_objclass_fkx ON citydb.thematic_surface USING btree (o
 -- Name: them_surface_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX them_surface_room_fkx ON citydb.thematic_surface USING btree (room_id) WITH (fillfactor='90');
+CREATE INDEX them_surface_room_fkx ON thematic_surface USING btree (room_id) WITH (fillfactor='90');
 
 
 --
@@ -19836,7 +19836,7 @@ CREATE INDEX them_surface_room_fkx ON citydb.thematic_surface USING btree (room_
 -- Name: tin_relief_break_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tin_relief_break_spx ON citydb.tin_relief USING gist (break_lines);
+CREATE INDEX tin_relief_break_spx ON tin_relief USING gist (break_lines);
 
 
 --
@@ -19844,7 +19844,7 @@ CREATE INDEX tin_relief_break_spx ON citydb.tin_relief USING gist (break_lines);
 -- Name: tin_relief_crtlpts_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tin_relief_crtlpts_spx ON citydb.tin_relief USING gist (control_points);
+CREATE INDEX tin_relief_crtlpts_spx ON tin_relief USING gist (control_points);
 
 
 --
@@ -19852,7 +19852,7 @@ CREATE INDEX tin_relief_crtlpts_spx ON citydb.tin_relief USING gist (control_poi
 -- Name: tin_relief_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tin_relief_geom_fkx ON citydb.tin_relief USING btree (surface_geometry_id) WITH (fillfactor='90');
+CREATE INDEX tin_relief_geom_fkx ON tin_relief USING btree (surface_geometry_id) WITH (fillfactor='90');
 
 
 --
@@ -19860,7 +19860,7 @@ CREATE INDEX tin_relief_geom_fkx ON citydb.tin_relief USING btree (surface_geome
 -- Name: tin_relief_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tin_relief_objclass_fkx ON citydb.tin_relief USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tin_relief_objclass_fkx ON tin_relief USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19868,7 +19868,7 @@ CREATE INDEX tin_relief_objclass_fkx ON citydb.tin_relief USING btree (objectcla
 -- Name: tin_relief_stop_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tin_relief_stop_spx ON citydb.tin_relief USING gist (stop_lines);
+CREATE INDEX tin_relief_stop_spx ON tin_relief USING gist (stop_lines);
 
 
 --
@@ -19876,7 +19876,7 @@ CREATE INDEX tin_relief_stop_spx ON citydb.tin_relief USING gist (stop_lines);
 -- Name: traffic_area_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX traffic_area_lod2msrf_fkx ON citydb.traffic_area USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX traffic_area_lod2msrf_fkx ON traffic_area USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19884,7 +19884,7 @@ CREATE INDEX traffic_area_lod2msrf_fkx ON citydb.traffic_area USING btree (lod2_
 -- Name: traffic_area_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX traffic_area_lod3msrf_fkx ON citydb.traffic_area USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX traffic_area_lod3msrf_fkx ON traffic_area USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19892,7 +19892,7 @@ CREATE INDEX traffic_area_lod3msrf_fkx ON citydb.traffic_area USING btree (lod3_
 -- Name: traffic_area_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX traffic_area_lod4msrf_fkx ON citydb.traffic_area USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX traffic_area_lod4msrf_fkx ON traffic_area USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19900,7 +19900,7 @@ CREATE INDEX traffic_area_lod4msrf_fkx ON citydb.traffic_area USING btree (lod4_
 -- Name: traffic_area_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX traffic_area_objclass_fkx ON citydb.traffic_area USING btree (objectclass_id);
+CREATE INDEX traffic_area_objclass_fkx ON traffic_area USING btree (objectclass_id);
 
 
 --
@@ -19908,7 +19908,7 @@ CREATE INDEX traffic_area_objclass_fkx ON citydb.traffic_area USING btree (objec
 -- Name: traffic_area_trancmplx_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX traffic_area_trancmplx_fkx ON citydb.traffic_area USING btree (transportation_complex_id) WITH (fillfactor='90');
+CREATE INDEX traffic_area_trancmplx_fkx ON traffic_area USING btree (transportation_complex_id) WITH (fillfactor='90');
 
 
 --
@@ -19916,7 +19916,7 @@ CREATE INDEX traffic_area_trancmplx_fkx ON citydb.traffic_area USING btree (tran
 -- Name: tran_complex_lod0net_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_lod0net_spx ON citydb.transportation_complex USING gist (lod0_network);
+CREATE INDEX tran_complex_lod0net_spx ON transportation_complex USING gist (lod0_network);
 
 
 --
@@ -19924,7 +19924,7 @@ CREATE INDEX tran_complex_lod0net_spx ON citydb.transportation_complex USING gis
 -- Name: tran_complex_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_lod1msrf_fkx ON citydb.transportation_complex USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tran_complex_lod1msrf_fkx ON transportation_complex USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19932,7 +19932,7 @@ CREATE INDEX tran_complex_lod1msrf_fkx ON citydb.transportation_complex USING bt
 -- Name: tran_complex_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_lod2msrf_fkx ON citydb.transportation_complex USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tran_complex_lod2msrf_fkx ON transportation_complex USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19940,7 +19940,7 @@ CREATE INDEX tran_complex_lod2msrf_fkx ON citydb.transportation_complex USING bt
 -- Name: tran_complex_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_lod3msrf_fkx ON citydb.transportation_complex USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tran_complex_lod3msrf_fkx ON transportation_complex USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19948,7 +19948,7 @@ CREATE INDEX tran_complex_lod3msrf_fkx ON citydb.transportation_complex USING bt
 -- Name: tran_complex_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_lod4msrf_fkx ON citydb.transportation_complex USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tran_complex_lod4msrf_fkx ON transportation_complex USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19956,7 +19956,7 @@ CREATE INDEX tran_complex_lod4msrf_fkx ON citydb.transportation_complex USING bt
 -- Name: tran_complex_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tran_complex_objclass_fkx ON citydb.transportation_complex USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tran_complex_objclass_fkx ON transportation_complex USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19964,7 +19964,7 @@ CREATE INDEX tran_complex_objclass_fkx ON citydb.transportation_complex USING bt
 -- Name: tun_hspace_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_hspace_lod4msrf_fkx ON citydb.tunnel_hollow_space USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tun_hspace_lod4msrf_fkx ON tunnel_hollow_space USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -19972,7 +19972,7 @@ CREATE INDEX tun_hspace_lod4msrf_fkx ON citydb.tunnel_hollow_space USING btree (
 -- Name: tun_hspace_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_hspace_lod4solid_fkx ON citydb.tunnel_hollow_space USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX tun_hspace_lod4solid_fkx ON tunnel_hollow_space USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -19980,7 +19980,7 @@ CREATE INDEX tun_hspace_lod4solid_fkx ON citydb.tunnel_hollow_space USING btree 
 -- Name: tun_hspace_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_hspace_objclass_fkx ON citydb.tunnel_hollow_space USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tun_hspace_objclass_fkx ON tunnel_hollow_space USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -19988,7 +19988,7 @@ CREATE INDEX tun_hspace_objclass_fkx ON citydb.tunnel_hollow_space USING btree (
 -- Name: tun_hspace_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_hspace_tunnel_fkx ON citydb.tunnel_hollow_space USING btree (tunnel_id) WITH (fillfactor='90');
+CREATE INDEX tun_hspace_tunnel_fkx ON tunnel_hollow_space USING btree (tunnel_id) WITH (fillfactor='90');
 
 
 --
@@ -19996,7 +19996,7 @@ CREATE INDEX tun_hspace_tunnel_fkx ON citydb.tunnel_hollow_space USING btree (tu
 -- Name: tun_open_to_them_srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_open_to_them_srf_fkx ON citydb.tunnel_open_to_them_srf USING btree (tunnel_opening_id) WITH (fillfactor='90');
+CREATE INDEX tun_open_to_them_srf_fkx ON tunnel_open_to_them_srf USING btree (tunnel_opening_id) WITH (fillfactor='90');
 
 
 --
@@ -20004,7 +20004,7 @@ CREATE INDEX tun_open_to_them_srf_fkx ON citydb.tunnel_open_to_them_srf USING bt
 -- Name: tun_open_to_them_srf_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_open_to_them_srf_fkx1 ON citydb.tunnel_open_to_them_srf USING btree (tunnel_thematic_surface_id) WITH (fillfactor='90');
+CREATE INDEX tun_open_to_them_srf_fkx1 ON tunnel_open_to_them_srf USING btree (tunnel_thematic_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20012,7 +20012,7 @@ CREATE INDEX tun_open_to_them_srf_fkx1 ON citydb.tunnel_open_to_them_srf USING b
 -- Name: tun_them_srf_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_hspace_fkx ON citydb.tunnel_thematic_surface USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_hspace_fkx ON tunnel_thematic_surface USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
 
 
 --
@@ -20020,7 +20020,7 @@ CREATE INDEX tun_them_srf_hspace_fkx ON citydb.tunnel_thematic_surface USING btr
 -- Name: tun_them_srf_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_lod2msrf_fkx ON citydb.tunnel_thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_lod2msrf_fkx ON tunnel_thematic_surface USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20028,7 +20028,7 @@ CREATE INDEX tun_them_srf_lod2msrf_fkx ON citydb.tunnel_thematic_surface USING b
 -- Name: tun_them_srf_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_lod3msrf_fkx ON citydb.tunnel_thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_lod3msrf_fkx ON tunnel_thematic_surface USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20036,7 +20036,7 @@ CREATE INDEX tun_them_srf_lod3msrf_fkx ON citydb.tunnel_thematic_surface USING b
 -- Name: tun_them_srf_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_lod4msrf_fkx ON citydb.tunnel_thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_lod4msrf_fkx ON tunnel_thematic_surface USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20044,7 +20044,7 @@ CREATE INDEX tun_them_srf_lod4msrf_fkx ON citydb.tunnel_thematic_surface USING b
 -- Name: tun_them_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_objclass_fkx ON citydb.tunnel_thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_objclass_fkx ON tunnel_thematic_surface USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20052,7 +20052,7 @@ CREATE INDEX tun_them_srf_objclass_fkx ON citydb.tunnel_thematic_surface USING b
 -- Name: tun_them_srf_tun_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_tun_inst_fkx ON citydb.tunnel_thematic_surface USING btree (tunnel_installation_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_tun_inst_fkx ON tunnel_thematic_surface USING btree (tunnel_installation_id) WITH (fillfactor='90');
 
 
 --
@@ -20060,7 +20060,7 @@ CREATE INDEX tun_them_srf_tun_inst_fkx ON citydb.tunnel_thematic_surface USING b
 -- Name: tun_them_srf_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tun_them_srf_tunnel_fkx ON citydb.tunnel_thematic_surface USING btree (tunnel_id) WITH (fillfactor='90');
+CREATE INDEX tun_them_srf_tunnel_fkx ON tunnel_thematic_surface USING btree (tunnel_id) WITH (fillfactor='90');
 
 
 --
@@ -20068,7 +20068,7 @@ CREATE INDEX tun_them_srf_tunnel_fkx ON citydb.tunnel_thematic_surface USING btr
 -- Name: tunnel_furn_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_hspace_fkx ON citydb.tunnel_furniture USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_furn_hspace_fkx ON tunnel_furniture USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
 
 
 --
@@ -20076,7 +20076,7 @@ CREATE INDEX tunnel_furn_hspace_fkx ON citydb.tunnel_furniture USING btree (tunn
 -- Name: tunnel_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_lod4brep_fkx ON citydb.tunnel_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_furn_lod4brep_fkx ON tunnel_furniture USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -20084,7 +20084,7 @@ CREATE INDEX tunnel_furn_lod4brep_fkx ON citydb.tunnel_furniture USING btree (lo
 -- Name: tunnel_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_lod4impl_fkx ON citydb.tunnel_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_furn_lod4impl_fkx ON tunnel_furniture USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20092,7 +20092,7 @@ CREATE INDEX tunnel_furn_lod4impl_fkx ON citydb.tunnel_furniture USING btree (lo
 -- Name: tunnel_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_lod4refpt_spx ON citydb.tunnel_furniture USING gist (lod4_implicit_ref_point);
+CREATE INDEX tunnel_furn_lod4refpt_spx ON tunnel_furniture USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -20100,7 +20100,7 @@ CREATE INDEX tunnel_furn_lod4refpt_spx ON citydb.tunnel_furniture USING gist (lo
 -- Name: tunnel_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_lod4xgeom_spx ON citydb.tunnel_furniture USING gist (lod4_other_geom);
+CREATE INDEX tunnel_furn_lod4xgeom_spx ON tunnel_furniture USING gist (lod4_other_geom);
 
 
 --
@@ -20108,7 +20108,7 @@ CREATE INDEX tunnel_furn_lod4xgeom_spx ON citydb.tunnel_furniture USING gist (lo
 -- Name: tunnel_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_furn_objclass_fkx ON citydb.tunnel_furniture USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_furn_objclass_fkx ON tunnel_furniture USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20116,7 +20116,7 @@ CREATE INDEX tunnel_furn_objclass_fkx ON citydb.tunnel_furniture USING btree (ob
 -- Name: tunnel_inst_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_hspace_fkx ON citydb.tunnel_installation USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_hspace_fkx ON tunnel_installation USING btree (tunnel_hollow_space_id) WITH (fillfactor='90');
 
 
 --
@@ -20124,7 +20124,7 @@ CREATE INDEX tunnel_inst_hspace_fkx ON citydb.tunnel_installation USING btree (t
 -- Name: tunnel_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod2brep_fkx ON citydb.tunnel_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod2brep_fkx ON tunnel_installation USING btree (lod2_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -20132,7 +20132,7 @@ CREATE INDEX tunnel_inst_lod2brep_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod2impl_fkx ON citydb.tunnel_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod2impl_fkx ON tunnel_installation USING btree (lod2_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20140,7 +20140,7 @@ CREATE INDEX tunnel_inst_lod2impl_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod2refpt_spx ON citydb.tunnel_installation USING gist (lod2_implicit_ref_point);
+CREATE INDEX tunnel_inst_lod2refpt_spx ON tunnel_installation USING gist (lod2_implicit_ref_point);
 
 
 --
@@ -20148,7 +20148,7 @@ CREATE INDEX tunnel_inst_lod2refpt_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod2xgeom_spx ON citydb.tunnel_installation USING gist (lod2_other_geom);
+CREATE INDEX tunnel_inst_lod2xgeom_spx ON tunnel_installation USING gist (lod2_other_geom);
 
 
 --
@@ -20156,7 +20156,7 @@ CREATE INDEX tunnel_inst_lod2xgeom_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod3brep_fkx ON citydb.tunnel_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod3brep_fkx ON tunnel_installation USING btree (lod3_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -20164,7 +20164,7 @@ CREATE INDEX tunnel_inst_lod3brep_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod3impl_fkx ON citydb.tunnel_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod3impl_fkx ON tunnel_installation USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20172,7 +20172,7 @@ CREATE INDEX tunnel_inst_lod3impl_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod3refpt_spx ON citydb.tunnel_installation USING gist (lod3_implicit_ref_point);
+CREATE INDEX tunnel_inst_lod3refpt_spx ON tunnel_installation USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -20180,7 +20180,7 @@ CREATE INDEX tunnel_inst_lod3refpt_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod3xgeom_spx ON citydb.tunnel_installation USING gist (lod3_other_geom);
+CREATE INDEX tunnel_inst_lod3xgeom_spx ON tunnel_installation USING gist (lod3_other_geom);
 
 
 --
@@ -20188,7 +20188,7 @@ CREATE INDEX tunnel_inst_lod3xgeom_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod4brep_fkx ON citydb.tunnel_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod4brep_fkx ON tunnel_installation USING btree (lod4_brep_id) WITH (fillfactor='90');
 
 
 --
@@ -20196,7 +20196,7 @@ CREATE INDEX tunnel_inst_lod4brep_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod4impl_fkx ON citydb.tunnel_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_lod4impl_fkx ON tunnel_installation USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20204,7 +20204,7 @@ CREATE INDEX tunnel_inst_lod4impl_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod4refpt_spx ON citydb.tunnel_installation USING gist (lod4_implicit_ref_point);
+CREATE INDEX tunnel_inst_lod4refpt_spx ON tunnel_installation USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -20212,7 +20212,7 @@ CREATE INDEX tunnel_inst_lod4refpt_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_lod4xgeom_spx ON citydb.tunnel_installation USING gist (lod4_other_geom);
+CREATE INDEX tunnel_inst_lod4xgeom_spx ON tunnel_installation USING gist (lod4_other_geom);
 
 
 --
@@ -20220,7 +20220,7 @@ CREATE INDEX tunnel_inst_lod4xgeom_spx ON citydb.tunnel_installation USING gist 
 -- Name: tunnel_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_objclass_fkx ON citydb.tunnel_installation USING btree (objectclass_id);
+CREATE INDEX tunnel_inst_objclass_fkx ON tunnel_installation USING btree (objectclass_id);
 
 
 --
@@ -20228,7 +20228,7 @@ CREATE INDEX tunnel_inst_objclass_fkx ON citydb.tunnel_installation USING btree 
 -- Name: tunnel_inst_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_inst_tunnel_fkx ON citydb.tunnel_installation USING btree (tunnel_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_inst_tunnel_fkx ON tunnel_installation USING btree (tunnel_id) WITH (fillfactor='90');
 
 
 --
@@ -20236,7 +20236,7 @@ CREATE INDEX tunnel_inst_tunnel_fkx ON citydb.tunnel_installation USING btree (t
 -- Name: tunnel_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod1msrf_fkx ON citydb.tunnel USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod1msrf_fkx ON tunnel USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20244,7 +20244,7 @@ CREATE INDEX tunnel_lod1msrf_fkx ON citydb.tunnel USING btree (lod1_multi_surfac
 -- Name: tunnel_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod1solid_fkx ON citydb.tunnel USING btree (lod1_solid_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod1solid_fkx ON tunnel USING btree (lod1_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20252,7 +20252,7 @@ CREATE INDEX tunnel_lod1solid_fkx ON citydb.tunnel USING btree (lod1_solid_id) W
 -- Name: tunnel_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod1terr_spx ON citydb.tunnel USING gist (lod1_terrain_intersection);
+CREATE INDEX tunnel_lod1terr_spx ON tunnel USING gist (lod1_terrain_intersection);
 
 
 --
@@ -20260,7 +20260,7 @@ CREATE INDEX tunnel_lod1terr_spx ON citydb.tunnel USING gist (lod1_terrain_inter
 -- Name: tunnel_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod2curve_spx ON citydb.tunnel USING gist (lod2_multi_curve);
+CREATE INDEX tunnel_lod2curve_spx ON tunnel USING gist (lod2_multi_curve);
 
 
 --
@@ -20268,7 +20268,7 @@ CREATE INDEX tunnel_lod2curve_spx ON citydb.tunnel USING gist (lod2_multi_curve)
 -- Name: tunnel_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod2msrf_fkx ON citydb.tunnel USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod2msrf_fkx ON tunnel USING btree (lod2_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20276,7 +20276,7 @@ CREATE INDEX tunnel_lod2msrf_fkx ON citydb.tunnel USING btree (lod2_multi_surfac
 -- Name: tunnel_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod2solid_fkx ON citydb.tunnel USING btree (lod2_solid_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod2solid_fkx ON tunnel USING btree (lod2_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20284,7 +20284,7 @@ CREATE INDEX tunnel_lod2solid_fkx ON citydb.tunnel USING btree (lod2_solid_id) W
 -- Name: tunnel_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod2terr_spx ON citydb.tunnel USING gist (lod2_terrain_intersection);
+CREATE INDEX tunnel_lod2terr_spx ON tunnel USING gist (lod2_terrain_intersection);
 
 
 --
@@ -20292,7 +20292,7 @@ CREATE INDEX tunnel_lod2terr_spx ON citydb.tunnel USING gist (lod2_terrain_inter
 -- Name: tunnel_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod3curve_spx ON citydb.tunnel USING gist (lod3_multi_curve);
+CREATE INDEX tunnel_lod3curve_spx ON tunnel USING gist (lod3_multi_curve);
 
 
 --
@@ -20300,7 +20300,7 @@ CREATE INDEX tunnel_lod3curve_spx ON citydb.tunnel USING gist (lod3_multi_curve)
 -- Name: tunnel_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod3msrf_fkx ON citydb.tunnel USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod3msrf_fkx ON tunnel USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20308,7 +20308,7 @@ CREATE INDEX tunnel_lod3msrf_fkx ON citydb.tunnel USING btree (lod3_multi_surfac
 -- Name: tunnel_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod3solid_fkx ON citydb.tunnel USING btree (lod3_solid_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod3solid_fkx ON tunnel USING btree (lod3_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20316,7 +20316,7 @@ CREATE INDEX tunnel_lod3solid_fkx ON citydb.tunnel USING btree (lod3_solid_id) W
 -- Name: tunnel_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod3terr_spx ON citydb.tunnel USING gist (lod3_terrain_intersection);
+CREATE INDEX tunnel_lod3terr_spx ON tunnel USING gist (lod3_terrain_intersection);
 
 
 --
@@ -20324,7 +20324,7 @@ CREATE INDEX tunnel_lod3terr_spx ON citydb.tunnel USING gist (lod3_terrain_inter
 -- Name: tunnel_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod4curve_spx ON citydb.tunnel USING gist (lod4_multi_curve);
+CREATE INDEX tunnel_lod4curve_spx ON tunnel USING gist (lod4_multi_curve);
 
 
 --
@@ -20332,7 +20332,7 @@ CREATE INDEX tunnel_lod4curve_spx ON citydb.tunnel USING gist (lod4_multi_curve)
 -- Name: tunnel_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod4msrf_fkx ON citydb.tunnel USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod4msrf_fkx ON tunnel USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20340,7 +20340,7 @@ CREATE INDEX tunnel_lod4msrf_fkx ON citydb.tunnel USING btree (lod4_multi_surfac
 -- Name: tunnel_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod4solid_fkx ON citydb.tunnel USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_lod4solid_fkx ON tunnel USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20348,7 +20348,7 @@ CREATE INDEX tunnel_lod4solid_fkx ON citydb.tunnel USING btree (lod4_solid_id) W
 -- Name: tunnel_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_lod4terr_spx ON citydb.tunnel USING gist (lod4_terrain_intersection);
+CREATE INDEX tunnel_lod4terr_spx ON tunnel USING gist (lod4_terrain_intersection);
 
 
 --
@@ -20356,7 +20356,7 @@ CREATE INDEX tunnel_lod4terr_spx ON citydb.tunnel USING gist (lod4_terrain_inter
 -- Name: tunnel_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_objectclass_fkx ON citydb.tunnel USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_objectclass_fkx ON tunnel USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20364,7 +20364,7 @@ CREATE INDEX tunnel_objectclass_fkx ON citydb.tunnel USING btree (objectclass_id
 -- Name: tunnel_open_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod3impl_fkx ON citydb.tunnel_opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_open_lod3impl_fkx ON tunnel_opening USING btree (lod3_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20372,7 +20372,7 @@ CREATE INDEX tunnel_open_lod3impl_fkx ON citydb.tunnel_opening USING btree (lod3
 -- Name: tunnel_open_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod3msrf_fkx ON citydb.tunnel_opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_open_lod3msrf_fkx ON tunnel_opening USING btree (lod3_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20380,7 +20380,7 @@ CREATE INDEX tunnel_open_lod3msrf_fkx ON citydb.tunnel_opening USING btree (lod3
 -- Name: tunnel_open_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod3refpt_spx ON citydb.tunnel_opening USING gist (lod3_implicit_ref_point);
+CREATE INDEX tunnel_open_lod3refpt_spx ON tunnel_opening USING gist (lod3_implicit_ref_point);
 
 
 --
@@ -20388,7 +20388,7 @@ CREATE INDEX tunnel_open_lod3refpt_spx ON citydb.tunnel_opening USING gist (lod3
 -- Name: tunnel_open_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod4impl_fkx ON citydb.tunnel_opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_open_lod4impl_fkx ON tunnel_opening USING btree (lod4_implicit_rep_id) WITH (fillfactor='90');
 
 
 --
@@ -20396,7 +20396,7 @@ CREATE INDEX tunnel_open_lod4impl_fkx ON citydb.tunnel_opening USING btree (lod4
 -- Name: tunnel_open_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod4msrf_fkx ON citydb.tunnel_opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_open_lod4msrf_fkx ON tunnel_opening USING btree (lod4_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20404,7 +20404,7 @@ CREATE INDEX tunnel_open_lod4msrf_fkx ON citydb.tunnel_opening USING btree (lod4
 -- Name: tunnel_open_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_lod4refpt_spx ON citydb.tunnel_opening USING gist (lod4_implicit_ref_point);
+CREATE INDEX tunnel_open_lod4refpt_spx ON tunnel_opening USING gist (lod4_implicit_ref_point);
 
 
 --
@@ -20412,7 +20412,7 @@ CREATE INDEX tunnel_open_lod4refpt_spx ON citydb.tunnel_opening USING gist (lod4
 -- Name: tunnel_open_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_open_objclass_fkx ON citydb.tunnel_opening USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_open_objclass_fkx ON tunnel_opening USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20420,7 +20420,7 @@ CREATE INDEX tunnel_open_objclass_fkx ON citydb.tunnel_opening USING btree (obje
 -- Name: tunnel_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_parent_fkx ON citydb.tunnel USING btree (tunnel_parent_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_parent_fkx ON tunnel USING btree (tunnel_parent_id) WITH (fillfactor='90');
 
 
 --
@@ -20428,7 +20428,7 @@ CREATE INDEX tunnel_parent_fkx ON citydb.tunnel USING btree (tunnel_parent_id) W
 -- Name: tunnel_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX tunnel_root_fkx ON citydb.tunnel USING btree (tunnel_root_id) WITH (fillfactor='90');
+CREATE INDEX tunnel_root_fkx ON tunnel USING btree (tunnel_root_id) WITH (fillfactor='90');
 
 
 --
@@ -20436,7 +20436,7 @@ CREATE INDEX tunnel_root_fkx ON citydb.tunnel USING btree (tunnel_root_id) WITH 
 -- Name: waterbnd_srf_lod2srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbnd_srf_lod2srf_fkx ON citydb.waterboundary_surface USING btree (lod2_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbnd_srf_lod2srf_fkx ON waterboundary_surface USING btree (lod2_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20444,7 +20444,7 @@ CREATE INDEX waterbnd_srf_lod2srf_fkx ON citydb.waterboundary_surface USING btre
 -- Name: waterbnd_srf_lod3srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbnd_srf_lod3srf_fkx ON citydb.waterboundary_surface USING btree (lod3_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbnd_srf_lod3srf_fkx ON waterboundary_surface USING btree (lod3_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20452,7 +20452,7 @@ CREATE INDEX waterbnd_srf_lod3srf_fkx ON citydb.waterboundary_surface USING btre
 -- Name: waterbnd_srf_lod4srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbnd_srf_lod4srf_fkx ON citydb.waterboundary_surface USING btree (lod4_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbnd_srf_lod4srf_fkx ON waterboundary_surface USING btree (lod4_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20460,7 +20460,7 @@ CREATE INDEX waterbnd_srf_lod4srf_fkx ON citydb.waterboundary_surface USING btre
 -- Name: waterbnd_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbnd_srf_objclass_fkx ON citydb.waterboundary_surface USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX waterbnd_srf_objclass_fkx ON waterboundary_surface USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20468,7 +20468,7 @@ CREATE INDEX waterbnd_srf_objclass_fkx ON citydb.waterboundary_surface USING btr
 -- Name: waterbod_to_waterbnd_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbod_to_waterbnd_fkx ON citydb.waterbod_to_waterbnd_srf USING btree (waterboundary_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbod_to_waterbnd_fkx ON waterbod_to_waterbnd_srf USING btree (waterboundary_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20476,7 +20476,7 @@ CREATE INDEX waterbod_to_waterbnd_fkx ON citydb.waterbod_to_waterbnd_srf USING b
 -- Name: waterbod_to_waterbnd_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbod_to_waterbnd_fkx1 ON citydb.waterbod_to_waterbnd_srf USING btree (waterbody_id) WITH (fillfactor='90');
+CREATE INDEX waterbod_to_waterbnd_fkx1 ON waterbod_to_waterbnd_srf USING btree (waterbody_id) WITH (fillfactor='90');
 
 
 --
@@ -20484,7 +20484,7 @@ CREATE INDEX waterbod_to_waterbnd_fkx1 ON citydb.waterbod_to_waterbnd_srf USING 
 -- Name: waterbody_lod0curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod0curve_spx ON citydb.waterbody USING gist (lod0_multi_curve);
+CREATE INDEX waterbody_lod0curve_spx ON waterbody USING gist (lod0_multi_curve);
 
 
 --
@@ -20492,7 +20492,7 @@ CREATE INDEX waterbody_lod0curve_spx ON citydb.waterbody USING gist (lod0_multi_
 -- Name: waterbody_lod0msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod0msrf_fkx ON citydb.waterbody USING btree (lod0_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod0msrf_fkx ON waterbody USING btree (lod0_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20500,7 +20500,7 @@ CREATE INDEX waterbody_lod0msrf_fkx ON citydb.waterbody USING btree (lod0_multi_
 -- Name: waterbody_lod1curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod1curve_spx ON citydb.waterbody USING gist (lod1_multi_curve);
+CREATE INDEX waterbody_lod1curve_spx ON waterbody USING gist (lod1_multi_curve);
 
 
 --
@@ -20508,7 +20508,7 @@ CREATE INDEX waterbody_lod1curve_spx ON citydb.waterbody USING gist (lod1_multi_
 -- Name: waterbody_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod1msrf_fkx ON citydb.waterbody USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod1msrf_fkx ON waterbody USING btree (lod1_multi_surface_id) WITH (fillfactor='90');
 
 
 --
@@ -20516,7 +20516,7 @@ CREATE INDEX waterbody_lod1msrf_fkx ON citydb.waterbody USING btree (lod1_multi_
 -- Name: waterbody_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod1solid_fkx ON citydb.waterbody USING btree (lod1_solid_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod1solid_fkx ON waterbody USING btree (lod1_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20524,7 +20524,7 @@ CREATE INDEX waterbody_lod1solid_fkx ON citydb.waterbody USING btree (lod1_solid
 -- Name: waterbody_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod2solid_fkx ON citydb.waterbody USING btree (lod2_solid_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod2solid_fkx ON waterbody USING btree (lod2_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20532,7 +20532,7 @@ CREATE INDEX waterbody_lod2solid_fkx ON citydb.waterbody USING btree (lod2_solid
 -- Name: waterbody_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod3solid_fkx ON citydb.waterbody USING btree (lod3_solid_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod3solid_fkx ON waterbody USING btree (lod3_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20540,7 +20540,7 @@ CREATE INDEX waterbody_lod3solid_fkx ON citydb.waterbody USING btree (lod3_solid
 -- Name: waterbody_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_lod4solid_fkx ON citydb.waterbody USING btree (lod4_solid_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_lod4solid_fkx ON waterbody USING btree (lod4_solid_id) WITH (fillfactor='90');
 
 
 --
@@ -20548,7 +20548,7 @@ CREATE INDEX waterbody_lod4solid_fkx ON citydb.waterbody USING btree (lod4_solid
 -- Name: waterbody_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
-CREATE INDEX waterbody_objclass_fkx ON citydb.waterbody USING btree (objectclass_id) WITH (fillfactor='90');
+CREATE INDEX waterbody_objclass_fkx ON waterbody USING btree (objectclass_id) WITH (fillfactor='90');
 
 
 --
@@ -20556,8 +20556,8 @@ CREATE INDEX waterbody_objclass_fkx ON citydb.waterbody USING btree (objectclass
 -- Name: address_to_bridge address_to_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_bridge
-    ADD CONSTRAINT address_to_bridge_fk FOREIGN KEY (address_id) REFERENCES citydb.address(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY address_to_bridge
+    ADD CONSTRAINT address_to_bridge_fk FOREIGN KEY (address_id) REFERENCES address(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20565,8 +20565,8 @@ ALTER TABLE ONLY citydb.address_to_bridge
 -- Name: address_to_bridge address_to_bridge_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_bridge
-    ADD CONSTRAINT address_to_bridge_fk1 FOREIGN KEY (bridge_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY address_to_bridge
+    ADD CONSTRAINT address_to_bridge_fk1 FOREIGN KEY (bridge_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20574,8 +20574,8 @@ ALTER TABLE ONLY citydb.address_to_bridge
 -- Name: address_to_building address_to_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_building
-    ADD CONSTRAINT address_to_building_fk FOREIGN KEY (address_id) REFERENCES citydb.address(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY address_to_building
+    ADD CONSTRAINT address_to_building_fk FOREIGN KEY (address_id) REFERENCES address(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20583,8 +20583,8 @@ ALTER TABLE ONLY citydb.address_to_building
 -- Name: address_to_building address_to_building_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.address_to_building
-    ADD CONSTRAINT address_to_building_fk1 FOREIGN KEY (building_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY address_to_building
+    ADD CONSTRAINT address_to_building_fk1 FOREIGN KEY (building_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20592,8 +20592,8 @@ ALTER TABLE ONLY citydb.address_to_building
 -- Name: aggregation_info aggregation_info_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.aggregation_info
-    ADD CONSTRAINT aggregation_info_fk1 FOREIGN KEY (child_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY aggregation_info
+    ADD CONSTRAINT aggregation_info_fk1 FOREIGN KEY (child_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20601,8 +20601,8 @@ ALTER TABLE ONLY citydb.aggregation_info
 -- Name: aggregation_info aggregation_info_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.aggregation_info
-    ADD CONSTRAINT aggregation_info_fk2 FOREIGN KEY (parent_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY aggregation_info
+    ADD CONSTRAINT aggregation_info_fk2 FOREIGN KEY (parent_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20610,8 +20610,8 @@ ALTER TABLE ONLY citydb.aggregation_info
 -- Name: appear_to_surface_data app_to_surf_data_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appear_to_surface_data
-    ADD CONSTRAINT app_to_surf_data_fk FOREIGN KEY (surface_data_id) REFERENCES citydb.surface_data(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY appear_to_surface_data
+    ADD CONSTRAINT app_to_surf_data_fk FOREIGN KEY (surface_data_id) REFERENCES surface_data(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20619,8 +20619,8 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 -- Name: appear_to_surface_data app_to_surf_data_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appear_to_surface_data
-    ADD CONSTRAINT app_to_surf_data_fk1 FOREIGN KEY (appearance_id) REFERENCES citydb.appearance(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY appear_to_surface_data
+    ADD CONSTRAINT app_to_surf_data_fk1 FOREIGN KEY (appearance_id) REFERENCES appearance(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20628,8 +20628,8 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 -- Name: appearance appearance_citymodel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appearance
-    ADD CONSTRAINT appearance_citymodel_fk FOREIGN KEY (citymodel_id) REFERENCES citydb.citymodel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY appearance
+    ADD CONSTRAINT appearance_citymodel_fk FOREIGN KEY (citymodel_id) REFERENCES citymodel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20637,8 +20637,8 @@ ALTER TABLE ONLY citydb.appearance
 -- Name: appearance appearance_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.appearance
-    ADD CONSTRAINT appearance_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY appearance
+    ADD CONSTRAINT appearance_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20646,8 +20646,8 @@ ALTER TABLE ONLY citydb.appearance
 -- Name: building_furniture bldg_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
-    ADD CONSTRAINT bldg_furn_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_furniture
+    ADD CONSTRAINT bldg_furn_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20655,8 +20655,8 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_furniture bldg_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
-    ADD CONSTRAINT bldg_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_furniture
+    ADD CONSTRAINT bldg_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20664,8 +20664,8 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_furniture bldg_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
-    ADD CONSTRAINT bldg_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_furniture
+    ADD CONSTRAINT bldg_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20673,8 +20673,8 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_furniture bldg_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
-    ADD CONSTRAINT bldg_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_furniture
+    ADD CONSTRAINT bldg_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20682,8 +20682,8 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_furniture bldg_furn_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_furniture
-    ADD CONSTRAINT bldg_furn_room_fk FOREIGN KEY (room_id) REFERENCES citydb.room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_furniture
+    ADD CONSTRAINT bldg_furn_room_fk FOREIGN KEY (room_id) REFERENCES room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20691,8 +20691,8 @@ ALTER TABLE ONLY citydb.building_furniture
 -- Name: building_installation bldg_inst_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_building_fk FOREIGN KEY (building_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_building_fk FOREIGN KEY (building_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20700,8 +20700,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20709,8 +20709,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20718,8 +20718,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20727,8 +20727,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20736,8 +20736,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20745,8 +20745,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20754,8 +20754,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20763,8 +20763,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20772,8 +20772,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: building_installation bldg_inst_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building_installation
-    ADD CONSTRAINT bldg_inst_room_fk FOREIGN KEY (room_id) REFERENCES citydb.room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building_installation
+    ADD CONSTRAINT bldg_inst_room_fk FOREIGN KEY (room_id) REFERENCES room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20781,8 +20781,8 @@ ALTER TABLE ONLY citydb.building_installation
 -- Name: bridge_open_to_them_srf brd_open_to_them_srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_open_to_them_srf
-    ADD CONSTRAINT brd_open_to_them_srf_fk FOREIGN KEY (bridge_opening_id) REFERENCES citydb.bridge_opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY bridge_open_to_them_srf
+    ADD CONSTRAINT brd_open_to_them_srf_fk FOREIGN KEY (bridge_opening_id) REFERENCES bridge_opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -20790,8 +20790,8 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 -- Name: bridge_open_to_them_srf brd_open_to_them_srf_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_open_to_them_srf
-    ADD CONSTRAINT brd_open_to_them_srf_fk1 FOREIGN KEY (bridge_thematic_surface_id) REFERENCES citydb.bridge_thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_open_to_them_srf
+    ADD CONSTRAINT brd_open_to_them_srf_fk1 FOREIGN KEY (bridge_thematic_surface_id) REFERENCES bridge_thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20799,8 +20799,8 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 -- Name: bridge_thematic_surface brd_them_srf_brd_const_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_brd_const_fk FOREIGN KEY (bridge_constr_element_id) REFERENCES citydb.bridge_constr_element(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_brd_const_fk FOREIGN KEY (bridge_constr_element_id) REFERENCES bridge_constr_element(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20808,8 +20808,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_brd_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_brd_inst_fk FOREIGN KEY (bridge_installation_id) REFERENCES citydb.bridge_installation(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_brd_inst_fk FOREIGN KEY (bridge_installation_id) REFERENCES bridge_installation(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20817,8 +20817,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES citydb.bridge_room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES bridge_room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20826,8 +20826,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_bridge_fk FOREIGN KEY (bridge_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_bridge_fk FOREIGN KEY (bridge_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20835,8 +20835,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_cityobj_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_cityobj_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20844,8 +20844,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20853,8 +20853,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20862,8 +20862,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20871,8 +20871,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: bridge_thematic_surface brd_them_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_thematic_surface
-    ADD CONSTRAINT brd_them_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_thematic_surface
+    ADD CONSTRAINT brd_them_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20880,8 +20880,8 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 -- Name: breakline_relief breakline_rel_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.breakline_relief
-    ADD CONSTRAINT breakline_rel_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY breakline_relief
+    ADD CONSTRAINT breakline_rel_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20889,8 +20889,8 @@ ALTER TABLE ONLY citydb.breakline_relief
 -- Name: breakline_relief breakline_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.breakline_relief
-    ADD CONSTRAINT breakline_relief_comp_fk FOREIGN KEY (id) REFERENCES citydb.relief_component(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY breakline_relief
+    ADD CONSTRAINT breakline_relief_comp_fk FOREIGN KEY (id) REFERENCES relief_component(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20898,8 +20898,8 @@ ALTER TABLE ONLY citydb.breakline_relief
 -- Name: bridge bridge_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20907,8 +20907,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge_constr_element bridge_constr_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_bridge_fk FOREIGN KEY (bridge_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_bridge_fk FOREIGN KEY (bridge_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20916,8 +20916,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_cityobj_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_cityobj_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20925,8 +20925,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20934,8 +20934,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20943,8 +20943,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20952,8 +20952,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20961,8 +20961,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20970,8 +20970,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20979,8 +20979,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20988,8 +20988,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -20997,8 +20997,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_constr_element bridge_constr_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_constr_element
-    ADD CONSTRAINT bridge_constr_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_constr_element
+    ADD CONSTRAINT bridge_constr_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21006,8 +21006,8 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 -- Name: bridge_furniture bridge_furn_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
-    ADD CONSTRAINT bridge_furn_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES citydb.bridge_room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_furniture
+    ADD CONSTRAINT bridge_furn_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES bridge_room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21015,8 +21015,8 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_furniture bridge_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
-    ADD CONSTRAINT bridge_furn_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_furniture
+    ADD CONSTRAINT bridge_furn_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21024,8 +21024,8 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_furniture bridge_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
-    ADD CONSTRAINT bridge_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_furniture
+    ADD CONSTRAINT bridge_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21033,8 +21033,8 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_furniture bridge_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
-    ADD CONSTRAINT bridge_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_furniture
+    ADD CONSTRAINT bridge_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21042,8 +21042,8 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_furniture bridge_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_furniture
-    ADD CONSTRAINT bridge_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_furniture
+    ADD CONSTRAINT bridge_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21051,8 +21051,8 @@ ALTER TABLE ONLY citydb.bridge_furniture
 -- Name: bridge_installation bridge_inst_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES citydb.bridge_room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_brd_room_fk FOREIGN KEY (bridge_room_id) REFERENCES bridge_room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21060,8 +21060,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_bridge_fk FOREIGN KEY (bridge_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_bridge_fk FOREIGN KEY (bridge_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21069,8 +21069,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21078,8 +21078,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21087,8 +21087,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21096,8 +21096,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21105,8 +21105,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21114,8 +21114,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21123,8 +21123,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21132,8 +21132,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge_installation bridge_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_installation
-    ADD CONSTRAINT bridge_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_installation
+    ADD CONSTRAINT bridge_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21141,8 +21141,8 @@ ALTER TABLE ONLY citydb.bridge_installation
 -- Name: bridge bridge_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21150,8 +21150,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21159,8 +21159,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21168,8 +21168,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21177,8 +21177,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21186,8 +21186,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21195,8 +21195,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21204,8 +21204,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21213,8 +21213,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge bridge_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21222,8 +21222,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge_opening bridge_open_address_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_address_fk FOREIGN KEY (address_id) REFERENCES citydb.address(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_address_fk FOREIGN KEY (address_id) REFERENCES address(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21231,8 +21231,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21240,8 +21240,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21249,8 +21249,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21258,8 +21258,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21267,8 +21267,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21276,8 +21276,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge_opening bridge_open_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_opening
-    ADD CONSTRAINT bridge_open_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_opening
+    ADD CONSTRAINT bridge_open_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21285,8 +21285,8 @@ ALTER TABLE ONLY citydb.bridge_opening
 -- Name: bridge bridge_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_parent_fk FOREIGN KEY (bridge_parent_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_parent_fk FOREIGN KEY (bridge_parent_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21294,8 +21294,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: bridge_room bridge_room_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
-    ADD CONSTRAINT bridge_room_bridge_fk FOREIGN KEY (bridge_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_room
+    ADD CONSTRAINT bridge_room_bridge_fk FOREIGN KEY (bridge_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21303,8 +21303,8 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge_room bridge_room_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
-    ADD CONSTRAINT bridge_room_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_room
+    ADD CONSTRAINT bridge_room_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21312,8 +21312,8 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge_room bridge_room_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
-    ADD CONSTRAINT bridge_room_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_room
+    ADD CONSTRAINT bridge_room_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21321,8 +21321,8 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge_room bridge_room_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
-    ADD CONSTRAINT bridge_room_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_room
+    ADD CONSTRAINT bridge_room_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21330,8 +21330,8 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge_room bridge_room_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge_room
-    ADD CONSTRAINT bridge_room_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge_room
+    ADD CONSTRAINT bridge_room_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21339,8 +21339,8 @@ ALTER TABLE ONLY citydb.bridge_room
 -- Name: bridge bridge_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.bridge
-    ADD CONSTRAINT bridge_root_fk FOREIGN KEY (bridge_root_id) REFERENCES citydb.bridge(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY bridge
+    ADD CONSTRAINT bridge_root_fk FOREIGN KEY (bridge_root_id) REFERENCES bridge(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21348,8 +21348,8 @@ ALTER TABLE ONLY citydb.bridge
 -- Name: building building_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21357,8 +21357,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod0footprint_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod0footprint_fk FOREIGN KEY (lod0_footprint_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod0footprint_fk FOREIGN KEY (lod0_footprint_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21366,8 +21366,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod0roofprint_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod0roofprint_fk FOREIGN KEY (lod0_roofprint_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod0roofprint_fk FOREIGN KEY (lod0_roofprint_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21375,8 +21375,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21384,8 +21384,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21393,8 +21393,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21402,8 +21402,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21411,8 +21411,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21420,8 +21420,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21429,8 +21429,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21438,8 +21438,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21447,8 +21447,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21456,8 +21456,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_parent_fk FOREIGN KEY (building_parent_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_parent_fk FOREIGN KEY (building_parent_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21465,8 +21465,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: building building_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.building
-    ADD CONSTRAINT building_root_fk FOREIGN KEY (building_root_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY building
+    ADD CONSTRAINT building_root_fk FOREIGN KEY (building_root_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21474,8 +21474,8 @@ ALTER TABLE ONLY citydb.building
 -- Name: city_furniture city_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21483,8 +21483,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21492,8 +21492,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21501,8 +21501,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21510,8 +21510,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21519,8 +21519,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21528,8 +21528,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21537,8 +21537,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21546,8 +21546,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21555,8 +21555,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: city_furniture city_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.city_furniture
-    ADD CONSTRAINT city_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY city_furniture
+    ADD CONSTRAINT city_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21564,8 +21564,8 @@ ALTER TABLE ONLY citydb.city_furniture
 -- Name: cityobject_member cityobject_member_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_member
-    ADD CONSTRAINT cityobject_member_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY cityobject_member
+    ADD CONSTRAINT cityobject_member_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21573,8 +21573,8 @@ ALTER TABLE ONLY citydb.cityobject_member
 -- Name: cityobject_member cityobject_member_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_member
-    ADD CONSTRAINT cityobject_member_fk1 FOREIGN KEY (citymodel_id) REFERENCES citydb.citymodel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject_member
+    ADD CONSTRAINT cityobject_member_fk1 FOREIGN KEY (citymodel_id) REFERENCES citymodel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21582,8 +21582,8 @@ ALTER TABLE ONLY citydb.cityobject_member
 -- Name: cityobject cityobject_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject
-    ADD CONSTRAINT cityobject_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject
+    ADD CONSTRAINT cityobject_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21591,8 +21591,8 @@ ALTER TABLE ONLY citydb.cityobject
 -- Name: external_reference ext_ref_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.external_reference
-    ADD CONSTRAINT ext_ref_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY external_reference
+    ADD CONSTRAINT ext_ref_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21600,8 +21600,8 @@ ALTER TABLE ONLY citydb.external_reference
 -- Name: generic_cityobject gen_object_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21609,8 +21609,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod0brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod0brep_fk FOREIGN KEY (lod0_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod0brep_fk FOREIGN KEY (lod0_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21618,8 +21618,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod0impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod0impl_fk FOREIGN KEY (lod0_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod0impl_fk FOREIGN KEY (lod0_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21627,8 +21627,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21636,8 +21636,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21645,8 +21645,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21654,8 +21654,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21663,8 +21663,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21672,8 +21672,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21681,8 +21681,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21690,8 +21690,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21699,8 +21699,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generic_cityobject gen_object_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generic_cityobject
-    ADD CONSTRAINT gen_object_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generic_cityobject
+    ADD CONSTRAINT gen_object_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21708,8 +21708,8 @@ ALTER TABLE ONLY citydb.generic_cityobject
 -- Name: generalization general_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generalization
-    ADD CONSTRAINT general_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generalization
+    ADD CONSTRAINT general_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21717,8 +21717,8 @@ ALTER TABLE ONLY citydb.generalization
 -- Name: generalization general_generalizes_to_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.generalization
-    ADD CONSTRAINT general_generalizes_to_fk FOREIGN KEY (generalizes_to_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY generalization
+    ADD CONSTRAINT general_generalizes_to_fk FOREIGN KEY (generalizes_to_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21726,8 +21726,8 @@ ALTER TABLE ONLY citydb.generalization
 -- Name: cityobject_genericattrib genericattrib_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_genericattrib
-    ADD CONSTRAINT genericattrib_cityobj_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject_genericattrib
+    ADD CONSTRAINT genericattrib_cityobj_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21735,8 +21735,8 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 -- Name: cityobject_genericattrib genericattrib_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_genericattrib
-    ADD CONSTRAINT genericattrib_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject_genericattrib
+    ADD CONSTRAINT genericattrib_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21744,8 +21744,8 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 -- Name: cityobject_genericattrib genericattrib_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_genericattrib
-    ADD CONSTRAINT genericattrib_parent_fk FOREIGN KEY (parent_genattrib_id) REFERENCES citydb.cityobject_genericattrib(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject_genericattrib
+    ADD CONSTRAINT genericattrib_parent_fk FOREIGN KEY (parent_genattrib_id) REFERENCES cityobject_genericattrib(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21753,8 +21753,8 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 -- Name: cityobject_genericattrib genericattrib_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobject_genericattrib
-    ADD CONSTRAINT genericattrib_root_fk FOREIGN KEY (root_genattrib_id) REFERENCES citydb.cityobject_genericattrib(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobject_genericattrib
+    ADD CONSTRAINT genericattrib_root_fk FOREIGN KEY (root_genattrib_id) REFERENCES cityobject_genericattrib(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21762,8 +21762,8 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 -- Name: cityobjectgroup group_brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobjectgroup
-    ADD CONSTRAINT group_brep_fk FOREIGN KEY (brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobjectgroup
+    ADD CONSTRAINT group_brep_fk FOREIGN KEY (brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21771,8 +21771,8 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 -- Name: cityobjectgroup group_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobjectgroup
-    ADD CONSTRAINT group_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobjectgroup
+    ADD CONSTRAINT group_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21780,8 +21780,8 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 -- Name: cityobjectgroup group_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobjectgroup
-    ADD CONSTRAINT group_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobjectgroup
+    ADD CONSTRAINT group_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21789,8 +21789,8 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 -- Name: cityobjectgroup group_parent_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.cityobjectgroup
-    ADD CONSTRAINT group_parent_cityobj_fk FOREIGN KEY (parent_cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY cityobjectgroup
+    ADD CONSTRAINT group_parent_cityobj_fk FOREIGN KEY (parent_cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21798,8 +21798,8 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 -- Name: group_to_cityobject group_to_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.group_to_cityobject
-    ADD CONSTRAINT group_to_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY group_to_cityobject
+    ADD CONSTRAINT group_to_cityobject_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21807,8 +21807,8 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 -- Name: group_to_cityobject group_to_cityobject_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.group_to_cityobject
-    ADD CONSTRAINT group_to_cityobject_fk1 FOREIGN KEY (cityobjectgroup_id) REFERENCES citydb.cityobjectgroup(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY group_to_cityobject
+    ADD CONSTRAINT group_to_cityobject_fk1 FOREIGN KEY (cityobjectgroup_id) REFERENCES cityobjectgroup(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21816,8 +21816,8 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 -- Name: implicit_geometry implicit_geom_brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.implicit_geometry
-    ADD CONSTRAINT implicit_geom_brep_fk FOREIGN KEY (relative_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY implicit_geometry
+    ADD CONSTRAINT implicit_geom_brep_fk FOREIGN KEY (relative_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21825,8 +21825,8 @@ ALTER TABLE ONLY citydb.implicit_geometry
 -- Name: land_use land_use_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21834,8 +21834,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_lod0msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_lod0msrf_fk FOREIGN KEY (lod0_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_lod0msrf_fk FOREIGN KEY (lod0_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21843,8 +21843,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21852,8 +21852,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21861,8 +21861,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21870,8 +21870,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21879,8 +21879,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: land_use land_use_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.land_use
-    ADD CONSTRAINT land_use_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY land_use
+    ADD CONSTRAINT land_use_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21888,8 +21888,8 @@ ALTER TABLE ONLY citydb.land_use
 -- Name: masspoint_relief masspoint_rel_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.masspoint_relief
-    ADD CONSTRAINT masspoint_rel_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY masspoint_relief
+    ADD CONSTRAINT masspoint_rel_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21897,8 +21897,8 @@ ALTER TABLE ONLY citydb.masspoint_relief
 -- Name: masspoint_relief masspoint_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.masspoint_relief
-    ADD CONSTRAINT masspoint_relief_comp_fk FOREIGN KEY (id) REFERENCES citydb.relief_component(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY masspoint_relief
+    ADD CONSTRAINT masspoint_relief_comp_fk FOREIGN KEY (id) REFERENCES relief_component(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21906,8 +21906,8 @@ ALTER TABLE ONLY citydb.masspoint_relief
 -- Name: objectclass objectclass_ade_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.objectclass
-    ADD CONSTRAINT objectclass_ade_fk FOREIGN KEY (ade_id) REFERENCES citydb.ade(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY objectclass
+    ADD CONSTRAINT objectclass_ade_fk FOREIGN KEY (ade_id) REFERENCES ade(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21915,8 +21915,8 @@ ALTER TABLE ONLY citydb.objectclass
 -- Name: objectclass objectclass_baseclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.objectclass
-    ADD CONSTRAINT objectclass_baseclass_fk FOREIGN KEY (baseclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY objectclass
+    ADD CONSTRAINT objectclass_baseclass_fk FOREIGN KEY (baseclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21924,8 +21924,8 @@ ALTER TABLE ONLY citydb.objectclass
 -- Name: objectclass objectclass_superclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.objectclass
-    ADD CONSTRAINT objectclass_superclass_fk FOREIGN KEY (superclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY objectclass
+    ADD CONSTRAINT objectclass_superclass_fk FOREIGN KEY (superclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21933,8 +21933,8 @@ ALTER TABLE ONLY citydb.objectclass
 -- Name: opening_to_them_surface open_to_them_surface_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening_to_them_surface
-    ADD CONSTRAINT open_to_them_surface_fk FOREIGN KEY (opening_id) REFERENCES citydb.opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY opening_to_them_surface
+    ADD CONSTRAINT open_to_them_surface_fk FOREIGN KEY (opening_id) REFERENCES opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -21942,8 +21942,8 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 -- Name: opening_to_them_surface open_to_them_surface_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening_to_them_surface
-    ADD CONSTRAINT open_to_them_surface_fk1 FOREIGN KEY (thematic_surface_id) REFERENCES citydb.thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening_to_them_surface
+    ADD CONSTRAINT open_to_them_surface_fk1 FOREIGN KEY (thematic_surface_id) REFERENCES thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21951,8 +21951,8 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 -- Name: opening opening_address_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_address_fk FOREIGN KEY (address_id) REFERENCES citydb.address(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_address_fk FOREIGN KEY (address_id) REFERENCES address(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21960,8 +21960,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21969,8 +21969,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21978,8 +21978,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21987,8 +21987,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -21996,8 +21996,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22005,8 +22005,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: opening opening_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.opening
-    ADD CONSTRAINT opening_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY opening
+    ADD CONSTRAINT opening_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22014,8 +22014,8 @@ ALTER TABLE ONLY citydb.opening
 -- Name: plant_cover plant_cover_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22023,8 +22023,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod1msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod1msolid_fk FOREIGN KEY (lod1_multi_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod1msolid_fk FOREIGN KEY (lod1_multi_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22032,8 +22032,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22041,8 +22041,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod2msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod2msolid_fk FOREIGN KEY (lod2_multi_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod2msolid_fk FOREIGN KEY (lod2_multi_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22050,8 +22050,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22059,8 +22059,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod3msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod3msolid_fk FOREIGN KEY (lod3_multi_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod3msolid_fk FOREIGN KEY (lod3_multi_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22068,8 +22068,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22077,8 +22077,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod4msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod4msolid_fk FOREIGN KEY (lod4_multi_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod4msolid_fk FOREIGN KEY (lod4_multi_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22086,8 +22086,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22095,8 +22095,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: plant_cover plant_cover_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.plant_cover
-    ADD CONSTRAINT plant_cover_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY plant_cover
+    ADD CONSTRAINT plant_cover_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22104,8 +22104,8 @@ ALTER TABLE ONLY citydb.plant_cover
 -- Name: raster_relief raster_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.raster_relief
-    ADD CONSTRAINT raster_relief_comp_fk FOREIGN KEY (id) REFERENCES citydb.relief_component(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY raster_relief
+    ADD CONSTRAINT raster_relief_comp_fk FOREIGN KEY (id) REFERENCES relief_component(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22113,8 +22113,8 @@ ALTER TABLE ONLY citydb.raster_relief
 -- Name: raster_relief raster_relief_coverage_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.raster_relief
-    ADD CONSTRAINT raster_relief_coverage_fk FOREIGN KEY (coverage_id) REFERENCES citydb.grid_coverage(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY raster_relief
+    ADD CONSTRAINT raster_relief_coverage_fk FOREIGN KEY (coverage_id) REFERENCES grid_coverage(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22122,8 +22122,8 @@ ALTER TABLE ONLY citydb.raster_relief
 -- Name: raster_relief raster_relief_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.raster_relief
-    ADD CONSTRAINT raster_relief_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY raster_relief
+    ADD CONSTRAINT raster_relief_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22131,8 +22131,8 @@ ALTER TABLE ONLY citydb.raster_relief
 -- Name: relief_feat_to_rel_comp rel_feat_to_rel_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
-    ADD CONSTRAINT rel_feat_to_rel_comp_fk FOREIGN KEY (relief_component_id) REFERENCES citydb.relief_component(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY relief_feat_to_rel_comp
+    ADD CONSTRAINT rel_feat_to_rel_comp_fk FOREIGN KEY (relief_component_id) REFERENCES relief_component(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22140,8 +22140,8 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 -- Name: relief_feat_to_rel_comp rel_feat_to_rel_comp_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
-    ADD CONSTRAINT rel_feat_to_rel_comp_fk1 FOREIGN KEY (relief_feature_id) REFERENCES citydb.relief_feature(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY relief_feat_to_rel_comp
+    ADD CONSTRAINT rel_feat_to_rel_comp_fk1 FOREIGN KEY (relief_feature_id) REFERENCES relief_feature(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22149,8 +22149,8 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 -- Name: relief_component relief_comp_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_component
-    ADD CONSTRAINT relief_comp_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY relief_component
+    ADD CONSTRAINT relief_comp_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22158,8 +22158,8 @@ ALTER TABLE ONLY citydb.relief_component
 -- Name: relief_component relief_comp_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_component
-    ADD CONSTRAINT relief_comp_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY relief_component
+    ADD CONSTRAINT relief_comp_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22167,8 +22167,8 @@ ALTER TABLE ONLY citydb.relief_component
 -- Name: relief_feature relief_feat_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feature
-    ADD CONSTRAINT relief_feat_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY relief_feature
+    ADD CONSTRAINT relief_feat_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22176,8 +22176,8 @@ ALTER TABLE ONLY citydb.relief_feature
 -- Name: relief_feature relief_feat_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.relief_feature
-    ADD CONSTRAINT relief_feat_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY relief_feature
+    ADD CONSTRAINT relief_feat_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22185,8 +22185,8 @@ ALTER TABLE ONLY citydb.relief_feature
 -- Name: room room_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
-    ADD CONSTRAINT room_building_fk FOREIGN KEY (building_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY room
+    ADD CONSTRAINT room_building_fk FOREIGN KEY (building_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22194,8 +22194,8 @@ ALTER TABLE ONLY citydb.room
 -- Name: room room_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
-    ADD CONSTRAINT room_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY room
+    ADD CONSTRAINT room_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22203,8 +22203,8 @@ ALTER TABLE ONLY citydb.room
 -- Name: room room_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
-    ADD CONSTRAINT room_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY room
+    ADD CONSTRAINT room_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22212,8 +22212,8 @@ ALTER TABLE ONLY citydb.room
 -- Name: room room_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
-    ADD CONSTRAINT room_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY room
+    ADD CONSTRAINT room_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22221,8 +22221,8 @@ ALTER TABLE ONLY citydb.room
 -- Name: room room_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.room
-    ADD CONSTRAINT room_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY room
+    ADD CONSTRAINT room_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22230,8 +22230,8 @@ ALTER TABLE ONLY citydb.room
 -- Name: schema schema_ade_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema
-    ADD CONSTRAINT schema_ade_fk FOREIGN KEY (ade_id) REFERENCES citydb.ade(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY schema
+    ADD CONSTRAINT schema_ade_fk FOREIGN KEY (ade_id) REFERENCES ade(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22239,8 +22239,8 @@ ALTER TABLE ONLY citydb.schema
 -- Name: schema_referencing schema_referencing_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_referencing
-    ADD CONSTRAINT schema_referencing_fk1 FOREIGN KEY (referencing_id) REFERENCES citydb.schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY schema_referencing
+    ADD CONSTRAINT schema_referencing_fk1 FOREIGN KEY (referencing_id) REFERENCES schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22248,8 +22248,8 @@ ALTER TABLE ONLY citydb.schema_referencing
 -- Name: schema_referencing schema_referencing_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_referencing
-    ADD CONSTRAINT schema_referencing_fk2 FOREIGN KEY (referenced_id) REFERENCES citydb.schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY schema_referencing
+    ADD CONSTRAINT schema_referencing_fk2 FOREIGN KEY (referenced_id) REFERENCES schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22257,8 +22257,8 @@ ALTER TABLE ONLY citydb.schema_referencing
 -- Name: schema_to_objectclass schema_to_objectclass_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_to_objectclass
-    ADD CONSTRAINT schema_to_objectclass_fk1 FOREIGN KEY (schema_id) REFERENCES citydb.schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY schema_to_objectclass
+    ADD CONSTRAINT schema_to_objectclass_fk1 FOREIGN KEY (schema_id) REFERENCES schema(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22266,8 +22266,8 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 -- Name: schema_to_objectclass schema_to_objectclass_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.schema_to_objectclass
-    ADD CONSTRAINT schema_to_objectclass_fk2 FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY schema_to_objectclass
+    ADD CONSTRAINT schema_to_objectclass_fk2 FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22275,8 +22275,8 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 -- Name: solitary_vegetat_object sol_veg_obj_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22284,8 +22284,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod1brep_fk FOREIGN KEY (lod1_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22293,8 +22293,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod1impl_fk FOREIGN KEY (lod1_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22302,8 +22302,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22311,8 +22311,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22320,8 +22320,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22329,8 +22329,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22338,8 +22338,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22347,8 +22347,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22356,8 +22356,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: solitary_vegetat_object sol_veg_obj_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.solitary_vegetat_object
-    ADD CONSTRAINT sol_veg_obj_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY solitary_vegetat_object
+    ADD CONSTRAINT sol_veg_obj_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22365,8 +22365,8 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 -- Name: surface_data surface_data_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_data
-    ADD CONSTRAINT surface_data_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY surface_data
+    ADD CONSTRAINT surface_data_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22374,8 +22374,8 @@ ALTER TABLE ONLY citydb.surface_data
 -- Name: surface_data surface_data_tex_image_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_data
-    ADD CONSTRAINT surface_data_tex_image_fk FOREIGN KEY (tex_image_id) REFERENCES citydb.tex_image(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY surface_data
+    ADD CONSTRAINT surface_data_tex_image_fk FOREIGN KEY (tex_image_id) REFERENCES tex_image(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22383,8 +22383,8 @@ ALTER TABLE ONLY citydb.surface_data
 -- Name: surface_geometry surface_geom_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_geometry
-    ADD CONSTRAINT surface_geom_cityobj_fk FOREIGN KEY (cityobject_id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY surface_geometry
+    ADD CONSTRAINT surface_geom_cityobj_fk FOREIGN KEY (cityobject_id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22392,8 +22392,8 @@ ALTER TABLE ONLY citydb.surface_geometry
 -- Name: surface_geometry surface_geom_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_geometry
-    ADD CONSTRAINT surface_geom_parent_fk FOREIGN KEY (parent_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY surface_geometry
+    ADD CONSTRAINT surface_geom_parent_fk FOREIGN KEY (parent_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22401,8 +22401,8 @@ ALTER TABLE ONLY citydb.surface_geometry
 -- Name: surface_geometry surface_geom_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.surface_geometry
-    ADD CONSTRAINT surface_geom_root_fk FOREIGN KEY (root_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY surface_geometry
+    ADD CONSTRAINT surface_geom_root_fk FOREIGN KEY (root_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22410,8 +22410,8 @@ ALTER TABLE ONLY citydb.surface_geometry
 -- Name: textureparam texparam_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.textureparam
-    ADD CONSTRAINT texparam_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY textureparam
+    ADD CONSTRAINT texparam_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22419,8 +22419,8 @@ ALTER TABLE ONLY citydb.textureparam
 -- Name: textureparam texparam_surface_data_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.textureparam
-    ADD CONSTRAINT texparam_surface_data_fk FOREIGN KEY (surface_data_id) REFERENCES citydb.surface_data(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY textureparam
+    ADD CONSTRAINT texparam_surface_data_fk FOREIGN KEY (surface_data_id) REFERENCES surface_data(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22428,8 +22428,8 @@ ALTER TABLE ONLY citydb.textureparam
 -- Name: thematic_surface them_surface_bldg_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_bldg_inst_fk FOREIGN KEY (building_installation_id) REFERENCES citydb.building_installation(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_bldg_inst_fk FOREIGN KEY (building_installation_id) REFERENCES building_installation(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22437,8 +22437,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_building_fk FOREIGN KEY (building_id) REFERENCES citydb.building(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_building_fk FOREIGN KEY (building_id) REFERENCES building(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22446,8 +22446,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22455,8 +22455,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22464,8 +22464,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22473,8 +22473,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22482,8 +22482,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22491,8 +22491,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: thematic_surface them_surface_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.thematic_surface
-    ADD CONSTRAINT them_surface_room_fk FOREIGN KEY (room_id) REFERENCES citydb.room(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY thematic_surface
+    ADD CONSTRAINT them_surface_room_fk FOREIGN KEY (room_id) REFERENCES room(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22500,8 +22500,8 @@ ALTER TABLE ONLY citydb.thematic_surface
 -- Name: tin_relief tin_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tin_relief
-    ADD CONSTRAINT tin_relief_comp_fk FOREIGN KEY (id) REFERENCES citydb.relief_component(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tin_relief
+    ADD CONSTRAINT tin_relief_comp_fk FOREIGN KEY (id) REFERENCES relief_component(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22509,8 +22509,8 @@ ALTER TABLE ONLY citydb.tin_relief
 -- Name: tin_relief tin_relief_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tin_relief
-    ADD CONSTRAINT tin_relief_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tin_relief
+    ADD CONSTRAINT tin_relief_geom_fk FOREIGN KEY (surface_geometry_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22518,8 +22518,8 @@ ALTER TABLE ONLY citydb.tin_relief
 -- Name: tin_relief tin_relief_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tin_relief
-    ADD CONSTRAINT tin_relief_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tin_relief
+    ADD CONSTRAINT tin_relief_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22527,8 +22527,8 @@ ALTER TABLE ONLY citydb.tin_relief
 -- Name: traffic_area traffic_area_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22536,8 +22536,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: traffic_area traffic_area_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22545,8 +22545,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: traffic_area traffic_area_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22554,8 +22554,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: traffic_area traffic_area_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22563,8 +22563,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: traffic_area traffic_area_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22572,8 +22572,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: traffic_area traffic_area_trancmplx_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.traffic_area
-    ADD CONSTRAINT traffic_area_trancmplx_fk FOREIGN KEY (transportation_complex_id) REFERENCES citydb.transportation_complex(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY traffic_area
+    ADD CONSTRAINT traffic_area_trancmplx_fk FOREIGN KEY (transportation_complex_id) REFERENCES transportation_complex(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22581,8 +22581,8 @@ ALTER TABLE ONLY citydb.traffic_area
 -- Name: transportation_complex tran_complex_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22590,8 +22590,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: transportation_complex tran_complex_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22599,8 +22599,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: transportation_complex tran_complex_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22608,8 +22608,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: transportation_complex tran_complex_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22617,8 +22617,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: transportation_complex tran_complex_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22626,8 +22626,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: transportation_complex tran_complex_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.transportation_complex
-    ADD CONSTRAINT tran_complex_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY transportation_complex
+    ADD CONSTRAINT tran_complex_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22635,8 +22635,8 @@ ALTER TABLE ONLY citydb.transportation_complex
 -- Name: tunnel_hollow_space tun_hspace_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
-    ADD CONSTRAINT tun_hspace_cityobj_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_hollow_space
+    ADD CONSTRAINT tun_hspace_cityobj_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22644,8 +22644,8 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_hollow_space tun_hspace_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
-    ADD CONSTRAINT tun_hspace_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_hollow_space
+    ADD CONSTRAINT tun_hspace_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22653,8 +22653,8 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_hollow_space tun_hspace_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
-    ADD CONSTRAINT tun_hspace_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_hollow_space
+    ADD CONSTRAINT tun_hspace_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22662,8 +22662,8 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_hollow_space tun_hspace_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
-    ADD CONSTRAINT tun_hspace_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_hollow_space
+    ADD CONSTRAINT tun_hspace_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22671,8 +22671,8 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_hollow_space tun_hspace_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_hollow_space
-    ADD CONSTRAINT tun_hspace_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES citydb.tunnel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_hollow_space
+    ADD CONSTRAINT tun_hspace_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES tunnel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22680,8 +22680,8 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 -- Name: tunnel_open_to_them_srf tun_open_to_them_srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
-    ADD CONSTRAINT tun_open_to_them_srf_fk FOREIGN KEY (tunnel_opening_id) REFERENCES citydb.tunnel_opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY tunnel_open_to_them_srf
+    ADD CONSTRAINT tun_open_to_them_srf_fk FOREIGN KEY (tunnel_opening_id) REFERENCES tunnel_opening(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -22689,8 +22689,8 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 -- Name: tunnel_open_to_them_srf tun_open_to_them_srf_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
-    ADD CONSTRAINT tun_open_to_them_srf_fk1 FOREIGN KEY (tunnel_thematic_surface_id) REFERENCES citydb.tunnel_thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_open_to_them_srf
+    ADD CONSTRAINT tun_open_to_them_srf_fk1 FOREIGN KEY (tunnel_thematic_surface_id) REFERENCES tunnel_thematic_surface(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22698,8 +22698,8 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 -- Name: tunnel_thematic_surface tun_them_srf_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_cityobj_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_cityobj_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22707,8 +22707,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES citydb.tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22716,8 +22716,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22725,8 +22725,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22734,8 +22734,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22743,8 +22743,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22752,8 +22752,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_tun_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_tun_inst_fk FOREIGN KEY (tunnel_installation_id) REFERENCES citydb.tunnel_installation(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_tun_inst_fk FOREIGN KEY (tunnel_installation_id) REFERENCES tunnel_installation(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22761,8 +22761,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel_thematic_surface tun_them_srf_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_thematic_surface
-    ADD CONSTRAINT tun_them_srf_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES citydb.tunnel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_thematic_surface
+    ADD CONSTRAINT tun_them_srf_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES tunnel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22770,8 +22770,8 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 -- Name: tunnel tunnel_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22779,8 +22779,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel_furniture tunnel_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
-    ADD CONSTRAINT tunnel_furn_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_furniture
+    ADD CONSTRAINT tunnel_furn_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22788,8 +22788,8 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_furniture tunnel_furn_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
-    ADD CONSTRAINT tunnel_furn_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES citydb.tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_furniture
+    ADD CONSTRAINT tunnel_furn_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22797,8 +22797,8 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_furniture tunnel_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
-    ADD CONSTRAINT tunnel_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_furniture
+    ADD CONSTRAINT tunnel_furn_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22806,8 +22806,8 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_furniture tunnel_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
-    ADD CONSTRAINT tunnel_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_furniture
+    ADD CONSTRAINT tunnel_furn_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22815,8 +22815,8 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_furniture tunnel_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_furniture
-    ADD CONSTRAINT tunnel_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_furniture
+    ADD CONSTRAINT tunnel_furn_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22824,8 +22824,8 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 -- Name: tunnel_installation tunnel_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22833,8 +22833,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES citydb.tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_hspace_fk FOREIGN KEY (tunnel_hollow_space_id) REFERENCES tunnel_hollow_space(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22842,8 +22842,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod2brep_fk FOREIGN KEY (lod2_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22851,8 +22851,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod2impl_fk FOREIGN KEY (lod2_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22860,8 +22860,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod3brep_fk FOREIGN KEY (lod3_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22869,8 +22869,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22878,8 +22878,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod4brep_fk FOREIGN KEY (lod4_brep_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22887,8 +22887,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22896,8 +22896,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22905,8 +22905,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel_installation tunnel_inst_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_installation
-    ADD CONSTRAINT tunnel_inst_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES citydb.tunnel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_installation
+    ADD CONSTRAINT tunnel_inst_tunnel_fk FOREIGN KEY (tunnel_id) REFERENCES tunnel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22914,8 +22914,8 @@ ALTER TABLE ONLY citydb.tunnel_installation
 -- Name: tunnel tunnel_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22923,8 +22923,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22932,8 +22932,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod2msrf_fk FOREIGN KEY (lod2_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22941,8 +22941,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22950,8 +22950,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22959,8 +22959,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22968,8 +22968,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22977,8 +22977,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22986,8 +22986,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_objectclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -22995,8 +22995,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel_opening tunnel_open_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23004,8 +23004,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel_opening tunnel_open_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_lod3impl_fk FOREIGN KEY (lod3_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23013,8 +23013,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel_opening tunnel_open_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_lod3msrf_fk FOREIGN KEY (lod3_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23022,8 +23022,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel_opening tunnel_open_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES citydb.implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_lod4impl_fk FOREIGN KEY (lod4_implicit_rep_id) REFERENCES implicit_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23031,8 +23031,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel_opening tunnel_open_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_lod4msrf_fk FOREIGN KEY (lod4_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23040,8 +23040,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel_opening tunnel_open_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel_opening
-    ADD CONSTRAINT tunnel_open_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel_opening
+    ADD CONSTRAINT tunnel_open_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23049,8 +23049,8 @@ ALTER TABLE ONLY citydb.tunnel_opening
 -- Name: tunnel tunnel_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_parent_fk FOREIGN KEY (tunnel_parent_id) REFERENCES citydb.tunnel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_parent_fk FOREIGN KEY (tunnel_parent_id) REFERENCES tunnel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23058,8 +23058,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: tunnel tunnel_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.tunnel
-    ADD CONSTRAINT tunnel_root_fk FOREIGN KEY (tunnel_root_id) REFERENCES citydb.tunnel(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY tunnel
+    ADD CONSTRAINT tunnel_root_fk FOREIGN KEY (tunnel_root_id) REFERENCES tunnel(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23067,8 +23067,8 @@ ALTER TABLE ONLY citydb.tunnel
 -- Name: waterboundary_surface waterbnd_srf_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
-    ADD CONSTRAINT waterbnd_srf_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterboundary_surface
+    ADD CONSTRAINT waterbnd_srf_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23076,8 +23076,8 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: waterboundary_surface waterbnd_srf_lod2srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
-    ADD CONSTRAINT waterbnd_srf_lod2srf_fk FOREIGN KEY (lod2_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterboundary_surface
+    ADD CONSTRAINT waterbnd_srf_lod2srf_fk FOREIGN KEY (lod2_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23085,8 +23085,8 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: waterboundary_surface waterbnd_srf_lod3srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
-    ADD CONSTRAINT waterbnd_srf_lod3srf_fk FOREIGN KEY (lod3_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterboundary_surface
+    ADD CONSTRAINT waterbnd_srf_lod3srf_fk FOREIGN KEY (lod3_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23094,8 +23094,8 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: waterboundary_surface waterbnd_srf_lod4srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
-    ADD CONSTRAINT waterbnd_srf_lod4srf_fk FOREIGN KEY (lod4_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterboundary_surface
+    ADD CONSTRAINT waterbnd_srf_lod4srf_fk FOREIGN KEY (lod4_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23103,8 +23103,8 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: waterboundary_surface waterbnd_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterboundary_surface
-    ADD CONSTRAINT waterbnd_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterboundary_surface
+    ADD CONSTRAINT waterbnd_srf_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23112,8 +23112,8 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
-    ADD CONSTRAINT waterbod_to_waterbnd_fk FOREIGN KEY (waterboundary_surface_id) REFERENCES citydb.waterboundary_surface(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY waterbod_to_waterbnd_srf
+    ADD CONSTRAINT waterbod_to_waterbnd_fk FOREIGN KEY (waterboundary_surface_id) REFERENCES waterboundary_surface(id) MATCH FULL ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -23121,8 +23121,8 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
-    ADD CONSTRAINT waterbod_to_waterbnd_fk1 FOREIGN KEY (waterbody_id) REFERENCES citydb.waterbody(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbod_to_waterbnd_srf
+    ADD CONSTRAINT waterbod_to_waterbnd_fk1 FOREIGN KEY (waterbody_id) REFERENCES waterbody(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23130,8 +23130,8 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 -- Name: waterbody waterbody_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_cityobject_fk FOREIGN KEY (id) REFERENCES citydb.cityobject(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_cityobject_fk FOREIGN KEY (id) REFERENCES cityobject(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23139,8 +23139,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod0msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod0msrf_fk FOREIGN KEY (lod0_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod0msrf_fk FOREIGN KEY (lod0_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23148,8 +23148,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod1msrf_fk FOREIGN KEY (lod1_multi_surface_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23157,8 +23157,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod1solid_fk FOREIGN KEY (lod1_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23166,8 +23166,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod2solid_fk FOREIGN KEY (lod2_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23175,8 +23175,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod3solid_fk FOREIGN KEY (lod3_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23184,8 +23184,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES citydb.surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_lod4solid_fk FOREIGN KEY (lod4_solid_id) REFERENCES surface_geometry(id) MATCH FULL ON UPDATE CASCADE;
 
 
 --
@@ -23193,8 +23193,8 @@ ALTER TABLE ONLY citydb.waterbody
 -- Name: waterbody waterbody_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
-ALTER TABLE ONLY citydb.waterbody
-    ADD CONSTRAINT waterbody_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
+ALTER TABLE ONLY waterbody
+    ADD CONSTRAINT waterbody_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
 -- Completed on 2021-09-06 12:01:09
