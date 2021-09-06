@@ -61,13 +61,13 @@ class CityMBuildings(CityMCityObjects):
             # No specific buildings were sought. We thus retrieve all the ones
             # we can find in the database:
             query = "SELECT building.id, BOX3D(cityobject.envelope) " + \
-                    "FROM building JOIN cityobject ON building.id=cityobject.id " + \
+                    "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id " + \
                     "WHERE building.id=building.building_root_id"
         else:
             building_gmlids = [n.get_gml_id() for n in buildings]
             building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
             query = "SELECT building.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
-                    "FROM building JOIN cityobject ON building.id=cityobject.id " + \
+                    "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id " + \
                     "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " " + \
                     "AND building.id=building.building_root_id"
 
@@ -93,18 +93,18 @@ class CityMBuildings(CityMCityObjects):
                 "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
                 "surface_geometry.geometry) " + \
                 ") " + \
-                "FROM surface_geometry JOIN thematic_surface " + \
+                "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
                 "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
-                "JOIN building ON thematic_surface.building_id = building.id " + \
+                "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
                 "WHERE building.building_root_id IN " + buildings_ids_arg
         else:
             query = \
                 "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
                 "surface_geometry.geometry) " + \
                 ")) " + \
-                "FROM surface_geometry JOIN thematic_surface " + \
+                "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
                 "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
-                "JOIN building ON thematic_surface.building_id = building.id " + \
+                "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
                 "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
                 "GROUP BY building.building_root_id "
 
@@ -124,13 +124,13 @@ class CityMBuildings(CityMCityObjects):
         query = ("SELECT surface_geometry.id, "
                  "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
                  "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
-                 "tex_image_uri AS uri FROM building JOIN "
-                 "thematic_surface ON building.id=thematic_surface.building_id JOIN "
-                 "surface_geometry ON surface_geometry.root_id="
-                 "thematic_surface.lod2_multi_surface_id JOIN textureparam ON "
+                 "tex_image_uri AS uri FROM citydb.building JOIN "
+                 "citydb.thematic_surface ON building.id=thematic_surface.building_id JOIN "
+                 "citydb.surface_geometry ON surface_geometry.root_id="
+                 "thematic_surface.lod2_multi_surface_id JOIN citydb.textureparam ON "
                  "textureparam.surface_geometry_id=surface_geometry.id "
-                 "JOIN surface_data ON textureparam.surface_data_id=surface_data.id "
-                 "JOIN tex_image ON surface_data.tex_image_id=tex_image.id "
+                 "JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id "
+                 "JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id "
                  "WHERE building.building_root_id IN " + buildings_ids_arg)
         return query
 
@@ -142,7 +142,7 @@ class CityMBuildings(CityMCityObjects):
         """
 
         query = \
-            "SELECT tex_image_data FROM tex_image WHERE tex_image_uri = '" + image_uri + "' "
+            "SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = '" + image_uri + "' "
         return query
 
     @staticmethod
