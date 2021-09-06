@@ -22,7 +22,7 @@ class Test_Tile(unittest.TestCase):
     def test_building_basic_case(self):
 
         directory = "tests/city_tiler_test_data/junk/building_basic_case"
-        cursor = open_data_base("tests/city_tiler_test_data/CityTilerDBConfig.yml")
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
@@ -31,26 +31,26 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
         cursor.close()
 
-    # def test_water_basic_case(self):
+    def test_water_basic_case(self):
 
-    #     directory = "tests/city_tiler_test_data/junk/water_basic_case"
-    #     cursor = open_data_base("tests/city_tiler_test_data/CityTilerDBConfig.yml")
-    #     objects_type = CityMWaterBodies
-    #     create_directory(directory)
-    #     objects_type.set_cursor(cursor)
-    #     tileset = from_3dcitydb(cursor, objects_type)
-    #     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    #     tileset.write_to_directory(directory)
-    #     cursor.close()
+        directory = "tests/city_tiler_test_data/junk/water_basic_case"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMWaterBodies
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
 
-    # def test_relief_basic_case(self):
+    def test_relief_basic_case(self):
 
-    #     directory = "tests/city_tiler_test_data/junk/relief_basic_case"
-    #     cursor = open_data_base("tests/city_tiler_test_data/CityTilerDBConfig.yml")
-    #     objects_type = CityMReliefs
-    #     create_directory(directory)
-    #     objects_type.set_cursor(cursor)
-    #     tileset = from_3dcitydb(cursor, objects_type)
-    #     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    #     tileset.write_to_directory(directory)
-    #     cursor.close()
+        directory = "tests/city_tiler_test_data/junk/relief_basic_case"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMReliefs
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
