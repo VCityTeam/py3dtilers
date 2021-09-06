@@ -21,7 +21,7 @@ jobs:
         - pip install -e .[extra]
         - python -c 'import ifcopenshell'  # Just to make sure
       before_script:
-        - psql -U postgres -d test_tiler < test_tiler.sql
+        - psql -U postgres -d test_tiler < tests/city_tiler_test_data/test_tiler.sql
       script:
       - |
         pytest
