@@ -51,17 +51,36 @@ and look for the lines concerning `IfcOpenShell.`
 After the installation, if you additionally wish to run unit tests, use
 
 ```bash
-(venv)$ pip install -e .[extra]
-(venv)$ pip install pytest # Even if you already have pytest, re-install it to make sure pytest exists in venv
+(venv)$ pip install -e .[dev]
 (venv)$ pytest
+```
+
+### Coding style
+
+First, install the additional dev requirements
+
+```bash
+(venv)$ pip install -e .[dev]
 ```
 
 To check if the code follows the coding style, run `flake8`
 
 ```bash
-(venv)$ pip install flake8
 (venv)$ flake8 .
 ```
+
+You can fix most of the coding style errors with `autopep8`
+
+```bash
+(venv)$ autopep8 --in-place --recursive py3dtilers/
+```
+
+If you want to apply `autopep8` from root directory, exclude the _venv_ directory
+
+```bash
+(venv)$ autopep8 --in-place --exclude='venv*' --recursive .
+```
+
 ### Developing py3dtilers together with py3dtiles
 
 By default, the py3dtilers' [`setup.py`](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) build stage uses [github's version of py3dtiles](https://github.com/VCityTeam/py3dtiles) (as opposed to using [Oslandia's version on Pypi](https://pypi.org/project/py3dtiles/).

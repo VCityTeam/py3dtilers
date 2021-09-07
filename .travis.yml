@@ -20,16 +20,16 @@ jobs:
           ### Proceed with the install of py3dtilers per se.
           # The extra flag installs the dev dependencies, refer to e.g.
           # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
-        - pip install -e .[extra]
+        - pip install -e .[dev]
         - python -c 'import ifcopenshell'  # Just to make sure
       before_script:
         - psql -c 'create database test_city_tiler;' -U postgres
         - psql -U postgres -d test_city_tiler < tests/city_tiler_test_data/test_data.sql
       script:
       - |
-        pytest
+        autopep8 --in-place --recursive py3dtilers/
+        pytest --flake8
         pytest -v
-        flake8 .
     - stage: "Markdown link checks"
       language: node_js
       node_js: 12
