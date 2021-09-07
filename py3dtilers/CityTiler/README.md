@@ -16,6 +16,8 @@ You can then run the tiler by specifying the path to the _.yml_ configuration fi
 citygml-tiler <path_to_file>/Config.yml
 ```
 
+The created tileset will be placed in a folder named `junk_<objects-type>` in the root directory. The name of the folder will be either `junk_buildings`, `junk_reliefs` or `junk_water_bodies`, depending on the [objects type](#objects-type) (respectively `building`, `relief` and `water`)
+
 ### Objects type
 By default, the tiler will treat the data as __buildings__. You can change the type by adding one the 3 keywords:
 
