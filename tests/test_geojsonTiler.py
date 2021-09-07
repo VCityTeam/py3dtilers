@@ -41,6 +41,40 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
+    def test_default_height(self):
+        path = 'tests/geojson_tiler_test_data/geojson_2/'
+        obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_default_height.obj'
+        properties = ['height', '10', 'prec', 'NONE']
+
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_objs')
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
+
+        tileset = from_geojson_directory(path, properties, obj_name)
+        if(tileset is not None):
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            folder_name = "default_height"
+            print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+            tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
+    def test_no_height(self):
+        path = 'tests/geojson_tiler_test_data/geojson_2/'
+        obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_no_height.obj'
+        properties = ['height', 'HAUTEUR', 'prec', 'NONE']
+
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_objs')
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
+
+        tileset = from_geojson_directory(path, properties, obj_name)
+        if(tileset is not None):
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            folder_name = "no_height"
+            print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+            tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
     def test_create_loa(self):
         path = 'tests/geojson_tiler_test_data/geojson_1/'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']

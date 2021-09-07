@@ -33,6 +33,7 @@ class Groups():
     """
     Contains a list of Group
     """
+
     def __init__(self, objects_to_tile, polygons_path=None):
         """
         Distribute the geometries contained in objects_to_tile into different Group

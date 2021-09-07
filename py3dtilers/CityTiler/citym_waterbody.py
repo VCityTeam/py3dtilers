@@ -22,6 +22,7 @@ class CityMWaterBody(CityMCityObject):
     """
     Implementation of the Water Body Model objects from the CityGML model.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -30,6 +31,7 @@ class CityMWaterBodies(CityMCityObjects):
     """
     A decorated list of CityMWaterBody type objects.
     """
+
     def __init__(self, objects=None):
         super().__init__(objects)
 
@@ -46,13 +48,13 @@ class CityMWaterBodies(CityMCityObjects):
             # No specific waterbodies were sought. We thus retrieve all the ones
             # we can find in the database:
             query = "SELECT waterbody.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
-                    "FROM waterbody JOIN cityobject ON waterbody.id=cityobject.id"
+                    "FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id"
 
         else:
             waterbody_gmlids = [n.get_gml_id() for n in waterbodies]
             waterbody_gmlids_as_string = "('" + "', '".join(waterbody_gmlids) + "')"
             query = "SELECT waterbody.id, BOX3D(cityobject.envelope) " + \
-                    "FROM waterbody JOIN cityobject ON waterbody.id=cityobject.id" + \
+                    "FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id" + \
                     "WHERE cityobject.gmlid IN " + waterbody_gmlids_as_string
 
         return query
@@ -71,20 +73,20 @@ class CityMWaterBodies(CityMCityObjects):
         if split_surfaces:
             query = \
                 "SELECT waterbody.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) " + \
-                "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
+                "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf " + \
                 "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
-                "JOIN waterboundary_surface " + \
+                "JOIN citydb.waterboundary_surface " + \
                 "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
-                "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+                "JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
                 "WHERE waterbody.id IN " + waterbodies_ids
         else:
             query = \
                 "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
-                "FROM waterbody JOIN waterbod_to_waterbnd_srf " + \
+                "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf " + \
                 "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
-                "JOIN waterboundary_surface " + \
+                "JOIN citydb.waterboundary_surface " + \
                 "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
-                "JOIN surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+                "JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
                 "WHERE waterbody.id IN " + waterbodies_ids + " " + \
                 "GROUP BY waterbody.id "
 

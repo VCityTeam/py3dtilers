@@ -33,6 +33,7 @@ class Lod1Node(LodNode):
     """
     Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
     """
+
     def __init__(self, objects_to_tile, geometric_error=50):
         lod1_list = list()
         for object_to_tile in objects_to_tile:
