@@ -19,7 +19,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
     'networkx',
-    'numpy',
+    'numpy <1.21,>=1.17',
     'psycopg2',
     'pyproj',
     'pywavefront',
