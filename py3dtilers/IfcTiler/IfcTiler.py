@@ -1,19 +1,12 @@
-import os
-from os import listdir
-from os.path import isfile, join
-import sys
 import argparse
 
 import numpy as np
-import pyproj
-import ifcopenshell
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
-from ..Common import kd_tree
 
 
-from .ifcObjectGeom import IfcObjectGeom, IfcObjectsGeom
+from .ifcObjectGeom import IfcObjectsGeom
 
 
 def parse_command_line():
@@ -85,7 +78,7 @@ def from_ifc(path_to_file, originalUnit, targetedUnit):
     """
     :param path: a path to a directory
 
-    :return: a tileset. 
+    :return: a tileset.
     """
 
     pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
@@ -122,7 +115,7 @@ def main():
 
     tileset = from_ifc(args.ifc_file_path, args.originalUnit, args.targetedUnit)
 
-    if(tileset != None):
+    if(tileset is not None):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory("ifc_tileset")
 

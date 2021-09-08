@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-from os import listdir
-from os.path import isfile, join
 import sys
 import numpy as np
 import ifcopenshell
@@ -280,11 +277,11 @@ class IfcObjectsGeom(ObjectsToTile):
         transformer = Transformer.from_crs("EPSG:3947", "EPSG:3857")
         location = transformer.transform(location[0], location[1], location[2])
 
-        if(placement.Axis == None):
+        if(placement.Axis is None):
             axis = [0, 0, 1]
         else:
             axis = placement.Axis.DirectionRatios
-        if(placement.RefDirection == None):
+        if(placement.RefDirection is None):
             refDirection = [1, 0, 0]
         else:
             refDirection = placement.RefDirection.DirectionRatios
@@ -301,7 +298,7 @@ class IfcObjectsGeom(ObjectsToTile):
         """
         :param path: a path to a directory
 
-        :return: a list of Obj. 
+        :return: a list of Obj.
         """
         ifc_file = ifcopenshell.open(path_to_file)
 

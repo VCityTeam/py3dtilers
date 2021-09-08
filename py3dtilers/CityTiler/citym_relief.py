@@ -48,13 +48,13 @@ class CityMReliefs(CityMCityObjects):
             # No specific reliefs were sought. We thus retrieve all the ones
             # we can find in the database:
             query = "SELECT relief_feature.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
-                    "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id"
+                    "FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id"
 
         else:
             relief_gmlids = [n.get_gml_id() for n in reliefs]
             relief_gmlids_as_string = "('" + "', '".join(relief_gmlids) + "')"
             query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
-                    "FROM relief_feature JOIN cityobject ON relief_feature.id=cityobject.id" + \
+                    "FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id" + \
                     "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
 
         return query
@@ -73,20 +73,20 @@ class CityMReliefs(CityMCityObjects):
         if split_surfaces:
             query = \
                 "SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) " + \
-                "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
+                "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp " + \
                 "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
-                "JOIN tin_relief " + \
+                "JOIN citydb.tin_relief " + \
                 "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
-                "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+                "JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
                 "WHERE relief_feature.id IN " + reliefs_ids
         else:
             query = \
                 "SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
-                "FROM relief_feature JOIN relief_feat_to_rel_comp " + \
+                "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp " + \
                 "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
-                "JOIN tin_relief " + \
+                "JOIN citydb.tin_relief " + \
                 "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
-                "JOIN surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+                "JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
                 "WHERE relief_feature.id IN " + reliefs_ids + " " + \
                 "GROUP BY relief_feature.id "
 
@@ -100,7 +100,7 @@ class CityMReliefs(CityMCityObjects):
         """
 
         query = \
-            "SELECT tex_image_data FROM tex_image WHERE tex_image_uri = '" + image_uri + "' "
+            "SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = '" + image_uri + "' "
         return query
 
     @staticmethod
@@ -116,17 +116,17 @@ class CityMReliefs(CityMCityObjects):
              "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
              "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
              "tex_image_uri AS uri "
-             "FROM relief_feature JOIN relief_feat_to_rel_comp "
+             "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp "
              "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id "
-             "JOIN tin_relief "
+             "JOIN citydb.tin_relief "
              "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id "
-             "JOIN surface_geometry "
+             "JOIN citydb.surface_geometry "
              "ON surface_geometry.root_id=tin_relief.surface_geometry_id "
-             "JOIN textureparam "
+             "JOIN citydb.textureparam "
              "ON textureparam.surface_geometry_id=surface_geometry.id "
-             "JOIN surface_data "
+             "JOIN citydb.surface_data "
              "ON textureparam.surface_data_id=surface_data.id "
-             "JOIN tex_image "
+             "JOIN citydb.tex_image "
              "ON surface_data.tex_image_id=tex_image.id "
              "WHERE relief_feature.id IN " + reliefs_ids)
         return query

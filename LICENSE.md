@@ -1,4 +1,9 @@
-# Library requirements of __py3dtilers__ and their respective licenses
+The Py3DTilers software is Copyright of University of Lyon, 2012 - 2021.
+
+Py3DTilers is distributed under the GNU Lesser General Public License Version 2.1 (refer to the accompanying file LICENSE-lgpl-2.1.txt or a copy at https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
+
+
+# Py3DTilers dependencies and their associated respective licenses : summary version
 
 | Package         |    License    |
 | --------------- | ------------- |
@@ -14,6 +19,8 @@
 | [Pillow](https://github.com/python-pillow/Pillow) | [HPND](https://github.com/python-pillow/Pillow/blob/master/LICENSE) |
 | [py3dtiles](https://gitlab.com/Oslandia/py3dtiles) | [Apache v2.0](https://gitlab.com/Oslandia/py3dtiles/-/blob/master/LICENSE) |
 | [earclip](https://github.com/lionfish0/earclip) | [MIT](https://github.com/lionfish0/earclip/blob/master/LICENSE) |
+
+# Py3DTilers dependencies and their associated respective licenses : expanded version
 
 ## __Networkx__
 Copyright (C) 2004-2020, NetworkX Developers  

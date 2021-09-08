@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 from os import listdir
-from os.path import isfile, join
-import sys
 
 import numpy as np
 import pywavefront
@@ -99,9 +97,9 @@ class Objs(ObjectsToTile):
 
     def translate_tileset(self, offset):
         """
-        :param objects: an array containing objs 
+        :param objects: an array containing objs
         :param offset: an offset
-        :return: 
+        :return:
         """
         # Translate the position of each obj by an offset
         for obj in self.objects:
@@ -121,7 +119,7 @@ class Objs(ObjectsToTile):
         """
         :param path: a path to a directory
 
-        :return: a list of Obj. 
+        :return: a list of Obj.
         """
 
         obj_dir = listdir(path)

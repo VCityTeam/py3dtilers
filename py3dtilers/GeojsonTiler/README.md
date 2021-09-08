@@ -65,6 +65,12 @@ If the file don't have those properties, you can change one or several property 
 ```
 geojson-tiler --path <path> --height HEIGHT_NAME --prec PREC_NAME
 ```
+
+You can set the height to a default value (used for all features). The height must be an _int_ or a _float_:
+```
+geojson-tiler --path <path> --height 10.5
+```
+
 If you want to skip the precision, you can set _prec_ to '_NONE_':
 ```
 geojson-tiler --path <path> --prec NONE

@@ -1,13 +1,12 @@
 import argparse
 import numpy as np
-import pywavefront
+import os
 import sys
 
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
 from py3dtiles import Tile, TileSet
 from ..Common import kd_tree
-from .obj import Obj, Objs
-
+from .obj import Objs
 
 def parse_command_line():
     # arg parse
@@ -22,7 +21,8 @@ def parse_command_line():
                         help='path to the database configuration file')
 
     result = parser.parse_args()
-    if(result.paths == None):
+
+    if(result.paths is None):
         print("Please provide a path to a directory "
               "containing some obj files or multiple directories")
         print("Exiting")
@@ -76,7 +76,7 @@ def from_obj_directory(path):
     """
     :param path: a path to a directory
 
-    :return: a tileset. 
+    :return: a tileset.
     """
 
     objects = Objs.retrieve_objs(path)
@@ -129,7 +129,7 @@ def main():
     - a repository named "obj_tileset" where the
     tileset is stored if the directory does only contains obj files.
     - or a repository named "obj_tilesets" that contains all tilesets are stored
-    created from sub_directories 
+    created from sub_directories
     and a classes.txt that contains the name of all tilesets
     """
     args = parse_command_line()
@@ -139,7 +139,7 @@ def main():
         if(os.path.isdir(path)):
             print("Writing " + path)
             tileset = from_obj_directory(path)
-            if(tileset != None):
+            if(tileset is not None):
                 tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                 folder_name = path.split('/')[-1]
                 print("tileset in obj_tilesets/" + folder_name)
