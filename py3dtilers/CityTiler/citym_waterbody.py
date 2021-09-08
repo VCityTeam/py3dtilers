@@ -22,6 +22,7 @@ class CityMWaterBody(CityMCityObject):
     """
     Implementation of the Water Body Model objects from the CityGML model.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -30,6 +31,7 @@ class CityMWaterBodies(CityMCityObjects):
     """
     A decorated list of CityMWaterBody type objects.
     """
+
     def __init__(self, objects=None):
         super().__init__(objects)
 

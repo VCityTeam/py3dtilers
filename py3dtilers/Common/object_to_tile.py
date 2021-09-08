@@ -14,12 +14,12 @@ class ObjectToTile(object):
         """
 
         self.geom = TriangleSoup()
-        
+
         # The identifier of the database
         self.id = None
-        
-        # An optional, alternative identifier
-        self.alt_id = None
+
+        # Optional application specific data to be added to the batch table for this object
+        self.data = None
 
         # A Bounding Volume Box object
         self.box = None
@@ -37,11 +37,11 @@ class ObjectToTile(object):
     def get_id(self):
         return self.id
 
-    def set_alt_id(self, id):
-        self.alt_id = id
+    def set_data(self, data):
+        self.data = data
 
-    def get_alt_id(self):
-        return self.alt_id
+    def get_data(self):
+        return self.data
 
     def get_centroid(self):
         return self.centroid

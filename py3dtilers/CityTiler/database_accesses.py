@@ -22,7 +22,7 @@ def open_data_base(db_config_file_path):
     # Check that db configuration is well defined
     if (("PG_HOST" not in db_config) or ("PG_USER" not in db_config) or ("PG_NAME" not in db_config) or ("PG_PORT" not in db_config) or ("PG_PASSWORD" not in db_config)):
         print(("ERROR: Database is not properly defined in '{0}', please refer to README.md"
-              .format(db_config_file_path)))
+               .format(db_config_file_path)))
         sys.exit()
 
     # Connect to database

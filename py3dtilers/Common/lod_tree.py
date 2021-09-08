@@ -5,6 +5,7 @@ class LodTree():
     """
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     """
+
     def __init__(self, objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, with_texture=False):
         """
         create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
