@@ -8,6 +8,7 @@ from py3dtiles import Tile, TileSet
 from ..Common import kd_tree
 from .obj import Objs
 
+
 def parse_command_line():
     # arg parse
     text = '''A small utility that build a 3DTiles tileset out of the content

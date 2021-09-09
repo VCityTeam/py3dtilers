@@ -19,7 +19,7 @@ class ObjectToTile(object):
         self.id = None
 
         # Optional application specific data to be added to the batch table for this object
-        self.data = None
+        self.batchtable_data = None
 
         # A Bounding Volume Box object
         self.box = None
@@ -37,11 +37,11 @@ class ObjectToTile(object):
     def get_id(self):
         return self.id
 
-    def set_data(self, data):
-        self.data = data
+    def set_batchtable_data(self, data):
+        self.batchtable_data = data
 
-    def get_data(self):
-        return self.data
+    def get_batchtable_data(self):
+        return self.batchtable_data
 
     def get_centroid(self):
         return self.centroid

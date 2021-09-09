@@ -21,14 +21,17 @@ class CityMCityObject(ObjectToTile):
         super().set_id(id)
 
     def set_gml_id(self, gml_id):
-        super().set_data(gml_id)
+        batch_table_data = {
+            'gml_id': gml_id
+        }
+        super().set_batchtable_data(batch_table_data)
 
     def get_gml_id(self):
         """
         :return: the (city)gml identifier of an object that should be encountered
                 in the database.
         """
-        return super().get_data()
+        return super().get_batchtable_data.gml_id
 
 
 class CityMCityObjects(ObjectsToTile):
@@ -101,8 +104,7 @@ class CityMCityObjects(ObjectsToTile):
                 sys.exit(1)
             gml_id = t[2]
             if no_input:
-                new_object = CityMCityObject(object_id)
-                new_object.set_gml_id(gml_id)
+                new_object = CityMCityObject(object_id, gml_id)
                 result_objects.append(new_object)
             else:
                 cityobject = objects_with_gmlid_key[gml_id]

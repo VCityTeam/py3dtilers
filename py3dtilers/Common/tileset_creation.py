@@ -103,12 +103,20 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
 
     # Create a batch table and add the ID of each feature to it
     ids = [feature.get_id() for feature in objects]
-    data = [feature.get_data() for feature in objects]
     bt = BatchTable()
     bt.add_property_from_array("id", ids)
-    # if there is application specific data associated with the object, add it to the batch table
-    if not all([d is None for d in data]):
-        bt.add_property_from_array("data", data)
+
+    # if there is application specific data associated with the features, add it to the batch table
+    features_data = [feature.get_batchtable_data() for feature in objects]
+    if not all([feature_data is None for feature_data in features_data]):
+        # Construct a set of all possible batch table keys
+        bt_keys = set()
+        for key_subset in [feature_data.keys() for feature_data in features_data]:
+            bt_keys = bt_keys.union(set(key_subset))
+        # add feature data to batch table based on possible keys
+        for key in bt_keys:
+            key_data = [feature_data.get(key, None) for feature_data in features_data]
+            bt.add_property_from_array(key, key_data)
 
     if extension_name is not None:
         extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
