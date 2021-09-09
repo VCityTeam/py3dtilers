@@ -21,6 +21,7 @@ The output folder contains:
 
  * the resulting tileset file (with the .json extension)
  * a `tiles` folder containing the associated set of `.b3dm` files
+   * The database and GML IDs of objects in the tileset are stored in the [Batch Table](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/BatchTable/README.md) of each `.b3dm` file
 
 ### Objects type
 By default, the tiler will treat the data as __buildings__. You can change the type by adding one the 3 keywords:
