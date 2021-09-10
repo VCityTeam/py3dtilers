@@ -114,8 +114,12 @@ $ source venv/bin/activate
 
 ## CLI Usage
 
+### Tilers usage
+
+* CityTiler [readme](py3dtilers/CityTiler/README.md)
+* GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
+
 ### Concerning CityTiler
 
-* CityTiler [usage documentation](Doc/CityTilerUsage.md)
 * For developers, some [design notes](Doc/CityTilerDesignNotes.md)
 * Credentials: CityTiler original code is due to Jeremy Gaillard (when working at LIRIS, University of Lyon, France)
