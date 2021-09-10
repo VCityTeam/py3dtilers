@@ -55,6 +55,16 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
+To run CityTiler's tests, you need to install PostgreSQL.  
+On Windows, [download PostgreSQL]() then add the `bin` path (for example _C:\Program Files\PostgreSQL\10\bin_) in PATH environmental variable. In a Windows shell, run
+
+```bash
+> psql -c 'create database test_city_tiler;' -U postgres
+> psql -U postgres -d test_city_tiler -f tests/city_tiler_test_data/test_data.sql
+```
+
+You may have to change the [test config file](tests/city_tiler_test_data/test_config.yml) with the right password/port.
+
 ### Coding style
 
 First, install the additional dev requirements
