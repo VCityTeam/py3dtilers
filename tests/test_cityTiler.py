@@ -55,3 +55,113 @@ class Test_Tile(unittest.TestCase):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
+
+    def test_building_lod1(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_lod1"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMReliefs
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, create_lod1=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_building_loa(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_loa"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBuildings
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, create_loa=True, polygons_path="tests/city_tiler_test_data/polygons")
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_building_loa_lod1(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_loa_lod1"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBuildings
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, create_lod1=True, create_loa=True, polygons_path="tests/city_tiler_test_data/polygons")
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_building_BTH(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_BTH"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBuildings
+        CityMBuildings.set_bth()
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        CityMBuildings.with_bth = False
+        cursor.close()
+
+    def test_building_split_surface(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_split_surface"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBuildings
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_relief_split_surface(self):
+
+        directory = "tests/city_tiler_test_data/junk/relief_split_surface"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMReliefs
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_water_split_surface(self):
+
+        directory = "tests/city_tiler_test_data/junk/water_split_surface"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMWaterBodies
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_building_texture(self):
+
+        directory = "tests/city_tiler_test_data/junk/building_texture"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBuildings
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, with_texture=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_relief_texture(self):
+
+        directory = "tests/city_tiler_test_data/junk/relief_texture"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMReliefs
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, with_texture=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()

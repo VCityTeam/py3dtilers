@@ -17,7 +17,7 @@ def retrieve_buildings_and_sub_parts(cursor, buildingIds, classes, hierarchy):
     cursor.execute(
         "SELECT building.id, building_parent_id,"
         "       cityobject.gmlid, cityobject.objectclass_id "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
+        "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id "
         "                        WHERE building_root_id IN " + buildingIds)
     for t in cursor.fetchall():
         buildindsAndSubParts.append(
@@ -46,7 +46,7 @@ def retrieve_geometric_instances(cursor, buildingIds, classes, hierarchy):
     # We must first collect all the buildings and their parts:
     cursor.execute(
         "SELECT building.id "
-        "FROM building JOIN cityobject ON building.id=cityobject.id "
+        "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id "
         "                        WHERE building_root_id IN " + buildingIds)
 
     subBuildingIds = tuple([t[0] for t in cursor.fetchall()])
@@ -57,9 +57,9 @@ def retrieve_geometric_instances(cursor, buildingIds, classes, hierarchy):
         "SELECT cityobject.id, cityobject.gmlid, "
         "       thematic_surface.building_id, thematic_surface.objectclass_id, "
         "ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) "
-        "FROM surface_geometry JOIN thematic_surface "
+        "FROM citydb.surface_geometry JOIN citydb.thematic_surface "
         "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id "
-        "JOIN cityobject ON thematic_surface.id=cityobject.id "
+        "JOIN citydb.cityobject ON thematic_surface.id=cityobject.id "
         "WHERE thematic_surface.building_id IN %s "
         "GROUP BY surface_geometry.root_id, cityobject.id, cityobject.gmlid, "
         "        thematic_surface.building_id, thematic_surface.objectclass_id",
@@ -108,7 +108,7 @@ def create_batch_table_hierarchy(cursor, buildingIds):
 
     # ##### Retrieve the class names
     classDict = {}
-    cursor.execute("SELECT id, classname FROM objectclass")
+    cursor.execute("SELECT id, classname FROM citydb.objectclass")
     for t in cursor.fetchall():
         # TODO: allow custom fields to be added (here + in queries)
         classDict[t[0]] = (t[1], ['gmlid'])

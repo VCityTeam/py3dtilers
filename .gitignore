@@ -106,3 +106,5 @@ geojson_tilesets/
 tests/test_lod_tree_tilesets/
 tests/geojson_tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_tilesets
+tests/city_tiler_test_data/junk/
+tests/city_tiler_test_data/test_config.yml
