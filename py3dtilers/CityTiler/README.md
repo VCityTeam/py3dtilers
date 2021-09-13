@@ -87,10 +87,10 @@ The City Temporal Tiler creates tilesets with a __temporal extension__. This ext
 In order to run the CityTemporalTiler you will first need to obtain the so called [evolution difference files](https://github.com/VCityTeam/UD-Reproducibility/tree/master/Computations/3DTiles/LyonTemporal/PythonCallingDocker) between various temporal vintages. Let us assume such difference files were computed in between three time stamps (2009, 2012, 2015) and for two boroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes **from the home directory**:
 ```
 citygml-tiler-temporal                                         \
-  --db_config_path Tilers/CityTiler/CityTilerDBConfig2009.yml  \
-                   Tilers/CityTiler/CityTilerDBConfig2012.yml  \
-                   Tilers/CityTiler/CityTilerDBConfig2015.yml  \
-  --time_stamp 2009 2012 2015                                  \
+  --db_config_path py3dtilers/CityTiler/CityTilerDBConfig2009.yml  \
+                   py3dtilers/CityTiler/CityTilerDBConfig2012.yml  \
+                   py3dtilers/CityTiler/CityTilerDBConfig2015.yml  \
+  --time_stamps 2009 2012 2015                                  \
   --temporal_graph LYON_1ER_2009-2012/DifferencesAsGraph.json  \
                    LYON_1ER_2012-2015/DifferencesAsGraph.json  \
                    LYON_2EME_2009-2012/DifferencesAsGraph.json \

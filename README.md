@@ -61,6 +61,10 @@ On Windows, [download PostgreSQL]() then add the `bin` path (for example _C:\Pro
 ```bash
 > psql -c 'create database test_city_tiler;' -U postgres
 > psql -U postgres -d test_city_tiler -f tests/city_tiler_test_data/test_data.sql
+> psql -c 'create database test_temporal_2009;' -U postgres
+> psql -U postgres -d test_temporal_2009 -f tests/city_temporal_tiler_test_data/test_data_temporal_2009.sql
+> psql -c 'create database test_temporal_2012;' -U postgres
+> psql -U postgres -d test_temporal_2012 -f tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql
 ```
 
 You may have to change the [test config file](tests/city_tiler_test_data/test_config.yml) with the right password/port.

@@ -108,3 +108,4 @@ tests/geojson_tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_tilesets
 tests/city_tiler_test_data/junk/
 tests/city_tiler_test_data/test_config.yml
+tests/city_temporal_tiler_test_data/junk/

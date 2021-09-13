@@ -1,0 +1,25 @@
+{
+    "_comments": {
+        "_comment-a": "This is the output of 3DUse ChangeDetection algorithmof 3DUse, launched with the following command line",
+        "_comment-b": "extractBuildingDates --first_date 2009 --first_file \/Input\/junk\/stage_3\/LYON_2009_Stripped\/LYON_1ER_BATI_2009_splited_stripped.gml --second_date 2012 --second_file \/Input\/junk\/stage_3\/LYON_2012_Stripped\/LYON_1ER_BATI_2012_splited_stripped.gml --output_dir \/Input\/junk\/stage_4\/2009_2012_Differences\/LYON_1ER_2009_2012"
+    },
+    "nodes": [
+        {
+            "id": "163",
+            "globalid": "2009::LYON_1_00056_0"
+        },
+        {
+            "id": "713",
+            "globalid": "2012::LYON_1ER_00101_0"
+        }
+    ],
+    "edges": [
+        {
+            "id": "130",
+            "source": "163",
+            "target": "713",
+            "type": "replace",
+            "tags": "re-ided"
+        }
+    ]
+}
