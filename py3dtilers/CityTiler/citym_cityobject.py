@@ -31,7 +31,7 @@ class CityMCityObject(ObjectToTile):
         :return: the (city)gml identifier of an object that should be encountered
                 in the database.
         """
-        return super().get_batchtable_data.gml_id
+        return super().get_batchtable_data()['gml_id']
 
 
 class CityMCityObjects(ObjectsToTile):
@@ -90,7 +90,7 @@ class CityMCityObjects(ObjectsToTile):
             # not preserve the order of the objects that was given to the query
             objects_with_gmlid_key = dict()
             for cityobject in cityobjects:
-                objects_with_gmlid_key[cityobject.gml_id] = cityobject
+                objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
 
         for t in cursor.fetchall():
             object_id = t[0]
