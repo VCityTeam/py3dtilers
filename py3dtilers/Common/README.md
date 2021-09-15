@@ -1,6 +1,6 @@
 ## [object_to_tile](object_to_tile.py)
 ### ObjectToTile
-An [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry and a bounding box.  
+An [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry, a bounding box, and optionally can contain semantic data.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
 To set the triangles of an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_, use:  
 ```
@@ -16,6 +16,13 @@ object_to_tile.geom.triangles.append()
 The bounding box is a box containing the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_'s geometry. It can be set with:
 ```
 object_to_tile.set_box()
+```
+
+The semantic data contained in the object represents application specific data. This data can be added to the [Batch Table](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/BatchTable/README.md) in 3Dtiles.
+
+This data must be structured as a [Dictionary](https://www.w3schools.com/python/python_dictionaries.asp) of key/value pairs and can be set with:
+```
+object_to_tile.set_batchtable_data()
 ```
 
 ### ObjectsToTile

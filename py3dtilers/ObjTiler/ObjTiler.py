@@ -22,6 +22,7 @@ def parse_command_line():
                         help='path to the database configuration file')
 
     result = parser.parse_args()
+
     if(result.paths is None):
         print("Please provide a path to a directory "
               "containing some obj files or multiple directories")
