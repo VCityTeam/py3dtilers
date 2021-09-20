@@ -8,7 +8,7 @@ from py3dtilers.GeojsonTiler.GeojsonTiler import from_geojson_directory
 class Test_Tile(unittest.TestCase):
 
     def test_basic_case(self):
-        path = 'tests/geojson_tiler_test_data/geojson_1/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block.obj'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']
 
@@ -25,7 +25,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_properties_with_other_name(self):
-        path = 'tests/geojson_tiler_test_data/geojson_2/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_2/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_other_properties_name.obj'
         properties = ['height', 'HEIGHT', 'prec', 'NONE']
 
@@ -42,7 +42,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_default_height(self):
-        path = 'tests/geojson_tiler_test_data/geojson_2/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_2/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_default_height.obj'
         properties = ['height', '10', 'prec', 'NONE']
 
@@ -59,7 +59,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_no_height(self):
-        path = 'tests/geojson_tiler_test_data/geojson_2/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_2/'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_no_height.obj'
         properties = ['height', 'HAUTEUR', 'prec', 'NONE']
 
@@ -76,7 +76,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_create_loa(self):
-        path = 'tests/geojson_tiler_test_data/geojson_1/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
@@ -92,7 +92,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_create_lod1(self):
-        path = 'tests/geojson_tiler_test_data/geojson_1/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
@@ -108,7 +108,7 @@ class Test_Tile(unittest.TestCase):
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
     def test_create_lod1_and_loa(self):
-        path = 'tests/geojson_tiler_test_data/geojson_1/'
+        path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):

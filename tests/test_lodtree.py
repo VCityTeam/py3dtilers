@@ -43,7 +43,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 
-        tileset.write_to_directory('tests/test_lod_tree_tilesets/kd_tree')
+        tileset.write_to_directory('tests/lod_tree_test_data/tilesets/kd_tree')
 
     def test_lod1(self):
         triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
@@ -80,7 +80,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 
-        tileset.write_to_directory('tests/test_lod_tree_tilesets/lod1')
+        tileset.write_to_directory('tests/lod_tree_test_data/tilesets/lod1')
 
     def test_loa(self):
         triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
@@ -117,7 +117,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 
-        tileset.write_to_directory('tests/test_lod_tree_tilesets/loa')
+        tileset.write_to_directory('tests/lod_tree_test_data/tilesets/loa')
 
 
 if __name__ == '__main__':

@@ -70,7 +70,7 @@ On Windows, [download PostgreSQL](https://www.postgresql.org/download/) then add
 > psql -U postgres -d test_temporal_2012 -f tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql
 ```
 
-You may have to change the [test config file](tests/city_tiler_test_data/test_config.yml) with the right password/port.
+You may have to update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right port or password. with the right password/port.
 
 ### Coding style
 

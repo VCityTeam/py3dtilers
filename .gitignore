@@ -103,7 +103,7 @@ profile_reliefs/
 geojson_tilesets/
 
 # Tests output
-tests/test_lod_tree_tilesets/
+tests/lod_tree_test_data/tilesets
 tests/geojson_tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_tilesets
 tests/city_tiler_test_data/junk/
