@@ -1,7 +1,7 @@
 ### See also
  - [Understanding ifc geometry and processing](IFC_Geometry.md)
 
-### Intallation note : 
+### (__Outdated__) Intallation note : 
 
 - To install [IfcOpenShell](http://ifcopenshell.org/)
     - Download the archive of the binary [here](http://ifcopenshell.org/python)
@@ -12,7 +12,7 @@
 ### Running the IfcTiler
 
 ```
-(venv) python Tilers/IfcTiles/IfcTiler.py  $PATH
+(venv) ifc-tiler $PATH
 ```
 $PATH should point to a directory holding an IFC file. 
 The resulting 3DTiles tileset will contain the ifc geometry, ordered by category :

@@ -1,14 +1,10 @@
 
 # ObjTiler
 
-## See also
-
-- [Developer's/Design notes](DesignNotes.md)
-
 ## Running the ObjTiler
 
 ```bash
-(venv) python Tilers/ObjTiler/ObjTiler.py <directory_path>
+(venv) obj-tiler --paths <directory_path>
 ```
 
 where `directory_path` should point to a directory holding a set of OBJ files.
@@ -17,7 +13,7 @@ located within this directory, using their filename as ID.
 
 This command should produce a directory named `obj_tilesets`.
 
-## Debugging temporary notes
+## (__Outdated__) Debugging temporary notes
 
 Once ObjTiler was ran and in order to 3D visulalize the results produced by the Tilers you might
  - install https://github.com/AnalyticalGraphicsInc/3d-tiles-samples

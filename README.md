@@ -1,14 +1,15 @@
 # Python 3DTiles Tilers
 
-p3dtilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) or [CityGML through 3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/)
+p3dtilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/)
 
 p3dtilers uses [`py3dtiles` python library](https://gitlab.com/Oslandia/py3dtiles) for its in memory representation of tilesets
 
 **CLI** **Features**
 
-* Convert OBJ files to a 3D Tiles tileset
-* Convert GeoJson files to a 3D Tiles tileset 
-* Extract [CityGML](https://en.wikipedia.org/wiki/CityGML) features (e.g buildings, bridges, terrain...) from a [3dCityDB database](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/) to a 3D Tiles tileset
+* [ObjTiler](./py3dtilers/ObjTiler): converts OBJ files to a 3D Tiles tileset
+* [GeojsonTiler](./py3dtilers/GeojsonTiler): converts GeoJson files to a 3D Tiles tileset
+* [IfcTiler](./py3dtilers/IfcTiler): converts IFC files to a 3D Tiles tileset
+* [CityTiler](./py3dtilers/CityTiler): converts CityGML features (e.g buildings, water bodies, terrain...) extracted from a 3dCityDB database to a 3D Tiles tileset
 
 ## Installation from sources
 
@@ -26,6 +27,7 @@ Install binary sub-dependencies with your platform package installer e.g. for Ub
 $ apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
 $ apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
 ```
+
 (_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
 Proceed with the installation of `py3dtilers` per se
@@ -55,8 +57,9 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
-To run CityTiler's tests, you need to install PostgreSQL.  
-On Windows, [download PostgreSQL]() then add the `bin` path (for example _C:\Program Files\PostgreSQL\10\bin_) in PATH environmental variable. In a Windows shell, run
+To run CityTiler's tests, you need to install PostgreSQL.
+
+On Windows, [download PostgreSQL](https://www.postgresql.org/download/) then add the `bin` path (for example _C:\Program Files\PostgreSQL\10\bin_) in PATH environmental variable. In a Windows shell, run
 
 ```bash
 > psql -c 'create database test_city_tiler;' -U postgres
