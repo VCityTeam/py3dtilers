@@ -64,6 +64,12 @@ def install_ifcopenshell_from_url():
         '3.8': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-38-v0.6.0-517b819-linux64.zip',
         '3.9': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-39-v0.6.0-517b819-linux64.zip'
     }
+    ifc_url['Windows'] = {
+        '3.6': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-36-v0.6.0-517b819-win64.zip',
+        '3.7': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-37-v0.6.0-517b819-win64.zip',
+        '3.8': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-38-v0.6.0-517b819-win64.zip',
+        '3.9': 'https://s3.amazonaws.com/ifcopenshell-builds/ifcopenshell-python-39-v0.6.0-517b819-win64.zip'
+    }
     python_version = str(sys.version_info.major) + '.' + str(sys.version_info.minor)
     platform_name = platform.system()
     if platform_name not in ifc_url:
