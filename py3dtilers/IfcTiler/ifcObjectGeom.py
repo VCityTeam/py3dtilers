@@ -218,7 +218,8 @@ class IfcObjectGeom(ObjectToTile):
             for i in range(len(listDirection)):
                 vertex = np.dot(np.array(vertex), listDirection[i])
                 vertex = (vertex + listPosition[i])
-                vertex = vertex * self.convertionRatio
+
+            vertex = vertex * self.convertionRatio
             vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
 
         triangles = list()
@@ -271,10 +272,9 @@ class IfcObjectsGeom(ObjectsToTile):
         elevation = ifcSite.RefElevation
         placement = ifcSite.ObjectPlacement.RelativePlacement
         location = placement.Location.Coordinates
-        location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation) * unitRatio)
-
-        # transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
-        transformer = Transformer.from_crs("EPSG:3947", "EPSG:3857")
+        location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation))
+        transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
+        # transformer = Transformer.from_crs("EPSG:3947", "EPSG:3857")
         location = transformer.transform(location[0], location[1], location[2])
 
         if(placement.Axis is None):
@@ -310,7 +310,6 @@ class IfcObjectsGeom(ObjectsToTile):
             if not(element.is_a() in dictObjByType):
                 print(element.is_a())
                 dictObjByType[element.is_a()] = list()
-
             obj = IfcObjectGeom(element, originalUnit, targetedUnit)
             if(obj.hasGeom()):
                 dictObjByType[element.is_a()].append(obj)

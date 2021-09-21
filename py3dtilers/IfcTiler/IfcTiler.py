@@ -17,12 +17,12 @@ def parse_command_line():
                         type=str,
                         help='path to the ifc file')
     parser.add_argument('--originalUnit',
-                        nargs='*',
+                        nargs='?',
                         default="?",
                         type=str,
                         help='original unit of the ifc file')
     parser.add_argument('--targetedUnit',
-                        nargs='*',
+                        nargs='?',
                         default="?",
                         type=str,
                         help='targeted unit of the 3DTiles produced')
@@ -112,7 +112,6 @@ def main():
     this function creates an ifc tileset handling one ifc classe per tiles
     """
     args = parse_command_line()
-
     tileset = from_ifc(args.ifc_file_path, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
