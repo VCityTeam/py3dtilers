@@ -130,7 +130,7 @@ def get_folder_name(path):
     folder_name = path.split('\\')[-1]
     return folder_name
 
-    
+
 def main():
     """
     :return: no return value

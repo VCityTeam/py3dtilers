@@ -5,7 +5,6 @@ from py3dtiles import BoundingVolumeBox
 from py3dtilers.ObjTiler.ObjTiler import from_obj_directory
 
 
-
 class Test_Tile(unittest.TestCase):
 
     def test_basic_case(self):
