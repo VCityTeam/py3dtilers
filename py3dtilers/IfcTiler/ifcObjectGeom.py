@@ -218,7 +218,7 @@ class IfcObjectGeom(ObjectToTile):
             for i in range(len(listDirection)):
                 vertex = np.dot(np.array(vertex), listDirection[i])
                 vertex = (vertex + listPosition[i])
-            
+
             vertex = vertex * self.convertionRatio
             vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
 
@@ -301,7 +301,7 @@ class IfcObjectsGeom(ObjectsToTile):
         :return: a list of Obj.
         """
         ifc_file = ifcopenshell.open(path_to_file)
-        
+
         centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type('IfcElement')
 
