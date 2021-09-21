@@ -18,12 +18,12 @@ def parse_command_line():
                         help='path to the ifc file')
     parser.add_argument('--originalUnit',
                         nargs='*',
-                        default="m",
+                        default="?",
                         type=str,
                         help='original unit of the ifc file')
     parser.add_argument('--targetedUnit',
                         nargs='*',
-                        default="m",
+                        default="?",
                         type=str,
                         help='targeted unit of the 3DTiles produced')
 
