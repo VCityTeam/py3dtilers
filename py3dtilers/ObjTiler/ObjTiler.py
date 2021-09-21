@@ -122,6 +122,15 @@ def from_obj_directory(path):
     return tileset
 
 
+def get_folder_name(path):
+    print(path[-1])
+    if(path[-1] == '\\') or (path[-1] == '\\'):
+        path = path[:-1]
+    folder_name = path.split('/')[-1]
+    folder_name = path.split('\\')[-1]
+    return folder_name
+
+
 def main():
     """
     :return: no return value
@@ -142,7 +151,7 @@ def main():
             tileset = from_obj_directory(path)
             if(tileset is not None):
                 tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-                folder_name = path.split('/')[-1]
+                folder_name = get_folder_name(path)
                 print("tileset in obj_tilesets/" + folder_name)
                 tileset.write_to_directory("obj_tilesets/" + folder_name)
 

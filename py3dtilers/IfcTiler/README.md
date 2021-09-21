@@ -1,14 +1,6 @@
 ### See also
  - [Understanding ifc geometry and processing](IFC_Geometry.md)
 
-### (__Outdated__) Intallation note : 
-
-- To install [IfcOpenShell](http://ifcopenshell.org/)
-    - Download the archive of the binary [here](http://ifcopenshell.org/python)
-    - Use the following command to find the site-packages folder of your Python distribution ```python -m site --user-site```
-    - Place it the extracted archive
-
-
 ### Running the IfcTiler
 
 ```
@@ -25,15 +17,15 @@ This command should produce a directory named "ifc_tileset".
 
 - Projection system conversion using Pyproj : 
     - Actually "EPSG:27562" to "EPSG:3946" to support our test
-    - Needs to be used in CL
+    - Need to be used in CL
 
 - Scale change of the geometry : 
     - Actually, we can change from centimeter to meter
-    - Needs to be used or not in CL
-    - Needs to accept more units
+    - Need to be used or not in CL
+    - Need to accept more units
 
 - Support only IFC4 :
-    - needs to support IFC2XC3 : 
+    - need to support IFC2XC3 : 
       - test the file version
       - change the geometry access 
 
