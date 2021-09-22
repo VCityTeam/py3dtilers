@@ -180,8 +180,6 @@ class Geojsons(ObjectsToTile):
         :return: a list of geojson.
         """
 
-        geojson_dir = listdir(path)
-
         features = list()
         geometries = Geojsons()
 
@@ -191,26 +189,36 @@ class Geojsons(ObjectsToTile):
         vertice_offset = 1
         center = [0, 0, 0]
 
+        files = []
+
+        if(os.path.isdir(path)):
+            geojson_dir = listdir(path)
+            for geojson_file in geojson_dir:
+                file_path = os.path.join(path, geojson_file)
+                if(os.path.isfile(file_path)):
+                    if(".geojson" in geojson_file or ".json" in geojson_file):
+                        files.append(file_path)
+        else:
+            files.append(path)
+
         # Reads and parse every features from the file(s)
-        for geojson_file in geojson_dir:
-            if(os.path.isfile(os.path.join(path, geojson_file))):
-                if(".geojson" in geojson_file or ".json" in geojson_file):
-                    # Get id from its name
-                    id = geojson_file.replace('json', '')
-                    with open(os.path.join(path, geojson_file)) as f:
-                        gjContent = json.load(f)
+        for geojson_file in files:
+            # Get id from its name
+            id = geojson_file.replace('json', '')
+            with open(geojson_file) as f:
+                gjContent = json.load(f)
 
-                    k = 0
-                    for feature in gjContent['features']:
+            k = 0
+            for feature in gjContent['features']:
 
-                        if "ID" in feature['properties']:
-                            feature_id = feature['properties']['ID']
-                        else:
-                            feature_id = id + str(k)
-                            k += 1
-                        geojson = Geojson(feature_id)
-                        if(geojson.parse_geojson(feature, properties, is_roof)):
-                            features.append(geojson)
+                if "ID" in feature['properties']:
+                    feature_id = feature['properties']['ID']
+                else:
+                    feature_id = id + str(k)
+                    k += 1
+                geojson = Geojson(feature_id)
+                if(geojson.parse_geojson(feature, properties, is_roof)):
+                    features.append(geojson)
 
         create_obj = obj_name is not None
 

@@ -2,6 +2,7 @@ import os
 import argparse
 import sys
 
+from pathlib import Path
 from py3dtiles import BoundingVolumeBox
 from .geojson import Geojsons
 from ..Common import create_tileset
@@ -103,15 +104,15 @@ def main():
 
     properties = ['height', args.height, 'prec', args.prec]
 
-    if(os.path.isdir(path)):
-        print("Writing " + path)
+    if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
+        print("Reading " + path)
         tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             print("tileset in geojson_tilesets")
             tileset.write_to_directory("geojson_tilesets")
     else:
-        print(path, "is not a directory. Please target a directory containing geojson files.")
+        print(path, "is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.")
 
 
 if __name__ == '__main__':
