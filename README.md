@@ -125,6 +125,8 @@ $ source venv/bin/activate
 
 * CityTiler [readme](py3dtilers/CityTiler/README.md)
 * GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
+* ObjTiler [readme](py3dtilers/ObjTiler/README.md)
+* IfcTiler [readme](py3dtilers/IfcTiler/README.md)
 
 ### Concerning CityTiler
 
