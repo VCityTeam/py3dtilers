@@ -48,6 +48,17 @@ flag, that is try
 
 and look for the lines concerning `IfcOpenShell.`
 
+## Usage
+
+To use the a tiler, check the corresponding readme to know the usage and the features of the tiler.
+
+* CityTiler [readme](py3dtilers/CityTiler/README.md)
+* GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
+* ObjTiler [readme](py3dtilers/ObjTiler/README.md)
+* IfcTiler [readme](py3dtilers/IfcTiler/README.md)
+
+## Develop with py3dtilers
+
 ### Running the tests (optional)
 
 After the installation, if you additionally wish to run unit tests, use
@@ -118,15 +129,6 @@ $ source venv/bin/activate
 (venv)$ pip install -e .
 (venv)$ pytest
 ```
-
-## CLI Usage
-
-### Tilers usage
-
-* CityTiler [readme](py3dtilers/CityTiler/README.md)
-* GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
-* ObjTiler [readme](py3dtilers/ObjTiler/README.md)
-* IfcTiler [readme](py3dtilers/IfcTiler/README.md)
 
 ### Concerning CityTiler
 
