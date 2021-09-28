@@ -68,9 +68,13 @@ After the installation, if you additionally wish to run unit tests, use
 (venv)$ pytest
 ```
 
-To run CityTiler's tests, you need to install PostgreSQL.
+To run CityTiler's tests, you need to install PostgreSQL and Postgis. 
 
-On Windows, [download PostgreSQL](https://www.postgresql.org/download/) then add the `bin` path (for example _C:\Program Files\PostgreSQL\10\bin_) in PATH environmental variable. In a Windows shell, run
+To setup PostgreSQL with Postgis on Windows or Ubuntu, follow the [PostgreSQL tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/PostgreSQL_for_cityGML.md).
+
+Once the setup is over, update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right password.
+
+Then, in a shell, run:
 
 ```bash
 > psql -c 'create database test_city_tiler;' -U postgres
@@ -80,8 +84,6 @@ On Windows, [download PostgreSQL](https://www.postgresql.org/download/) then add
 > psql -c 'create database test_temporal_2012;' -U postgres
 > psql -U postgres -d test_temporal_2012 -f tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql
 ```
-
-You may have to update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right port or password. with the right password/port.
 
 ### Coding style
 
