@@ -4,7 +4,7 @@
 
 See the [installation notes](../README.md#running-the-tests-optional) to run the tests.
 
-The CityTiler and CityTemporalTiler tests will fail if you don't have PostgreSQL. If you want to develop with the CityTiler, follow the installion notes to host the databases.  
+The CityTiler and CityTemporalTiler tests will fail if you don't have PostgreSQL. If you want to develop with the CityTiler, follow the [installation notes](../README.md#running-the-tests-optional) to host the databases.  
 Once the databases created, you may have to update the config files (e.g [test_config.yml](city_tiler_test_data/test_config.yml), [test_config_2009.yml](city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](city_temporal_tiler_test_data/test_config_2012.yml)) with the right port or password.
 
 ## Notes concerning the data files
