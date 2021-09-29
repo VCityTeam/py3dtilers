@@ -72,7 +72,11 @@ To run CityTiler's tests, you need to install PostgreSQL and Postgis.
 
 To setup PostgreSQL with Postgis on Windows or Ubuntu, follow the [PostgreSQL tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/PostgreSQL_for_cityGML.md).
 
-Once the setup is over, update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right password.
+Once the setup is over, update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right password. Ignore the config files to avoid commiting them in the repo
+
+```bash
+git update-index --assume-unchanged tests/*/test_config*
+```
 
 Then, in a shell, run:
 
