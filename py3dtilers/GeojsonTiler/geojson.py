@@ -26,9 +26,6 @@ class Geojson(ObjectToTile):
     def __init__(self, id=None):
         super().__init__(id)
 
-        self.z = 0
-        """Altitude of the polygon that will be extruded to create the 3D geometry"""
-
         self.height = 0
         """How high we extrude the polygon when creating the 3D geometry"""
 
@@ -75,25 +72,20 @@ class Geojson(ObjectToTile):
 
         if feature['geometry']['type'] == 'Polygon':
             coords = feature['geometry']['coordinates'][0][:-1]
-            self.z = min(coords, key=lambda x: x[2])[2]
-            coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords))]
+            if is_roof:
+                for coord in coords:
+                    coord[2] -= self.height
             self.polygons.append(coords)
 
         if feature['geometry']['type'] == 'MultiPolygon':
-            z = np.inf
             for polygon in feature['geometry']['coordinates'][0]:
                 coords = polygon[:-1]
                 # Check if the coordinates are clockwise. If they are clockwise, the polygon is a hole, so we skip it
                 if not LinearRing(coords).is_ccw:
-                    min_z = min(coords, key=lambda x: x[2])[2]
-                    if min_z < z:
-                        z = min_z
-                    coords = [(coords[n][0], coords[n][1]) for n in range(0, len(coords))]
+                    if is_roof:
+                        for coord in coords:
+                            coord[2] -= self.height
                     self.polygons.append(coords)
-            self.z = z
-
-        if is_roof:
-            self.z -= self.height
 
         return True
 
@@ -101,7 +93,6 @@ class Geojson(ObjectToTile):
         """
         Creates the 3D extrusion of the feature.
         """
-        z = self.z
         height = self.height
 
         # Contains the triangles vertices. Used to create 3D tiles
@@ -117,15 +108,15 @@ class Geojson(ObjectToTile):
             vertices = [None] * (2 * length)
 
             for i, coord in enumerate(coordinates):
-                vertices[i] = np.array([coord[0], coord[1], z], dtype=np.float32)
-                vertices[i + length] = np.array([coord[0], coord[1], z + height], dtype=np.float32)
+                vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
+                vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
 
             # Triangulate the feature footprint
             poly_triangles = triangulate(coordinates)
 
             # Create upper face triangles
             for tri in poly_triangles:
-                upper_tri = [np.array([coord[0], coord[1], z + height], dtype=np.float32) for coord in tri]
+                upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
                 triangles.append(upper_tri)
 
             # Create side triangles
