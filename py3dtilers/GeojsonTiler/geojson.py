@@ -3,7 +3,7 @@ import os
 from os import listdir
 import numpy as np
 import json
-from shapely.geometry import LinearRing
+from shapely.geometry import LinearRing, LineString
 from earclip import triangulate
 
 from ..Common import ObjectToTile, ObjectsToTile
@@ -86,6 +86,26 @@ class Geojson(ObjectToTile):
                         for coord in coords:
                             coord[2] -= self.height
                     self.polygons.append(coords)
+
+        if feature['geometry']['type'] == 'LineString':
+            coords = feature['geometry']['coordinates']
+            start = coords[0]
+            end = coords[1]
+
+            line_1 = LineString([end, start])
+            left_end = line_1.parallel_offset(3, 'left')
+            right_end = line_1.parallel_offset(3, 'right')
+            a = left_end.boundary[1]
+            b = right_end.boundary[0]
+
+            line_2 = LineString([start,end])
+            left_start = line_2.parallel_offset(3, 'left')
+            right_start = line_2.parallel_offset(3, 'right')
+            c = left_start.boundary[1]
+            d = right_start.boundary[0]
+
+            polygon = [[a.x, a.y, start[2]], [b.x, b.y, start[2]], [c.x, c.y, end[2]], [d.x, d.y, end[2]]]
+            self.polygons.append(polygon)
 
         return True
 
@@ -194,6 +214,7 @@ class Geojsons(ObjectsToTile):
 
         # Reads and parse every features from the file(s)
         for geojson_file in files:
+            print("Reading " + geojson_file)
             # Get id from its name
             id = geojson_file.replace('json', '')
             with open(geojson_file) as f:

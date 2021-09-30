@@ -105,7 +105,6 @@ def main():
     properties = ['height', args.height, 'prec', args.prec]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        print("Reading " + path)
         tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
