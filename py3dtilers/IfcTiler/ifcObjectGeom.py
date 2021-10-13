@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import math
 import numpy as np
 import ifcopenshell
 from pyproj import Transformer
@@ -63,6 +64,39 @@ class IfcObjectGeom(ObjectToTile):
     def getIfcClasse(self):
         return self.ifcClasse
 
+    def computePointsFromRectangleProfileDef(self, XDim,YDim):
+        points = list()
+        maxX = XDim / 2
+        minX = -maxX
+        maxY = YDim / 2
+        minY = -maxY
+        
+        points.append(np.array([minX,minY]))
+        points.append(np.array([minX,maxY]))
+        points.append(np.array([maxX,maxY]))
+        points.append(np.array([maxX,minY]))
+        return points
+
+    def computePointsFromCircleProfileDef(self, radius):
+        points = list()
+        #The lower this value the higher quality the circle is with more points generated
+        stepSize = 0.1
+        t = 0
+        while t < 2 * math.pi:
+            points.append(np.array([radius * math.cos(t), radius * math.sin(t)]))
+            t += stepSize
+        return points
+
+    def getPointsFromOuterCurve(self, outerCurve):
+        if(hasattr(outerCurve, 'CoordList')):
+            return outerCurve.CoordList
+        else:
+            points = list()
+            for point in outerCurve : 
+                coord = point.Coordinates
+                points.append(np.array([coord[0],coord[1]]))
+            return points
+
     def extrudGeom(self, geom):
         depth = geom.Depth
         extrudedDirection = geom.ExtrudedDirection.DirectionRatios
@@ -81,7 +115,15 @@ class IfcObjectGeom(ObjectToTile):
 
         direction = computeDirection(axis, refDirection)
 
-        points = geom.SweptArea.OuterCurve.Points.CoordList
+        if(geom.SweptArea.is_a('IfcArbitraryClosedProfileDef')):
+            if(hasattr(geom.SweptArea.OuterCurve,"Points")):
+                points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
+            else : return None,None
+        elif(geom.SweptArea.is_a('IfcRectangleProfileDef')):
+            points = self.computePointsFromRectangleProfileDef(geom.SweptArea.XDim,geom.SweptArea.YDim)
+        elif(geom.SweptArea.is_a('IfcCircleProfileDef')):
+            points = self.computePointsFromCircleProfileDef(geom.SweptArea.Radius)
+
         center = self.computeCenter(points)
 
         vertexList = list()
@@ -202,7 +244,7 @@ class IfcObjectGeom(ObjectToTile):
                         sys.exit("Géométrie de ce type non encore gérée")
                     vertexListTemp = itemGeom.Coordinates.CoordList
 
-                elif(representation.RepresentationType == "SweptSolid"):
+                elif(representation.RepresentationType == "SweptSolid" and not(itemGeom.is_a("IfcBooleanClippingResult"))):
                     vertexListTemp, indexListTemp = self.extrudGeom(itemGeom)
                 if(vertexListTemp and indexListTemp):
                     for index in indexListTemp:
