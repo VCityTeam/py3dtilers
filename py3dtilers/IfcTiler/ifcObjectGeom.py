@@ -24,6 +24,9 @@ def computeDirection(axis, refDirection):
     XAxis = normalize(np.subtract(V, XVec))
     return np.array([XAxis, np.cross(Z, XAxis), Z])
 
+def compute2DDirection(refDirection):
+    return np.array([np.array([refDirection[0],refDirection[1]]), np.array([-refDirection[1],refDirection[0]])])
+
 
 def unitConversion(originalUnit, targetedUnit):
     conversions = {
@@ -64,20 +67,43 @@ class IfcObjectGeom(ObjectToTile):
     def getIfcClasse(self):
         return self.ifcClasse
 
-    def computePointsFromRectangleProfileDef(self, XDim,YDim):
+    def computePointsFromRectangleProfileDef(self, sweptArea):
         points = list()
-        maxX = XDim / 2
-        minX = -maxX
-        maxY = YDim / 2
+        maxX = sweptArea.XDim / 2
+        minX = -maxX 
+        maxY = sweptArea.YDim / 2
         minY = -maxY
+
+        position = sweptArea.Position.Location.Coordinates
+
+        refDirection = [1, 0]
+
+        if (sweptArea.Position.RefDirection):
+            refDirection = sweptArea.Position.RefDirection.DirectionRatios
+
+        direction = compute2DDirection(refDirection)
         
         points.append(np.array([minX,minY]))
         points.append(np.array([minX,maxY]))
         points.append(np.array([maxX,maxY]))
         points.append(np.array([maxX,minY]))
+        points.append(points[0])
+
+        for i in range(len(points)):
+            points[i] = np.dot(np.array(points[i]), direction) + position
         return points
 
-    def computePointsFromCircleProfileDef(self, radius):
+    def computePointsFromCircleProfileDef(self, sweptArea):
+        radius = sweptArea.Radius
+        position = sweptArea.Position.Location.Coordinates
+
+        refDirection = [1, 0]
+
+        if (sweptArea.Position.RefDirection):
+            refDirection = sweptArea.Position.RefDirection.DirectionRatios
+
+        direction = compute2DDirection(refDirection)
+
         points = list()
         #The lower this value the higher quality the circle is with more points generated
         stepSize = 0.1
@@ -85,6 +111,10 @@ class IfcObjectGeom(ObjectToTile):
         while t < 2 * math.pi:
             points.append(np.array([radius * math.cos(t), radius * math.sin(t)]))
             t += stepSize
+        points.append(points[0])
+
+        for i in range(len(points)):
+            points[i] = np.dot(np.array(points[i]), direction) + position 
         return points
 
     def getPointsFromOuterCurve(self, outerCurve):
@@ -120,9 +150,9 @@ class IfcObjectGeom(ObjectToTile):
                 points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
             else : return None,None
         elif(geom.SweptArea.is_a('IfcRectangleProfileDef')):
-            points = self.computePointsFromRectangleProfileDef(geom.SweptArea.XDim,geom.SweptArea.YDim)
+            points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
         elif(geom.SweptArea.is_a('IfcCircleProfileDef')):
-            points = self.computePointsFromCircleProfileDef(geom.SweptArea.Radius)
+            points = self.computePointsFromCircleProfileDef(geom.SweptArea)
 
         center = self.computeCenter(points)
 
