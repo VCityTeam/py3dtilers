@@ -60,6 +60,12 @@ class Geojson(ObjectToTile):
         i       = p + t*r
         return i.tolist()
 
+    def get_parallel_offset(self, start_point, end_point, offset=3):
+        line = LineString([start_point, end_point])
+        po_left = list(line.parallel_offset(offset, 'left', join_style=2, resolution=1).coords)
+        po_right = list(line.parallel_offset(offset, 'right', join_style=2, resolution=1).coords)
+        return po_left, po_right
+
     def buffer_line_string(self, coordinates):
         """
         Take a line string as coordinates
@@ -68,26 +74,17 @@ class Geojson(ObjectToTile):
         """
         polygon = [None] * (len(coordinates) * 2)
 
-        line_1 = LineString([coordinates[0], coordinates[1]])
-        po_1 = list(line_1.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
-        po_2 = list(line_1.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
-        polygon[0] = [po_1[0][0], po_1[0][1], coordinates[0][2]]
-        polygon[(len(coordinates) * 2) - 1] = [po_2[1][0], po_2[1][1], coordinates[0][2]]
+        po_1_left, po_1_right = self.get_parallel_offset(coordinates[0], coordinates[1], offset=3)
+        polygon[0] = [po_1_left[0][0], po_1_left[0][1], coordinates[0][2]]
+        polygon[(len(coordinates) * 2) - 1] = [po_1_right[1][0], po_1_right[1][1], coordinates[0][2]]
 
-        line_2 = LineString([coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1]])
-        po_1 = list(line_2.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
-        po_2 = list(line_2.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
-        polygon[len(coordinates) - 1] = [po_1[1][0], po_1[1][1], coordinates[len(coordinates) - 1][2]]
-        polygon[len(coordinates)] = [po_2[0][0], po_2[0][1], coordinates[len(coordinates) - 1][2]]
+        po_2_left, po_2_right = self.get_parallel_offset(coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1], offset=3)
+        polygon[len(coordinates) - 1] = [po_2_left[1][0], po_2_left[1][1], coordinates[len(coordinates) - 1][2]]
+        polygon[len(coordinates)] = [po_2_right[0][0], po_2_right[0][1], coordinates[len(coordinates) - 1][2]]
 
         for i in range(0, len(coordinates) - 2):
-            line_1 = LineString([coordinates[i], coordinates[i + 1]])
-            po_1_left = list(line_1.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
-            po_1_right = list(line_1.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
-
-            line_2 = LineString([coordinates[i + 1], coordinates[i + 2]])
-            po_2_left = list(line_2.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
-            po_2_right = list(line_2.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
+            po_1_left, po_1_right = self.get_parallel_offset(coordinates[i], coordinates[i + 1], offset=3)
+            po_2_left, po_2_right = self.get_parallel_offset(coordinates[i + 1], coordinates[i + 2], offset=3)
 
             intersection_left = self.line_intersect(po_1_left[0], po_1_left[1], po_2_left[0], po_2_left[1])
             intersection_right = self.line_intersect(po_1_right[0], po_1_right[1], po_2_right[0], po_2_right[1])
