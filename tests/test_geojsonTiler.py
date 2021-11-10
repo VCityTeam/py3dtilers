@@ -123,6 +123,38 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
+    def test_line_string(self):
+        path = 'tests/geojson_tiler_test_data/roads/line_string_road.geojson'
+        obj_name = 'tests/geojson_tiler_test_data/generated_objs/road_line_string.obj'
+        properties = ['height', '1', 'prec', 'NONE']
 
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_objs')
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
+
+        tileset = from_geojson_directory(path, properties, obj_name, is_roof=False)
+        if(tileset is not None):
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            folder_name = "line_string"
+            print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+            tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
+    def test_multi_line_string(self):
+        path = 'tests/geojson_tiler_test_data/roads/multi_line_string_road.geojson'
+        obj_name = 'tests/geojson_tiler_test_data/generated_objs/road_multi_line_string.obj'
+        properties = ['height', '1', 'prec', 'NONE']
+
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_objs')
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
+
+        tileset = from_geojson_directory(path, properties, obj_name, is_roof=False)
+        if(tileset is not None):
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            folder_name = "multi_line_string"
+            print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+            tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 if __name__ == '__main__':
     unittest.main()

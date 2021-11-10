@@ -1,0 +1,9 @@
+{
+"__comment": "Made with QGIS from IGN open data. The data can be downloaded here https://geoservices.ign.fr/ressource/159380",
+"type": "FeatureCollection",
+"name": "multi_line_string_road",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3946" } },
+"features": [
+{ "type": "Feature", "properties": { "ID": "TRONROUT0000002204326596", "IMPORTANCE": "5", "POS_SOL": "0", "PREC_ALTI": 1.5, "NB_VOIES": 2, "LARGEUR": 6.0 }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 1844029.513947007246315, 5175322.636617271229625, 167.4 ], [ 1844025.813421350205317, 5175334.446645244956017, 167.3 ], [ 1844021.113099121721461, 5175351.160729296505451, 167.2 ], [ 1844018.614547449396923, 5175368.074526521377265, 167.2 ], [ 1844014.41793160745874, 5175401.201409922912717, 167.0 ] ] ] } }
+]
+}
