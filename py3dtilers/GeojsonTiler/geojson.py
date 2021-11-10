@@ -41,6 +41,61 @@ class Geojson(ObjectToTile):
                     return i
         return None
 
+    def line_intersect(self, l1_start, l1_end, l2_start, l2_end):
+        """
+        https://stackoverflow.com/questions/64463369/intersection-of-two-infinite-lines-specified-by-points
+        Find the intersection between 2 lines, each line is defined by 2 points
+        """
+        p1_start    = np.asarray(l1_start)
+        p1_end      = np.asarray(l1_end)
+        p2_start    = np.asarray(l2_start)
+        p2_end      = np.asarray(l2_end)
+
+        p       = p1_start
+        r       = (p1_end-p1_start)
+        q       = p2_start
+        s       = (p2_end-p2_start)
+
+        t       = np.cross(q - p,s)/(np.cross(r,s))
+        i       = p + t*r
+        return i.tolist()
+
+    def buffer_line_string(self, coordinates):
+        """
+        Take a line string as coordinates
+
+        Return: a buffered polygon
+        """
+        polygon = [None] * (len(coordinates) * 2)
+
+        line_1 = LineString([coordinates[0], coordinates[1]])
+        po_1 = list(line_1.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
+        po_2 = list(line_1.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
+        polygon[0] = [po_1[0][0], po_1[0][1], coordinates[0][2]]
+        polygon[(len(coordinates) * 2) - 1] = [po_2[1][0], po_2[1][1], coordinates[0][2]]
+
+        line_2 = LineString([coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1]])
+        po_1 = list(line_2.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
+        po_2 = list(line_2.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
+        polygon[len(coordinates) - 1] = [po_1[1][0], po_1[1][1], coordinates[len(coordinates) - 1][2]]
+        polygon[len(coordinates)] = [po_2[0][0], po_2[0][1], coordinates[len(coordinates) - 1][2]]
+
+        for i in range(0, len(coordinates) - 2):
+            line_1 = LineString([coordinates[i], coordinates[i + 1]])
+            po_1_left = list(line_1.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
+            po_1_right = list(line_1.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
+
+            line_2 = LineString([coordinates[i + 1], coordinates[i + 2]])
+            po_2_left = list(line_2.parallel_offset(3, 'left', join_style=2, resolution=1).coords)
+            po_2_right = list(line_2.parallel_offset(3, 'right', join_style=2, resolution=1).coords)
+
+            intersection_left = self.line_intersect(po_1_left[0], po_1_left[1], po_2_left[0], po_2_left[1])
+            intersection_right = self.line_intersect(po_1_right[0], po_1_right[1], po_2_right[0], po_2_right[1])
+            polygon[i + 1] = [intersection_left[0], intersection_left[1], coordinates[i + 1][2]]
+            polygon[len(polygon) - 2 - i] = [intersection_right[0], intersection_right[1], coordinates[i + 1][2]]
+
+        return polygon
+
     def parse_geojson(self, feature, properties, is_roof):
         """
         Parse a feature of the .geojson file to extract the height and the coordinates of the feature.
@@ -87,25 +142,13 @@ class Geojson(ObjectToTile):
                             coord[2] -= self.height
                     self.polygons.append(coords)
 
+        if feature['geometry']['type'] == 'MultiLineString':
+            coords = feature['geometry']['coordinates'][0]
+            self.polygons.append(self.buffer_line_string(coords))
+
         if feature['geometry']['type'] == 'LineString':
             coords = feature['geometry']['coordinates']
-            start = coords[0]
-            end = coords[1]
-
-            line_1 = LineString([end, start])
-            left_end = line_1.parallel_offset(3, 'left')
-            right_end = line_1.parallel_offset(3, 'right')
-            a = left_end.boundary[1]
-            b = right_end.boundary[0]
-
-            line_2 = LineString([start,end])
-            left_start = line_2.parallel_offset(3, 'left')
-            right_start = line_2.parallel_offset(3, 'right')
-            c = left_start.boundary[1]
-            d = right_start.boundary[0]
-
-            polygon = [[a.x, a.y, start[2]], [b.x, b.y, start[2]], [c.x, c.y, end[2]], [d.x, d.y, end[2]]]
-            self.polygons.append(polygon)
+            self.polygons.append(self.buffer_line_string(coords))
 
         return True
 
