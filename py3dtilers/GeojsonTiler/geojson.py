@@ -3,7 +3,7 @@ import os
 from os import listdir
 import numpy as np
 import json
-from shapely.geometry import LinearRing, LineString
+from shapely.geometry import LineString
 from earclip import triangulate
 
 from ..Common import ObjectToTile, ObjectsToTile
@@ -23,11 +23,17 @@ class Geojson(ObjectToTile):
     # Default height will be used if no height is found when parsing the data
     default_height = 2
 
+    # Default width will be used if no width is found when parsing LineString or MultiLineString
+    default_width = 2
+
     def __init__(self, id=None):
         super().__init__(id)
 
         self.height = 0
         """How high we extrude the polygon when creating the 3D geometry"""
+
+        self.width = 0
+        """The width of the buffer when parsing LineString or MultiLineString"""
 
         self.vertices = list()
         self.triangles = list()
@@ -73,18 +79,19 @@ class Geojson(ObjectToTile):
         Return: a buffered polygon
         """
         polygon = [None] * (len(coordinates) * 2)
+        width_offset = self.width / 2
 
-        po_1_left, po_1_right = self.get_parallel_offset(coordinates[0], coordinates[1], offset=3)
+        po_1_left, po_1_right = self.get_parallel_offset(coordinates[0], coordinates[1], offset=width_offset)
         polygon[0] = [po_1_left[0][0], po_1_left[0][1], coordinates[0][2]]
         polygon[(len(coordinates) * 2) - 1] = [po_1_right[1][0], po_1_right[1][1], coordinates[0][2]]
 
-        po_2_left, po_2_right = self.get_parallel_offset(coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1], offset=3)
+        po_2_left, po_2_right = self.get_parallel_offset(coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1], offset=width_offset)
         polygon[len(coordinates) - 1] = [po_2_left[1][0], po_2_left[1][1], coordinates[len(coordinates) - 1][2]]
         polygon[len(coordinates)] = [po_2_right[0][0], po_2_right[0][1], coordinates[len(coordinates) - 1][2]]
 
         for i in range(0, len(coordinates) - 2):
-            po_1_left, po_1_right = self.get_parallel_offset(coordinates[i], coordinates[i + 1], offset=3)
-            po_2_left, po_2_right = self.get_parallel_offset(coordinates[i + 1], coordinates[i + 2], offset=3)
+            po_1_left, po_1_right = self.get_parallel_offset(coordinates[i], coordinates[i + 1], offset=width_offset)
+            po_2_left, po_2_right = self.get_parallel_offset(coordinates[i + 1], coordinates[i + 2], offset=width_offset)
 
             intersection_left = self.line_intersect(po_1_left[0], po_1_left[1], po_2_left[0], po_2_left[1])
             intersection_right = self.line_intersect(po_1_right[0], po_1_right[1], po_2_right[0], po_2_right[1])
@@ -99,6 +106,8 @@ class Geojson(ObjectToTile):
         """
         # Current feature number (used for debug)
         Geojson.n_feature += 1
+
+        geom_type = feature['geometry']['type']
 
         # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
         prec_name = properties[properties.index('prec') + 1]
@@ -117,34 +126,40 @@ class Geojson(ObjectToTile):
                 if feature['properties'][height_name] > 0:
                     self.height = feature['properties'][height_name]
                 else:
-                    return False
+                    self.height = Geojson.default_height
             else:
                 print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
                 self.height = Geojson.default_height
 
-        if feature['geometry']['type'] == 'Polygon':
-            coords = feature['geometry']['coordinates'][0][:-1]
+        if geom_type == 'LineString' or geom_type == 'MultiLineString':
+            width_name = properties[properties.index('width') + 1]
+            if width_name.replace('.', '', 1).isdigit():
+                self.width = float(width_name)
+            else:
+                if width_name in feature['properties']:
+                    if feature['properties'][width_name] is not None and feature['properties'][width_name] > 0:
+                        self.width = feature['properties'][width_name]
+                    else:
+                        self.width = Geojson.default_width
+                else:
+                    print("No propertie called " + width_name + " in feature " + str(Geojson.n_feature) + ". Set width to default value (" + str(Geojson.default_width) + ").")
+                    self.width = Geojson.default_width
+
+        if geom_type == 'Polygon' or geom_type == 'MultiPolygon':
+            if geom_type == 'Polygon':
+                coords = feature['geometry']['coordinates'][0][:-1]
+            else:
+                coords = feature['geometry']['coordinates'][0][0][:-1]
             if is_roof:
                 for coord in coords:
                     coord[2] -= self.height
             self.polygons.append(coords)
 
-        if feature['geometry']['type'] == 'MultiPolygon':
-            for polygon in feature['geometry']['coordinates'][0]:
-                coords = polygon[:-1]
-                # Check if the coordinates are clockwise. If they are clockwise, the polygon is a hole, so we skip it
-                if not LinearRing(coords).is_ccw:
-                    if is_roof:
-                        for coord in coords:
-                            coord[2] -= self.height
-                    self.polygons.append(coords)
-
-        if feature['geometry']['type'] == 'MultiLineString':
-            coords = feature['geometry']['coordinates'][0]
-            self.polygons.append(self.buffer_line_string(coords))
-
-        if feature['geometry']['type'] == 'LineString':
-            coords = feature['geometry']['coordinates']
+        if geom_type == 'LineString' or geom_type == 'MultiLineString':
+            if geom_type == 'LineString':
+                coords = feature['geometry']['coordinates']
+            else:
+                coords = feature['geometry']['coordinates'][0]
             self.polygons.append(self.buffer_line_string(coords))
 
         return True

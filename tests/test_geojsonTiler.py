@@ -126,7 +126,7 @@ class Test_Tile(unittest.TestCase):
     def test_line_string(self):
         path = 'tests/geojson_tiler_test_data/roads/line_string_road.geojson'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/road_line_string.obj'
-        properties = ['height', '1', 'prec', 'NONE']
+        properties = ['height', '1', 'width', '1', 'prec', 'NONE']
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
@@ -143,7 +143,7 @@ class Test_Tile(unittest.TestCase):
     def test_multi_line_string(self):
         path = 'tests/geojson_tiler_test_data/roads/multi_line_string_road.geojson'
         obj_name = 'tests/geojson_tiler_test_data/generated_objs/road_multi_line_string.obj'
-        properties = ['height', '1', 'prec', 'NONE']
+        properties = ['height', '1', 'width', '1', 'prec', 'NONE']
 
         if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
             os.makedirs('tests/geojson_tiler_test_data/generated_objs')
