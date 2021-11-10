@@ -156,5 +156,7 @@ class Test_Tile(unittest.TestCase):
             folder_name = "multi_line_string"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
+
 if __name__ == '__main__':
     unittest.main()

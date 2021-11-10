@@ -46,18 +46,18 @@ class Geojson(ObjectToTile):
         https://stackoverflow.com/questions/64463369/intersection-of-two-infinite-lines-specified-by-points
         Find the intersection between 2 lines, each line is defined by 2 points
         """
-        p1_start    = np.asarray(l1_start)
-        p1_end      = np.asarray(l1_end)
-        p2_start    = np.asarray(l2_start)
-        p2_end      = np.asarray(l2_end)
+        p1_start = np.asarray(l1_start)
+        p1_end = np.asarray(l1_end)
+        p2_start = np.asarray(l2_start)
+        p2_end = np.asarray(l2_end)
 
-        p       = p1_start
-        r       = (p1_end-p1_start)
-        q       = p2_start
-        s       = (p2_end-p2_start)
+        p = p1_start
+        r = (p1_end - p1_start)
+        q = p2_start
+        s = (p2_end - p2_start)
 
-        t       = np.cross(q - p,s)/(np.cross(r,s))
-        i       = p + t*r
+        t = np.cross(q - p, s) / (np.cross(r, s))
+        i = p + t * r
         return i.tolist()
 
     def get_parallel_offset(self, start_point, end_point, offset=3):
