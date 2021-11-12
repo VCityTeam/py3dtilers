@@ -137,12 +137,35 @@ class CityMBuildings(CityMCityObjects):
     @staticmethod
     def sql_query_textures(image_uri):
         """
-        :param buildings: a string which is the uri of the texture to select in the database
+        :param image_uri: a string which is the uri of the texture to select in the database
         :return: a string containing the right SQL query that should be executed.
         """
 
         query = \
             "SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = '" + image_uri + "' "
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        """
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        """
+
+        query = \
+            "SELECT " + \
+            "ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) " + \
+            "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
+            "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+            "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
+            "WHERE building.building_root_id = " + str(id) + \
+            " GROUP BY building.building_root_id"
+
         return query
 
     @staticmethod
