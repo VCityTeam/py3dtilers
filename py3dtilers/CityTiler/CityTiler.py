@@ -1,5 +1,6 @@
 import argparse
 import pathlib
+import numpy as np
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
@@ -114,6 +115,7 @@ def get_surfaces_with_texture(cursor, cityobjects, objects_type):
     for cityobject in cityobjects:
         id = '(' + str(cityobject.get_database_id()) + ')'
         cursor.execute(objects_type.sql_query_geometries_with_texture_coordinates(id))
+        current_object_surfaces = list()
         for t in cursor.fetchall():
             surface_id = t[0]
             geom_as_string = t[1]
@@ -131,8 +133,14 @@ def get_surfaces_with_texture(cursor, cityobjects, objects_type):
                     surface.set_texture(texture.get_texture_image())
                     surface.set_box()
                     surfaces.append(surface)
+                    current_object_surfaces.append(surface)
                 except ValueError:
                     continue
+        cursor.execute(objects_type.sql_query_centroid(cityobject.get_database_id()))
+        centroid = cursor.fetchall()
+        for s in current_object_surfaces:
+            s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
+
     return CityMCityObjects(surfaces)
 
 
