@@ -12,13 +12,21 @@ See https://github.com/VCityTeam/py3dtilers/blob/master/README.md
 
 ## Use the Tiler
 ### Files path
-To execute the GeojsonTiler, use the flag `--path` followed by the path of a folder containing .json or .geojson files
+To execute the GeojsonTiler, use the flag `--path` followed by the path of a geojson file or a folder containing geojson files
 
 Example:
+
+```bash
+geojson-tiler --path ../../geojsons/file.geojson
 ```
-geojson-tiler --path ../../geojson/
+
+It will read ___file.geojson___ and parse it into 3DTiles.
+
+```bash
+geojson-tiler --path ../../geojsons/
 ```
-It will read all .geojson and .json in the _geojson_ directory and parse them into 3DTiles.
+
+It will read all .geojson and .json in the ___geojsons___ directory and parse them into 3DTiles.
 
 ### LOA
 Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
