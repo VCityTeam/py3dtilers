@@ -40,6 +40,8 @@ class Geojson(ObjectToTile):
 
         self.polygons = list()
 
+        self.custom_triangulation = False
+
     def find_coordinate_index(self, coordinates, value):
         for i, coord in enumerate(coordinates):
             if coord[0] == value[0]:
@@ -99,6 +101,16 @@ class Geojson(ObjectToTile):
             polygon[len(polygon) - 2 - i] = [intersection_right[0], intersection_right[1], coordinates[i + 1][2]]
 
         return polygon
+
+    def custom_triangulate(self, coordinates):
+        triangles = list()
+        length = len(coordinates)
+
+        for i in range(0, (length // 2) - 1):
+            triangles.append([coordinates[i], coordinates[length - 1 - i], coordinates[i + 1]])
+            triangles.append([coordinates[i + 1], coordinates[length - 1 - i], coordinates[length - 2 - i]])
+
+        return triangles
 
     def parse_geojson(self, feature, properties, is_roof):
         """
@@ -160,6 +172,7 @@ class Geojson(ObjectToTile):
                 coords = feature['geometry']['coordinates']
             else:
                 coords = feature['geometry']['coordinates'][0]
+            self.custom_triangulation = True
             self.polygons.append(self.buffer_line_string(coords))
 
         return True
@@ -187,7 +200,10 @@ class Geojson(ObjectToTile):
                 vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
 
             # Triangulate the feature footprint
-            poly_triangles = triangulate(coordinates)
+            if self.custom_triangulation:
+                poly_triangles = self.custom_triangulate(coordinates)
+            else:
+                poly_triangles = triangulate(coordinates)
 
             # Create upper face triangles
             for tri in poly_triangles:
