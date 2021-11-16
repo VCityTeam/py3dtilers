@@ -5,7 +5,10 @@ The CityTiler is a Python tiler which creates 3DTiles (.b3dm) from [3DCityDB](ht
 
 The tiler can create 3DTiles of __buildings__, __terrains__ and __water bodies__.
 ## Installation
+
 See https://github.com/VCityTeam/py3dtilers/blob/master/README.md
+
+If you want to create your own local 3DCityDB databases, follow the [3DCityDB tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/PostgreSQL_for_cityGML.md)
 
 ## Use the Tiler
 ### Run the CityTiler
