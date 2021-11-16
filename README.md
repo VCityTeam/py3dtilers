@@ -13,6 +13,8 @@ p3dtilers uses [`py3dtiles` python library](https://gitlab.com/Oslandia/py3dtile
 
 ## Installation from sources
 
+NB: py3dtilers installation requires a Bash shell. If you're using Windows 10, see how use the [Ubuntu Bash shell on Windows](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/).
+
 In order to install py3dtilers from sources use:
 
 ```bash
