@@ -12,16 +12,24 @@ See https://github.com/VCityTeam/py3dtilers/blob/master/README.md
 
 ## Use the Tiler
 ### Files path
-To execute the GeojsonTiler, use the flag `--path` followed by the path of a folder containing .json or .geojson files
+To execute the GeojsonTiler, use the flag `--path` followed by the path of a geojson file or a folder containing geojson files
 
 Example:
+
+```bash
+geojson-tiler --path ../../geojsons/file.geojson
 ```
-geojson-tiler --path ../../geojson/
+
+It will read ___file.geojson___ and parse it into 3DTiles.
+
+```bash
+geojson-tiler --path ../../geojsons/
 ```
-It will read all .geojson and .json in the _geojson_ directory and parse them into 3DTiles.
+
+It will read all .geojson and .json in the ___geojsons___ directory and parse them into 3DTiles.
 
 ### LOA
-Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
 
 To use the LOA option:
 ```
@@ -53,22 +61,24 @@ By default, the tiler considers that the polygons in the .geojson files are at t
 geojson-tiler --path <path> --is_roof
 ```
 ### Properties
-The Tiler uses '_height_' property to create 3D tiles from features. It also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).
+The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ geometries. This width will define the size of the buffer applied to the lines.  
+The Tiler also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).
 
 By default, those properties are equal to:
 - 'prec' --> 'PREC_ALTI'
 - 'height' --> 'HAUTEUR'
+- 'width' --> 'LARGEUR'
 
-It means the tiler will target the property 'HAUTEUR' to find the height and 'PREC_ALTI' to find the altitude precision.
+It means the tiler will target the property 'HAUTEUR' to find the height, 'LARGEUR' to find the width and 'PREC_ALTI' to find the altitude precision.
 
-If the file don't have those properties, you can change one or several property names to target in command line with `--height` or `--prec`:
+If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`:
 ```
-geojson-tiler --path <path> --height HEIGHT_NAME --prec PREC_NAME
+geojson-tiler --path <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME
 ```
 
-You can set the height to a default value (used for all features). The height must be an _int_ or a _float_:
+You can set the height or the width to a default value (used for all features). The value must be an _int_ or a _float_:
 ```
-geojson-tiler --path <path> --height 10.5
+geojson-tiler --path <path> --height 10.5 --width 6.4
 ```
 
 If you want to skip the precision, you can set _prec_ to '_NONE_':

@@ -55,7 +55,7 @@ The static methods in the _Group_ class allow to distribute [:red_circle:](#obje
 The groups can be created with:
 ```
 # Group together the objects which are in the same polygon
-# Takes : an ObjectsToTile, a path to a folder containing polygons as .json files
+# Takes : an ObjectsToTile, a path to a Geojson file containing polygons, or a folder containing Geojson files
 groups = Group.group_objects_by_polygons(objects_to_tile, polygons_path)
 ```
 ```
@@ -123,7 +123,7 @@ To create a tileset with LOA\*, use:
 ```
 create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
                also_create_loa=True, # Indicate to create a LOA
-               polygons_path="./path/to/dir") # Path to a directory containing polygons as .json files
+               polygons_path="./path/to/dir") # Path to a Geojson file containing polygons, or a folder with many Geojson files
 ```
 \* _Level Of Abstraction_, it consists in a tile with a low level of details and an abstract geometry representing multiple geometries (for example a cube to represent a block of buildings).
 
@@ -184,7 +184,7 @@ A tileset can be created with both LOD1 and LOA with:
 create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
                also_create_lod1=True, # Indicate to create a LOD1
                also_create_loa=True, # Indicate to create a LOA
-               polygons_path="./path/to/dir") # Path to a directory containing polygons as .json files
+               polygons_path="./path/to/dir") # Path to a Geojson file containing polygons, or a folder with many Geojson files
 ```
 Resulting tilesets:
 

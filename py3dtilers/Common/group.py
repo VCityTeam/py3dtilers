@@ -1,6 +1,5 @@
 import os
 from os import listdir
-import sys
 import json
 from shapely.geometry import Point, Polygon
 from ..Common import ObjectsToTile
@@ -64,17 +63,22 @@ class Groups():
         Load the polygons from the files in the folder
         :param polygons_path: the path of the folder containing the files
         """
-        try:
-            polygon_dir = listdir(polygons_path)
-        except FileNotFoundError:
-            print("No directory called ", polygons_path, ". Please, place the polygons to read in", polygons_path)
-            print("Exiting")
-            sys.exit(1)
         polygons = list()
+        files = []
+
+        if(os.path.isdir(polygons_path)):
+            geojson_dir = listdir(polygons_path)
+            for geojson_file in geojson_dir:
+                file_path = os.path.join(polygons_path, geojson_file)
+                if(os.path.isfile(file_path)):
+                    files.append(file_path)
+        else:
+            files.append(polygons_path)
+
         # Read all the polygons in the file(s)
-        for polygon_file in polygon_dir:
-            if(".geojson" in polygon_file or ".json" in polygon_file):
-                with open(os.path.join(polygons_path, polygon_file)) as f:
+        for file in files:
+            if(".geojson" in file or ".json" in file):
+                with open(file) as f:
                     gjContent = json.load(f)
                 for feature in gjContent['features']:
                     if feature['geometry']['type'] == 'Polygon':

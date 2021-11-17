@@ -5,7 +5,10 @@ The CityTiler is a Python tiler which creates 3DTiles (.b3dm) from [3DCityDB](ht
 
 The tiler can create 3DTiles of __buildings__, __terrains__ and __water bodies__.
 ## Installation
+
 See https://github.com/VCityTeam/py3dtilers/blob/master/README.md
+
+If you want to create your own local 3DCityDB databases, follow the [3DCityDB tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/PostgreSQL_for_cityGML.md)
 
 ## Use the Tiler
 ### Run the CityTiler
@@ -40,7 +43,7 @@ citygml-tiler <path_to_file>/Config.yml water
 ```
 
 ### LOA
-Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a directory containing geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
 
 To use the LOA option:
 ```

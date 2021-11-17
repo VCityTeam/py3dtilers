@@ -95,7 +95,7 @@ class CityMReliefs(CityMCityObjects):
     @staticmethod
     def sql_query_textures(image_uri):
         """
-        :param buildings: a string which is the uri of the texture to select in the database
+        :param image_uri: a string which is the uri of the texture to select in the database
         :return: a string containing the right SQL query that should be executed.
         """
 
@@ -129,4 +129,29 @@ class CityMReliefs(CityMCityObjects):
              "JOIN citydb.tex_image "
              "ON surface_data.tex_image_id=tex_image.id "
              "WHERE relief_feature.id IN " + reliefs_ids)
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        """
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        """
+
+        query = \
+            "SELECT " + \
+            "ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) " + \
+            "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp " + \
+            "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
+            "JOIN citydb.tin_relief " + \
+            "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
+            "JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+            "WHERE relief_feature.id = " + str(id) + \
+            " GROUP BY relief_feature.id"
+
         return query

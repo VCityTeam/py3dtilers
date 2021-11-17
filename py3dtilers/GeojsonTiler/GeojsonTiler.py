@@ -43,7 +43,16 @@ def parse_command_line():
                         default='HAUTEUR',
                         type=str,
                         help='Change the name of the propertie to look for in the feature for height.\
+                              The value can be a float, this will set the default height.\
                               Default property name is HAUTEUR')
+
+    parser.add_argument('--width',
+                        nargs='?',
+                        default='LARGEUR',
+                        type=str,
+                        help='Change the name of the propertie to look for in the feature for width.\
+                              The value can be a float, this will set the default width.\
+                              Default property name is LARGEUR')
 
     parser.add_argument('--prec',
                         nargs='?',
@@ -102,10 +111,9 @@ def main():
 
     create_loa = args.loa is not None
 
-    properties = ['height', args.height, 'prec', args.prec]
+    properties = ['height', args.height, 'width', args.width, 'prec', args.prec]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        print("Reading " + path)
         tileset = from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
