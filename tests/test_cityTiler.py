@@ -6,6 +6,7 @@ from py3dtilers.Texture.texture import Texture
 from py3dtilers.CityTiler.citym_building import CityMBuildings
 from py3dtilers.CityTiler.citym_relief import CityMReliefs
 from py3dtilers.CityTiler.citym_waterbody import CityMWaterBodies
+from py3dtilers.CityTiler.citym_bridge import CityMBridges
 from py3dtilers.CityTiler.database_accesses import open_data_base
 from py3dtilers.CityTiler.CityTiler import from_3dcitydb
 
@@ -162,6 +163,30 @@ class Test_Tile(unittest.TestCase):
         create_directory(directory)
         objects_type.set_cursor(cursor)
         tileset = from_3dcitydb(cursor, objects_type, with_texture=True)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_bridge(self):
+
+        directory = "tests/city_tiler_test_data/junk/bridge_basic_case"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBridges
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        tileset.write_to_directory(directory)
+        cursor.close()
+
+    def test_bridge_split_surface(self):
+
+        directory = "tests/city_tiler_test_data/junk/bridge_split_surface"
+        cursor = open_data_base("tests/city_tiler_test_data/test_config.yml")
+        objects_type = CityMBridges
+        create_directory(directory)
+        objects_type.set_cursor(cursor)
+        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
