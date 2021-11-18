@@ -98,6 +98,8 @@ ENV/
 junk/
 junk_buildings/
 junk_reliefs/
+junk_water_bodies/
+junk_bridges/
 profile_buildings/
 profile_reliefs/
 geojson_tilesets/

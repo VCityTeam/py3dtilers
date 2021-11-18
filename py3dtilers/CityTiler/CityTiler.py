@@ -10,6 +10,7 @@ from .citym_cityobject import CityMCityObjects, CityMCityObject
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
+from .citym_bridge import CityMBridges
 from .database_accesses import open_data_base
 
 
@@ -30,7 +31,7 @@ def parse_command_line():
                         nargs='?',
                         default='building',
                         type=str,
-                        choices=['building', 'relief', 'water'],
+                        choices=['building', 'relief', 'water', 'bridge'],
                         help='identify the object type to seek in the database')
 
     parser.add_argument('--loa',
@@ -82,6 +83,8 @@ def get_surfaces_merged(cursor, cityobjects, objects_type):
                 cityobject.set_box()
                 cityobjects_with_geom.append(cityobject)
         except AttributeError:
+            continue
+        except ValueError:
             continue
     return objects_type(cityobjects_with_geom)
 
@@ -199,7 +202,11 @@ def main():
         create_directory('junk_reliefs')
         objects_type = CityMReliefs
     elif args.object_type == "water":
+        create_directory('junk_water_bodies')
         objects_type = CityMWaterBodies
+    elif args.object_type == "bridge":
+        create_directory('junk_bridges')
+        objects_type = CityMBridges
 
     create_loa = args.loa is not None
 
@@ -228,6 +235,8 @@ def main():
         tileset.write_to_directory('junk_reliefs')
     elif args.object_type == "water":
         tileset.write_to_directory('junk_water_bodies')
+    elif args.object_type == "bridge":
+        tileset.write_to_directory('junk_bridges')
 
 
 if __name__ == '__main__':

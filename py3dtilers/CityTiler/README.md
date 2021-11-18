@@ -19,7 +19,7 @@ You can then run the tiler by specifying the path to the _.yml_ configuration fi
 citygml-tiler <path_to_file>/Config.yml
 ```
 
-The created tileset will be placed in a folder named `junk_<objects-type>` in the root directory. The name of the folder will be either `junk_buildings`, `junk_reliefs` or `junk_water_bodies`, depending on the [objects type](#objects-type) (respectively `building`, `relief` and `water`).
+The created tileset will be placed in a folder named `junk_<objects-type>` in the root directory. The name of the folder will be either `junk_buildings`, `junk_reliefs`, `junk_water_bodies` or `junk_bridges`, depending on the [objects type](#objects-type) (respectively `building`, `relief`, `water` and `bridge`).
 The output folder contains:
 
  * the resulting tileset file (with the .json extension)
@@ -40,6 +40,10 @@ citygml-tiler <path_to_file>/Config.yml relief
 * `water`
 ```
 citygml-tiler <path_to_file>/Config.yml water
+```
+* `bridge`
+```
+citygml-tiler <path_to_file>/Config.yml bridge
 ```
 
 ### LOA

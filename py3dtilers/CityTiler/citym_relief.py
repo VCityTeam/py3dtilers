@@ -93,17 +93,6 @@ class CityMReliefs(CityMCityObjects):
         return query
 
     @staticmethod
-    def sql_query_textures(image_uri):
-        """
-        :param image_uri: a string which is the uri of the texture to select in the database
-        :return: a string containing the right SQL query that should be executed.
-        """
-
-        query = \
-            "SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = '" + image_uri + "' "
-        return query
-
-    @staticmethod
     def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
         """
         param reliefs_ids: a formatted list of (city)gml identifier corresponding to
