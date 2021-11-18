@@ -24,8 +24,9 @@ def computeDirection(axis, refDirection):
     XAxis = normalize(np.subtract(V, XVec))
     return np.array([XAxis, np.cross(Z, XAxis), Z])
 
+
 def compute2DDirection(refDirection):
-    return np.array([np.array([refDirection[0],refDirection[1]]), np.array([-refDirection[1],refDirection[0]])])
+    return np.array([np.array([refDirection[0], refDirection[1]]), np.array([-refDirection[1], refDirection[0]])])
 
 
 def unitConversion(originalUnit, targetedUnit):
@@ -70,7 +71,7 @@ class IfcObjectGeom(ObjectToTile):
     def computePointsFromRectangleProfileDef(self, sweptArea):
         points = list()
         maxX = sweptArea.XDim / 2
-        minX = -maxX 
+        minX = -maxX
         maxY = sweptArea.YDim / 2
         minY = -maxY
 
@@ -82,11 +83,11 @@ class IfcObjectGeom(ObjectToTile):
             refDirection = sweptArea.Position.RefDirection.DirectionRatios
 
         direction = compute2DDirection(refDirection)
-        
-        points.append(np.array([minX,minY]))
-        points.append(np.array([minX,maxY]))
-        points.append(np.array([maxX,maxY]))
-        points.append(np.array([maxX,minY]))
+
+        points.append(np.array([minX, minY]))
+        points.append(np.array([minX, maxY]))
+        points.append(np.array([maxX, maxY]))
+        points.append(np.array([maxX, minY]))
         points.append(points[0])
 
         for i in range(len(points)):
@@ -105,7 +106,7 @@ class IfcObjectGeom(ObjectToTile):
         direction = compute2DDirection(refDirection)
 
         points = list()
-        #The lower this value the higher quality the circle is with more points generated
+        # The lower this value the higher quality the circle is with more points generated
         stepSize = 0.1
         t = 0
         while t < 2 * math.pi:
@@ -114,7 +115,7 @@ class IfcObjectGeom(ObjectToTile):
         points.append(points[0])
 
         for i in range(len(points)):
-            points[i] = np.dot(np.array(points[i]), direction) + position 
+            points[i] = np.dot(np.array(points[i]), direction) + position
         return points
 
     def getPointsFromOuterCurve(self, outerCurve):
@@ -122,9 +123,9 @@ class IfcObjectGeom(ObjectToTile):
             return outerCurve.CoordList
         else:
             points = list()
-            for point in outerCurve : 
+            for point in outerCurve:
                 coord = point.Coordinates
-                points.append(np.array([coord[0],coord[1]]))
+                points.append(np.array([coord[0], coord[1]]))
             return points
 
     def extrudGeom(self, geom):
@@ -146,9 +147,10 @@ class IfcObjectGeom(ObjectToTile):
         direction = computeDirection(axis, refDirection)
 
         if(geom.SweptArea.is_a('IfcArbitraryClosedProfileDef')):
-            if(hasattr(geom.SweptArea.OuterCurve,"Points")):
+            if(hasattr(geom.SweptArea.OuterCurve, "Points")):
                 points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
-            else : return None,None
+            else:
+                return None, None
         elif(geom.SweptArea.is_a('IfcRectangleProfileDef')):
             points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
         elif(geom.SweptArea.is_a('IfcCircleProfileDef')):
