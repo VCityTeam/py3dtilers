@@ -2,6 +2,7 @@
 
 from .citym_cityobject import CityMCityObject, CityMCityObjects
 
+
 class CityMBridge(CityMCityObject):
     """
     Implementation of the Bridge Model objects from the CityGML model.
@@ -113,14 +114,14 @@ class CityMBridges(CityMCityObjects):
         # from which inherits concrete bridge class as well bridge-subdivisions
         # a.k.a. parts) we must first collect all the bridges and their parts:
         query = ("SELECT surface_geometry.id, "
-                "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
-                "ST_AsBinary(ST_Multi(ST_Translate("
-                "ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
-                "tex_image_uri AS uri FROM citydb.bridge JOIN "
-                "citydb.surface_geometry ON surface_geometry.root_id="
-                "bridge.lod2_multi_surface_id JOIN citydb.textureparam ON "
-                "textureparam.surface_geometry_id=surface_geometry.id "
-                "JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id "
-                "JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id "
-                "WHERE bridge.bridge_root_id IN " + bridges_ids_arg)
+                 "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
+                 "ST_AsBinary(ST_Multi(ST_Translate("
+                 "ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+                 "tex_image_uri AS uri FROM citydb.bridge JOIN "
+                 "citydb.surface_geometry ON surface_geometry.root_id="
+                 "bridge.lod2_multi_surface_id JOIN citydb.textureparam ON "
+                 "textureparam.surface_geometry_id=surface_geometry.id "
+                 "JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id "
+                 "JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id "
+                 "WHERE bridge.bridge_root_id IN " + bridges_ids_arg)
         return query
