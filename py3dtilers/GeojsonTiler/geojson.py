@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from os import listdir
 import numpy as np
-import json
-from shapely.geometry import LineString
 from earclip import triangulate
 
 from ..Common import ObjectToTile, ObjectsToTile
@@ -26,19 +23,19 @@ class Geojson(ObjectToTile):
     # Default width will be used if no width is found when parsing LineString or MultiLineString
     default_width = 2
 
-    def __init__(self, id=None):
+    def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
+
+        self.feature_properties = feature_properties
+        self.feature_geometry = feature_geometry
 
         self.height = 0
         """How high we extrude the polygon when creating the 3D geometry"""
 
-        self.width = 0
-        """The width of the buffer when parsing LineString or MultiLineString"""
-
         self.vertices = list()
         self.triangles = list()
 
-        self.polygons = list()
+        self.polygon = list()
 
         self.custom_triangulation = False
 
@@ -48,59 +45,6 @@ class Geojson(ObjectToTile):
                 if coord[1] == value[1]:
                     return i
         return None
-
-    def line_intersect(self, l1_start, l1_end, l2_start, l2_end):
-        """
-        https://stackoverflow.com/questions/64463369/intersection-of-two-infinite-lines-specified-by-points
-        Find the intersection between 2 lines, each line is defined by 2 points
-        """
-        p1_start = np.asarray(l1_start)
-        p1_end = np.asarray(l1_end)
-        p2_start = np.asarray(l2_start)
-        p2_end = np.asarray(l2_end)
-
-        p = p1_start
-        r = (p1_end - p1_start)
-        q = p2_start
-        s = (p2_end - p2_start)
-
-        t = np.cross(q - p, s) / (np.cross(r, s))
-        i = p + t * r
-        return i.tolist()
-
-    def get_parallel_offset(self, start_point, end_point, offset=3):
-        line = LineString([start_point, end_point])
-        po_left = list(line.parallel_offset(offset, 'left', join_style=2, resolution=1).coords)
-        po_right = list(line.parallel_offset(offset, 'right', join_style=2, resolution=1).coords)
-        return po_left, po_right
-
-    def buffer_line_string(self, coordinates):
-        """
-        Take a line string as coordinates
-
-        Return: a buffered polygon
-        """
-        polygon = [None] * (len(coordinates) * 2)
-        width_offset = self.width / 2
-
-        po_1_left, po_1_right = self.get_parallel_offset(coordinates[0], coordinates[1], offset=width_offset)
-        polygon[0] = [po_1_left[0][0], po_1_left[0][1], coordinates[0][2]]
-        polygon[(len(coordinates) * 2) - 1] = [po_1_right[1][0], po_1_right[1][1], coordinates[0][2]]
-
-        po_2_left, po_2_right = self.get_parallel_offset(coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1], offset=width_offset)
-        polygon[len(coordinates) - 1] = [po_2_left[1][0], po_2_left[1][1], coordinates[len(coordinates) - 1][2]]
-        polygon[len(coordinates)] = [po_2_right[0][0], po_2_right[0][1], coordinates[len(coordinates) - 1][2]]
-
-        for i in range(0, len(coordinates) - 2):
-            po_1_left, po_1_right = self.get_parallel_offset(coordinates[i], coordinates[i + 1], offset=width_offset)
-            po_2_left, po_2_right = self.get_parallel_offset(coordinates[i + 1], coordinates[i + 2], offset=width_offset)
-
-            intersection_left = self.line_intersect(po_1_left[0], po_1_left[1], po_2_left[0], po_2_left[1])
-            intersection_right = self.line_intersect(po_1_right[0], po_1_right[1], po_2_right[0], po_2_right[1])
-            polygon[i + 1] = [intersection_left[0], intersection_left[1], coordinates[i + 1][2]]
-            polygon[len(polygon) - 2 - i] = [intersection_right[0], intersection_right[1], coordinates[i + 1][2]]
-
-        return polygon
 
     def custom_triangulate(self, coordinates):
         triangles = list()
@@ -112,70 +56,34 @@ class Geojson(ObjectToTile):
 
         return triangles
 
-    def parse_geojson(self, feature, properties, is_roof):
+    def parse_geojson(self, target_properties, is_roof=False):
         """
         Parse a feature of the .geojson file to extract the height and the coordinates of the feature.
         """
         # Current feature number (used for debug)
         Geojson.n_feature += 1
 
-        geom_type = feature['geometry']['type']
-
         # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
-        prec_name = properties[properties.index('prec') + 1]
+        prec_name = target_properties[target_properties.index('prec') + 1]
         if prec_name != 'NONE':
-            if prec_name in feature['properties']:
-                if feature['properties'][prec_name] >= 9999.:
+            if prec_name in self.feature_properties:
+                if self.feature_properties[prec_name] >= 9999.:
                     return False
             else:
                 print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
 
-        height_name = properties[properties.index('height') + 1]
+        height_name = target_properties[target_properties.index('height') + 1]
         if height_name.replace('.', '', 1).isdigit():
             self.height = float(height_name)
         else:
-            if height_name in feature['properties']:
-                if feature['properties'][height_name] > 0:
-                    self.height = feature['properties'][height_name]
+            if height_name in self.feature_properties:
+                if self.feature_properties[height_name] > 0:
+                    self.height = self.feature_properties[height_name]
                 else:
                     self.height = Geojson.default_height
             else:
                 print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
                 self.height = Geojson.default_height
-
-        if geom_type == 'LineString' or geom_type == 'MultiLineString':
-            width_name = properties[properties.index('width') + 1]
-            if width_name.replace('.', '', 1).isdigit():
-                self.width = float(width_name)
-            else:
-                if width_name in feature['properties']:
-                    if feature['properties'][width_name] is not None and feature['properties'][width_name] > 0:
-                        self.width = feature['properties'][width_name]
-                    else:
-                        self.width = Geojson.default_width
-                else:
-                    print("No propertie called " + width_name + " in feature " + str(Geojson.n_feature) + ". Set width to default value (" + str(Geojson.default_width) + ").")
-                    self.width = Geojson.default_width
-
-        if geom_type == 'Polygon' or geom_type == 'MultiPolygon':
-            if geom_type == 'Polygon':
-                coords = feature['geometry']['coordinates'][0][:-1]
-            else:
-                coords = feature['geometry']['coordinates'][0][0][:-1]
-            if is_roof:
-                for coord in coords:
-                    coord[2] -= self.height
-            self.polygons.append(coords)
-
-        if geom_type == 'LineString' or geom_type == 'MultiLineString':
-            if geom_type == 'LineString':
-                coords = feature['geometry']['coordinates']
-            else:
-                coords = feature['geometry']['coordinates'][0]
-            self.custom_triangulation = True
-            self.polygons.append(self.buffer_line_string(coords))
-
-        return True
 
     def parse_geom(self, create_obj=False):
         """
@@ -190,48 +98,48 @@ class Geojson(ObjectToTile):
 
         vertex_offset = 0
 
-        for coordinates in self.polygons:
+        coordinates = self.polygon
 
-            length = len(coordinates)
-            vertices = [None] * (2 * length)
+        length = len(coordinates)
+        vertices = [None] * (2 * length)
 
-            for i, coord in enumerate(coordinates):
-                vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
-                vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
+        for i, coord in enumerate(coordinates):
+            vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
+            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
 
-            # Triangulate the feature footprint
-            if self.custom_triangulation:
-                poly_triangles = self.custom_triangulate(coordinates)
-            else:
-                poly_triangles = triangulate(coordinates)
+        # Triangulate the feature footprint
+        if self.custom_triangulation:
+            poly_triangles = self.custom_triangulate(coordinates)
+        else:
+            poly_triangles = triangulate(coordinates)
 
-            # Create upper face triangles
+        # Create upper face triangles
+        for tri in poly_triangles:
+            upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
+            triangles.append(upper_tri)
+
+        # Create side triangles
+        for i in range(0, length):
+            triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
+            triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
+
+        # If the obj creation flag is defined, create triangles for the obj
+        if create_obj:
             for tri in poly_triangles:
-                upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
-                triangles.append(upper_tri)
+                lower_tri = [self.find_coordinate_index(coordinates, coord) + vertex_offset for coord in reversed(tri)]
+                triangles_id.append(lower_tri)
+                upper_tri = [self.find_coordinate_index(coordinates, coord) + length + vertex_offset for coord in tri]
+                triangles_id.append(upper_tri)
 
-            # Create side triangles
             for i in range(0, length):
-                triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
-                triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
+                triangles_id.append([i, length + i, length + ((i + 1) % length)])
+                triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
 
-            # If the obj creation flag is defined, create triangles for the obj
-            if create_obj:
-                for tri in poly_triangles:
-                    lower_tri = [self.find_coordinate_index(coordinates, coord) + vertex_offset for coord in reversed(tri)]
-                    triangles_id.append(lower_tri)
-                    upper_tri = [self.find_coordinate_index(coordinates, coord) + length + vertex_offset for coord in tri]
-                    triangles_id.append(upper_tri)
+            vertex_offset += len(vertices)
 
-                for i in range(0, length):
-                    triangles_id.append([i, length + i, length + ((i + 1) % length)])
-                    triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
-
-                vertex_offset += len(vertices)
-
-                # keep vertices and triangles in order to create Obj model
-                self.vertices.extend(vertices)
-                self.triangles.extend(triangles_id)
+            # keep vertices and triangles in order to create Obj model
+            self.vertices.extend(vertices)
+            self.triangles.extend(triangles_id)
 
         self.geom.triangles.append(triangles)
 
@@ -255,15 +163,14 @@ class Geojsons(ObjectsToTile):
         super().__init__(objects)
 
     @staticmethod
-    def retrieve_geojsons(path, properties, obj_name, is_roof):
+    def parse_geojsons(features, properties, obj_name, is_roof):
         """
         :param path: a path to a directory
 
         :return: a list of geojson.
         """
 
-        features = list()
-        geometries = Geojsons()
+        geometries = list()
 
         # Used only when creating an .obj model
         vertices = list()
@@ -271,43 +178,14 @@ class Geojsons(ObjectsToTile):
         vertice_offset = 1
         center = [0, 0, 0]
 
-        files = []
-
-        if(os.path.isdir(path)):
-            geojson_dir = listdir(path)
-            for geojson_file in geojson_dir:
-                file_path = os.path.join(path, geojson_file)
-                if(os.path.isfile(file_path)):
-                    if(".geojson" in geojson_file or ".json" in geojson_file):
-                        files.append(file_path)
-        else:
-            files.append(path)
-
-        # Reads and parse every features from the file(s)
-        for geojson_file in files:
-            print("Reading " + geojson_file)
-            # Get id from its name
-            id = geojson_file.replace('json', '')
-            with open(geojson_file) as f:
-                gjContent = json.load(f)
-
-            k = 0
-            for feature in gjContent['features']:
-
-                if "ID" in feature['properties']:
-                    feature_id = feature['properties']['ID']
-                else:
-                    feature_id = id + str(k)
-                    k += 1
-                geojson = Geojson(feature_id)
-                if(geojson.parse_geojson(feature, properties, is_roof)):
-                    features.append(geojson)
-
         create_obj = obj_name is not None
 
         for feature in features:
+            if not feature.parse_geojson(properties, is_roof):
+                continue
+
             # Create geometry as expected from GLTF from an geojson file
-            if(feature.parse_geom(create_obj)):
+            if feature.parse_geom(create_obj):
                 geometries.append(feature)
 
                 if create_obj:
@@ -333,4 +211,4 @@ class Geojsons(ObjectsToTile):
             for triangle in triangles:
                 f.write("f " + str(int(triangle[0])) + " " + str(int(triangle[1])) + " " + str(int(triangle[2])) + "\n")
 
-        return geometries
+        return Geojsons(geometries)
