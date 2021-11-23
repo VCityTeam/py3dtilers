@@ -34,13 +34,6 @@ class Geojson(ObjectToTile):
         self.polygon = list()
         self.custom_triangulation = False
 
-    def find_coordinate_index(self, coordinates, value):
-        for i, coord in enumerate(coordinates):
-            if coord[0] == value[0]:
-                if coord[1] == value[1]:
-                    return i
-        return None
-
     def custom_triangulate(self, coordinates):
         triangles = list()
         length = len(coordinates)
@@ -85,13 +78,11 @@ class Geojson(ObjectToTile):
         Creates the 3D extrusion of the feature.
         """
         height = self.height
+        coordinates = self.polygon
+        length = len(coordinates)
 
         # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
-
-        coordinates = self.polygon
-
-        length = len(coordinates)
         vertices = [None] * (2 * length)
 
         for i, coord in enumerate(coordinates):
@@ -115,10 +106,7 @@ class Geojson(ObjectToTile):
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
         self.geom.triangles.append(triangles)
-
         self.set_box()
-
-        return True
 
     def get_geojson_id(self):
         return super().get_id()
@@ -136,9 +124,12 @@ class Geojsons(ObjectsToTile):
         super().__init__(objects)
 
     @staticmethod
-    def parse_geojsons(features, properties, obj_name, is_roof):
+    def parse_geojsons(features, properties, obj_name=None, is_roof=False):
         """
-        :param path: a path to a directory
+        :param features: the features to parse
+        :param properties: the properties used to parse the features
+        :param obj_name: the name of the OBJ file when writing geometries as OBJ
+        :param is_roof: substract the height from the features coordinates
 
         :return: a list of geojson.
         """
@@ -149,8 +140,8 @@ class Geojsons(ObjectsToTile):
                 continue
 
             # Create geometry as expected from GLTF from an geojson file
-            if feature.parse_geom():
-                geometries.append(feature)
+            feature.parse_geom()
+            geometries.append(feature)
 
         if obj_name is not None:
             obj_writer = ObjWriter()

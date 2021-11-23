@@ -111,18 +111,15 @@ def retrieve_geojsons(path):
     # Reads and parse every features from the file(s)
     for geojson_file in files:
         print("Reading " + geojson_file)
-        # Get id from its name
-        id = geojson_file.replace('json', '')
         with open(geojson_file) as f:
             gjContent = json.load(f)
 
         k = 0
         for feature in gjContent['features']:
-
             if "ID" in feature['properties']:
                 feature_id = feature['properties']['ID']
             else:
-                feature_id = id + str(k)
+                feature_id = 'feature_' + str(k)
                 k += 1
             features.append(get_geojson_instance(feature_id, feature['geometry'], feature['properties']))
 
@@ -159,7 +156,6 @@ def main():
     path = args.path[0]
 
     create_loa = args.loa is not None
-
     properties = ['height', args.height, 'width', args.width, 'prec', args.prec]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):

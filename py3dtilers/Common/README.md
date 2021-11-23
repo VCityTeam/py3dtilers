@@ -35,6 +35,15 @@ for object in objects_to_tile:
     print(object.get_id())
 ```
 
+## [obj_writer](obj_writer.py)
+This class allows to write [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ in as an OBJ model. To write geometries in a file, use:
+
+```
+obj_writer = ObjWriter()
+obj_writer.add_geometries(geometries)   # geometries contains ObjectToTile instances
+obj_writer.write_obj(file_name)
+```
+
 ## [polygon_extrusion](polygon_extrusion.py)
 An instance of _ExtrudedPolygon_ contains a footprint (a polygon as list of points, and a point is a list of float), a minimal height and a maximal height.
 
