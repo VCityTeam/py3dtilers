@@ -1,10 +1,14 @@
 import os
 import argparse
 import sys
+from os import listdir
+import json
 
 from pathlib import Path
 from py3dtiles import BoundingVolumeBox
 from .geojson import Geojsons
+from .geojson_line import GeojsonLine
+from .geojson_polygon import GeojsonPolygon
 from ..Common import create_tileset
 
 
@@ -81,6 +85,50 @@ def parse_command_line():
     return result
 
 
+def get_geojson_instance(id, feature_geometry, feature_properties):
+    return {
+        'Polygon': GeojsonPolygon(id, feature_properties, feature_geometry),
+        'MultiPolygon': GeojsonPolygon(id, feature_properties, feature_geometry, is_multi_geom=True),
+        'LineString': GeojsonLine(id, feature_properties, feature_geometry),
+        'MultiLineString': GeojsonLine(id, feature_properties, feature_geometry, is_multi_geom=True)
+    }[feature_geometry['type']]
+
+
+def retrieve_geojsons(path):
+    files = []
+    features = []
+
+    if(os.path.isdir(path)):
+        geojson_dir = listdir(path)
+        for geojson_file in geojson_dir:
+            file_path = os.path.join(path, geojson_file)
+            if(os.path.isfile(file_path)):
+                if(".geojson" in geojson_file or ".json" in geojson_file):
+                    files.append(file_path)
+    else:
+        files.append(path)
+
+    # Reads and parse every features from the file(s)
+    for geojson_file in files:
+        print("Reading " + geojson_file)
+        # Get id from its name
+        id = geojson_file.replace('json', '')
+        with open(geojson_file) as f:
+            gjContent = json.load(f)
+
+        k = 0
+        for feature in gjContent['features']:
+
+            if "ID" in feature['properties']:
+                feature_id = feature['properties']['ID']
+            else:
+                feature_id = id + str(k)
+                k += 1
+            features.append(get_geojson_instance(feature_id, feature['geometry'], feature['properties']))
+
+    return features
+
+
 def from_geojson_directory(path, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
     """
     :param path: a path to a directory
@@ -88,7 +136,8 @@ def from_geojson_directory(path, properties, obj_name=None, create_lod1=False, c
     :return: a tileset.
     """
 
-    objects = Geojsons.retrieve_geojsons(path, properties, obj_name, is_roof)
+    features = retrieve_geojsons(path)
+    objects = Geojsons.parse_geojsons(features, properties, obj_name, is_roof)
 
     if(len(objects) == 0):
         print("No .geojson found in " + path)
