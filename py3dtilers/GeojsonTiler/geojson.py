@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
 import numpy as np
 from earclip import triangulate
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import ObjectToTile, ObjectsToTile, ObjWriter
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -32,11 +31,7 @@ class Geojson(ObjectToTile):
         self.height = 0
         """How high we extrude the polygon when creating the 3D geometry"""
 
-        self.vertices = list()
-        self.triangles = list()
-
         self.polygon = list()
-
         self.custom_triangulation = False
 
     def find_coordinate_index(self, coordinates, value):
@@ -85,7 +80,7 @@ class Geojson(ObjectToTile):
                 print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
                 self.height = Geojson.default_height
 
-    def parse_geom(self, create_obj=False):
+    def parse_geom(self):
         """
         Creates the 3D extrusion of the feature.
         """
@@ -93,10 +88,6 @@ class Geojson(ObjectToTile):
 
         # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
-        # Contains the triangles vertices index. Used to create Objs
-        triangles_id = list()
-
-        vertex_offset = 0
 
         coordinates = self.polygon
 
@@ -122,24 +113,6 @@ class Geojson(ObjectToTile):
         for i in range(0, length):
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
-
-        # If the obj creation flag is defined, create triangles for the obj
-        if create_obj:
-            for tri in poly_triangles:
-                lower_tri = [self.find_coordinate_index(coordinates, coord) + vertex_offset for coord in reversed(tri)]
-                triangles_id.append(lower_tri)
-                upper_tri = [self.find_coordinate_index(coordinates, coord) + length + vertex_offset for coord in tri]
-                triangles_id.append(upper_tri)
-
-            for i in range(0, length):
-                triangles_id.append([i, length + i, length + ((i + 1) % length)])
-                triangles_id.append([i, length + ((i + 1) % length), ((i + 1) % length)])
-
-            vertex_offset += len(vertices)
-
-            # keep vertices and triangles in order to create Obj model
-            self.vertices.extend(vertices)
-            self.triangles.extend(triangles_id)
 
         self.geom.triangles.append(triangles)
 
@@ -169,46 +142,19 @@ class Geojsons(ObjectsToTile):
 
         :return: a list of geojson.
         """
-
         geometries = list()
-
-        # Used only when creating an .obj model
-        vertices = list()
-        triangles = list()
-        vertice_offset = 1
-        center = [0, 0, 0]
-
-        create_obj = obj_name is not None
 
         for feature in features:
             if not feature.parse_geojson(properties, is_roof):
                 continue
 
             # Create geometry as expected from GLTF from an geojson file
-            if feature.parse_geom(create_obj):
+            if feature.parse_geom():
                 geometries.append(feature)
 
-                if create_obj:
-                    # Add triangles and vertices to create an obj
-                    for vertice in feature.vertices:
-                        vertices.append(vertice)
-                    for triangle in feature.triangles:
-                        triangles.append([v + vertice_offset for v in triangle])
-                    vertice_offset += len(feature.vertices)
-                    centroid = feature.get_centroid()
-                    for i in range(0, len(centroid)):
-                        center[i] += centroid[i]
-
-        if create_obj:
-            center[:] = [c / len(geometries) for c in center]
-            file_name = obj_name
-            f = open(os.path.join(file_name), "w")
-            f.write("# " + file_name + "\n")
-
-            for vertice in vertices:
-                f.write("v " + str(vertice[0] - center[0]) + " " + str(vertice[1] - center[1]) + " " + str(vertice[2] - center[2]) + "\n")
-
-            for triangle in triangles:
-                f.write("f " + str(int(triangle[0])) + " " + str(int(triangle[1])) + " " + str(int(triangle[2])) + "\n")
+        if obj_name is not None:
+            obj_writer = ObjWriter()
+            obj_writer.add_geometries(geometries)
+            obj_writer.write_obj(obj_name)
 
         return Geojsons(geometries)
