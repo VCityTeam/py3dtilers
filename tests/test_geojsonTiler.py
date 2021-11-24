@@ -2,7 +2,7 @@ import unittest
 import os
 from py3dtiles import BoundingVolumeBox
 
-from py3dtilers.GeojsonTiler.GeojsonTiler import from_geojson_directory
+from py3dtilers.GeojsonTiler.GeojsonTiler import GeojsonTiler
 
 
 class Test_Tile(unittest.TestCase):
@@ -17,7 +17,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "basic_case"
@@ -34,7 +35,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "properties_with_other_name"
@@ -51,7 +53,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "default_height"
@@ -68,7 +71,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "no_height"
@@ -84,7 +88,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, create_loa=True, polygons_path='tests/geojson_tiler_test_data/polygons/', is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, create_loa=True, polygons_path='tests/geojson_tiler_test_data/polygons/', is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "create_loa"
@@ -100,7 +105,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, create_lod1=True, is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, create_lod1=True, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "create_lod1"
@@ -116,7 +122,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, create_lod1=True, create_loa=True, polygons_path='tests/geojson_tiler_test_data/polygons/', is_roof=True)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, create_lod1=True, create_loa=True, polygons_path='tests/geojson_tiler_test_data/polygons/', is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "create_lod1"
@@ -133,7 +140,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=False)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=False)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "line_string"
@@ -150,7 +158,8 @@ class Test_Tile(unittest.TestCase):
         if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
-        tileset = from_geojson_directory(path, properties, obj_name, is_roof=False)
+        geojson_tiler = GeojsonTiler()
+        tileset = geojson_tiler.from_geojson_directory(path, properties, obj_name, is_roof=False)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "multi_line_string"

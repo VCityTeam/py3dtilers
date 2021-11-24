@@ -2,7 +2,7 @@
 import numpy as np
 from earclip import triangulate
 
-from ..Common import ObjectToTile, ObjectsToTile, ObjWriter
+from ..Common import ObjectToTile, ObjectsToTile
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -124,7 +124,7 @@ class Geojsons(ObjectsToTile):
         super().__init__(objects)
 
     @staticmethod
-    def parse_geojsons(features, properties, obj_name=None, is_roof=False):
+    def parse_geojsons(features, properties, is_roof=False):
         """
         :param features: the features to parse
         :param properties: the properties used to parse the features
@@ -142,10 +142,5 @@ class Geojsons(ObjectsToTile):
             # Create geometry as expected from GLTF from an geojson file
             feature.parse_geom()
             geometries.append(feature)
-
-        if obj_name is not None:
-            obj_writer = ObjWriter()
-            obj_writer.add_geometries(geometries)
-            obj_writer.write_obj(obj_name)
 
         return Geojsons(geometries)
