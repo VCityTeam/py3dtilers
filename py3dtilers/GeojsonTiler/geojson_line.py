@@ -4,6 +4,9 @@ from .lineBuffer import LineBuffer
 
 class GeojsonLine(Geojson):
 
+    # Default width will be used if no width is found when parsing LineString or MultiLineString
+    default_width = 2
+
     def __init__(self, id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False):
         super().__init__(id, feature_properties, feature_geometry)
 
@@ -24,10 +27,10 @@ class GeojsonLine(Geojson):
                 if self.feature_properties[width_name] is not None and self.feature_properties[width_name] > 0:
                     self.width = self.feature_properties[width_name]
                 else:
-                    self.width = Geojson.default_width
+                    self.width = GeojsonLine.default_width
             else:
                 print("No propertie called " + width_name + " in feature " + str(Geojson.n_feature) + ". Set width to default value (" + str(Geojson.default_width) + ").")
-                self.width = Geojson.default_width
+                self.width = GeojsonLine.default_width
 
         if self.is_multi_geom:
             coords = self.feature_geometry['coordinates'][0]

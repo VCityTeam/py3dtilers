@@ -6,7 +6,7 @@ class LodTree():
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     """
 
-    def __init__(self, objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, with_texture=False):
+    def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         """
         create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
         In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
@@ -20,7 +20,7 @@ class LodTree():
             node = LodNode(group.objects_to_tile, 1)
             node.with_texture = with_texture
             root_node = node
-            if also_create_lod1:
+            if create_lod1:
                 lod1_node = Lod1Node(group.objects_to_tile, 5)
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node

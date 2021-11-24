@@ -1,5 +1,6 @@
 import argparse
 
+from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
 
 
@@ -29,9 +30,17 @@ class Tiler():
                                  help='Creates a LOD1 when defined. The LOD1 is a 3D extrusion of the footprint of each object.')
 
     def parse_command_line(self):
-        return self.parser.parse_args()
+        self.args = self.parser.parse_args()
 
     def write_geometries_as_obj(self, geometries, file_name):
         obj_writer = ObjWriter()
         obj_writer.add_geometries(geometries)
         obj_writer.write_obj(file_name)
+
+    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
+        if self.args.obj is not None:
+            self.write_geometries_as_obj(objects_to_tile, self.args.obj)
+
+        create_loa = self.args.loa is not None
+
+        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, with_texture)

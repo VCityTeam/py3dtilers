@@ -8,7 +8,7 @@ from py3dtiles import BoundingVolumeBox
 from .geojson import Geojsons
 from .geojson_line import GeojsonLine
 from .geojson_polygon import GeojsonPolygon
-from ..Common import create_tileset, Tiler
+from ..Common import Tiler
 
 
 class GeojsonTiler(Tiler):
@@ -63,7 +63,7 @@ class GeojsonTiler(Tiler):
             print("Exiting")
             sys.exit(1)
 
-        return result
+        self.args = result
 
     def get_geojson_instance(self, id, feature_geometry, feature_properties):
         return {
@@ -104,7 +104,7 @@ class GeojsonTiler(Tiler):
 
         return features
 
-    def from_geojson_directory(self, path, properties, obj_name=None, create_lod1=False, create_loa=False, polygons_path=None, is_roof=False):
+    def from_geojson_directory(self, path, properties, is_roof=False):
         """
         :param path: a path to a directory
 
@@ -114,16 +114,13 @@ class GeojsonTiler(Tiler):
         features = self.retrieve_geojsons(path)
         objects = Geojsons.parse_geojsons(features, properties, is_roof)
 
-        if obj_name is not None:
-            self.write_geometries_as_obj(objects, obj_name)
-
         if(len(objects) == 0):
             print("No .geojson found in " + path)
             return None
         else:
             print(str(len(objects)) + " features parsed")
 
-        return create_tileset(objects, also_create_lod1=create_lod1, also_create_loa=create_loa, polygons_path=polygons_path)
+        return self.create_tileset_from_geometries(objects)
 
 
 def main():
@@ -134,14 +131,13 @@ def main():
     created from all the geojson files stored in the targeted directory
     """
     geojson_tiler = GeojsonTiler()
-    args = geojson_tiler.parse_command_line()
-    path = args.path[0]
+    geojson_tiler.parse_command_line()
+    path = geojson_tiler.args.path[0]
 
-    create_loa = args.loa is not None
-    properties = ['height', args.height, 'width', args.width, 'prec', args.prec]
+    properties = ['height', geojson_tiler.args.height, 'width', geojson_tiler.args.width, 'prec', geojson_tiler.args.prec]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, args.obj, args.lod1, create_loa, args.loa, args.is_roof)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             print("tileset in geojson_tilesets")

@@ -76,7 +76,7 @@ class Test_Tile(unittest.TestCase):
 
         objects_to_tile = ObjectsToTile([object_to_tile])
 
-        tileset = create_tileset(objects_to_tile, also_create_lod1=True)
+        tileset = create_tileset(objects_to_tile, create_lod1=True)
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 
@@ -113,7 +113,7 @@ class Test_Tile(unittest.TestCase):
 
         objects_to_tile = ObjectsToTile([object_to_tile])
 
-        tileset = create_tileset(objects_to_tile, also_create_loa=True, polygons_path='tests/lod_tree_test_data/loa_polygons')
+        tileset = create_tileset(objects_to_tile, create_loa=True, polygons_path='tests/lod_tree_test_data/loa_polygons')
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
 

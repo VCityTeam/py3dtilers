@@ -19,9 +19,6 @@ class Geojson(ObjectToTile):
     # Default height will be used if no height is found when parsing the data
     default_height = 2
 
-    # Default width will be used if no width is found when parsing LineString or MultiLineString
-    default_width = 2
-
     def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
 
@@ -127,11 +124,10 @@ class Geojsons(ObjectsToTile):
     def parse_geojsons(features, properties, is_roof=False):
         """
         :param features: the features to parse
-        :param properties: the properties used to parse the features
-        :param obj_name: the name of the OBJ file when writing geometries as OBJ
+        :param properties: the properties used when parsing the features
         :param is_roof: substract the height from the features coordinates
 
-        :return: a list of geojson.
+        :return: a list of Geojson instances.
         """
         geometries = list()
 
