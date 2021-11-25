@@ -7,8 +7,7 @@ from .obj_writer import ObjWriter
 class Tiler():
 
     def __init__(self):
-        text = '''A small utility that build a 3DTiles tileset out of the content
-        of an geojson repository'''
+        text = '''A small utility that build a 3DTiles tileset out of data'''
         self.parser = argparse.ArgumentParser(description=text)
 
         self.parser.add_argument('--obj',

@@ -54,8 +54,6 @@ class Geojson(ObjectToTile):
             if prec_name in self.feature_properties:
                 if self.feature_properties[prec_name] >= 9999.:
                     return False
-            else:
-                print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
 
         height_name = target_properties[target_properties.index('height') + 1]
         if height_name.replace('.', '', 1).isdigit():
@@ -78,7 +76,6 @@ class Geojson(ObjectToTile):
         coordinates = self.polygon
         length = len(coordinates)
 
-        # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
         vertices = [None] * (2 * length)
 
@@ -114,7 +111,7 @@ class Geojson(ObjectToTile):
 
 class Geojsons(ObjectsToTile):
     """
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of Geojson instances.
     """
 
     def __init__(self, objects=None):

@@ -20,14 +20,14 @@ class GeojsonTiler(Tiler):
         self.parser.add_argument('--path',
                                  nargs=1,
                                  type=str,
-                                 help='Path to the directory containing .geojson files')
+                                 help='Path to a geojson file or a directory containing geojson files')
 
         self.parser.add_argument('--height',
                                  nargs='?',
                                  default='HAUTEUR',
                                  type=str,
                                  help='Change the name of the propertie to look for in the feature for height.\
-                                    The value can be a float, this will set the default height.\
+                                    The value can also be a float or an int, this will set the default height.\
                                     Default property name is HAUTEUR')
 
         self.parser.add_argument('--width',
@@ -35,7 +35,7 @@ class GeojsonTiler(Tiler):
                                  default='LARGEUR',
                                  type=str,
                                  help='Change the name of the propertie to look for in the feature for width.\
-                                    The value can be a float, this will set the default width.\
+                                    The value can also be a float or an int, this will set the default width.\
                                     Default property name is LARGEUR')
 
         self.parser.add_argument('--prec',
