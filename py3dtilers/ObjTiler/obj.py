@@ -5,7 +5,6 @@ from os import listdir
 import numpy as np
 import pywavefront
 
-from py3dtiles import BoundingVolumeBox, TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
 
 
@@ -23,14 +22,6 @@ from ..Common import ObjectToTile, ObjectsToTile
 class Obj(ObjectToTile):
     def __init__(self, id=None):
         super().__init__(id)
-
-        self.geom = TriangleSoup()
-
-    def get_geom_as_triangles(self):
-        return self.geom.triangles[0]
-
-    def set_triangles(self, triangles):
-        self.geom.triangles[0] = triangles
 
     def parse_geom(self, path):
         # Realize the geometry conversion from OBJ to GLTF
@@ -64,22 +55,6 @@ class Obj(ObjectToTile):
 
         return True
 
-    def set_box(self):
-        """
-        Parameters
-        ----------
-        Returns
-        -------
-        """
-        bbox = self.geom.getBbox()
-        self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
-
-        # Set centroid from Bbox center
-        self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
-                                  (bbox[0][1] + bbox[1][1]) / 2.0,
-                                  (bbox[0][2] + bbox[0][2]) / 2.0])
-
     def get_obj_id(self):
         return super().get_id()
 
@@ -94,25 +69,6 @@ class Objs(ObjectsToTile):
 
     def __init__(self, objs=None):
         super().__init__(objs)
-
-    def translate_tileset(self, offset):
-        """
-        :param objects: an array containing objs
-        :param offset: an offset
-        :return:
-        """
-        # Translate the position of each obj by an offset
-        for obj in self.objects:
-            new_geom = []
-            for triangle in obj.get_geom_as_triangles():
-                new_position = []
-                for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
-                new_geom.append(new_position)
-            obj.set_triangles(new_geom)
-            obj.set_box()
 
     @staticmethod
     def retrieve_objs(path, objects=list()):
