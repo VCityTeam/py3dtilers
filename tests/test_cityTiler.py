@@ -1,5 +1,6 @@
 import unittest
 import pathlib
+from argparse import Namespace
 
 from py3dtiles import BoundingVolumeBox
 from py3dtilers.Texture.texture import Texture
@@ -8,7 +9,7 @@ from py3dtilers.CityTiler.citym_relief import CityMReliefs
 from py3dtilers.CityTiler.citym_waterbody import CityMWaterBodies
 from py3dtilers.CityTiler.citym_bridge import CityMBridges
 from py3dtilers.CityTiler.database_accesses import open_data_base
-from py3dtilers.CityTiler.CityTiler import from_3dcitydb
+from py3dtilers.CityTiler.CityTiler import CityTiler
 
 
 def create_directory(directory):
@@ -28,7 +29,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -40,7 +43,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMWaterBodies
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -52,7 +57,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -64,7 +71,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, create_lod1=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=True)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -76,7 +85,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, create_loa=True, polygons_path="tests/city_tiler_test_data/polygons")
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -88,7 +99,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, create_lod1=True, create_loa=True, polygons_path="tests/city_tiler_test_data/polygons")
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=True)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -101,7 +114,9 @@ class Test_Tile(unittest.TestCase):
         CityMBuildings.set_bth()
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         CityMBuildings.with_bth = False
@@ -114,7 +129,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -126,7 +143,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -138,7 +157,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMWaterBodies
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -150,7 +171,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, with_texture=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, with_texture=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -162,7 +185,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, with_texture=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, with_texture=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -174,7 +199,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBridges
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()
@@ -186,7 +213,9 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBridges
         create_directory(directory)
         objects_type.set_cursor(cursor)
-        tileset = from_3dcitydb(cursor, objects_type, split_surfaces=True)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory(directory)
         cursor.close()

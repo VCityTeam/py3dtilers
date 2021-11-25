@@ -32,6 +32,9 @@ class Tiler():
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
+        if(self.args.obj is not None and '.obj' not in self.args.obj):
+            self.args.obj = self.args.obj + '.obj'
+
     def write_geometries_as_obj(self, geometries, file_name):
         obj_writer = ObjWriter()
         obj_writer.add_geometries(geometries)

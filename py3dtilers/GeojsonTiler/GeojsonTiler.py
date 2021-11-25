@@ -52,18 +52,13 @@ class GeojsonTiler(Tiler):
                                     We will thus substract the height from the coordinates to reach the floor.')
 
     def parse_command_line(self):
-        result = self.parser.parse_args()
+        super().parse_command_line()
 
-        if(result.obj is not None and '.obj' not in result.obj):
-            result.obj = result.obj + '.obj'
-
-        if(result.path is None):
+        if(self.args.path is None):
             print("Please provide a path to a directory "
                   "containing some geojson files")
             print("Exiting")
             sys.exit(1)
-
-        self.args = result
 
     def get_geojson_instance(self, id, feature_geometry, feature_properties):
         return {
