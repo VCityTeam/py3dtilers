@@ -103,6 +103,7 @@ junk_bridges/
 profile_buildings/
 profile_reliefs/
 geojson_tilesets/
+ifc_tileset/
 
 # Tests output
 tests/lod_tree_test_data/tilesets

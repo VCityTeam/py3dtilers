@@ -42,13 +42,22 @@ class Groups():
         When this param is not None, it means we want to group geometries by polygons
         """
         self.objects_to_tile = objects_to_tile
-        if polygons_path is not None:
+        if objects_to_tile.is_list_of_objects_to_tile():
+            self.group_objects_by_instance()
+        elif polygons_path is not None:
             self.group_objects_by_polygons(polygons_path)
         else:
             self.group_objects_with_kdtree()
 
     def get_groups_as_list(self):
         return self.groups
+
+    def group_objects_by_instance(self):
+        groups = list()
+        for objects in self.objects_to_tile:
+            group = Group(objects)
+            groups.append(group)
+        self.groups = groups
 
     def group_objects_with_kdtree(self):
         groups = list()

@@ -36,7 +36,11 @@ class Tiler():
 
     def write_geometries_as_obj(self, geometries, file_name):
         obj_writer = ObjWriter()
-        obj_writer.add_geometries(geometries)
+        if geometries.is_list_of_objects_to_tile():
+            for objects in geometries:
+                obj_writer.add_geometries(objects)
+        else:
+            obj_writer.add_geometries(geometries)
         obj_writer.write_obj(file_name)
 
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):

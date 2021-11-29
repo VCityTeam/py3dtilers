@@ -4,7 +4,7 @@ import math
 import numpy as np
 import ifcopenshell
 from pyproj import Transformer
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
 
 
@@ -46,7 +46,7 @@ class IfcObjectGeom(ObjectToTile):
         self.id = ifcObject.GlobalId
         self.geom = TriangleSoup()
         self.ifcObject = ifcObject
-        self.ifcClasse = ifcObject.is_a()
+        self.setIfcClasse(ifcObject.is_a())
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         self.has_geom = self.parse_geom()
 
@@ -64,6 +64,13 @@ class IfcObjectGeom(ObjectToTile):
         for point in pointList:
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
+
+    def setIfcClasse(self, ifcClasse):
+        self.ifcClasse = ifcClasse
+        batch_table_data = {
+            'classe': ifcClasse
+        }
+        super().set_batchtable_data(batch_table_data)
 
     def getIfcClasse(self):
         return self.ifcClasse
@@ -155,6 +162,8 @@ class IfcObjectGeom(ObjectToTile):
             points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
         elif(geom.SweptArea.is_a('IfcCircleProfileDef')):
             points = self.computePointsFromCircleProfileDef(geom.SweptArea)
+        else:
+            return None, None
 
         center = self.computeCenter(points)
 
@@ -309,22 +318,6 @@ class IfcObjectGeom(ObjectToTile):
         self.set_box()
 
         return True
-
-    def set_box(self):
-        """
-        Parameters
-        ----------
-        Returns
-        -------
-        """
-        bbox = self.geom.getBbox()
-        self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
-
-        # Set centroid from Bbox center
-        self.centroid = np.array([(bbox[0][0] + bbox[1][0]) / 2.0,
-                                  (bbox[0][1] + bbox[1][1]) / 2.0,
-                                  (bbox[0][2] + bbox[0][2]) / 2.0])
 
     def get_obj_id(self):
         return super().get_id()
