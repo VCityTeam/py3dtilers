@@ -105,6 +105,9 @@ profile_reliefs/
 geojson_tilesets/
 ifc_tileset/
 
+# Debug OBJs
+*.obj
+
 # Tests output
 tests/lod_tree_test_data/tilesets
 tests/geojson_tiler_test_data/generated_objs
