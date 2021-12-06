@@ -3,8 +3,6 @@ import sys
 import math
 import numpy as np
 import ifcopenshell
-from pyproj import Transformer
-from py3dtiles import TriangleSoup
 from ..Common import ObjectToTile, ObjectsToTile
 
 
@@ -40,15 +38,13 @@ def unitConversion(originalUnit, targetedUnit):
 
 
 class IfcObjectGeom(ObjectToTile):
-    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m"):
-        super().__init__()
+    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None):
+        super().__init__(ifcObject.GlobalId)
 
-        self.id = ifcObject.GlobalId
-        self.geom = TriangleSoup()
         self.ifcObject = ifcObject
         self.setIfcClasse(ifcObject.is_a())
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
-        self.has_geom = self.parse_geom()
+        self.has_geom = self.parse_geom(transform_matrix)
 
     def hasGeom(self):
         return self.has_geom
@@ -253,7 +249,7 @@ class IfcObjectGeom(ObjectToTile):
 
         return indexListTemp
 
-    def parse_geom(self):
+    def parse_geom(self, transform_matrix):
         if (not(self.ifcObject.Representation)):
             return False
 
@@ -262,6 +258,9 @@ class IfcObjectGeom(ObjectToTile):
         listPosition = self.getPosition(self.ifcObject.ObjectPlacement)
 
         listDirection = self.getDirections(self.ifcObject.ObjectPlacement)
+
+        offset = np.array(transform_matrix[3])
+        rotation = np.array(transform_matrix[:-1])
 
         vertexList = list()
         indexList = list()
@@ -303,6 +302,8 @@ class IfcObjectGeom(ObjectToTile):
                 vertex = (vertex + listPosition[i])
 
             vertex = vertex * self.convertionRatio
+            vertex = np.dot(np.array(vertex), rotation)
+            vertex += offset
             vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
 
         triangles = list()
@@ -340,9 +341,6 @@ class IfcObjectsGeom(ObjectsToTile):
         placement = ifcSite.ObjectPlacement.RelativePlacement
         location = placement.Location.Coordinates
         location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation))
-        transformer = Transformer.from_crs("EPSG:27562", "EPSG:3946")
-        # transformer = Transformer.from_crs("EPSG:3947", "EPSG:3857")
-        location = transformer.transform(location[0], location[1], location[2])
 
         if(placement.Axis is None):
             axis = [0, 0, 1]
@@ -354,10 +352,10 @@ class IfcObjectsGeom(ObjectsToTile):
             refDirection = placement.RefDirection.DirectionRatios
 
         direction = computeDirection(axis, refDirection)
-        centroid = [direction[0][0], direction[0][1], direction[0][2], 0,
-                    direction[1][0], direction[1][1], direction[1][2], 0,
-                    direction[2][0], direction[2][1], direction[2][2], 0,
-                    location[0], location[1], location[2], 1]
+        centroid = [[direction[0][0], direction[0][1], direction[0][2]],
+                    [direction[1][0], direction[1][1], direction[1][2]],
+                    [direction[2][0], direction[2][1], direction[2][2]],
+                    [location[0], location[1], location[2]]]
         return centroid
 
     @staticmethod
@@ -377,7 +375,7 @@ class IfcObjectsGeom(ObjectsToTile):
             if not(element.is_a() in dictObjByType):
                 print(element.is_a())
                 dictObjByType[element.is_a()] = list()
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
             if(obj.hasGeom()):
                 dictObjByType[element.is_a()].append(obj)
 

@@ -15,9 +15,6 @@ class ObjectToTile(object):
 
         self.geom = TriangleSoup()
 
-        # The identifier of the database
-        self.id = None
-
         # Optional application specific data to be added to the batch table for this object
         self.batchtable_data = None
 
