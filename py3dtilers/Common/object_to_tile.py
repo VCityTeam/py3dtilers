@@ -166,6 +166,22 @@ class ObjectsToTile(object):
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
 
+    def change_crs(self, transformer):
+        """
+        :param transformer: the transformer used to change the crs
+        :return:
+        """
+        for object_to_tile in self.get_objects():
+            new_geom = []
+            for triangle in object_to_tile.get_geom_as_triangles():
+                new_position = []
+                for point in triangle:
+                    new_point = transformer.transform(point[0], point[1], point[2])
+                    new_position.append(np.array(new_point, dtype=np.float32))
+                new_geom.append(new_position)
+            object_to_tile.set_triangles(new_geom)
+            object_to_tile.set_box()
+
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
         pass

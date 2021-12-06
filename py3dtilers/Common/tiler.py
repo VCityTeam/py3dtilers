@@ -66,8 +66,7 @@ class Tiler():
 
     def change_projection(self, geometries, crs_in, crs_out):
         transformer = Transformer.from_crs(crs_in, crs_out)
-        print(transformer)
-        # TODO: change vertices projection
+        geometries.change_crs(transformer)
 
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
         if sum(self.args.offset) != 0:
