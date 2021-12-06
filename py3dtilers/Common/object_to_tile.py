@@ -114,7 +114,13 @@ class ObjectsToTile(object):
         self.objects.extend(others)
 
     def get_objects(self):
-        return self.objects
+        if not self.is_list_of_objects_to_tile():
+            return self.objects
+        else:
+            objects = list()
+            for objs in self.objects:
+                objects.extend(objs.get_objects())
+            return objects
 
     def __len__(self):
         return len(self.objects)
@@ -144,12 +150,11 @@ class ObjectsToTile(object):
 
     def translate_tileset(self, offset):
         """
-        :param objects: an array containing geojsons
         :param offset: an offset
         :return:
         """
-        # Translate the position of each geojson by an offset
-        for object_to_tile in self.objects:
+        # Translate the position of each object by an offset
+        for object_to_tile in self.get_objects():
             new_geom = []
             for triangle in object_to_tile.get_geom_as_triangles():
                 new_position = []
