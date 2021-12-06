@@ -1,4 +1,5 @@
 import argparse
+from pyproj import Transformer
 
 from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
@@ -34,6 +35,18 @@ class Tiler():
                                  type=float,
                                  help='Substract an offset to all the vertices.')
 
+        self.parser.add_argument('--crs_in',
+                                 nargs='?',
+                                 default='EPSG:3946',
+                                 type=str,
+                                 help='Input projection.')
+
+        self.parser.add_argument('--crs_out',
+                                 nargs='?',
+                                 default='EPSG:3946',
+                                 type=str,
+                                 help='Output projection.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -51,9 +64,17 @@ class Tiler():
         obj_writer.add_geometries(geometries.get_objects())
         obj_writer.write_obj(file_name)
 
+    def change_projection(self, geometries, crs_in, crs_out):
+        transformer = Transformer.from_crs(crs_in, crs_out)
+        print(transformer)
+        # TODO: change vertices projection
+
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
         if sum(self.args.offset) != 0:
             objects_to_tile.translate_tileset(self.args.offset)
+
+        if not self.args.crs_in == self.args.crs_out:
+            self.change_projection(objects_to_tile, self.args.crs_in, self.args.crs_out)
 
         if self.args.obj is not None:
             self.write_geometries_as_obj(objects_to_tile, self.args.obj)
