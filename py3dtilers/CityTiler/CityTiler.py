@@ -1,4 +1,3 @@
-import pathlib
 import numpy as np
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
@@ -111,7 +110,8 @@ class CityTiler(Tiler):
                         if len(surface.geom.triangles[0]) <= 0:
                             continue
                         surface.geom.triangles.append(texture_uri)
-                        texture = Texture(texture_uri, objects_type, cursor, surface.geom.triangles[1])
+                        stream = objects_type.get_image_from_binary(texture_uri, objects_type, cursor)
+                        texture = Texture(stream, surface.geom.triangles[1])
                         surface.set_texture(texture.get_texture_image())
                         surface.set_box()
                         surfaces.append(surface)
@@ -151,13 +151,6 @@ class CityTiler(Tiler):
             extension_name = "batch_table_hierarchy"
 
         return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name, with_texture=with_texture)
-
-    def create_directory(self, directory):
-        target_dir = pathlib.Path(directory).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        target_dir = pathlib.Path(directory + '/tiles').expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        Texture.set_texture_folder(directory)
 
 
 def main():

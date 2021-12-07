@@ -1,8 +1,10 @@
 import argparse
 from pyproj import Transformer
+import pathlib
 
 from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
+from ..Texture import Texture
 
 
 class Tiler():
@@ -81,3 +83,10 @@ class Tiler():
         create_loa = self.args.loa is not None
 
         return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, with_texture)
+
+    def create_directory(self, directory):
+        target_dir = pathlib.Path(directory).expanduser()
+        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = pathlib.Path(directory + '/tiles').expanduser()
+        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+        Texture.set_texture_folder(directory)

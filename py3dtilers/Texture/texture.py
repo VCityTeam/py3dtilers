@@ -1,5 +1,4 @@
 import numpy as np
-from io import BytesIO
 from PIL import Image
 
 
@@ -7,21 +6,13 @@ class Texture():
 
     folder = None
 
-    def __init__(self, textureUri, objects_type, cursor, triangles):
+    def __init__(self, image_path, triangles):
         """
-        :param textureUri : a texture Uri in the database
-        :param objects_type: a class name among CityMCityObject derived classes.
-                        For example, objects_type can be "CityMBuilding".
-        :param cursor: a database access cursor
+        :param image_path: path to the image (or a stream with image bytes)
+        :param triangles: the uvs
         Create a pillow.image:
         """
-        imageBinaryData = objects_type.retrieve_textures(
-            cursor,
-            textureUri,
-            objects_type)
-        LEFT_THUMB = imageBinaryData[0][0]
-        stream = BytesIO(LEFT_THUMB)
-        image = Image.open(stream)
+        image = Image.open(image_path)
         image = self.cropImage(image, triangles)
         self.texture_image = image.convert("RGBA")
 
