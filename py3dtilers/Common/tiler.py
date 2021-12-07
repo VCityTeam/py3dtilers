@@ -70,7 +70,7 @@ class Tiler():
 
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
         if sum(self.args.offset) != 0:
-            objects_to_tile.translate_tileset(self.args.offset)
+            objects_to_tile.translate_objects(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
             self.change_projection(objects_to_tile, self.args.crs_in, self.args.crs_out)

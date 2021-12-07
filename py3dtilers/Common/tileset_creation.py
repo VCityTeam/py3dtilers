@@ -21,7 +21,7 @@ def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygon
 
 def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
     objects = node.objects_to_tile
-    objects.translate_tileset(centroid)
+    objects.translate_objects(centroid)
 
     tile = Tile()
     tile.set_geometric_error(node.geometric_error)

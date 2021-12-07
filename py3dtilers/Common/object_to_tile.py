@@ -148,7 +148,7 @@ class ObjectsToTile(object):
                 centroid[1] / self.get_size(),
                 centroid[2] / self.get_size()]
 
-    def translate_tileset(self, offset):
+    def translate_objects(self, offset):
         """
         :param offset: an offset
         :return:
