@@ -70,10 +70,11 @@ def main():
     for path in paths:
         if(os.path.isdir(path)):
             print("Writing " + path)
+            folder_name = obj_tiler.get_folder_name(path)
+            obj_tiler.create_directory("obj_tilesets/" + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
                 tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-                folder_name = obj_tiler.get_folder_name(path)
                 print("tileset in obj_tilesets/" + folder_name)
                 tileset.write_to_directory("obj_tilesets/" + folder_name)
 
