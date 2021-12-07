@@ -5,12 +5,12 @@ from ..Common import LodTree
 from ..Texture import Atlas
 
 
-def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
+def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
     """
     Recursively creates a tileset from the nodes of a LodTree
     :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
     """
-    lod_tree = LodTree(objects_to_tile, also_create_lod1, also_create_loa, polygons_path, with_texture)
+    lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
     tileset = TileSet()
     centroid = lod_tree.centroid
     for root_node in lod_tree.root_nodes:
@@ -21,7 +21,7 @@ def create_tileset(objects_to_tile, also_create_lod1=False, also_create_loa=Fals
 
 def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
     objects = node.objects_to_tile
-    objects.translate_tileset(centroid)
+    objects.translate_objects(centroid)
 
     tile = Tile()
     tile.set_geometric_error(node.geometric_error)

@@ -6,17 +6,17 @@ from .polygon_extrusion import ExtrudedPolygon
 from .lod_node import LodNode, Lod1Node, LoaNode
 from .lod_tree import LodTree
 from .obj_writer import ObjWriter
-from .tileset_creation import create_tileset
+from .tiler import Tiler
 
 __all__ = ['kd_tree',
            'ObjectToTile',
            'ObjectsToTile',
            'TreeWithChildrenAndParent',
-           'create_tileset',
            'Groups',
            'ExtrudedPolygon',
            'LodNode',
            'Lod1Node',
            'LoaNode',
            'LodTree',
-           'ObjWriter']
+           'ObjWriter',
+           'Tiler']

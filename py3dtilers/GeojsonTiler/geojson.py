@@ -2,7 +2,7 @@
 import numpy as np
 from earclip import triangulate
 
-from ..Common import ObjectToTile, ObjectsToTile, ObjWriter
+from ..Common import ObjectToTile, ObjectsToTile
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -18,9 +18,6 @@ class Geojson(ObjectToTile):
 
     # Default height will be used if no height is found when parsing the data
     default_height = 2
-
-    # Default width will be used if no width is found when parsing LineString or MultiLineString
-    default_width = 2
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
@@ -57,8 +54,6 @@ class Geojson(ObjectToTile):
             if prec_name in self.feature_properties:
                 if self.feature_properties[prec_name] >= 9999.:
                     return False
-            else:
-                print("No propertie called " + prec_name + " in feature " + str(Geojson.n_feature))
 
         height_name = target_properties[target_properties.index('height') + 1]
         if height_name.replace('.', '', 1).isdigit():
@@ -81,7 +76,6 @@ class Geojson(ObjectToTile):
         coordinates = self.polygon
         length = len(coordinates)
 
-        # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
         vertices = [None] * (2 * length)
 
@@ -117,21 +111,20 @@ class Geojson(ObjectToTile):
 
 class Geojsons(ObjectsToTile):
     """
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of Geojson instances.
     """
 
     def __init__(self, objects=None):
         super().__init__(objects)
 
     @staticmethod
-    def parse_geojsons(features, properties, obj_name=None, is_roof=False):
+    def parse_geojsons(features, properties, is_roof=False):
         """
         :param features: the features to parse
-        :param properties: the properties used to parse the features
-        :param obj_name: the name of the OBJ file when writing geometries as OBJ
+        :param properties: the properties used when parsing the features
         :param is_roof: substract the height from the features coordinates
 
-        :return: a list of geojson.
+        :return: a list of Geojson instances.
         """
         geometries = list()
 
@@ -142,10 +135,5 @@ class Geojsons(ObjectsToTile):
             # Create geometry as expected from GLTF from an geojson file
             feature.parse_geom()
             geometries.append(feature)
-
-        if obj_name is not None:
-            obj_writer = ObjWriter()
-            obj_writer.add_geometries(geometries)
-            obj_writer.write_obj(obj_name)
 
         return Geojsons(geometries)

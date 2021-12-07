@@ -15,9 +15,6 @@ class ObjectToTile(object):
 
         self.geom = TriangleSoup()
 
-        # The identifier of the database
-        self.id = None
-
         # Optional application specific data to be added to the batch table for this object
         self.batchtable_data = None
 
@@ -80,6 +77,9 @@ class ObjectToTile(object):
     def has_texture(self):
         return self.texture is not None
 
+    def get_size(self):
+        return 1
+
 
 class ObjectsToTile(object):
     """
@@ -114,10 +114,24 @@ class ObjectsToTile(object):
         self.objects.extend(others)
 
     def get_objects(self):
-        return self.objects
+        if not self.is_list_of_objects_to_tile():
+            return self.objects
+        else:
+            objects = list()
+            for objs in self.objects:
+                objects.extend(objs.get_objects())
+            return objects
 
     def __len__(self):
         return len(self.objects)
+
+    def is_list_of_objects_to_tile(self):
+        '''Check if this instance of ObjectsToTile contains others ObjectsToTile'''
+        return isinstance(self.objects[0], ObjectsToTile)
+
+    def get_size(self):
+        '''Recursive method to get the length'''
+        return sum([obj.get_size() for obj in self])
 
     def get_centroid(self):
         """
@@ -130,18 +144,17 @@ class ObjectsToTile(object):
             centroid[0] += objectToTile.get_centroid()[0]
             centroid[1] += objectToTile.get_centroid()[1]
             centroid[2] += objectToTile.get_centroid()[2]
-        return [centroid[0] / len(self),
-                centroid[1] / len(self),
-                centroid[2] / len(self)]
+        return [centroid[0] / self.get_size(),
+                centroid[1] / self.get_size(),
+                centroid[2] / self.get_size()]
 
-    def translate_tileset(self, offset):
+    def translate_objects(self, offset):
         """
-        :param objects: an array containing geojsons
         :param offset: an offset
         :return:
         """
-        # Translate the position of each geojson by an offset
-        for object_to_tile in self.objects:
+        # Translate the position of each object by an offset
+        for object_to_tile in self.get_objects():
             new_geom = []
             for triangle in object_to_tile.get_geom_as_triangles():
                 new_position = []
@@ -149,6 +162,22 @@ class ObjectsToTile(object):
                     # Must to do this this way to ensure that the new position
                     # stays in float32, which is mandatory for writing the GLTF
                     new_position.append(np.array(points - offset, dtype=np.float32))
+                new_geom.append(new_position)
+            object_to_tile.set_triangles(new_geom)
+            object_to_tile.set_box()
+
+    def change_crs(self, transformer):
+        """
+        :param transformer: the transformer used to change the crs
+        :return:
+        """
+        for object_to_tile in self.get_objects():
+            new_geom = []
+            for triangle in object_to_tile.get_geom_as_triangles():
+                new_position = []
+                for point in triangle:
+                    new_point = transformer.transform(point[0], point[1], point[2])
+                    new_position.append(np.array(new_point, dtype=np.float32))
                 new_geom.append(new_position)
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
