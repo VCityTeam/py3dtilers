@@ -49,6 +49,11 @@ class Tiler():
                                  type=str,
                                  help='Output projection.')
 
+        self.parser.add_argument('--with_texture',
+                                 dest='with_texture',
+                                 action='store_true',
+                                 help='Adds texture to 3DTiles when defined')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -70,7 +75,7 @@ class Tiler():
         transformer = Transformer.from_crs(crs_in, crs_out)
         geometries.change_crs(transformer)
 
-    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
+    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
         if sum(self.args.offset) != 0:
             objects_to_tile.translate_objects(self.args.offset)
 
@@ -82,7 +87,7 @@ class Tiler():
 
         create_loa = self.args.loa is not None
 
-        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, with_texture)
+        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, self.args.with_texture)
 
     def create_directory(self, directory):
         target_dir = pathlib.Path(directory).expanduser()

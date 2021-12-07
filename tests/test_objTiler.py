@@ -11,7 +11,7 @@ class Test_Tile(unittest.TestCase):
     def test_basic_case(self):
         path = 'tests/obj_tiler_data'
         obj_tiler = ObjTiler()
-        obj_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        obj_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         if not os.path.exists('tests/obj_tiler_data/generated_tilesets'):
             os.makedirs('tests/obj_tiler_data/generated_tilesets')
 

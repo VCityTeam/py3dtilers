@@ -19,7 +19,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -38,7 +38,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -57,7 +57,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -76,7 +76,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -94,7 +94,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -112,7 +112,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -130,7 +130,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -149,7 +149,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -168,7 +168,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -187,7 +187,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3857', offset=[0, 0, 0])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3857', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
@@ -206,7 +206,7 @@ class Test_Tile(unittest.TestCase):
             os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
 
         geojson_tiler = GeojsonTiler()
-        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[100, 100, 100])
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[100, 100, 100], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
