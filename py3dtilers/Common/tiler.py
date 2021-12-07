@@ -37,6 +37,11 @@ class Tiler():
                                  type=float,
                                  help='Substract an offset to all the vertices.')
 
+        self.parser.add_argument('--scale',
+                                 nargs='?',
+                                 type=float,
+                                 help='Scale geometries by the input factor.')
+
         self.parser.add_argument('--crs_in',
                                  nargs='?',
                                  default='EPSG:3946',
@@ -76,6 +81,9 @@ class Tiler():
         geometries.change_crs(transformer)
 
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+        if hasattr(self.args, 'scale') and self.args.scale:
+            objects_to_tile.scale_objects(self.args.scale)
+
         if sum(self.args.offset) != 0:
             objects_to_tile.translate_objects(self.args.offset)
 
