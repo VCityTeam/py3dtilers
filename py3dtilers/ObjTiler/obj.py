@@ -44,21 +44,21 @@ class Obj(ObjectToTile):
         # If the mesh doesn't have a texture
         if mesh.materials[0].vertex_format == 'V3F':
             for i in range(0, length, 9):
-                triangle = [np.array(vertices[n:n+3], dtype=np.float32) for n in range(i, i+9, 3)]
+                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
         # If the mesh has a texture
         elif mesh.materials[0].vertex_format == 'T2F_N3F_V3F':
             for i in range(0, length, 24):
-                triangle = [np.array(vertices[n:n+3], dtype=np.float32) for n in range(i+5, i+29, 8)]
+                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
                 triangles.append(triangle)
-                uv = [np.array(vertices[n:n+2], dtype=np.float32) for n in range(i, i+24, 8)]
+                uv = [np.array(vertices[n:n + 2], dtype=np.float32) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
 
         self.geom.triangles.append(triangles)
         if len(uvs) > 0:
             self.geom.triangles.append(uvs)
             if mesh.materials[0].texture is not None:
-                path = str(mesh.materials[0].texture._path).replace('\\','/')
+                path = str(mesh.materials[0].texture._path).replace('\\', '/')
                 texture = Texture(path, self.geom.triangles[1])
                 self.set_texture(texture.get_texture_image())
         self.set_box()

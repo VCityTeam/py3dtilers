@@ -190,7 +190,7 @@ class ObjectsToTile(object):
         for object_to_tile in self.get_objects():
             new_geom = []
             for triangle in object_to_tile.get_geom_as_triangles():
-                scaled_triangle = [vertex*scale_factor for vertex in triangle]
+                scaled_triangle = [vertex * scale_factor for vertex in triangle]
                 new_geom.append(scaled_triangle)
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
