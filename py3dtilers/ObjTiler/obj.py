@@ -90,13 +90,13 @@ class Objs(ObjectsToTile):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path, objects=list()):
+    def retrieve_objs(path):
         """
         :param path: a path to a directory
 
         :return: a list of Obj.
         """
-
+        objects = list()
         obj_dir = listdir(path)
 
         for obj_file in obj_dir:
