@@ -20,7 +20,7 @@ class Test_Tile(unittest.TestCase):
 
     def test_temporal(self):
         city_temp_tiler = CityTemporalTiler()
-        city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0])
+        city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         cli_args = Args()
         graph = TemporalGraph(cli_args)
         graph.reconstruct_connectivity()

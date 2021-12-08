@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+from io import BytesIO
 
 from ..Common import ObjectToTile, ObjectsToTile
 
@@ -150,3 +151,13 @@ class CityMCityObjects(ObjectsToTile):
         for t in cursor.fetchall():
             res.append(t)
         return(res)
+
+    @staticmethod
+    def get_image_from_binary(textureUri, objects_type, cursor):
+        imageBinaryData = objects_type.retrieve_textures(
+            cursor,
+            textureUri,
+            objects_type)
+        LEFT_THUMB = imageBinaryData[0][0]
+        stream = BytesIO(LEFT_THUMB)
+        return stream

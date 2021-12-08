@@ -1,4 +1,3 @@
-import pathlib
 import numpy as np
 
 from py3dtiles import BoundingVolumeBox, TriangleSoup
@@ -37,11 +36,6 @@ class CityTiler(Tiler):
                                  dest='with_BTH',
                                  action='store_true',
                                  help='Adds a Batch Table Hierarchy when defined')
-
-        self.parser.add_argument('--with_texture',
-                                 dest='with_texture',
-                                 action='store_true',
-                                 help='Adds texture to 3DTiles when defined')
 
         self.parser.add_argument('--split_surfaces',
                                  dest='split_surfaces',
@@ -111,7 +105,8 @@ class CityTiler(Tiler):
                         if len(surface.geom.triangles[0]) <= 0:
                             continue
                         surface.geom.triangles.append(texture_uri)
-                        texture = Texture(texture_uri, objects_type, cursor, surface.geom.triangles[1])
+                        stream = objects_type.get_image_from_binary(texture_uri, objects_type, cursor)
+                        texture = Texture(stream, surface.geom.triangles[1])
                         surface.set_texture(texture.get_texture_image())
                         surface.set_box()
                         surfaces.append(surface)
@@ -125,7 +120,7 @@ class CityTiler(Tiler):
 
         return CityMCityObjects(surfaces)
 
-    def from_3dcitydb(self, cursor, objects_type, split_surfaces=False, with_texture=False):
+    def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         """
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -138,7 +133,7 @@ class CityTiler(Tiler):
         if not cityobjects:
             raise ValueError(f'The database does not contain any {objects_type} object')
 
-        if with_texture:
+        if self.args.with_texture:
             objects_to_tile = self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
         else:
             if split_surfaces:
@@ -150,14 +145,7 @@ class CityTiler(Tiler):
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
 
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name, with_texture=with_texture)
-
-    def create_directory(self, directory):
-        target_dir = pathlib.Path(directory).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        target_dir = pathlib.Path(directory + '/tiles').expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        Texture.set_texture_folder(directory)
+        return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name)
 
 
 def main():
@@ -192,7 +180,7 @@ def main():
 
     split_surfaces = args.split_surfaces or args.with_texture
 
-    tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces, args.with_texture)
+    tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

@@ -6,6 +6,7 @@ import numpy as np
 import pywavefront
 
 from ..Common import ObjectToTile, ObjectsToTile
+from ..Texture import Texture
 
 
 # This Obj class refers to the obj file fromat (https://en.wikipedia.org/wiki/Wavefront_.obj_file)
@@ -23,7 +24,7 @@ class Obj(ObjectToTile):
     def __init__(self, id=None):
         super().__init__(id)
 
-    def parse_geom(self, path):
+    def parse_geom(self, mesh):
         # Realize the geometry conversion from OBJ to GLTF
         # GLTF expect the geometry to only be triangles that contains
         # the vertices position, i.e something in the form :
@@ -35,22 +36,40 @@ class Obj(ObjectToTile):
         #    np.array([1., 1., 1.]),
         #    np.array([-1.0 ,-1.0 ,-1.0])]
         # ]
+        triangles = list()
+        uvs = list()
 
-        geom = pywavefront.Wavefront(path, collect_faces=True)
-        if(len(geom.vertices) == 0):
+        vertices = mesh.materials[0].vertices
+        length = len(vertices)
+        # Contains only vertex positions
+        if mesh.materials[0].vertex_format == 'V3F':
+            for i in range(0, length, 9):
+                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
+                triangles.append(triangle)
+        # Contains texture and vertex positions
+        elif mesh.materials[0].vertex_format == 'T2F_V3F':
+            for i in range(0, length, 15):
+                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 2, i + 17, 5)]
+                triangles.append(triangle)
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
+                uvs.append(uv)
+        # Contains texture/vertex positions and normals
+        elif mesh.materials[0].vertex_format == 'T2F_N3F_V3F':
+            for i in range(0, length, 24):
+                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
+                triangles.append(triangle)
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 24, 8)]
+                uvs.append(uv)
+        else:
             return False
 
-        triangles = list()
-        for mesh in geom.mesh_list:
-            for face in mesh.faces:
-                triangle = []
-                for i in range(0, 3):
-                    # We store each position for each triangles, as GLTF expect
-                    triangle.append(np.array(geom.vertices[face[i]],
-                                             dtype=np.float64))
-                triangles.append(triangle)
         self.geom.triangles.append(triangles)
-
+        if len(uvs) > 0:
+            self.geom.triangles.append(uvs)
+            if mesh.materials[0].texture is not None:
+                path = str(mesh.materials[0].texture._path).replace('\\', '/')
+                texture = Texture(path, self.geom.triangles[1])
+                self.set_texture(texture.get_texture_image())
         self.set_box()
 
         return True
@@ -71,23 +90,27 @@ class Objs(ObjectsToTile):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path, objects=list()):
+    def retrieve_objs(path):
         """
         :param path: a path to a directory
 
         :return: a list of Obj.
         """
-
+        objects = list()
         obj_dir = listdir(path)
 
         for obj_file in obj_dir:
             if(os.path.isfile(os.path.join(path, obj_file))):
                 if(".obj" in obj_file):
-                    # Get id from its name
-                    id = obj_file.replace('.obj', '')
-                    obj = Obj(id)
-                    # Create geometry as expected from GLTF from an obj file
-                    if(obj.parse_geom(os.path.join(path, obj_file))):
-                        objects.append(obj)
+                    geom = pywavefront.Wavefront(os.path.join(path, obj_file), collect_faces=True)
+                    if(len(geom.vertices) == 0):
+                        continue
+                    for mesh in geom.mesh_list:
+                        # Get id from its name
+                        id = mesh.name
+                        obj = Obj(id)
+                        # Create geometry as expected from GLTF from an obj file
+                        if(obj.parse_geom(mesh)):
+                            objects.append(obj)
 
         return Objs(objects)

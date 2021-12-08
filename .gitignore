@@ -109,7 +109,8 @@ ifc_tileset/
 *.obj
 
 # Tests output
-tests/lod_tree_test_data/tilesets
+tests/tiler_test_data/tilesets
+tests/tiler_test_data/junk
 tests/geojson_tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_tilesets
 tests/city_tiler_test_data/junk/

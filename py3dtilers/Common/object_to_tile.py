@@ -144,9 +144,9 @@ class ObjectsToTile(object):
             centroid[0] += objectToTile.get_centroid()[0]
             centroid[1] += objectToTile.get_centroid()[1]
             centroid[2] += objectToTile.get_centroid()[2]
-        return [centroid[0] / self.get_size(),
-                centroid[1] / self.get_size(),
-                centroid[2] / self.get_size()]
+        return np.array([centroid[0] / self.get_size(),
+                         centroid[1] / self.get_size(),
+                         centroid[2] / self.get_size()])
 
     def translate_objects(self, offset):
         """
@@ -179,6 +179,20 @@ class ObjectsToTile(object):
                     new_point = transformer.transform(point[0], point[1], point[2])
                     new_position.append(np.array(new_point, dtype=np.float32))
                 new_geom.append(new_position)
+            object_to_tile.set_triangles(new_geom)
+            object_to_tile.set_box()
+
+    def scale_objects(self, scale_factor):
+        """
+        :param transformer: the transformer used to change the crs
+        :return:
+        """
+        centroid = self.get_centroid()
+        for object_to_tile in self.get_objects():
+            new_geom = []
+            for triangle in object_to_tile.get_geom_as_triangles():
+                scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
+                new_geom.append(scaled_triangle)
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
 

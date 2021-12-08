@@ -1,8 +1,10 @@
 import argparse
 from pyproj import Transformer
+import pathlib
 
 from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
+from ..Texture import Texture
 
 
 class Tiler():
@@ -35,6 +37,11 @@ class Tiler():
                                  type=float,
                                  help='Substract an offset to all the vertices.')
 
+        self.parser.add_argument('--scale',
+                                 nargs='?',
+                                 type=float,
+                                 help='Scale geometries by the input factor.')
+
         self.parser.add_argument('--crs_in',
                                  nargs='?',
                                  default='EPSG:3946',
@@ -46,6 +53,11 @@ class Tiler():
                                  default='EPSG:3946',
                                  type=str,
                                  help='Output projection.')
+
+        self.parser.add_argument('--with_texture',
+                                 dest='with_texture',
+                                 action='store_true',
+                                 help='Adds texture to 3DTiles when defined')
 
     def parse_command_line(self):
         self.args = self.parser.parse_args()
@@ -68,7 +80,10 @@ class Tiler():
         transformer = Transformer.from_crs(crs_in, crs_out)
         geometries.change_crs(transformer)
 
-    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None, with_texture=False):
+    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+        if hasattr(self.args, 'scale') and self.args.scale:
+            objects_to_tile.scale_objects(self.args.scale)
+
         if sum(self.args.offset) != 0:
             objects_to_tile.translate_objects(self.args.offset)
 
@@ -80,4 +95,11 @@ class Tiler():
 
         create_loa = self.args.loa is not None
 
-        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, with_texture)
+        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, self.args.with_texture)
+
+    def create_directory(self, directory):
+        target_dir = pathlib.Path(directory).expanduser()
+        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = pathlib.Path(directory + '/tiles').expanduser()
+        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+        Texture.set_texture_folder(directory)

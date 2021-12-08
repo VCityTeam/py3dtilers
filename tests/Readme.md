@@ -24,4 +24,4 @@ It also contains a [.json graph](city_temporal_tiler_test_data/graph_2009-2012.j
 
 ### LOD tree
 
-The [polygons](lod_tree_test_data/loa_polygons) were created from [IGN's roads](https://geoservices.ign.fr/ressource/159380) with QGIS.
+The [polygons](tiler_test_data/loa_polygons) were created from [IGN's roads](https://geoservices.ign.fr/ressource/159380) with QGIS.
