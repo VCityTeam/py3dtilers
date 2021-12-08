@@ -53,7 +53,7 @@ class Obj(ObjectToTile):
                 triangles.append(triangle)
                 uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
                 uvs.append(uv)
-        # Contains texture/vertex positions and normals        
+        # Contains texture/vertex positions and normals
         elif mesh.materials[0].vertex_format == 'T2F_N3F_V3F':
             for i in range(0, length, 24):
                 triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]

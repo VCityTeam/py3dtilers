@@ -145,8 +145,8 @@ class ObjectsToTile(object):
             centroid[1] += objectToTile.get_centroid()[1]
             centroid[2] += objectToTile.get_centroid()[2]
         return np.array([centroid[0] / self.get_size(),
-                centroid[1] / self.get_size(),
-                centroid[2] / self.get_size()])
+                         centroid[1] / self.get_size(),
+                         centroid[2] / self.get_size()])
 
     def translate_objects(self, offset):
         """
