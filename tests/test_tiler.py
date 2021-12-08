@@ -2,34 +2,35 @@ import unittest
 from py3dtiles import BoundingVolumeBox
 import numpy as np
 from argparse import Namespace
+import os
 
 from py3dtilers.Common.tiler import Tiler
 from py3dtilers.Common.object_to_tile import ObjectToTile, ObjectsToTile
 
 
 triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
-                      np.array([1843466, 5174373, 400], dtype=np.float32),
-                      np.array([1843566, 5174473, 200], dtype=np.float32)],
+              np.array([1843466, 5174373, 400], dtype=np.float32),
+              np.array([1843566, 5174473, 200], dtype=np.float32)],
 
-                     [np.array([1843566, 5174473, 200], dtype=np.float32),
-                      np.array([1843466, 5174373, 400], dtype=np.float32),
-                      np.array([1843566, 5174273, 200], dtype=np.float32)],
+             [np.array([1843566, 5174473, 200], dtype=np.float32),
+              np.array([1843466, 5174373, 400], dtype=np.float32),
+              np.array([1843566, 5174273, 200], dtype=np.float32)],
 
-                     [np.array([1843566, 5174273, 200], dtype=np.float32),
-                      np.array([1843466, 5174373, 400], dtype=np.float32),
-                      np.array([1843366, 5174273, 200], dtype=np.float32)],
+             [np.array([1843566, 5174273, 200], dtype=np.float32),
+              np.array([1843466, 5174373, 400], dtype=np.float32),
+              np.array([1843366, 5174273, 200], dtype=np.float32)],
 
-                     [np.array([1843366, 5174273, 200], dtype=np.float32),
-                      np.array([1843466, 5174373, 400], dtype=np.float32),
-                      np.array([1843366, 5174473, 200], dtype=np.float32)],
+             [np.array([1843366, 5174273, 200], dtype=np.float32),
+              np.array([1843466, 5174373, 400], dtype=np.float32),
+              np.array([1843366, 5174473, 200], dtype=np.float32)],
 
-                     [np.array([1843366, 5174473, 200], dtype=np.float32),
-                      np.array([1843566, 5174473, 200], dtype=np.float32),
-                      np.array([1843366, 5174273, 200], dtype=np.float32)],
+             [np.array([1843366, 5174473, 200], dtype=np.float32),
+              np.array([1843566, 5174473, 200], dtype=np.float32),
+              np.array([1843366, 5174273, 200], dtype=np.float32)],
 
-                     [np.array([1843566, 5174473, 200], dtype=np.float32),
-                      np.array([1843566, 5174273, 200], dtype=np.float32),
-                      np.array([1843366, 5174273, 200], dtype=np.float32)]]
+             [np.array([1843566, 5174473, 200], dtype=np.float32),
+              np.array([1843566, 5174273, 200], dtype=np.float32),
+              np.array([1843366, 5174273, 200], dtype=np.float32)]]
 
 
 class Test_Tile(unittest.TestCase):
@@ -126,7 +127,10 @@ class Test_Tile(unittest.TestCase):
         object_to_tile.set_box()
         objects_to_tile = ObjectsToTile([object_to_tile])
 
+        if not os.path.exists('tests/tiler_test_data/junk'):
+            os.makedirs('tests/tiler_test_data/junk')
         obj_name = 'tests/tiler_test_data/junk/cube.obj'
+
         tiler = Tiler()
         tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
 
