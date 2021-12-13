@@ -9,10 +9,16 @@ class IfcTiler(Tiler):
     def __init__(self):
         super().__init__()
 
-        self.parser.add_argument('ifc_file_path',
+        self.parser.add_argument('--file_path',
                                  nargs='?',
                                  type=str,
                                  help='path to the ifc file')
+        self.parser.add_argument('--grouped_by',
+                                    nargs='?',
+                                    default='IfcTypeObject',
+                                    choices=['IfcTypeObject', 'IfcGroup'],
+                                    help='Either IfcTypeObject or IfcGroup (default: %(default)s)'
+                                )                                
         self.parser.add_argument('--originalUnit',
                                  nargs='?',
                                  default="m",
@@ -24,19 +30,22 @@ class IfcTiler(Tiler):
                                  type=str,
                                  help='targeted unit of the 3DTiles produced')
 
-    def from_ifc(self, path_to_file, originalUnit, targetedUnit):
+    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
         """
         :param path: a path to a directory
 
         :return: a tileset.
         """
+        if(grouped_by == 'IfcTypeObject'):
+            pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+        elif(grouped_by == 'IfcGroup'):
+            pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
-        pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         objects_to_tile = IfcObjectsGeom(objects)
 
-        return self.create_tileset_from_geometries(objects_to_tile)
+        return self.create_tileset_from_geometries(objects_to_tile,centroid)
 
 
 def main():
@@ -48,7 +57,7 @@ def main():
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-    tileset = ifc_tiler.from_ifc(args.ifc_file_path, args.originalUnit, args.targetedUnit)
+    tileset = ifc_tiler.from_ifc(args.file_path,args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())

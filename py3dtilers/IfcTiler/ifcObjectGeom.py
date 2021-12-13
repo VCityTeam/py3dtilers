@@ -38,11 +38,11 @@ def unitConversion(originalUnit, targetedUnit):
 
 
 class IfcObjectGeom(ObjectToTile):
-    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None):
+    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None,ifcGroup = None):
         super().__init__(ifcObject.GlobalId)
 
         self.ifcObject = ifcObject
-        self.setIfcClasse(ifcObject.is_a())
+        self.setIfcClasse(ifcObject.is_a(),ifcGroup)
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         self.has_geom = self.parse_geom(transform_matrix)
 
@@ -61,10 +61,11 @@ class IfcObjectGeom(ObjectToTile):
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcClasse):
+    def setIfcClasse(self, ifcClasse,ifcGroup):
         self.ifcClasse = ifcClasse
         batch_table_data = {
-            'classe': ifcClasse
+            'classe': ifcClasse,
+            'group': ifcGroup
         }
         super().set_batchtable_data(batch_table_data)
 
@@ -336,6 +337,16 @@ class IfcObjectsGeom(ObjectsToTile):
         super().__init__(objs)
 
     @staticmethod
+    def getCentroid(ifcMapConversion):
+        location = (ifcMapConversion.Eastings, ifcMapConversion.Northings,ifcMapConversion.OrthogonalHeight)
+
+        centroid = [[0, ifcMapConversion.XAxisAbscissa, 0],
+                    [-ifcMapConversion.XAxisOrdinate, 0, 0],
+                    [0, 0, 1],
+                    [location[0], location[1], location[2]]]
+        return centroid
+
+    @staticmethod
     def computeCentroid(ifcSite, unitRatio):
         elevation = ifcSite.RefElevation
         placement = ifcSite.ObjectPlacement.RelativePlacement
@@ -367,19 +378,69 @@ class IfcObjectsGeom(ObjectsToTile):
         """
         ifc_file = ifcopenshell.open(path_to_file)
 
-        centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0], unitConversion(originalUnit, targetedUnit))
+        if(ifc_file.by_type("IfcMapConversion")):
+            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type("IfcMapConversion")[0])
+        else:
+            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type('IfcElement')
-
+        nb_element = str(len(elements))
+        print(nb_element + " elements to parse")
+        i = 1
         dictObjByType = dict()
         for element in elements:
+            print("\r"+str(i) + " / " + nb_element,end='',flush=True)
             if not(element.is_a() in dictObjByType):
-                print(element.is_a())
                 dictObjByType[element.is_a()] = list()
             obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
             if(obj.hasGeom()):
                 dictObjByType[element.is_a()].append(obj)
+            i = i+1
 
         for key in dictObjByType.keys():
             dictObjByType[key] = IfcObjectsGeom(dictObjByType[key])
 
         return dictObjByType, centroid
+
+
+    @staticmethod
+    def retrievObjByGroup(path_to_file, originalUnit="m", targetedUnit="m"):
+        """
+        :param path: a path to a directory
+
+        :return: a list of Obj.
+        """
+        ifc_file = ifcopenshell.open(path_to_file)
+
+        if(ifc_file.by_type("IfcMapConversion")):
+            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type("IfcMapConversion")[0])
+        else:
+            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type('IfcSite')[0], unitConversion(originalUnit, targetedUnit))
+        elements = ifc_file.by_type('IfcElement')
+        nb_element = str(len(elements))
+        print(nb_element + " elements to parse")
+
+        groups = ifc_file.by_type("IFCRELASSIGNSTOGROUP")
+
+
+        dictObjByGroup = dict()
+        for group in groups:
+            elements_in_group = list()
+            for element in group.RelatedObjects:
+                if(element.is_a('IfcElement')):
+                    elements.remove(element)
+                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid,group.RelatingGroup.Name)
+                    if(obj.hasGeom()):
+                        elements_in_group.append(obj)
+            dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
+        
+        elements_not_in_group = list()
+        for element in elements:
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+            if(obj.hasGeom()):
+                elements_not_in_group.append(obj)
+        dictObjByGroup["None"] = elements_not_in_group
+
+        for key in dictObjByGroup.keys():
+            dictObjByGroup[key] = IfcObjectsGeom(dictObjByGroup[key])
+
+        return dictObjByGroup, centroid
