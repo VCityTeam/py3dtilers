@@ -45,7 +45,7 @@ class IfcTiler(Tiler):
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         objects_to_tile = IfcObjectsGeom(objects)
 
-        return self.create_tileset_from_geometries(objects_to_tile,centroid)
+        return self.create_tileset_from_geometries(objects_to_tile)
 
 
 def main():
