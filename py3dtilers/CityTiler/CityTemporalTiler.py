@@ -22,11 +22,6 @@ class CityTemporalTiler(CityTiler):
     def __init__(self):
         super().__init__()
 
-        self.parser.add_argument('--db_config_path',
-                                 nargs='+',
-                                 default='CityTilerDBConfig.yml',
-                                 type=str,
-                                 help='Path(es) to the database configuration file(s)')
         self.parser.add_argument('--time_stamps',
                                  nargs='+',
                                  type=str,

@@ -18,11 +18,11 @@ class CityTiler(Tiler):
         super().__init__()
 
         # adding positional arguments
-        self.parser.add_argument('db_config_path',
-                                 nargs='?',
+        self.parser.add_argument('--db_config_path',
+                                 nargs='*',
                                  default='py3dtilers/CityTiler/CityTilerDBConfig.yml',
-                                 type=str,  # why precise this if it is the default config ?
-                                 help='path to the database configuration file')
+                                 type=str,
+                                 help='Path(es) to the database configuration file(s)')
 
         self.parser.add_argument('object_type',
                                  nargs='?',
@@ -159,7 +159,7 @@ def main():
     city_tiler.parse_command_line()
     args = city_tiler.args
 
-    cursor = open_data_base(args.db_config_path)
+    cursor = open_data_base(args.db_config_path[0])
 
     if args.object_type == "building":
         objects_type = CityMBuildings
