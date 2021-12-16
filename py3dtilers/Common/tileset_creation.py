@@ -1,8 +1,13 @@
 import numpy as np
+import random
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Common import LodTree
 from ..Texture import Atlas
+
+
+def get_random_color():
+    return [round(random.random(), 2) for i in range(0, 3)]
 
 
 def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
@@ -65,24 +70,26 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
     """
     # create B3DM content
     arrays = []
+    materials = []
+    mat_index = 0
     if with_texture:
         tile_atlas = Atlas(objects)
-        for feature in objects:
-            arrays.append({
-                'position': feature.geom.getPositionArray(),
-                'normal': feature.geom.getNormalArray(),
-                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
-                'uv': feature.geom.getDataArray(0),
-                'matIndex': 0
-            })
-    else:
-        for feature in objects:
-            arrays.append({
-                'position': feature.geom.getPositionArray(),
-                'normal': feature.geom.getNormalArray(),
-                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
-                'matIndex': 0
-            })
+    for feature in objects:
+        content = {
+            'position': feature.geom.getPositionArray(),
+            'normal': feature.geom.getNormalArray(),
+            'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
+            'matIndex': mat_index
+        }
+        # print(get_random_color())
+        mat = GlTFMaterial(rgb=get_random_color())
+        # mat = GlTFMaterial(rgb=[1,1,0])
+        if with_texture:
+            content['uv'] = feature.geom.getDataArray(0)
+            mat.textureUri = './ATLAS_' + str(tile_atlas.tile_number) + '.png'
+        mat_index += 1
+        materials.append(mat)
+        arrays.append(content)
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
     # in the 3DCityDB database) uses a z-up coordinate system convention. In
@@ -98,10 +105,7 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                           0, 1, 0, 0,
                           0, 0, 0, 1])
 
-    mat = GlTFMaterial()
-    if with_texture:
-        mat.textureUri = './ATLAS_' + str(tile_atlas.tile_number) + '.png'
-    gltf = GlTF.from_binary_arrays(arrays, transform, materials=[mat])
+    gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
 
     # Create a batch table and add the ID of each feature to it
     ids = [feature.get_id() for feature in objects]
