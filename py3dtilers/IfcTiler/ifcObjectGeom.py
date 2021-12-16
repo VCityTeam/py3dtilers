@@ -38,11 +38,11 @@ def unitConversion(originalUnit, targetedUnit):
 
 
 class IfcObjectGeom(ObjectToTile):
-    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None,ifcGroup = None):
+    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
 
         self.ifcObject = ifcObject
-        self.setIfcClasse(ifcObject.is_a(),ifcGroup)
+        self.setIfcClasse(ifcObject.is_a(), ifcGroup)
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         self.has_geom = self.parse_geom(transform_matrix)
 
@@ -61,7 +61,7 @@ class IfcObjectGeom(ObjectToTile):
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcClasse,ifcGroup):
+    def setIfcClasse(self, ifcClasse, ifcGroup):
         self.ifcClasse = ifcClasse
         batch_table_data = {
             'classe': ifcClasse,
@@ -338,7 +338,7 @@ class IfcObjectsGeom(ObjectsToTile):
 
     @staticmethod
     def getCentroid(ifcMapConversion):
-        location = (ifcMapConversion.Eastings, ifcMapConversion.Northings,ifcMapConversion.OrthogonalHeight)
+        location = (ifcMapConversion.Eastings, ifcMapConversion.Northings, ifcMapConversion.OrthogonalHeight)
 
         centroid = [[0, ifcMapConversion.XAxisAbscissa, 0],
                     [-ifcMapConversion.XAxisOrdinate, 0, 0],
@@ -388,19 +388,18 @@ class IfcObjectsGeom(ObjectsToTile):
         i = 1
         dictObjByType = dict()
         for element in elements:
-            print("\r"+str(i) + " / " + nb_element,end='',flush=True)
+            print("\r" + str(i) + " / " + nb_element, end='', flush=True)
             if not(element.is_a() in dictObjByType):
                 dictObjByType[element.is_a()] = list()
             obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
             if(obj.hasGeom()):
                 dictObjByType[element.is_a()].append(obj)
-            i = i+1
+            i = i + 1
 
         for key in dictObjByType.keys():
             dictObjByType[key] = IfcObjectsGeom(dictObjByType[key])
 
         return dictObjByType, centroid
-
 
     @staticmethod
     def retrievObjByGroup(path_to_file, originalUnit="m", targetedUnit="m"):
@@ -421,18 +420,17 @@ class IfcObjectsGeom(ObjectsToTile):
 
         groups = ifc_file.by_type("IFCRELASSIGNSTOGROUP")
 
-
         dictObjByGroup = dict()
         for group in groups:
             elements_in_group = list()
             for element in group.RelatedObjects:
                 if(element.is_a('IfcElement')):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid,group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
-        
+
         elements_not_in_group = list()
         for element in elements:
             obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
