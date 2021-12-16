@@ -16,7 +16,7 @@ Copy and customize the [CityTilerDBConfigReference.yml](CityTilerDBConfigReferen
 
 You can then run the tiler by specifying the path to the _.yml_ configuration file:  
 ```
-citygml-tiler <path_to_file>/Config.yml
+citygml-tiler --db_config_path <path_to_file>/Config.yml
 ```
 
 The created tileset will be placed in a folder named `junk_<objects-type>` in the root directory. The name of the folder will be either `junk_buildings`, `junk_reliefs`, `junk_water_bodies` or `junk_bridges`, depending on the [objects type](#objects-type) (respectively `building`, `relief`, `water` and `bridge`).
@@ -31,19 +31,19 @@ By default, the tiler will treat the data as __buildings__. You can change the t
 
 * `building`
 ```
-citygml-tiler <path_to_file>/Config.yml building
+citygml-tiler --db_config_path <path_to_file>/Config.yml building
 ```
 * `relief`
 ```
-citygml-tiler <path_to_file>/Config.yml relief
+citygml-tiler --db_config_path <path_to_file>/Config.yml relief
 ```
 * `water`
 ```
-citygml-tiler <path_to_file>/Config.yml water
+citygml-tiler --db_config_path <path_to_file>/Config.yml water
 ```
 * `bridge`
 ```
-citygml-tiler <path_to_file>/Config.yml bridge
+citygml-tiler --db_config_path <path_to_file>/Config.yml bridge
 ```
 
 ### LOA
@@ -51,7 +51,7 @@ Using the LOA\* option creates a tileset with a __refinement hierarchy__. The le
 
 To use the LOA option:
 ```
-citygml-tiler <path_to_file>/Config.yml --loa <path-to-polygons>
+citygml-tiler --db_config_path <path_to_file>/Config.yml --loa <path-to-polygons>
 ```
 
 \*_LOA (Level Of Abstraction): here, it is simple 3D extrusion of a polygon._
@@ -61,7 +61,7 @@ Using the LOD1 option creates a tileset with a __refinement hierarchy__. The lea
 
 To use the LOD1 option:
 ```
-citygml-tiler <path_to_file>/Config.yml --lod1
+citygml-tiler --db_config_path <path_to_file>/Config.yml --lod1
 ```
 
 ### Textures
@@ -69,7 +69,7 @@ By default, the objects are created without their texture.
 
 To add texture:
 ```
-citygml-tiler <path_to_file>/Config.yml --with_texture
+citygml-tiler --db_config_path <path_to_file>/Config.yml --with_texture
 ```
 
 ### Split surfaces
@@ -77,14 +77,14 @@ By default, the tiler merges the surfaces of the same CityObject into one geomet
 
 To keep the surfaces split:
 ```
-citygml-tiler <path_to_file>/Config.yml --split_surfaces
+citygml-tiler --db_config_path <path_to_file>/Config.yml --split_surfaces
 ```
 ### Batch Table Hierarchy
 The Batch table hierarchy is a [Batch Table](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/BatchTable/README.md) extension. This extension creates a link between the buildings and their surfaces.
 
 To create the BatchTableHierarchy extension:
 ```
-citygml-tiler <path_to_file>/Config.yml --with_BTH
+citygml-tiler --db_config_path <path_to_file>/Config.yml --with_BTH
 ```
 
 # City Temporal Tiler
