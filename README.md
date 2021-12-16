@@ -41,6 +41,7 @@ $ . venv/bin/activate
 ```
 
 (_Note_: On Windows replace `$ . venv/bin/activate` with `$ . venv\Scripts\activate`)
+
 **Caveat emptor**: make sure, that the IfcOpenShell dependency was properly installed with help of the `python -c 'import ifcopenshell'` command. In case
 of failure of the importation try re-installing but this time with the verbose
 flag, that is try
