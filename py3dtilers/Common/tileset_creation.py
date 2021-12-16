@@ -1,5 +1,5 @@
 import numpy as np
-from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF
+from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Common import LodTree
 from ..Texture import Atlas
@@ -72,14 +72,16 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                 'position': feature.geom.getPositionArray(),
                 'normal': feature.geom.getNormalArray(),
                 'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
-                'uv': feature.geom.getDataArray(0)
+                'uv': feature.geom.getDataArray(0),
+                'matIndex': 0
             })
     else:
         for feature in objects:
             arrays.append({
                 'position': feature.geom.getPositionArray(),
                 'normal': feature.geom.getNormalArray(),
-                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()]
+                'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
+                'matIndex': 0
             })
 
     # GlTF uses a y-up coordinate system whereas the geographical data (stored
@@ -96,10 +98,10 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                           0, 1, 0, 0,
                           0, 0, 0, 1])
 
+    mat = GlTFMaterial()
     if with_texture:
-        gltf = GlTF.from_binary_arrays(arrays, transform, textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.png')
-    else:
-        gltf = GlTF.from_binary_arrays(arrays, transform)
+        mat.textureUri = './ATLAS_' + str(tile_atlas.tile_number) + '.png'
+    gltf = GlTF.from_binary_arrays(arrays, transform, materials=[mat])
 
     # Create a batch table and add the ID of each feature to it
     ids = [feature.get_id() for feature in objects]
