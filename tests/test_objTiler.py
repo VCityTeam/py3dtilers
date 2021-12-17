@@ -25,7 +25,7 @@ class Test_Tile(unittest.TestCase):
     def test_texture(self):
         path = 'tests/obj_tiler_data/TexturedCube'
         obj_tiler = ObjTiler()
-        offset = [-1843397 - 5173891 - 300]
+        offset = [-1843397, - 5173891, - 300]
         obj_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=offset, with_texture=True, scale=50)
         obj_tiler.create_directory('tests/obj_tiler_data/generated_tilesets/texture')
         if not os.path.exists('tests/obj_tiler_data/generated_tilesets'):
