@@ -69,6 +69,12 @@ Translate the geometries by __substracting__ an offset. :
 obj-tiler --paths <directory_path> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
 ```
 
+It is also possible to translate a tileset by its own centroid by using `centroid` as parameter:
+
+```bash
+obj-tiler --paths <directory_path> --offset centroid
+```
+
 ### CRS in/out
 
 Project the geometries on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the geometries in another CRS (default output CRS is EPSG:3946).

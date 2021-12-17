@@ -84,7 +84,9 @@ class Tiler():
         if hasattr(self.args, 'scale') and self.args.scale:
             objects_to_tile.scale_objects(self.args.scale)
 
-        if sum(self.args.offset) != 0:
+        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
+            if self.args.offset[0] == 'centroid':
+                self.args.offset = objects_to_tile.get_centroid()
             objects_to_tile.translate_objects(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
