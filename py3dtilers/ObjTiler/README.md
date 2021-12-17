@@ -1,16 +1,86 @@
+# Obj Tiler
 
-# ObjTiler
+## Installation
 
-## Running the ObjTiler
+See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/README.md)
+
+## ObjTiler features
+
+### Run the ObjTiler
 
 ```bash
 (venv) obj-tiler --paths <directory_path>
 ```
 
-where `directory_path` should point to directories holding a set of OBJ files. 
+where `directory_path` should point to directories holding a set of OBJ files.
 
 The resulting 3DTiles tileset will contain all of the converted OBJ that are
 located within this directory, using their filename as ID.
 
 This command should produce a directory named `obj_tilesets`.
 
+## Shared Tiler features
+
+### LOA
+
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+
+To use the LOA option:
+
+```bash
+obj-tiler --paths <directory_path> --loa <path-to-polygons>
+```
+
+\*_LOA (Level Of Abstraction): here, it is simple 3D extrusion of a polygon._
+
+### LOD1
+
+___Warning__: creating LOD1 can be useless if the features are already footprints._
+
+Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 geometries of those detailed features. The LOD1 geometries are 3D extrusions of the footprints of the features.
+
+To use the LOD1 option:
+
+```bash
+obj-tiler --paths <directory_path> --lod1
+```
+
+### Obj creation
+
+An .obj model (without texture) is created if the `--obj` flag is present in command line. To create an obj file, use:
+
+```bash
+obj-tiler --paths <directory_path> --obj <obj_file_name>
+```
+
+### Scale
+
+Rescale the geometries by a factor:
+
+```bash
+obj-tiler --paths <directory_path> --scale 10
+```
+
+### Offset
+
+Translate the geometries by __substracting__ an offset. :
+
+```bash
+obj-tiler --paths <directory_path> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
+```
+
+### CRS in/out
+
+Project the geometries on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the geometries in another CRS (default output CRS is EPSG:3946).
+
+```bash
+obj-tiler --paths <directory_path> --crs_in EPSG:3946 --crs_out EPSG:4171
+```
+
+### With texture
+
+Read the texture from the OBJ and write it in the produced 3DTiles:
+
+```bash
+obj-tiler --paths <directory_path> --with_texture
+```
