@@ -105,7 +105,7 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
                           0, 1, 0, 0,
                           0, 0, 0, 1])
 
-    gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
+    gltf = GlTF.from_binary_arrays(arrays, transform, splitted=True, materials=materials)
 
     # Create a batch table and add the ID of each feature to it
     ids = [feature.get_id() for feature in objects]
