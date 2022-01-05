@@ -1,5 +1,5 @@
 import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import BoundingVolumeBox, TriangleSoup, GlTFMaterial
 
 
 class ObjectToTile(object):
@@ -25,6 +25,8 @@ class ObjectToTile(object):
         self.centroid = np.array([0, 0, 0])
 
         self.texture = None
+
+        self.material_index = 0
 
         self.set_id(id)
 
@@ -88,6 +90,7 @@ class ObjectsToTile(object):
 
     def __init__(self, objects=None):
         self.objects = list()
+        self.materials = [GlTFMaterial()]
         if(objects):
             self.objects.extend(objects)
 
@@ -147,6 +150,21 @@ class ObjectsToTile(object):
         return np.array([centroid[0] / self.get_size(),
                          centroid[1] / self.get_size(),
                          centroid[2] / self.get_size()])
+
+    def set_materials(self, materials):
+        """
+        :param materials: an array of GlTFMaterial
+        """
+        self.materials = materials
+
+    def add_materials(self, materials):
+        """
+        :param materials: an array of GlTFMaterial
+        """
+        self.materials.extend(materials)
+
+    def get_material(self, index):
+        return self.materials[index]
 
     def translate_objects(self, offset):
         """
