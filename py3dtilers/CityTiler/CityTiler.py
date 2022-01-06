@@ -1,6 +1,6 @@
 import numpy as np
 
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import TriangleSoup
 
 from ..Common import Tiler
 from ..Texture import Texture
@@ -194,7 +194,6 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     if args.object_type == "building":
         tileset.write_to_directory('junk_buildings')
     elif args.object_type == "relief":

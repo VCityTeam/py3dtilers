@@ -1,5 +1,3 @@
-from py3dtiles import BoundingVolumeBox
-
 from ..Common import Tiler
 from .ifcObjectGeom import IfcObjectsGeom
 
@@ -59,7 +57,6 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory("ifc_tileset")
 
 
