@@ -40,7 +40,8 @@ dev_requirements = (
     'pytest',
     'pytest-cov',
     'autopep8',
-    'pytest-flake8'
+    'pytest-flake8',
+    'pdoc3'
 )
 
 prod_requirements = (
