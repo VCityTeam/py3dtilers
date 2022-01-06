@@ -143,7 +143,7 @@ $ source venv/bin/activate
 
 ### Documentation
 
-The documentation can be found in the [HTML](./html/index.html) repository.
+The documentation can be found in the [HTML](./html/py3dtilers/index.html) repository.
 
 To update the documentation :
 
