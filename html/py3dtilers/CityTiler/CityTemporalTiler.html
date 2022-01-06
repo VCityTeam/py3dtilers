@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>py3dtilers.CityTiler.CityTemporalTiler API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>py3dtilers.CityTiler.CityTemporalTiler</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import sys
+
+from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
+from py3dtiles import TemporalTileSet
+from py3dtiles import TemporalTransaction
+from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
+from py3dtiles import TriangleSoup
+
+from .temporal_utils import debug_msg
+from .temporal_graph import TemporalGraph, Edge
+from .temporal_building import TemporalBuilding
+
+from .citym_cityobject import CityMCityObjects
+from .citym_building import CityMBuildings
+from .CityTiler import CityTiler
+
+from .database_accesses import open_data_bases
+
+
+class CityTemporalTiler(CityTiler):
+
+    def __init__(self):
+        super().__init__()
+
+        self.parser.add_argument(&#39;--time_stamps&#39;,
+                                 nargs=&#39;+&#39;,
+                                 type=str,
+                                 help=&#39;Time stamps (corresponding to each database)&#39;)
+        self.parser.add_argument(&#39;--temporal_graph&#39;,
+                                 nargs=&#39;+&#39;,
+                                 type=str,
+                                 help=&#39;GraphML-Json temporal data filename(s)&#39;)
+
+    def parse_command_line(self):
+        super().parse_command_line()
+
+        if len(self.args.db_config_path) &lt;= 1:
+            print(&#34;Only a single database configuration file was provided.&#34;)
+            print(&#34;This is highly suspect since temporal comparisons require at&#34;)
+            print(&#34;lest to time-stamps and thus two databases (one for each).&#34;)
+            print(&#34;Exiting.&#34;)
+            sys.exit(1)
+        else:
+            # When there is more than one database there should be as
+            # as many time stamps as databases (because each time stamp
+            # corresponds to a database:
+            if not self.args.time_stamps:
+                # How come the nargs+ doesn&#39;t deal with this case ?
+                print(&#34;There must be as many time-stamps as databases.&#34;)
+                print(&#34;Provide time-stamps with the --time_stamps option.&#34;)
+                sys.exit(1)
+            if len(self.args.db_config_path) != len(self.args.time_stamps):
+                print(&#34;Mismatching number of databases vs time-stamps:&#34;)
+                print(&#34; - databases (configurations): &#34;, self.args.db_config_path)
+                print(&#34; - timestamps: &#34;, self.args.time_stamps)
+                print(&#34;Exiting.&#34;)
+                sys.exit(1)
+
+    def get_surfaces_merged(self, cursors, cityobjects, objects_type):
+        &#34;&#34;&#34;
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup
+        Surfaces of the same cityObject are merged into one geometry
+        &#34;&#34;&#34;
+        cityobjects_with_geom = list()
+        for cityobject in cityobjects:
+            try:
+                id = &#39;(&#39; + str(cityobject.get_database_id()) + &#39;)&#39;
+                time_stamp = cityobject.get_time_stamp()
+                cursors[time_stamp].execute(objects_type.sql_query_geometries(id, False))
+                for t in cursors[time_stamp].fetchall():
+                    geom_as_string = t[1]
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                    cityobject.set_box()
+                    cityobjects_with_geom.append(cityobject)
+            except AttributeError:
+                continue
+        return objects_type(cityobjects_with_geom)
+
+    def from_3dcitydb(self, cursors, buildings):
+        &#34;&#34;&#34;
+        :param cursors: a dictionary with a timestamp as key and database cursors
+                        as values
+        :param buildings: a Buildings object
+        &#34;&#34;&#34;
+
+        if not buildings:
+            raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
+
+        objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+
+        return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)
+
+    def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
+        # ######## Convert the nodes to buildings (optimization purpose)
+        # Constructing the pre-tiling stage (i.e. sorting out the cityGML objects
+        # in a 2D-Tree used as input to the TileSet construction per-se, refer to
+        # to the from_3dcitydb() method) requires the objects bounding boxes. Once
+        # retrieved we would have to match the retrieved building with the upcoming
+        # nodes in order to transfer the temporal information (creation/deletion
+        # dates). In order to avoid this possibly expensive matching, we create
+        # temporal buildings and let from_3dcitydb() decorate those objects with
+        # the information it extracts from the database:
+        resulting_buildings = CityMBuildings()
+        for index, time_stamp in enumerate(cli_args.time_stamps):
+            cursor = cursors[index]
+            nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            buildings = CityMBuildings()
+            for node in nodes:
+                new_building = TemporalBuilding()
+                new_building.set_start_date(node.get_start_date())
+                new_building.set_end_date(node.get_end_date())
+                new_building.set_temporal_id(node.get_global_id())
+                new_building.set_gml_id(node.get_local_id())
+                buildings.append(new_building)
+            if not buildings:
+                continue
+            extracted_buildings = CityMCityObjects.retrieve_objects(
+                cursor, CityMBuildings, buildings)
+            resulting_buildings.extend(extracted_buildings)
+        return resulting_buildings
+
+    def build_temporal_tile_set(self, graph):
+        # ####### We are left with transposing the information carried by the
+        # graph edges to transactions
+        debug_msg(&#39;  Creating transactions&#39;)
+        temporal_tile_set = TemporalTileSet()
+        for edge in graph.edges:
+            if not edge.is_modified():
+                continue
+            if not edge.are_adjacent_nodes_one_to_one():
+                continue
+            ancestor = edge.get_ancestor()
+            descendant = edge.get_descendant()
+            transaction = TemporalPrimaryTransaction()
+            transaction.set_start_date(ancestor.get_end_date())
+            transaction.set_end_date(descendant.get_start_date())
+            transaction.set_type(&#39;modification&#39;)
+            transaction.append_source(ancestor.get_global_id())
+            transaction.append_destination(descendant.get_global_id())
+            temporal_tile_set.append_transaction(transaction)
+
+        # ######## Re-qualifying modified-fusion or modified-subdivision
+        # When they are many modified edges adjacent to a single node
+        # then this indicates that such edges were incompletely labeled
+        # since they miss the tags &#39;subdivision&#39; or &#39;fused&#39; in addition
+        # to the modified one. In other terms we encountered a combination
+        # of subdivision (or fusion) with a modification.
+        # In such a case we re-qualify those edges and let the next stage
+        # (fused and subdivision edge transactions) treat them:
+        time_stamps = graph.extract_time_stamps()
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_ancestor_edges_of_type(Edge.Tag.modified):
+                    continue
+                for ancestor_edge in node.get_ancestor_edges():
+                    ancestor_edge.append_tag(Edge.Tag.fused)
+
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_descendant_edges_of_type(Edge.Tag.modified):
+                    continue
+                for descendant_edge in node.get_descendant_edges():
+                    descendant_edge.append_tag(Edge.Tag.subdivided)
+
+        # ####### The union case
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
+                    continue
+
+                # At first we do _not_ know whether the resulting transaction will
+                # be a
+                #  - a simple PrimaryTransaction of union type
+                #  - or an TransactionAggregate nesting the above (simple case) of
+                #    fusion PrimaryTransaction together with another simple
+                #    PrimaryTransaction of modification type
+                # Note that when both PrimaryTransactions happen to exist we need
+                # the three created transactions (the two primary transactions
+                # with the transaction aggregate holding them) to share the same
+                # (redundant) information (that is the attributes of the base
+                # class that they share i.e. a TemporalTransaction).
+                # We thus make a first pass where on the one hand we collect the
+                # elements of the transaction(s) and on the other hand on the other
+                # decide which case we are facing.
+                aggregate_required = False
+                transaction_elements = TemporalTransaction()
+                transaction_elements.append_destination(node.get_global_id())
+
+                if not node.do_all_ancestor_nodes_share_same_date():
+                    debug_msg(&#34;Warning: union transaction surely erroneous...&#34;)
+                # We here make the assumption that all ancestor nodes are all
+                # sharing the same deletion date for the following code to make
+                # sense:
+                some_ancestor = node.get_ancestors()[0]
+                transaction_elements.set_start_date(some_ancestor.get_end_date())
+                transaction_elements.set_end_date(node.get_start_date())
+
+                for ancestor in node.get_ancestors():
+                    transaction_elements.append_source(ancestor.get_global_id())
+                for ancestor_edge in node.get_ancestor_edges():
+                    if ancestor_edge.is_modified():
+                        aggregate_required = True
+                        break
+
+                # We can now wrap the collected elements into the ad-hoc
+                # transaction:
+                union_transaction = TemporalPrimaryTransaction()
+                union_transaction.replicate_from(transaction_elements)
+                union_transaction.set_type(&#39;union&#39;)
+
+                if not aggregate_required:
+                    resulting_transaction = union_transaction
+                else:
+                    resulting_transaction = TemporalTransactionAggregate()
+                    resulting_transaction.replicate_from(transaction_elements)
+                    resulting_transaction.append_transaction(union_transaction)
+                    modification_transaction = TemporalPrimaryTransaction()
+                    modification_transaction.replicate_from(transaction_elements)
+                    modification_transaction.set_type(&#39;modification&#39;)
+                    resulting_transaction.append_transaction(
+                        modification_transaction)
+                # And eventually attach the result to the the tile set
+                temporal_tile_set.append_transaction(resulting_transaction)
+
+        # ####### The subdivision case
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_descendant_edges_of_type(Edge.Tag.subdivided):
+                    continue
+
+                # Refer to the above fusion case for comments concerning the
+                # algorithm logic used for creating the transaction(s):
+                aggregate_required = False
+                transaction_elements = TemporalTransaction()
+                transaction_elements.append_source(node.get_global_id())
+
+                if not node.do_all_descendant_nodes_share_same_date():
+                    debug_msg(&#34;Warning: erroneous subdivision transaction ?&#34;)
+                # We here make the assumption that all descendant nodes all share
+                # the same deletion date for the following code to make sense:
+                some_descendant = node.get_descendants()[0]
+                transaction_elements.set_end_date(some_descendant.get_start_date())
+                transaction_elements.set_start_date(node.get_end_date())
+
+                for descendant in node.get_descendants():
+                    transaction_elements.append_destination(
+                        descendant.get_global_id())
+
+                for descendant_edge in node.get_descendant_edges():
+                    if descendant_edge.is_modified():
+                        aggregate_required = True
+                        break
+
+                # We can now wrap the collected elements into the ad-hoc
+                # transaction:
+                union_transaction = TemporalPrimaryTransaction()
+                union_transaction.replicate_from(transaction_elements)
+                union_transaction.set_type(&#39;division&#39;)
+
+                if not aggregate_required:
+                    resulting_transaction = union_transaction
+                else:
+                    resulting_transaction = TemporalTransactionAggregate()
+                    resulting_transaction.replicate_from(transaction_elements)
+                    resulting_transaction.append_transaction(union_transaction)
+                    modification_transaction = TemporalPrimaryTransaction()
+                    modification_transaction.replicate_from(transaction_elements)
+                    modification_transaction.set_type(&#39;modification&#39;)
+                    resulting_transaction.append_transaction(
+                        modification_transaction)
+                # And eventually attach the result to the the tile set
+                temporal_tile_set.append_transaction(resulting_transaction)
+
+        return temporal_tile_set
+
+
+def main():
+    city_temp_tiler = CityTemporalTiler()
+    city_temp_tiler.parse_command_line()
+    cli_args = city_temp_tiler.args
+
+    # #### Reconstruct the graph
+    graph = TemporalGraph(cli_args)
+    graph.reconstruct_connectivity()
+    debug_msg(&#34;Reconstructed graph characteristics:&#34;)
+    # graph.print_nodes_and_edges()
+    graph.display_characteristics(&#39;   &#39;)
+    graph.simplify(display_characteristics=True)
+    debug_msg(&#34;&#34;)
+    # graph.print_nodes_and_edges()
+
+    # Just making sure the time stamps information is coherent between
+    # their two sources that is the set of difference files and the command
+    # line arguments
+    cli_time_stamps_as_ints = [int(ts) for ts in cli_args.time_stamps]
+    for extracted_time_stamp in graph.extract_time_stamps():
+        if extracted_time_stamp not in cli_time_stamps_as_ints:
+            print(&#39;Command line and difference files time stamps not aligned.&#39;)
+            print(&#34;Exiting&#34;)
+            sys.exit(1)
+
+    # Extract the information form the databases
+    cursors = open_data_bases(cli_args.db_config_path)
+    time_stamped_cursors = dict()
+    for index in range(len(cursors)):
+        time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
+    all_buildings = city_temp_tiler.combine_nodes_with_buildings_from_3dcitydb(
+        graph,
+        cursors,
+        cli_args)
+
+    # Construct the temporal tile set
+    tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
+
+    tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+
+    # Build and attach a TemporalTileSet extension
+    temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
+    tile_set.add_extension(temporal_tile_set)
+
+    # A shallow attempt at providing some traceability on where the resulting
+    # data set comes from:
+    origin = f&#39;This tileset is the result of Py3DTiles {__file__} script &#39;
+    origin += &#39;ran with data extracted from the following databases:&#39;
+    for cursor in cursors:
+        cursor.execute(&#39;SELECT inet_client_addr()&#39;)
+        server_ip = cursor.fetchone()[0]
+        cursor.execute(&#39;SELECT current_database()&#39;)
+        database_name = cursor.fetchone()[0]
+        origin += &#39;   - &#39; + server_ip + &#39;: &#39; + database_name + &#39;\n&#39;
+
+    tile_set.add_asset_extras(origin)
+
+    [cursor.close() for cursor in cursors]  # We are done with the databases
+
+    tile_set.write_to_directory(&#39;junk&#39;)
+
+
+if __name__ == &#39;__main__&#39;:
+    main()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def main():
+    city_temp_tiler = CityTemporalTiler()
+    city_temp_tiler.parse_command_line()
+    cli_args = city_temp_tiler.args
+
+    # #### Reconstruct the graph
+    graph = TemporalGraph(cli_args)
+    graph.reconstruct_connectivity()
+    debug_msg(&#34;Reconstructed graph characteristics:&#34;)
+    # graph.print_nodes_and_edges()
+    graph.display_characteristics(&#39;   &#39;)
+    graph.simplify(display_characteristics=True)
+    debug_msg(&#34;&#34;)
+    # graph.print_nodes_and_edges()
+
+    # Just making sure the time stamps information is coherent between
+    # their two sources that is the set of difference files and the command
+    # line arguments
+    cli_time_stamps_as_ints = [int(ts) for ts in cli_args.time_stamps]
+    for extracted_time_stamp in graph.extract_time_stamps():
+        if extracted_time_stamp not in cli_time_stamps_as_ints:
+            print(&#39;Command line and difference files time stamps not aligned.&#39;)
+            print(&#34;Exiting&#34;)
+            sys.exit(1)
+
+    # Extract the information form the databases
+    cursors = open_data_bases(cli_args.db_config_path)
+    time_stamped_cursors = dict()
+    for index in range(len(cursors)):
+        time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
+    all_buildings = city_temp_tiler.combine_nodes_with_buildings_from_3dcitydb(
+        graph,
+        cursors,
+        cli_args)
+
+    # Construct the temporal tile set
+    tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
+
+    tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+
+    # Build and attach a TemporalTileSet extension
+    temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
+    tile_set.add_extension(temporal_tile_set)
+
+    # A shallow attempt at providing some traceability on where the resulting
+    # data set comes from:
+    origin = f&#39;This tileset is the result of Py3DTiles {__file__} script &#39;
+    origin += &#39;ran with data extracted from the following databases:&#39;
+    for cursor in cursors:
+        cursor.execute(&#39;SELECT inet_client_addr()&#39;)
+        server_ip = cursor.fetchone()[0]
+        cursor.execute(&#39;SELECT current_database()&#39;)
+        database_name = cursor.fetchone()[0]
+        origin += &#39;   - &#39; + server_ip + &#39;: &#39; + database_name + &#39;\n&#39;
+
+    tile_set.add_asset_extras(origin)
+
+    [cursor.close() for cursor in cursors]  # We are done with the databases
+
+    tile_set.write_to_directory(&#39;junk&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler"><code class="flex name class">
+<span>class <span class="ident">CityTemporalTiler</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityTemporalTiler(CityTiler):
+
+    def __init__(self):
+        super().__init__()
+
+        self.parser.add_argument(&#39;--time_stamps&#39;,
+                                 nargs=&#39;+&#39;,
+                                 type=str,
+                                 help=&#39;Time stamps (corresponding to each database)&#39;)
+        self.parser.add_argument(&#39;--temporal_graph&#39;,
+                                 nargs=&#39;+&#39;,
+                                 type=str,
+                                 help=&#39;GraphML-Json temporal data filename(s)&#39;)
+
+    def parse_command_line(self):
+        super().parse_command_line()
+
+        if len(self.args.db_config_path) &lt;= 1:
+            print(&#34;Only a single database configuration file was provided.&#34;)
+            print(&#34;This is highly suspect since temporal comparisons require at&#34;)
+            print(&#34;lest to time-stamps and thus two databases (one for each).&#34;)
+            print(&#34;Exiting.&#34;)
+            sys.exit(1)
+        else:
+            # When there is more than one database there should be as
+            # as many time stamps as databases (because each time stamp
+            # corresponds to a database:
+            if not self.args.time_stamps:
+                # How come the nargs+ doesn&#39;t deal with this case ?
+                print(&#34;There must be as many time-stamps as databases.&#34;)
+                print(&#34;Provide time-stamps with the --time_stamps option.&#34;)
+                sys.exit(1)
+            if len(self.args.db_config_path) != len(self.args.time_stamps):
+                print(&#34;Mismatching number of databases vs time-stamps:&#34;)
+                print(&#34; - databases (configurations): &#34;, self.args.db_config_path)
+                print(&#34; - timestamps: &#34;, self.args.time_stamps)
+                print(&#34;Exiting.&#34;)
+                sys.exit(1)
+
+    def get_surfaces_merged(self, cursors, cityobjects, objects_type):
+        &#34;&#34;&#34;
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup
+        Surfaces of the same cityObject are merged into one geometry
+        &#34;&#34;&#34;
+        cityobjects_with_geom = list()
+        for cityobject in cityobjects:
+            try:
+                id = &#39;(&#39; + str(cityobject.get_database_id()) + &#39;)&#39;
+                time_stamp = cityobject.get_time_stamp()
+                cursors[time_stamp].execute(objects_type.sql_query_geometries(id, False))
+                for t in cursors[time_stamp].fetchall():
+                    geom_as_string = t[1]
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                    cityobject.set_box()
+                    cityobjects_with_geom.append(cityobject)
+            except AttributeError:
+                continue
+        return objects_type(cityobjects_with_geom)
+
+    def from_3dcitydb(self, cursors, buildings):
+        &#34;&#34;&#34;
+        :param cursors: a dictionary with a timestamp as key and database cursors
+                        as values
+        :param buildings: a Buildings object
+        &#34;&#34;&#34;
+
+        if not buildings:
+            raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
+
+        objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+
+        return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)
+
+    def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
+        # ######## Convert the nodes to buildings (optimization purpose)
+        # Constructing the pre-tiling stage (i.e. sorting out the cityGML objects
+        # in a 2D-Tree used as input to the TileSet construction per-se, refer to
+        # to the from_3dcitydb() method) requires the objects bounding boxes. Once
+        # retrieved we would have to match the retrieved building with the upcoming
+        # nodes in order to transfer the temporal information (creation/deletion
+        # dates). In order to avoid this possibly expensive matching, we create
+        # temporal buildings and let from_3dcitydb() decorate those objects with
+        # the information it extracts from the database:
+        resulting_buildings = CityMBuildings()
+        for index, time_stamp in enumerate(cli_args.time_stamps):
+            cursor = cursors[index]
+            nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            buildings = CityMBuildings()
+            for node in nodes:
+                new_building = TemporalBuilding()
+                new_building.set_start_date(node.get_start_date())
+                new_building.set_end_date(node.get_end_date())
+                new_building.set_temporal_id(node.get_global_id())
+                new_building.set_gml_id(node.get_local_id())
+                buildings.append(new_building)
+            if not buildings:
+                continue
+            extracted_buildings = CityMCityObjects.retrieve_objects(
+                cursor, CityMBuildings, buildings)
+            resulting_buildings.extend(extracted_buildings)
+        return resulting_buildings
+
+    def build_temporal_tile_set(self, graph):
+        # ####### We are left with transposing the information carried by the
+        # graph edges to transactions
+        debug_msg(&#39;  Creating transactions&#39;)
+        temporal_tile_set = TemporalTileSet()
+        for edge in graph.edges:
+            if not edge.is_modified():
+                continue
+            if not edge.are_adjacent_nodes_one_to_one():
+                continue
+            ancestor = edge.get_ancestor()
+            descendant = edge.get_descendant()
+            transaction = TemporalPrimaryTransaction()
+            transaction.set_start_date(ancestor.get_end_date())
+            transaction.set_end_date(descendant.get_start_date())
+            transaction.set_type(&#39;modification&#39;)
+            transaction.append_source(ancestor.get_global_id())
+            transaction.append_destination(descendant.get_global_id())
+            temporal_tile_set.append_transaction(transaction)
+
+        # ######## Re-qualifying modified-fusion or modified-subdivision
+        # When they are many modified edges adjacent to a single node
+        # then this indicates that such edges were incompletely labeled
+        # since they miss the tags &#39;subdivision&#39; or &#39;fused&#39; in addition
+        # to the modified one. In other terms we encountered a combination
+        # of subdivision (or fusion) with a modification.
+        # In such a case we re-qualify those edges and let the next stage
+        # (fused and subdivision edge transactions) treat them:
+        time_stamps = graph.extract_time_stamps()
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_ancestor_edges_of_type(Edge.Tag.modified):
+                    continue
+                for ancestor_edge in node.get_ancestor_edges():
+                    ancestor_edge.append_tag(Edge.Tag.fused)
+
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_descendant_edges_of_type(Edge.Tag.modified):
+                    continue
+                for descendant_edge in node.get_descendant_edges():
+                    descendant_edge.append_tag(Edge.Tag.subdivided)
+
+        # ####### The union case
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
+                    continue
+
+                # At first we do _not_ know whether the resulting transaction will
+                # be a
+                #  - a simple PrimaryTransaction of union type
+                #  - or an TransactionAggregate nesting the above (simple case) of
+                #    fusion PrimaryTransaction together with another simple
+                #    PrimaryTransaction of modification type
+                # Note that when both PrimaryTransactions happen to exist we need
+                # the three created transactions (the two primary transactions
+                # with the transaction aggregate holding them) to share the same
+                # (redundant) information (that is the attributes of the base
+                # class that they share i.e. a TemporalTransaction).
+                # We thus make a first pass where on the one hand we collect the
+                # elements of the transaction(s) and on the other hand on the other
+                # decide which case we are facing.
+                aggregate_required = False
+                transaction_elements = TemporalTransaction()
+                transaction_elements.append_destination(node.get_global_id())
+
+                if not node.do_all_ancestor_nodes_share_same_date():
+                    debug_msg(&#34;Warning: union transaction surely erroneous...&#34;)
+                # We here make the assumption that all ancestor nodes are all
+                # sharing the same deletion date for the following code to make
+                # sense:
+                some_ancestor = node.get_ancestors()[0]
+                transaction_elements.set_start_date(some_ancestor.get_end_date())
+                transaction_elements.set_end_date(node.get_start_date())
+
+                for ancestor in node.get_ancestors():
+                    transaction_elements.append_source(ancestor.get_global_id())
+                for ancestor_edge in node.get_ancestor_edges():
+                    if ancestor_edge.is_modified():
+                        aggregate_required = True
+                        break
+
+                # We can now wrap the collected elements into the ad-hoc
+                # transaction:
+                union_transaction = TemporalPrimaryTransaction()
+                union_transaction.replicate_from(transaction_elements)
+                union_transaction.set_type(&#39;union&#39;)
+
+                if not aggregate_required:
+                    resulting_transaction = union_transaction
+                else:
+                    resulting_transaction = TemporalTransactionAggregate()
+                    resulting_transaction.replicate_from(transaction_elements)
+                    resulting_transaction.append_transaction(union_transaction)
+                    modification_transaction = TemporalPrimaryTransaction()
+                    modification_transaction.replicate_from(transaction_elements)
+                    modification_transaction.set_type(&#39;modification&#39;)
+                    resulting_transaction.append_transaction(
+                        modification_transaction)
+                # And eventually attach the result to the the tile set
+                temporal_tile_set.append_transaction(resulting_transaction)
+
+        # ####### The subdivision case
+        for time_stamp in time_stamps:
+            current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+            for node in current_nodes:
+                if not node.are_all_descendant_edges_of_type(Edge.Tag.subdivided):
+                    continue
+
+                # Refer to the above fusion case for comments concerning the
+                # algorithm logic used for creating the transaction(s):
+                aggregate_required = False
+                transaction_elements = TemporalTransaction()
+                transaction_elements.append_source(node.get_global_id())
+
+                if not node.do_all_descendant_nodes_share_same_date():
+                    debug_msg(&#34;Warning: erroneous subdivision transaction ?&#34;)
+                # We here make the assumption that all descendant nodes all share
+                # the same deletion date for the following code to make sense:
+                some_descendant = node.get_descendants()[0]
+                transaction_elements.set_end_date(some_descendant.get_start_date())
+                transaction_elements.set_start_date(node.get_end_date())
+
+                for descendant in node.get_descendants():
+                    transaction_elements.append_destination(
+                        descendant.get_global_id())
+
+                for descendant_edge in node.get_descendant_edges():
+                    if descendant_edge.is_modified():
+                        aggregate_required = True
+                        break
+
+                # We can now wrap the collected elements into the ad-hoc
+                # transaction:
+                union_transaction = TemporalPrimaryTransaction()
+                union_transaction.replicate_from(transaction_elements)
+                union_transaction.set_type(&#39;division&#39;)
+
+                if not aggregate_required:
+                    resulting_transaction = union_transaction
+                else:
+                    resulting_transaction = TemporalTransactionAggregate()
+                    resulting_transaction.replicate_from(transaction_elements)
+                    resulting_transaction.append_transaction(union_transaction)
+                    modification_transaction = TemporalPrimaryTransaction()
+                    modification_transaction.replicate_from(transaction_elements)
+                    modification_transaction.set_type(&#39;modification&#39;)
+                    resulting_transaction.append_transaction(
+                        modification_transaction)
+                # And eventually attach the result to the the tile set
+                temporal_tile_set.append_transaction(resulting_transaction)
+
+        return temporal_tile_set</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></li>
+<li><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.build_temporal_tile_set"><code class="name flex">
+<span>def <span class="ident">build_temporal_tile_set</span></span>(<span>self, graph)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_temporal_tile_set(self, graph):
+    # ####### We are left with transposing the information carried by the
+    # graph edges to transactions
+    debug_msg(&#39;  Creating transactions&#39;)
+    temporal_tile_set = TemporalTileSet()
+    for edge in graph.edges:
+        if not edge.is_modified():
+            continue
+        if not edge.are_adjacent_nodes_one_to_one():
+            continue
+        ancestor = edge.get_ancestor()
+        descendant = edge.get_descendant()
+        transaction = TemporalPrimaryTransaction()
+        transaction.set_start_date(ancestor.get_end_date())
+        transaction.set_end_date(descendant.get_start_date())
+        transaction.set_type(&#39;modification&#39;)
+        transaction.append_source(ancestor.get_global_id())
+        transaction.append_destination(descendant.get_global_id())
+        temporal_tile_set.append_transaction(transaction)
+
+    # ######## Re-qualifying modified-fusion or modified-subdivision
+    # When they are many modified edges adjacent to a single node
+    # then this indicates that such edges were incompletely labeled
+    # since they miss the tags &#39;subdivision&#39; or &#39;fused&#39; in addition
+    # to the modified one. In other terms we encountered a combination
+    # of subdivision (or fusion) with a modification.
+    # In such a case we re-qualify those edges and let the next stage
+    # (fused and subdivision edge transactions) treat them:
+    time_stamps = graph.extract_time_stamps()
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_ancestor_edges_of_type(Edge.Tag.modified):
+                continue
+            for ancestor_edge in node.get_ancestor_edges():
+                ancestor_edge.append_tag(Edge.Tag.fused)
+
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_descendant_edges_of_type(Edge.Tag.modified):
+                continue
+            for descendant_edge in node.get_descendant_edges():
+                descendant_edge.append_tag(Edge.Tag.subdivided)
+
+    # ####### The union case
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_ancestor_edges_of_type(Edge.Tag.fused):
+                continue
+
+            # At first we do _not_ know whether the resulting transaction will
+            # be a
+            #  - a simple PrimaryTransaction of union type
+            #  - or an TransactionAggregate nesting the above (simple case) of
+            #    fusion PrimaryTransaction together with another simple
+            #    PrimaryTransaction of modification type
+            # Note that when both PrimaryTransactions happen to exist we need
+            # the three created transactions (the two primary transactions
+            # with the transaction aggregate holding them) to share the same
+            # (redundant) information (that is the attributes of the base
+            # class that they share i.e. a TemporalTransaction).
+            # We thus make a first pass where on the one hand we collect the
+            # elements of the transaction(s) and on the other hand on the other
+            # decide which case we are facing.
+            aggregate_required = False
+            transaction_elements = TemporalTransaction()
+            transaction_elements.append_destination(node.get_global_id())
+
+            if not node.do_all_ancestor_nodes_share_same_date():
+                debug_msg(&#34;Warning: union transaction surely erroneous...&#34;)
+            # We here make the assumption that all ancestor nodes are all
+            # sharing the same deletion date for the following code to make
+            # sense:
+            some_ancestor = node.get_ancestors()[0]
+            transaction_elements.set_start_date(some_ancestor.get_end_date())
+            transaction_elements.set_end_date(node.get_start_date())
+
+            for ancestor in node.get_ancestors():
+                transaction_elements.append_source(ancestor.get_global_id())
+            for ancestor_edge in node.get_ancestor_edges():
+                if ancestor_edge.is_modified():
+                    aggregate_required = True
+                    break
+
+            # We can now wrap the collected elements into the ad-hoc
+            # transaction:
+            union_transaction = TemporalPrimaryTransaction()
+            union_transaction.replicate_from(transaction_elements)
+            union_transaction.set_type(&#39;union&#39;)
+
+            if not aggregate_required:
+                resulting_transaction = union_transaction
+            else:
+                resulting_transaction = TemporalTransactionAggregate()
+                resulting_transaction.replicate_from(transaction_elements)
+                resulting_transaction.append_transaction(union_transaction)
+                modification_transaction = TemporalPrimaryTransaction()
+                modification_transaction.replicate_from(transaction_elements)
+                modification_transaction.set_type(&#39;modification&#39;)
+                resulting_transaction.append_transaction(
+                    modification_transaction)
+            # And eventually attach the result to the the tile set
+            temporal_tile_set.append_transaction(resulting_transaction)
+
+    # ####### The subdivision case
+    for time_stamp in time_stamps:
+        current_nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        for node in current_nodes:
+            if not node.are_all_descendant_edges_of_type(Edge.Tag.subdivided):
+                continue
+
+            # Refer to the above fusion case for comments concerning the
+            # algorithm logic used for creating the transaction(s):
+            aggregate_required = False
+            transaction_elements = TemporalTransaction()
+            transaction_elements.append_source(node.get_global_id())
+
+            if not node.do_all_descendant_nodes_share_same_date():
+                debug_msg(&#34;Warning: erroneous subdivision transaction ?&#34;)
+            # We here make the assumption that all descendant nodes all share
+            # the same deletion date for the following code to make sense:
+            some_descendant = node.get_descendants()[0]
+            transaction_elements.set_end_date(some_descendant.get_start_date())
+            transaction_elements.set_start_date(node.get_end_date())
+
+            for descendant in node.get_descendants():
+                transaction_elements.append_destination(
+                    descendant.get_global_id())
+
+            for descendant_edge in node.get_descendant_edges():
+                if descendant_edge.is_modified():
+                    aggregate_required = True
+                    break
+
+            # We can now wrap the collected elements into the ad-hoc
+            # transaction:
+            union_transaction = TemporalPrimaryTransaction()
+            union_transaction.replicate_from(transaction_elements)
+            union_transaction.set_type(&#39;division&#39;)
+
+            if not aggregate_required:
+                resulting_transaction = union_transaction
+            else:
+                resulting_transaction = TemporalTransactionAggregate()
+                resulting_transaction.replicate_from(transaction_elements)
+                resulting_transaction.append_transaction(union_transaction)
+                modification_transaction = TemporalPrimaryTransaction()
+                modification_transaction.replicate_from(transaction_elements)
+                modification_transaction.set_type(&#39;modification&#39;)
+                resulting_transaction.append_transaction(
+                    modification_transaction)
+            # And eventually attach the result to the the tile set
+            temporal_tile_set.append_transaction(resulting_transaction)
+
+    return temporal_tile_set</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.combine_nodes_with_buildings_from_3dcitydb"><code class="name flex">
+<span>def <span class="ident">combine_nodes_with_buildings_from_3dcitydb</span></span>(<span>self, graph, cursors, cli_args)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
+    # ######## Convert the nodes to buildings (optimization purpose)
+    # Constructing the pre-tiling stage (i.e. sorting out the cityGML objects
+    # in a 2D-Tree used as input to the TileSet construction per-se, refer to
+    # to the from_3dcitydb() method) requires the objects bounding boxes. Once
+    # retrieved we would have to match the retrieved building with the upcoming
+    # nodes in order to transfer the temporal information (creation/deletion
+    # dates). In order to avoid this possibly expensive matching, we create
+    # temporal buildings and let from_3dcitydb() decorate those objects with
+    # the information it extracts from the database:
+    resulting_buildings = CityMBuildings()
+    for index, time_stamp in enumerate(cli_args.time_stamps):
+        cursor = cursors[index]
+        nodes = graph.get_nodes_with_time_stamp(time_stamp)
+        buildings = CityMBuildings()
+        for node in nodes:
+            new_building = TemporalBuilding()
+            new_building.set_start_date(node.get_start_date())
+            new_building.set_end_date(node.get_end_date())
+            new_building.set_temporal_id(node.get_global_id())
+            new_building.set_gml_id(node.get_local_id())
+            buildings.append(new_building)
+        if not buildings:
+            continue
+        extracted_buildings = CityMCityObjects.retrieve_objects(
+            cursor, CityMBuildings, buildings)
+        resulting_buildings.extend(extracted_buildings)
+    return resulting_buildings</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.from_3dcitydb"><code class="name flex">
+<span>def <span class="ident">from_3dcitydb</span></span>(<span>self, cursors, buildings)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param cursors: a dictionary with a timestamp as key and database cursors
+as values
+:param buildings: a Buildings object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def from_3dcitydb(self, cursors, buildings):
+    &#34;&#34;&#34;
+    :param cursors: a dictionary with a timestamp as key and database cursors
+                    as values
+    :param buildings: a Buildings object
+    &#34;&#34;&#34;
+
+    if not buildings:
+        raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
+
+    objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+
+    return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line"><code class="name flex">
+<span>def <span class="ident">parse_command_line</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_command_line(self):
+    super().parse_command_line()
+
+    if len(self.args.db_config_path) &lt;= 1:
+        print(&#34;Only a single database configuration file was provided.&#34;)
+        print(&#34;This is highly suspect since temporal comparisons require at&#34;)
+        print(&#34;lest to time-stamps and thus two databases (one for each).&#34;)
+        print(&#34;Exiting.&#34;)
+        sys.exit(1)
+    else:
+        # When there is more than one database there should be as
+        # as many time stamps as databases (because each time stamp
+        # corresponds to a database:
+        if not self.args.time_stamps:
+            # How come the nargs+ doesn&#39;t deal with this case ?
+            print(&#34;There must be as many time-stamps as databases.&#34;)
+            print(&#34;Provide time-stamps with the --time_stamps option.&#34;)
+            sys.exit(1)
+        if len(self.args.db_config_path) != len(self.args.time_stamps):
+            print(&#34;Mismatching number of databases vs time-stamps:&#34;)
+            print(&#34; - databases (configurations): &#34;, self.args.db_config_path)
+            print(&#34; - timestamps: &#34;, self.args.time_stamps)
+            print(&#34;Exiting.&#34;)
+            sys.exit(1)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_merged" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_merged">get_surfaces_merged</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split">get_surfaces_split</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="py3dtilers.CityTiler" href="index.html">py3dtilers.CityTiler</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.main" href="#py3dtilers.CityTiler.CityTemporalTiler.main">main</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler">CityTemporalTiler</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.build_temporal_tile_set" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.build_temporal_tile_set">build_temporal_tile_set</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.combine_nodes_with_buildings_from_3dcitydb" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.combine_nodes_with_buildings_from_3dcitydb">combine_nodes_with_buildings_from_3dcitydb</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.from_3dcitydb" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.from_3dcitydb">from_3dcitydb</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line">parse_command_line</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
