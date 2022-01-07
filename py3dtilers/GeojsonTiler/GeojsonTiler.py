@@ -4,7 +4,7 @@ from os import listdir
 import json
 
 from pathlib import Path
-from py3dtiles import BoundingVolumeBox, GlTFMaterial
+from py3dtiles import GlTFMaterial
 from .geojson import Geojson, Geojsons
 from .geojson_line import GeojsonLine
 from .geojson_polygon import GeojsonPolygon
@@ -155,7 +155,6 @@ def main():
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             print("tileset in geojson_tilesets")
             tileset.write_to_directory("geojson_tilesets")
     else:

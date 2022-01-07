@@ -16,6 +16,7 @@ def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygon
     for root_node in lod_tree.root_nodes:
         create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
+    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     return tileset
 
 
@@ -36,8 +37,8 @@ def create_tile(node, parent, centroid, transform_offset, depth, extension_name=
                         transform_offset[0], transform_offset[1], transform_offset[2], 1])
     tile.set_refine_mode('REPLACE')
     bounding_box = BoundingVolumeBox()
-    for geojson in objects:
-        bounding_box.add(geojson.get_bounding_volume_box())
+    for feature in objects:
+        bounding_box.add(feature.get_bounding_volume_box())
 
     if extension_name is not None:
         extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)

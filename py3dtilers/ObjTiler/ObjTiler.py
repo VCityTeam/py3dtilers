@@ -1,7 +1,6 @@
 import os
 import sys
 
-from py3dtiles import BoundingVolumeBox
 from ..Common import Tiler
 from .obj import Objs
 
@@ -74,7 +73,6 @@ def main():
             obj_tiler.create_directory("obj_tilesets/" + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
-                tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
                 print("tileset in obj_tilesets/" + folder_name)
                 tileset.write_to_directory("obj_tilesets/" + folder_name)
 

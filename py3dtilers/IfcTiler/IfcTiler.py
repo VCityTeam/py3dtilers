@@ -1,5 +1,3 @@
-from py3dtiles import BoundingVolumeBox
-
 from ..Common import Tiler
 from .ifcObjectGeom import IfcObjectsGeom
 
@@ -21,13 +19,13 @@ class IfcTiler(Tiler):
                                  )
         self.parser.add_argument('--originalUnit',
                                  nargs='?',
-                                 default="m",
-                                 type=str,
+                                 default='m',
+                                 choices=['mm', 'cm', 'm', 'km'],
                                  help='original unit of the ifc file')
         self.parser.add_argument('--targetedUnit',
                                  nargs='?',
-                                 default="m",
-                                 type=str,
+                                 default='m',
+                                 choices=['mm', 'cm', 'm', 'km'],
                                  help='targeted unit of the 3DTiles produced')
 
     def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
@@ -59,7 +57,6 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tileset.write_to_directory("ifc_tileset")
 
 

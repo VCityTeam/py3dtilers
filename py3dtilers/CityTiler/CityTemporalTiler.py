@@ -1,6 +1,6 @@
 import sys
 
-from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
+from py3dtiles import TemporalBoundingVolume
 from py3dtiles import TemporalTileSet
 from py3dtiles import TemporalTransaction
 from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
@@ -316,7 +316,6 @@ def main():
     # Construct the temporal tile set
     tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-    tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
 
     # Build and attach a TemporalTileSet extension

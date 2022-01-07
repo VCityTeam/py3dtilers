@@ -106,6 +106,21 @@ class Test_Tile(unittest.TestCase):
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/offset')
 
+    def test_offset_centroid(self):
+        object_to_tile = ObjectToTile("offset_centroid")
+        object_to_tile.geom.triangles.append(triangles)
+        object_to_tile.set_box()
+        objects_to_tile = ObjectsToTile([object_to_tile])
+
+        tiler = Tiler()
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=['centroid'], with_texture=False)
+
+        tileset = tiler.create_tileset_from_geometries(objects_to_tile)
+
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+
+        tileset.write_to_directory('tests/tiler_test_data/tilesets/offset_centroid')
+
     def test_scale(self):
         object_to_tile = ObjectToTile("scale")
         object_to_tile.geom.triangles.append(triangles)
