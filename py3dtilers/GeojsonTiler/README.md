@@ -41,6 +41,14 @@ By default, the tiler considers that the polygons in the .geojson files are at t
 geojson-tiler --path <path> --is_roof
 ```
 
+### Color
+
+When present, the `--add_color` add a single colored material to each feature. The color of the material is determined by the height of the feature: the taller the feature, the more the color tends towards red.
+
+```bash
+geojson-tiler --path <path> --add_color
+```
+
 ### Properties
 
 The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ geometries. This width will define the size of the buffer applied to the lines.  

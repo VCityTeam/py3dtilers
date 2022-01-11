@@ -28,6 +28,11 @@ class Group():
         return rounded_coord
 
     def add_materials(self, materials):
+        """
+        Keep only the materials used by the objects of this group,
+        among all the materials created, and add them to the geometries.
+        :param materials: an array of all the materials
+        """
         seen_mat_indexes = dict()
         group_materials = []
         for feature in self.objects_to_tile:
@@ -66,6 +71,10 @@ class Groups():
         return self.groups
 
     def set_materials(self, materials):
+        """
+        Set the materials of each group.
+        :param materials: an array of all the materials
+        """
         for group in self.groups:
             group.add_materials(materials)
 

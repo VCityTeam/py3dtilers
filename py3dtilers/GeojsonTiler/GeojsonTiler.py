@@ -105,6 +105,12 @@ class GeojsonTiler(Tiler):
         return features
 
     def add_colors(self, objects_to_tile):
+        """
+        Assigne a single-colored material to each feature.
+        The color depends on the height of the feature.
+        The taller the feature, the more the color tends towards red.
+        :param objects_to_tile: An instance of ObjectsToTile containing geometries
+        """
         max_height = Geojson.max_height
         min_height = Geojson.min_height
         colors = []
@@ -112,7 +118,7 @@ class GeojsonTiler(Tiler):
         for i in range(0, 10, 1):
             colors.append(GlTFMaterial(rgb=[i / 10, (10 - i) / 10, 0]))
         objects_to_tile.add_materials(colors)
-        for feature in objects_to_tile:
+        for feature in objects_to_tile.get_objects():
             height_factor = (feature.height - min_height) / (max_height - min_height)
             height_factor = round(height_factor * (len(colors) - 1)) + 1
             feature.material_index = height_factor
