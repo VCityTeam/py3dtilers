@@ -105,6 +105,7 @@ profile_reliefs/
 geojson_tilesets/
 ifc_tileset/
 obj_tilesets/
+tileset_reader_output/
 
 # Debug OBJs
 *.obj

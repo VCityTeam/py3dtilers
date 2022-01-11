@@ -177,7 +177,8 @@ setup(
                             'geojson-tiler=py3dtilers.GeojsonTiler:main',
                             'ifc-tiler=py3dtilers.IfcTiler:main',
                             'citygml-tiler-temporal=py3dtilers.CityTiler:main_temporal',
-                            'obj-tiler=py3dtilers.ObjTiler:main'],
+                            'obj-tiler=py3dtilers.ObjTiler:main',
+                            'tileset-reader=py3dtilers.TilesetReader:main'],
     },
     data_files=[('py3dtilers/CityTiler',
                  ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']
