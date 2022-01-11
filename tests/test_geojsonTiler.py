@@ -84,6 +84,25 @@ class Test_Tile(unittest.TestCase):
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
 
+    def test_add_color(self):
+        path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
+        obj_name = 'tests/geojson_tiler_test_data/generated_objs/block_color.obj'
+        properties = ['height', 'HAUTEUR', 'prec', 'NONE']
+
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_objs'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_objs')
+        if not os.path.exists('tests/geojson_tiler_test_data/generated_tilesets'):
+            os.makedirs('tests/geojson_tiler_test_data/generated_tilesets')
+
+        geojson_tiler = GeojsonTiler()
+        geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True, add_color=True)
+        if(tileset is not None):
+            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            folder_name = "add_color"
+            print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+            tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
+
     def test_create_loa(self):
         path = 'tests/geojson_tiler_test_data/buildings/feature_1/'
         properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI']

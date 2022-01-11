@@ -4,7 +4,8 @@ from os import listdir
 import json
 
 from pathlib import Path
-from .geojson import Geojsons
+from py3dtiles import GlTFMaterial
+from .geojson import Geojson, Geojsons
 from .geojson_line import GeojsonLine
 from .geojson_polygon import GeojsonPolygon
 from ..Common import Tiler
@@ -49,6 +50,11 @@ class GeojsonTiler(Tiler):
                                  action='store_true',
                                  help='When defined, the features from geojsons will be considered as rooftops.\
                                     We will thus substract the height from the coordinates to reach the floor.')
+
+        self.parser.add_argument('--add_color',
+                                 dest='add_color',
+                                 action='store_true',
+                                 help='When defined, add colors to the features depending on their height.')
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -98,7 +104,26 @@ class GeojsonTiler(Tiler):
 
         return features
 
-    def from_geojson_directory(self, path, properties, is_roof=False):
+    def add_colors(self, objects_to_tile):
+        """
+        Assigne a single-colored material to each feature.
+        The color depends on the height of the feature.
+        The taller the feature, the more the color tends towards red.
+        :param objects_to_tile: An instance of ObjectsToTile containing geometries
+        """
+        max_height = Geojson.max_height
+        min_height = Geojson.min_height
+        colors = []
+
+        for i in range(0, 10, 1):
+            colors.append(GlTFMaterial(rgb=[i / 10, (10 - i) / 10, 0]))
+        objects_to_tile.add_materials(colors)
+        for feature in objects_to_tile.get_objects():
+            height_factor = (feature.height - min_height) / (max_height - min_height)
+            height_factor = round(height_factor * (len(colors) - 1)) + 1
+            feature.material_index = height_factor
+
+    def from_geojson_directory(self, path, properties, is_roof=False, add_color=False):
         """
         :param path: a path to a directory
 
@@ -107,6 +132,9 @@ class GeojsonTiler(Tiler):
 
         features = self.retrieve_geojsons(path)
         objects = Geojsons.parse_geojsons(features, properties, is_roof)
+
+        if add_color:
+            self.add_colors(objects)
 
         if(len(objects) == 0):
             print("No .geojson found in " + path)
@@ -131,7 +159,7 @@ def main():
     properties = ['height', geojson_tiler.args.height, 'width', geojson_tiler.args.width, 'prec', geojson_tiler.args.prec]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
             print("tileset in geojson_tilesets")
             tileset.write_to_directory("geojson_tilesets")

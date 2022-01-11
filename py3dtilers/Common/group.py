@@ -27,6 +27,22 @@ class Group():
             rounded_coord[i] = base * round(coordinates[i] / base)
         return rounded_coord
 
+    def add_materials(self, materials):
+        """
+        Keep only the materials used by the objects of this group,
+        among all the materials created, and add them to the geometries.
+        :param materials: an array of all the materials
+        """
+        seen_mat_indexes = dict()
+        group_materials = []
+        for feature in self.objects_to_tile:
+            mat_index = feature.material_index
+            if mat_index not in seen_mat_indexes:
+                seen_mat_indexes[mat_index] = len(group_materials)
+                group_materials.append(materials[mat_index])
+            feature.material_index = seen_mat_indexes[mat_index]
+        self.objects_to_tile.set_materials(group_materials)
+
 
 class Groups():
     """
@@ -42,15 +58,25 @@ class Groups():
         When this param is not None, it means we want to group geometries by polygons
         """
         self.objects_to_tile = objects_to_tile
+        self.materials = objects_to_tile.materials
         if objects_to_tile.is_list_of_objects_to_tile():
             self.group_objects_by_instance()
         elif polygons_path is not None:
             self.group_objects_by_polygons(polygons_path)
         else:
             self.group_objects_with_kdtree()
+        self.set_materials(self.materials)
 
     def get_groups_as_list(self):
         return self.groups
+
+    def set_materials(self, materials):
+        """
+        Set the materials of each group.
+        :param materials: an array of all the materials
+        """
+        for group in self.groups:
+            group.add_materials(materials)
 
     def group_objects_by_instance(self):
         groups = list()

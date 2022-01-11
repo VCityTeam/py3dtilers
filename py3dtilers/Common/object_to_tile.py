@@ -1,5 +1,5 @@
 import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles import BoundingVolumeBox, TriangleSoup, GlTFMaterial
 
 
 class ObjectToTile(object):
@@ -25,6 +25,8 @@ class ObjectToTile(object):
         self.centroid = np.array([0, 0, 0])
 
         self.texture = None
+
+        self.material_index = 0
 
         self.set_id(id)
 
@@ -88,6 +90,7 @@ class ObjectsToTile(object):
 
     def __init__(self, objects=None):
         self.objects = list()
+        self.materials = [GlTFMaterial()]
         if(objects):
             self.objects.extend(objects)
 
@@ -126,11 +129,11 @@ class ObjectsToTile(object):
         return len(self.objects)
 
     def is_list_of_objects_to_tile(self):
-        '''Check if this instance of ObjectsToTile contains others ObjectsToTile'''
+        """Check if this instance of ObjectsToTile contains others ObjectsToTile"""
         return isinstance(self.objects[0], ObjectsToTile)
 
     def get_size(self):
-        '''Recursive method to get the length'''
+        """Recursive method to get the length"""
         return sum([obj.get_size() for obj in self])
 
     def get_centroid(self):
@@ -148,10 +151,31 @@ class ObjectsToTile(object):
                          centroid[1] / self.get_size(),
                          centroid[2] / self.get_size()])
 
+    def set_materials(self, materials):
+        """
+        Set the materials of this object to a new array of materials.
+        :param materials: an array of GlTFMaterial
+        """
+        self.materials = materials
+
+    def add_materials(self, materials):
+        """
+        Extend the materials of this object with another array of materials.
+        :param materials: an array of GlTFMaterial
+        """
+        self.materials.extend(materials)
+
+    def get_material(self, index):
+        """
+        Get the material at the index.
+        :param index: the index (int) of the material
+        """
+        return self.materials[index]
+
     def translate_objects(self, offset):
         """
-        :param offset: an offset
-        :return:
+        Translate the geometries by substracting an offset
+        :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset
         for object_to_tile in self.get_objects():
@@ -168,8 +192,8 @@ class ObjectsToTile(object):
 
     def change_crs(self, transformer):
         """
+        Project the geometries into another CRS
         :param transformer: the transformer used to change the crs
-        :return:
         """
         for object_to_tile in self.get_objects():
             new_geom = []
@@ -184,8 +208,8 @@ class ObjectsToTile(object):
 
     def scale_objects(self, scale_factor):
         """
-        :param transformer: the transformer used to change the crs
-        :return:
+        Rescale the geometries.
+        :param scale_factor: the factor to scale the objects
         """
         centroid = self.get_centroid()
         for object_to_tile in self.get_objects():

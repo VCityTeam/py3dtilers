@@ -19,6 +19,9 @@ class Geojson(ObjectToTile):
     # Default height will be used if no height is found when parsing the data
     default_height = 2
 
+    max_height = np.NINF
+    min_height = np.Inf
+
     def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
 
@@ -62,6 +65,10 @@ class Geojson(ObjectToTile):
             if height_name in self.feature_properties:
                 if self.feature_properties[height_name] > 0:
                     self.height = self.feature_properties[height_name]
+                    if self.height > Geojson.max_height:
+                        Geojson.max_height = self.height
+                    if self.height < Geojson.min_height:
+                        Geojson.min_height = self.height
                 else:
                     self.height = Geojson.default_height
             else:
