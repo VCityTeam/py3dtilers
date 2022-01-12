@@ -24,8 +24,8 @@ class B3dmTiler(Tiler):
             print("Exiting")
             sys.exit(1)
 
-    def from_tileset(self, tileset):
-        objects = ParsedB3dms()
+    def from_tileset(self, tileset, tileset_path=None):
+        objects = ParsedB3dms(tileset_path=tileset_path)
         objects.extend(objects.parse_tileset(tileset))
 
         return self.create_tileset_from_geometries(objects)
@@ -36,10 +36,10 @@ def main():
     tiler = B3dmTiler()
     tiler.parse_command_line()
     path = tiler.args.path[0]
-
+    tiler.create_directory("tileset_reader_output/tileset_2/")
     reader = TilesetReader()
     tileset_1 = reader.read_tileset(path)
-    tileset_2 = tiler.from_tileset(tileset_1)
+    tileset_2 = tiler.from_tileset(tileset_1, path)
 
     tileset_1.write_to_directory("tileset_reader_output/tileset_1/")
     tileset_2.write_to_directory("tileset_reader_output/tileset_2/")

@@ -1,7 +1,9 @@
 import numpy as np
+import os
 
 from py3dtiles import TriangleSoup, GlTFMaterial
 from ..Common import ObjectsToTile, ObjectToTile
+from ..Texture import Texture
 
 
 class ParsedB3dm(ObjectToTile):
@@ -11,15 +13,22 @@ class ParsedB3dm(ObjectToTile):
 
         self.geom = triangle_soup
         self.set_box()
+
+    def set_material(self, mat_index, materials, tileset_path=None):
         self.material_index = mat_index
+        if materials[mat_index].is_textured():
+            path = os.path.join(tileset_path, "tiles", materials[mat_index].textureUri)
+            texture = Texture(path, self.geom.triangles[1])
+            self.set_texture(texture.get_texture_image())
 
 
 class ParsedB3dms(ObjectsToTile):
 
-    def __init__(self, objects=None):
+    def __init__(self, objects=None, tileset_path=None):
         super().__init__(objects)
         self.materials = []
         self.mat_offset = 0
+        self.tileset_path = tileset_path
 
     def parse_materials(self, gltf):
         materials = gltf.header['materials']
@@ -29,7 +38,12 @@ class ParsedB3dms(ObjectsToTile):
             rgba = material['pbrMetallicRoughness']['baseColorFactor']
             metallic_factor = material['pbrMetallicRoughness']['metallicFactor']
             roughness_factor = material['pbrMetallicRoughness']['roughnessFactor']
-            gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba))
+            if 'baseColorTexture' in material['pbrMetallicRoughness']:
+                index = material['pbrMetallicRoughness']['baseColorTexture']['index']
+                uri = gltf.header['images'][gltf.header['textures'][index]['source']]['uri']
+            else:
+                uri = None
+            gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba, textureUri=uri))
         self.add_materials(gltf_materials)
 
     def parse_triangle_soup(self, triangle_soup):
@@ -55,7 +69,11 @@ class ParsedB3dms(ObjectsToTile):
             if uvs:
                 triangle_dict[id].triangles[1].append(uvs[index])
 
-        objects = [ParsedB3dm(str(id), triangle_dict[id], material_dict[id]) for id in triangle_dict]
+        objects = []
+        for id in triangle_dict:
+            feature = ParsedB3dm(str(id), triangle_dict[id], material_dict[id])
+            feature.set_material(material_dict[id], self.materials, self.tileset_path)
+            objects.append(feature)
         return ParsedB3dms(objects)
 
     def parse_tileset(self, tileset):
