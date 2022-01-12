@@ -104,6 +104,7 @@ profile_buildings/
 profile_reliefs/
 geojson_tilesets/
 ifc_tileset/
+obj_tilesets/
 
 # Debug OBJs
 *.obj
