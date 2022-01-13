@@ -96,7 +96,7 @@ class Test_Tile(unittest.TestCase):
 
         geojson_tiler = GeojsonTiler()
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
-        tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True, add_color=True)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True, color_attribute=('HAUTEUR', 'numeric'))
         if(tileset is not None):
             tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
             folder_name = "add_color"

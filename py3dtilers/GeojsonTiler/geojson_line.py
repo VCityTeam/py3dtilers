@@ -16,8 +16,8 @@ class GeojsonLine(Geojson):
         self.is_multi_geom = is_multi_geom
         self.custom_triangulation = True
 
-    def parse_geojson(self, properties, is_roof=False):
-        super().parse_geojson(properties, is_roof)
+    def parse_geojson(self, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
+        super().parse_geojson(properties, is_roof, color_attribute)
 
         width_name = properties[properties.index('width') + 1]
         if width_name.replace('.', '', 1).isdigit():

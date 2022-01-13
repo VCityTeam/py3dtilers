@@ -8,8 +8,8 @@ class GeojsonPolygon(Geojson):
 
         self.is_multi_geom = is_multi_geom
 
-    def parse_geojson(self, properties, is_roof=False):
-        super().parse_geojson(properties, is_roof)
+    def parse_geojson(self, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
+        super().parse_geojson(properties, is_roof, color_attribute)
 
         if self.is_multi_geom:
             coords = self.feature_geometry['coordinates'][0][0][:-1]

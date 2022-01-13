@@ -19,8 +19,10 @@ class Geojson(ObjectToTile):
     # Default height will be used if no height is found when parsing the data
     default_height = 2
 
-    max_height = np.NINF
-    min_height = np.Inf
+    # Those values are used to set the color of the features
+    attribute_values = list()  # Contains all the values of a semantic attribute
+    attribute_min = np.Inf  # Contains the min value of a numeric attribute
+    attribute_max = np.NINF  # Contains the max value of a numeric attribute
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
@@ -44,7 +46,7 @@ class Geojson(ObjectToTile):
 
         return triangles
 
-    def parse_geojson(self, target_properties, is_roof=False):
+    def parse_geojson(self, target_properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
         Parse a feature of the .geojson file to extract the height and the coordinates of the feature.
         """
@@ -65,15 +67,22 @@ class Geojson(ObjectToTile):
             if height_name in self.feature_properties:
                 if self.feature_properties[height_name] > 0:
                     self.height = self.feature_properties[height_name]
-                    if self.height > Geojson.max_height:
-                        Geojson.max_height = self.height
-                    if self.height < Geojson.min_height:
-                        Geojson.min_height = self.height
                 else:
                     self.height = Geojson.default_height
             else:
                 print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
                 self.height = Geojson.default_height
+
+        if color_attribute[0] in self.feature_properties:
+            attribute = self.feature_properties[color_attribute[0]]
+            if color_attribute[1] == 'numeric':
+                if attribute > Geojson.attribute_max:
+                    Geojson.attribute_max = attribute
+                if attribute < Geojson.attribute_min:
+                    Geojson.attribute_min = attribute
+            else:
+                if attribute not in Geojson.attribute_values:
+                    Geojson.attribute_values.append(attribute)
 
     def parse_geom(self):
         """
@@ -125,7 +134,7 @@ class Geojsons(ObjectsToTile):
         super().__init__(objects)
 
     @staticmethod
-    def parse_geojsons(features, properties, is_roof=False):
+    def parse_geojsons(features, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
         :param features: the features to parse
         :param properties: the properties used when parsing the features
@@ -136,7 +145,7 @@ class Geojsons(ObjectsToTile):
         geometries = list()
 
         for feature in features:
-            if not feature.parse_geojson(properties, is_roof):
+            if not feature.parse_geojson(properties, is_roof, color_attribute):
                 continue
 
             # Create geometry as expected from GLTF from an geojson file

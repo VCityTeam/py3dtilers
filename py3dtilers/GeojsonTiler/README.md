@@ -43,10 +43,21 @@ geojson-tiler --path <path> --is_roof
 
 ### Color
 
-When present, the `--add_color` add a single colored material to each feature. The color of the material is determined by the height of the feature: the taller the feature, the more the color tends towards red.
+When present, the `--add_color` add a single colored material to each feature. The color of the material is determined by the value of a selected property for each feature.  
+If the property is numeric, we determine a RGB with the min and max values readed for this property when parsing the features. Else, we create a color per value of the property.
+
+The flag takes 2 arguments: the name of the property and its type ('numeric' or 'semantic'). If only the name is given, the type will be 'numeric' by default. If no argument is given with the flag, the colors won't be added.
+
+Example for numeric property:
 
 ```bash
-geojson-tiler --path <path> --add_color
+geojson-tiler --path <path> --add_color HEIGTH numeric
+```
+
+Example for semantic property:
+
+```bash
+geojson-tiler --path <path> --add_color NATURE semantic
 ```
 
 ### Properties
