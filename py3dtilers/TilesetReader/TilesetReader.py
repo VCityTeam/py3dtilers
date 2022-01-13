@@ -36,13 +36,11 @@ def main():
     tiler = B3dmTiler()
     tiler.parse_command_line()
     path = tiler.args.path[0]
-    tiler.create_directory("tileset_reader_output/tileset_2/")
+    tiler.create_directory("tileset_reader_output/")
     reader = TilesetReader()
     tileset_1 = reader.read_tileset(path)
     tileset_2 = tiler.from_tileset(tileset_1, path)
-
-    tileset_1.write_to_directory("tileset_reader_output/tileset_1/")
-    tileset_2.write_to_directory("tileset_reader_output/tileset_2/")
+    tileset_2.write_to_directory("tileset_reader_output/")
 
 
 if __name__ == '__main__':

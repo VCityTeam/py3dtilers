@@ -21,6 +21,16 @@ class ParsedB3dm(ObjectToTile):
             texture = Texture(path, self.geom.triangles[1])
             self.set_texture(texture.get_texture_image())
 
+    def set_batchtable_data(self, bt_attributes):
+        data = {}
+        for attribute in bt_attributes:
+            if attribute == 'ids':
+                self.set_id(bt_attributes[attribute][int(self.id)])
+            else:
+                data[attribute] = bt_attributes[attribute][int(self.id)]
+        if data:
+            super().set_batchtable_data(data)
+
 
 class ParsedB3dms(ObjectsToTile):
 
@@ -71,7 +81,7 @@ class ParsedB3dms(ObjectsToTile):
 
         objects = []
         for id in triangle_dict:
-            feature = ParsedB3dm(str(id), triangle_dict[id], material_dict[id])
+            feature = ParsedB3dm(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], self.materials, self.tileset_path)
             objects.append(feature)
         return ParsedB3dms(objects)
@@ -81,10 +91,16 @@ class ParsedB3dms(ObjectsToTile):
         objects = list()
         for tile in all_tiles:
             gltf = tile.get_content().body.glTF
+
             self.parse_materials(gltf)
             ts = TriangleSoup.from_glTF(gltf)
             objects_to_tile = self.parse_triangle_soup(ts)
+
+            bt_attributes = tile.get_content().body.batch_table.attributes
+            [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]
+
             centroid = np.array(tile.get_transform()[12:15], dtype=np.float32) * -1
             objects_to_tile.translate_objects(centroid)
+
             objects.append(objects_to_tile)
         return objects
