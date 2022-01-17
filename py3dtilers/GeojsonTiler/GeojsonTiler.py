@@ -80,6 +80,14 @@ class GeojsonTiler(Tiler):
             sys.exit(1)
 
     def get_geojson_instance(self, id, feature_geometry, feature_properties):
+        """
+        Create a Geojson instance with the geometry and the properties of a feature.
+        :param id: the identifier of the Geojson instance
+        :param feature_geometry: the JSON geometry of the feature
+        :param feature_properties: the JSON properties of the feature
+
+        :return: a Geojson instance
+        """
         return {
             'Polygon': GeojsonPolygon(id, feature_properties, feature_geometry),
             'MultiPolygon': GeojsonPolygon(id, feature_properties, feature_geometry, is_multi_geom=True),
@@ -88,6 +96,13 @@ class GeojsonTiler(Tiler):
         }[feature_geometry['type']]
 
     def retrieve_geojsons(self, path):
+        """
+        Retrieve the GeoJson features from GeoJson file(s).
+        Return a list of Geojson instances containing properties and a geometry.
+        :param path: a path to the file(s)
+
+        :return: a list of Geojson instances.
+        """
         files = []
         features = []
 
@@ -153,7 +168,9 @@ class GeojsonTiler(Tiler):
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
-        :param path: a path to a directory
+        Create a tileset from a GeoJson file or a directory of GeoJson files
+        :param path: a path to the file(s)
+        :param properties: the names of the properties to read in the GeoJson file(s)
 
         :return: a tileset.
         """
@@ -175,10 +192,9 @@ class GeojsonTiler(Tiler):
 
 def main():
     """
+    Run the GeojsonTiler: create a 3DTiles tileset from GeoJson file(s).
+    The tileset is writen in '/geojson_tilesets/'.
     :return: no return value
-
-    this function creates a repository named "geojson_tilesets" that contains a tileset
-    created from all the geojson files stored in the targeted directory
     """
     geojson_tiler = GeojsonTiler()
     geojson_tiler.parse_command_line()

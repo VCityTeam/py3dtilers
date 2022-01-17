@@ -27,6 +27,14 @@ class LineBuffer():
         return i.tolist()
 
     def get_parallel_offset(self, start_point, end_point, offset=3):
+        """
+        Return the parallel offsets (left and right) of a line
+        :param start_point: the starting point of the line
+        :param end_point: the ending point of the line
+        :param offset: the distance between the line and its parallel offsets
+
+        :return: left and right parallel offsets a list of points
+        """
         line = LineString([start_point, end_point])
         po_left = list(line.parallel_offset(offset, 'left', join_style=2, resolution=1).coords)
         po_right = list(line.parallel_offset(offset, 'right', join_style=2, resolution=1).coords)
@@ -35,8 +43,9 @@ class LineBuffer():
     def buffer_line_string(self, coordinates):
         """
         Take a line string as coordinates
+        :param coordinates: a list of 3D points ([x, y, z])
 
-        Return: a buffered polygon
+        :return: a buffered polygon
         """
         polygon = [None] * (len(coordinates) * 2)
         width_offset = self.offset
