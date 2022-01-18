@@ -2,10 +2,10 @@ import argparse
 from pyproj import Transformer
 import pathlib
 
-from .tileset_creation import create_tileset
-from .obj_writer import ObjWriter
 from ..Color import ColorConfig
+from ..Common import LodTree, ObjWriter
 from ..Texture import Texture
+from .tileset_creation import create_tileset
 
 
 class Tiler():
@@ -81,6 +81,10 @@ class Tiler():
         transformer = Transformer.from_crs(crs_in, crs_out)
         geometries.change_crs(transformer)
 
+    def create_tree(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+        lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
+        return lod_tree
+
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
         if hasattr(self.args, 'scale') and self.args.scale:
             objects_to_tile.scale_objects(self.args.scale)
@@ -98,7 +102,8 @@ class Tiler():
 
         create_loa = self.args.loa is not None
 
-        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, self.args.with_texture)
+        tree = self.create_tree(objects_to_tile, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+        return create_tileset(tree, extension_name)
 
     def create_directory(self, directory):
         target_dir = pathlib.Path(directory).expanduser()

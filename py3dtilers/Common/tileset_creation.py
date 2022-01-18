@@ -1,19 +1,17 @@
 import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
-from ..Common import LodTree
 from ..Texture import Atlas
 
 
-def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
+def create_tileset(geometry_tree, extension_name=None):
     """
     Recursively creates a tileset from the nodes of a LodTree
     :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
     """
-    lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
     tileset = TileSet()
-    centroid = lod_tree.centroid
-    for root_node in lod_tree.root_nodes:
+    centroid = geometry_tree.centroid
+    for root_node in geometry_tree.root_nodes:
         create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())

@@ -1,8 +1,8 @@
-from ..Common import ObjectsToTile, ObjectToTile
+from ..Common import ObjectsToTile, ObjectToTile, GeometryNode
 from ..Common import ExtrudedPolygon
 
 
-class LodNode():
+class LodNode(GeometryNode):
     """
     Each node contains a collection of objects to tile
     and a list of child nodes
@@ -14,26 +14,8 @@ class LodNode():
         :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
         :param geometric_error: the distance to display the 3D tile that will be created from this node.
         """
-        self.objects_to_tile = objects_to_tile
-        self.child_nodes = list()
+        super().__init__(objects_to_tile, with_texture)
         self.geometric_error = geometric_error
-        self.with_texture = with_texture and self.geometries_have_texture()
-
-    def set_child_nodes(self, nodes=list()):
-        self.child_nodes = nodes
-
-    def add_child_node(self, node):
-        self.child_nodes.append(node)
-
-    def has_texture(self):
-        return self.with_texture
-
-    def geometries_have_texture(self):
-        """
-        Check if all the geometries in the node have a texture.
-        :return: a boolean
-        """
-        return all([feature.has_texture() for feature in self.objects_to_tile])
 
 
 class Lod1Node(LodNode):

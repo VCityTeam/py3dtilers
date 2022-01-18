@@ -1,14 +1,14 @@
-from ..Common import LodNode, Lod1Node, LoaNode, Groups
+from ..Common import GeometryTree, LodNode, Lod1Node, LoaNode, Groups
 
 
-class LodTree():
+class LodTree(GeometryTree):
     """
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     """
 
     def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         """
-        create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
+        LodTree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
         In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
         A Group contains geometries and an optional polygon that will be used for LoaNodes.
         """
@@ -30,15 +30,7 @@ class LodTree():
 
             root_nodes.append(root_node)
 
-        self.root_nodes = root_nodes
-        self.centroid = objects_to_tile.get_centroid()
-
-    def set_centroid(self, centroid):
-        """
-        Set the centroid of the tree.
-        :param centroid: the centroid
-        """
-        self.centroid = centroid
+        super().__init__(objects_to_tile, root_nodes)
 
     def group_features(self, objects_to_tile, polygons_path=None):
         """
