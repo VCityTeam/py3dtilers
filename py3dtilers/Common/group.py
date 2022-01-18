@@ -95,7 +95,7 @@ class Groups():
 
     def group_objects_by_instance(self):
         """
-        Create groups of geometries. One group is created per object in the ObjectsToTile. 
+        Create groups of geometries. One group is created per object in the ObjectsToTile.
         """
         groups = list()
         for objects in self.objects_to_tile:
@@ -194,7 +194,7 @@ class Groups():
         :param groups: the groups to distribute into cubes
         :param cube_size: the size of the cubes
 
-        :return: merged groups 
+        :return: merged groups
         """
         groups_dict = {}
 
