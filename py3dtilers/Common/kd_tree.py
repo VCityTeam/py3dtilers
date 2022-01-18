@@ -2,6 +2,15 @@ from .object_to_tile import ObjectsToTile
 
 
 def kd_tree(objects, maxNumObjects, depth=0):
+    """
+    Distribute the geometries into ObjectsToTile.
+    The objects are distributed by their centroid.
+    :param objects: the geometries to distribute
+    :param maxNumObjects: the max number of objects in each new group
+    :param depth: the depth of the recursion
+
+    :return: a list of ObjectsToTile
+    """
     # objects should herited from objects_to_tile and
     # dispose of a method get_centroid()
     if (not isinstance(objects, ObjectsToTile)):
