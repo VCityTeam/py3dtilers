@@ -35,11 +35,19 @@ class LodTree():
         self.centroid = objects_to_tile.get_centroid()
 
     def set_centroid(self, centroid):
+        """
+        Set the centroid of the tree.
+        :param centroid: the centroid
+        """
         self.centroid = centroid
 
     def group_features(self, objects_to_tile, polygons_path=None):
         """
-        Group objects_to_tile to reduce the number of tiles
+        Distribute objects_to_tile into groups to reduce the number of tiles.
+        :param objects_to_tile: a list of geometries to distribute into groups.
+        :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
+
+        :return: a list of groups, each group containing geometries
         """
         groups = Groups(objects_to_tile, polygons_path)
         return groups.get_groups_as_list()
