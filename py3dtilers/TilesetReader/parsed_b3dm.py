@@ -34,11 +34,11 @@ class ParsedB3dm(ObjectToTile):
 
 class ParsedB3dms(ObjectsToTile):
 
-    def __init__(self, objects=None, tileset_path=None):
+    def __init__(self, objects=None, tileset_paths_dict=None):
         super().__init__(objects)
         self.materials = []
         self.mat_offset = 0
-        self.tileset_path = tileset_path
+        self.tileset_paths_dict = tileset_paths_dict
 
     def parse_materials(self, gltf):
         materials = gltf.header['materials']
@@ -56,7 +56,7 @@ class ParsedB3dms(ObjectsToTile):
             gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba, textureUri=uri))
         self.add_materials(gltf_materials)
 
-    def parse_triangle_soup(self, triangle_soup):
+    def parse_triangle_soup(self, triangle_soup, tile_index=0):
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
         mat_indexes = triangle_soup.triangles[2]
@@ -82,19 +82,19 @@ class ParsedB3dms(ObjectsToTile):
         objects = []
         for id in triangle_dict:
             feature = ParsedB3dm(str(int(id)), triangle_dict[id], material_dict[id])
-            feature.set_material(material_dict[id], self.materials, self.tileset_path)
+            feature.set_material(material_dict[id], self.materials, self.tileset_paths_dict[tile_index])
             objects.append(feature)
         return ParsedB3dms(objects)
 
     def parse_tileset(self, tileset):
         all_tiles = tileset.get_root_tile().get_children()
         objects = list()
-        for tile in all_tiles:
+        for i, tile in enumerate(all_tiles):
             gltf = tile.get_content().body.glTF
 
             self.parse_materials(gltf)
             ts = TriangleSoup.from_glTF(gltf)
-            objects_to_tile = self.parse_triangle_soup(ts)
+            objects_to_tile = self.parse_triangle_soup(ts, tile_index=i)
 
             bt_attributes = tile.get_content().body.batch_table.attributes
             [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]

@@ -17,8 +17,7 @@ class LodTree():
         groups = self.group_features(objects_to_tile, polygons_path)
 
         for group in groups:
-            node = LodNode(group.objects_to_tile, 1)
-            node.with_texture = with_texture
+            node = LodNode(group.objects_to_tile, 1, with_texture)
             root_node = node
             if create_lod1:
                 lod1_node = Lod1Node(group.objects_to_tile, 5)
