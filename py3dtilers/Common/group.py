@@ -19,9 +19,20 @@ class Group():
         self.points_dict = points_dict
 
     def get_centroid(self):
+        """
+        Get the centroid of the group.
+        :return: a 3D point ([x, y, z])
+        """
         return self.objects_to_tile.get_centroid()
 
     def round_coordinates(self, coordinates, base):
+        """
+        Round the coordinates to the closer multiple of a base.
+        :param coordinates: a 3D point ([x, y, z])
+        :param int base: the base used to round the coordinates
+
+        :return: a 3D point rounded to the closer multiples of the base
+        """
         rounded_coord = coordinates
         for i in range(0, len(coordinates)):
             rounded_coord[i] = base * round(coordinates[i] / base)
@@ -68,6 +79,10 @@ class Groups():
         self.set_materials(self.materials)
 
     def get_groups_as_list(self):
+        """
+        Return the groups as a list.
+        :return: the groups as list
+        """
         return self.groups
 
     def set_materials(self, materials):
@@ -79,6 +94,9 @@ class Groups():
             group.add_materials(materials)
 
     def group_objects_by_instance(self):
+        """
+        Create groups of geometries. One group is created per object in the ObjectsToTile. 
+        """
         groups = list()
         for objects in self.objects_to_tile:
             group = Group(objects)
@@ -86,6 +104,10 @@ class Groups():
         self.groups = groups
 
     def group_objects_with_kdtree(self):
+        """
+        Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
+        The distribution depends on the centroid of each geometry.
+        """
         groups = list()
         objects = kd_tree(self.objects_to_tile, 500)
         for objects_to_tile in objects:
@@ -96,7 +118,7 @@ class Groups():
     def group_objects_by_polygons(self, polygons_path):
         """
         Load the polygons from the files in the folder
-        :param polygons_path: the path of the folder containing the files
+        :param polygons_path: the path to the file(s) containing polygons
         """
         polygons = list()
         files = []
@@ -128,6 +150,7 @@ class Groups():
         Distribute the geometries in the polygons.
         The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
         If a geometry is not in any polygon, create a Group containing only this geometry. This group won't have addtional points.
+        :param polygons: a list of Shapely polygons
         """
 
         objects_to_tile = self.objects_to_tile
@@ -168,6 +191,10 @@ class Groups():
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
         To avoid conflicts, the groups with a polygon are not merged with those without polygon.
+        :param groups: the groups to distribute into cubes
+        :param cube_size: the size of the cubes
+
+        :return: merged groups 
         """
         groups_dict = {}
 
@@ -191,6 +218,11 @@ class Groups():
     def merge_groups_together(self, groups, group_indexes, with_polygon):
         """
         Creates a Group from a list of Groups
+        :param groups: all the groups
+        :param group_indexes: the indexes of the groups to merge together
+        :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
+
+        :return: a new group containing the geometries of all the groups
         """
 
         objects = list()

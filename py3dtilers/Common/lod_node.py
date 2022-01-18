@@ -59,6 +59,14 @@ class LoaNode(LodNode):
         super().__init__(objects_to_tile=ObjectsToTile(loas), geometric_error=geometric_error)
 
     def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+        """
+        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
+        :param objects_to_tile: the geometries contained in the LOA
+        :param polygon_points: a polygon as list of 3D points
+        :param int index: an index used for the LOA identifier
+
+        :return: a 3D extrusion of the polygon
+        """
         loa_geometry = ObjectToTile("loa_" + str(index))
         for object_to_tile in objects_to_tile:
             loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
