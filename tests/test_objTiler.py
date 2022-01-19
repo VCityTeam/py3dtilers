@@ -17,7 +17,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory(path)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "basic_case"
             print("tileset in tests/obj_tiler_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/obj_tiler_data/generated_tilesets/" + folder_name)
@@ -33,7 +33,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory(path)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "texture"
             tileset.write_to_directory("tests/obj_tiler_data/generated_tilesets/" + folder_name)
 

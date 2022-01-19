@@ -32,7 +32,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -46,7 +46,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -60,7 +60,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -74,7 +74,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -88,7 +88,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -102,7 +102,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -117,7 +117,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         CityMBuildings.with_bth = False
         cursor.close()
@@ -132,7 +132,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -146,7 +146,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -160,7 +160,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -174,7 +174,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -188,7 +188,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -202,7 +202,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()
 
@@ -216,6 +216,6 @@ class Test_Tile(unittest.TestCase):
         city_tiler = CityTiler()
         city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory(directory)
         cursor.close()

@@ -44,7 +44,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
         tileset.write_to_directory('tests/tiler_test_data/tilesets/kd_tree')
 
     def test_lod1(self):
@@ -57,7 +57,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/lod1')
 
@@ -72,7 +72,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/loa')
 
@@ -87,7 +87,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/change_crs')
 
@@ -102,7 +102,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/offset')
 
@@ -117,7 +117,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/offset_centroid')
 
@@ -132,7 +132,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/scale')
 
@@ -151,7 +151,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        
 
         tileset.write_to_directory('tests/tiler_test_data/tilesets/scale')
 

@@ -22,7 +22,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "basic_case"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -41,7 +41,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "properties_with_other_name"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -60,7 +60,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "default_height"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -79,7 +79,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "no_height"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -116,7 +116,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "create_loa"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -134,7 +134,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "create_lod1"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -152,7 +152,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "create_lod1"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -171,7 +171,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "line_string"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
@@ -190,7 +190,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
-            tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+            
             folder_name = "multi_line_string"
             print("tileset in tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
             tileset.write_to_directory("tests/geojson_tiler_test_data/generated_tilesets/" + folder_name)
