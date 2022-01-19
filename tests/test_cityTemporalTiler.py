@@ -1,7 +1,7 @@
 import unittest
 from argparse import Namespace
 
-from py3dtiles import BoundingVolumeBox, TemporalBoundingVolume
+from py3dtiles import TemporalBoundingVolume
 
 from py3dtilers.CityTiler.temporal_graph import TemporalGraph
 from py3dtilers.CityTiler.database_accesses import open_data_bases
@@ -39,7 +39,6 @@ class Test_Tile(unittest.TestCase):
 
         tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-        tile_set.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
 
         temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
