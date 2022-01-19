@@ -5,10 +5,11 @@ from .group import Groups
 from .polygon_extrusion import ExtrudedPolygon
 from .geometry_node import GeometryNode
 from .geometry_tree import GeometryTree
-from .lod_node import LodNode, Lod1Node, LoaNode
+from .lod_node import Lod1Node, LoaNode
 from .lod_tree import LodTree
 from .obj_writer import ObjWriter
 from .tiler import Tiler
+from .tileset_creation import create_tileset
 
 __all__ = ['kd_tree',
            'ObjectToTile',
@@ -18,9 +19,9 @@ __all__ = ['kd_tree',
            'ExtrudedPolygon',
            'GeometryNode',
            'GeometryTree',
-           'LodNode',
            'Lod1Node',
            'LoaNode',
            'LodTree',
            'ObjWriter',
-           'Tiler']
+           'Tiler',
+           'create_tileset']

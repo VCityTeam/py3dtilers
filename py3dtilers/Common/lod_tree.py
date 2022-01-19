@@ -1,4 +1,4 @@
-from ..Common import GeometryTree, LodNode, Lod1Node, LoaNode, Groups
+from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode, Groups
 
 
 class LodTree(GeometryTree):
@@ -17,7 +17,7 @@ class LodTree(GeometryTree):
         groups = self.group_features(objects_to_tile, polygons_path)
 
         for group in groups:
-            node = LodNode(group.objects_to_tile, 1, with_texture)
+            node = GeometryNode(group.objects_to_tile, 1, with_texture)
             root_node = node
             if create_lod1:
                 lod1_node = Lod1Node(group.objects_to_tile, 5)

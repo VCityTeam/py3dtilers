@@ -2,7 +2,8 @@ import sys
 
 from py3dtiles import TilesetReader
 from .parsed_b3dm import ParsedB3dms
-from ..Common import Tiler
+from .tile_hierarchy import TileHierarchy
+from ..Common import Tiler, create_tileset
 
 
 class B3dmTiler(Tiler):
@@ -42,19 +43,38 @@ class B3dmTiler(Tiler):
         self.tile_index += 1
         return index
 
-    def from_tileset(self, tileset, tileset_paths_dict=None):
+    def create_tileset_from_geometries(self, tile_hierarchy, extension_name=None):
+        if hasattr(self.args, 'scale') and self.args.scale:
+            for objects in tile_hierarchy.get_all_objects():
+                objects.scale_objects(self.args.scale)
+
+        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
+            if self.args.offset[0] == 'centroid':
+                self.args.offset = tile_hierarchy.centroid
+            for objects in tile_hierarchy.get_all_objects():
+                objects.translate_objects(self.args.offset)
+
+        if not self.args.crs_in == self.args.crs_out:
+            for objects in tile_hierarchy.get_all_objects():
+                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
+
+        if self.args.obj is not None:
+            self.write_geometries_as_obj(tile_hierarchy.get_leaf_objects(), self.args.obj)
+
+        return create_tileset(tile_hierarchy, extension_name)
+
+    def from_tileset(self, tileset):
         """
         Create a new tileset from another tileset.
         Allows to transform the old tileset before creating a new tileset.
         :param tileset: the tileset to read and transform
-        :param tileset_paths_dict: a dict linking tiles with tileset path(s)
 
         :return: a tileset
         """
-        objects = ParsedB3dms(tileset_paths_dict=tileset_paths_dict)
-        objects.extend(objects.parse_tileset(tileset))
+        objects = ParsedB3dms(tileset_paths_dict=self.tile_to_tileset_dict)
+        tile_hierarchy = TileHierarchy(tileset, objects)
 
-        return self.create_tileset_from_geometries(objects)
+        return self.create_tileset_from_geometries(tile_hierarchy)
 
     def merge_tilesets(self, main_tileset, add_tileset_paths=list()):
         """
@@ -101,7 +121,7 @@ def main():
     if len(tilesets_to_merge) > 0:
         tiler.merge_tilesets(tileset_1, tilesets_to_merge)
 
-    tileset_2 = tiler.from_tileset(tileset_1, tiler.tile_to_tileset_dict)
+    tileset_2 = tiler.from_tileset(tileset_1)
     tileset_2.write_to_directory("tileset_reader_output/")
 
 

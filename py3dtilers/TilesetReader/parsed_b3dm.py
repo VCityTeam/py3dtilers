@@ -1,4 +1,3 @@
-import numpy as np
 import os
 
 from py3dtiles import TriangleSoup, GlTFMaterial
@@ -15,6 +14,12 @@ class ParsedB3dm(ObjectToTile):
         self.set_box()
 
     def set_material(self, mat_index, materials, tileset_path=None):
+        """
+        Set the material of this geometry.
+        :param mat_index: the index of the material
+        :param materials: the list of all the materials
+        :param tileset_path: the path to the tileset containing the texture image
+        """
         self.material_index = mat_index
         if materials[mat_index].is_textured():
             path = os.path.join(tileset_path, "tiles", materials[mat_index].textureUri)
@@ -22,12 +27,17 @@ class ParsedB3dm(ObjectToTile):
             self.set_texture(texture.get_texture_image())
 
     def set_batchtable_data(self, bt_attributes):
+        """
+        Set the batch table data of this geometry.
+        :param bt_attributes: the batch table attributes for the whole tile
+        """
         data = {}
+        index = int(self.id)
         for attribute in bt_attributes:
             if attribute == 'ids':
-                self.set_id(bt_attributes[attribute][int(self.id)])
+                self.set_id(bt_attributes[attribute][index])
             else:
-                data[attribute] = bt_attributes[attribute][int(self.id)]
+                data[attribute] = bt_attributes[attribute][index]
         if data:
             super().set_batchtable_data(data)
 
@@ -37,10 +47,15 @@ class ParsedB3dms(ObjectsToTile):
     def __init__(self, objects=None, tileset_paths_dict=None):
         super().__init__(objects)
         self.materials = []
-        self.mat_offset = 0
         self.tileset_paths_dict = tileset_paths_dict
 
     def parse_materials(self, gltf):
+        """
+        Parse the materials from the glTF and create GlTFMaterials.
+        :param gltf: the gltf of the tile
+
+        :return: a list of GlTFMaterials
+        """
         materials = gltf.header['materials']
         gltf_materials = list()
         self.mat_offset = len(self.materials)
@@ -54,9 +69,17 @@ class ParsedB3dms(ObjectsToTile):
             else:
                 uri = None
             gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba, textureUri=uri))
-        self.add_materials(gltf_materials)
+        return gltf_materials
 
-    def parse_triangle_soup(self, triangle_soup, tile_index=0):
+    def parse_triangle_soup(self, triangle_soup, materials, tile_index=0):
+        """
+        Parse the triangle soup to re-create the geometries.
+        :param triangle_soup: the triangle soup
+        :param materials: the materials of the tile
+        :param tile_index: the index of the tile
+
+        :return: a list of geometries
+        """
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
         mat_indexes = triangle_soup.triangles[2]
@@ -68,7 +91,7 @@ class ParsedB3dms(ObjectsToTile):
             id = vertex_ids[3 * index][0]
 
             if id not in triangle_dict:
-                mat_index = int(mat_indexes[int(vertex_ids[3 * index][1])]) + self.mat_offset
+                mat_index = int(mat_indexes[int(vertex_ids[3 * index][1])])
                 material_dict[id] = mat_index
                 triangle_dict[id] = TriangleSoup()
                 triangle_dict[id].triangles.append(list())
@@ -82,25 +105,26 @@ class ParsedB3dms(ObjectsToTile):
         objects = []
         for id in triangle_dict:
             feature = ParsedB3dm(str(int(id)), triangle_dict[id], material_dict[id])
-            feature.set_material(material_dict[id], self.materials, self.tileset_paths_dict[tile_index])
+            feature.set_material(material_dict[id], materials, self.tileset_paths_dict[tile_index])
             objects.append(feature)
         return ParsedB3dms(objects)
 
-    def parse_tileset(self, tileset):
-        all_tiles = tileset.get_root_tile().get_children()
-        objects = list()
-        for i, tile in enumerate(all_tiles):
-            gltf = tile.get_content().body.glTF
+    def parse_tile(self, tile, tile_index=0):
+        """
+        Parse the tile to create materials and geometries.
+        :param tile: the tile to parse
+        :param tile_index: the index if the tile
 
-            self.parse_materials(gltf)
-            ts = TriangleSoup.from_glTF(gltf)
-            objects_to_tile = self.parse_triangle_soup(ts, tile_index=i)
+        :return: a list of geometries
+        """
+        gltf = tile.get_content().body.glTF
 
-            bt_attributes = tile.get_content().body.batch_table.attributes
-            [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]
+        materials = self.parse_materials(gltf)
+        ts = TriangleSoup.from_glTF(gltf)
+        objects_to_tile = self.parse_triangle_soup(ts, materials, tile_index)
+        objects_to_tile.add_materials(materials)
 
-            centroid = np.array(tile.get_transform()[12:15], dtype=np.float32) * -1
-            objects_to_tile.translate_objects(centroid)
+        bt_attributes = tile.get_content().body.batch_table.attributes
+        [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]
 
-            objects.append(objects_to_tile)
-        return objects
+        return objects_to_tile
