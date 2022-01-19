@@ -20,4 +20,7 @@ class GeojsonPolygon(Geojson):
                 coord[2] -= self.height
         self.polygon = coords
 
+        z_name = properties[properties.index('z') + 1]
+        self.set_z(coords, z_name)
+
         return True

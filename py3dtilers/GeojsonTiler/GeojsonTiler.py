@@ -38,6 +38,14 @@ class GeojsonTiler(Tiler):
                                     The value can also be a float or an int, this will set the default width.\
                                     Default property name is LARGEUR')
 
+        self.parser.add_argument('--z',
+                                 nargs='?',
+                                 default='NONE',
+                                 type=str,
+                                 help='Change the name of the propertie to look for in the feature for Z.\
+                                    The value can also be a float or an int, this will set the default Z.\
+                                    By default, the Z will be taken from the geometry coordinates.')
+
         self.parser.add_argument('--prec',
                                  nargs='?',
                                  default='PREC_ALTI',
@@ -174,7 +182,10 @@ def main():
     geojson_tiler = GeojsonTiler()
     geojson_tiler.parse_command_line()
     path = geojson_tiler.args.path[0]
-    properties = ['height', geojson_tiler.args.height, 'width', geojson_tiler.args.width, 'prec', geojson_tiler.args.prec]
+    properties = ['height', geojson_tiler.args.height,
+                  'width', geojson_tiler.args.width,
+                  'prec', geojson_tiler.args.prec,
+                  'z', geojson_tiler.args.z]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)

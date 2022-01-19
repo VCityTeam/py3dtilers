@@ -37,6 +37,9 @@ class GeojsonLine(Geojson):
         else:
             coords = self.feature_geometry['coordinates']
 
+        z_name = properties[properties.index('z') + 1]
+        self.set_z(coords, z_name)
+
         line_buffer = LineBuffer(self.width)
         self.polygon = line_buffer.buffer_line_string(coords)
 

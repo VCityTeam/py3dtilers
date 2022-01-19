@@ -63,26 +63,28 @@ geojson-tiler --path <path> --add_color NATURE semantic
 ### Properties
 
 The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ geometries. This width will define the size of the buffer applied to the lines.  
-The Tiler also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).
+The Tiler also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).  
+A '_z_' property can be used to specify a Z value used for all the coordinates of the feature's geometry. By default, the Z will be the values in the coordinates.
 
 By default, those properties are equal to:
 
 - 'prec' --> 'PREC_ALTI'
 - 'height' --> 'HAUTEUR'
 - 'width' --> 'LARGEUR'
+- 'z' --> use the Z from the coordinates
 
-It means the tiler will target the property 'HAUTEUR' to find the height, 'LARGEUR' to find the width and 'PREC_ALTI' to find the altitude precision.
+It means the tiler will target the property 'HAUTEUR' to find the height, 'LARGEUR' to find the width and 'PREC_ALTI' to find the altitude precision. The tiler won't override the Z values by default.
 
-If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`:
+If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`. If the geometries don't have a Z (2D geometries), a Z can be targeted with `--z`.
 
 ```bash
-geojson-tiler --path <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME
+geojson-tiler --path <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME --z Z_NAME
 ```
 
-You can set the height or the width to a default value (used for all features). The value must be an _int_ or a _float_:
+You can set the height, the width or the Z to a default value (used for all features). The value must be an _int_ or a _float_:
 
 ```bash
-geojson-tiler --path <path> --height 10.5 --width 6.4
+geojson-tiler --path <path> --height 10.5 --width 6.4 --z 100
 ```
 
 If you want to skip the precision, you can set _prec_ to '_NONE_':

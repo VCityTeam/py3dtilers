@@ -19,6 +19,9 @@ class Geojson(ObjectToTile):
     # Default height will be used if no height is found when parsing the data
     default_height = 2
 
+    # Default Z will be used if no Z is found in the feature coordinates
+    default_z = 0
+
     # Those values are used to set the color of the features
     attribute_values = list()  # Contains all the values of a semantic attribute
     attribute_min = np.Inf  # Contains the min value of a numeric attribute
@@ -45,6 +48,28 @@ class Geojson(ObjectToTile):
             triangles.append([coordinates[i + 1], coordinates[length - 1 - i], coordinates[length - 2 - i]])
 
         return triangles
+
+    def set_z(self, coordinates, z):
+        """
+        Set the Z value of each coordinate of the feature.
+        The Z can be the name of a property to read in the feature or a float.
+        :param coordinates: the coordinates of the feature
+        :param z: the value of the z
+        """
+        z_value = Geojson.default_z
+        if z != 'NONE':
+            if z.replace('.', '', 1).isdigit():
+                z_value = float(z)
+            else:
+                if z in self.feature_properties:
+                    z_value = self.feature_properties[z]
+                else:
+                    print("No propertie called " + z + " in feature " + str(Geojson.n_feature) + ". Set Z to default value (" + str(Geojson.default_z) + ").")
+        for coord in coordinates:
+            if len(coord) < 3:
+                coord.append(z_value)
+            elif z != 'NONE':
+                coord[2] = z_value
 
     def parse_geojson(self, target_properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
