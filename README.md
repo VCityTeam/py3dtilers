@@ -10,6 +10,7 @@ p3dtilers uses [`py3dtiles` python library](https://gitlab.com/Oslandia/py3dtile
 * [GeojsonTiler](./py3dtilers/GeojsonTiler): converts GeoJson files to a 3D Tiles tileset
 * [IfcTiler](./py3dtilers/IfcTiler): converts IFC files to a 3D Tiles tileset
 * [CityTiler](./py3dtilers/CityTiler): converts CityGML features (e.g buildings, water bodies, terrain...) extracted from a 3dCityDB database to a 3D Tiles tileset
+* [TilesetReader](./py3dtilers/TilesetReader): read, merge or transform 3DTiles tilesets
 
 ## Installation from sources
 
@@ -18,16 +19,16 @@ NB: py3dtilers installation requires a Bash shell. If you're using Windows 10, s
 In order to install py3dtilers from sources use:
 
 ```bash
-$ apt install git python3 python3-pip virtualenv
-$ git clone https://github.com/VCityTeam/py3dtilers
-$ cd py3dtilers
+apt install git python3 python3-pip virtualenv
+git clone https://github.com/VCityTeam/py3dtilers
+cd py3dtilers
 ```
 
 Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
-$ apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
-$ apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
+apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
+apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
 ```
 
 (_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
@@ -60,6 +61,7 @@ To use the a tiler, check the corresponding readme to know the usage and the fea
 * GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
 * ObjTiler [readme](py3dtilers/ObjTiler/README.md)
 * IfcTiler [readme](py3dtilers/IfcTiler/README.md)
+* TilesetReader [readme](py3dtilers/TilesetReader/README.md)
 
 ## Develop with py3dtilers
 
@@ -123,11 +125,13 @@ If you want to apply `autopep8` from root directory, exclude the _venv_ director
 ### Developing py3dtilers together with py3dtiles
 
 By default, the py3dtilers' [`setup.py`](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30) build stage uses [github's version of py3dtiles](https://github.com/VCityTeam/py3dtiles) (as opposed to using [Oslandia's version on Pypi](https://pypi.org/project/py3dtiles/).
-When developing one might need/wish to use a local version of py3dtiles (located on host in another directory e.g. by cloning the original repository) it is possible 
+When developing one might need/wish to use a local version of py3dtiles (located on host in another directory e.g. by cloning the original repository) it is possible
+
  1. to first install py3dtiles by following the [installation notes](https://github.com/Oslandia/py3dtiles/blob/master/docs/install.rst)
  2. then within the py3dtilers (cloned) directory, comment out (or delete) [the line reference to py3dtiles](https://github.com/VCityTeam/py3dtilers/blob/master/setup.py#L30).
 
 This boils down to :
+
 ```bash
 $ git clone https://github.com/VCityTeam/py3dtiles
 $ cd py3dtiles
