@@ -4,6 +4,7 @@ import pathlib
 
 from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
+from .color_config import ColorConfig
 from ..Texture import Texture
 
 
@@ -105,3 +106,6 @@ class Tiler():
         target_dir = pathlib.Path(directory + '/tiles').expanduser()
         pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
         Texture.set_texture_folder(directory)
+
+    def get_color_config(self):
+        return ColorConfig()
