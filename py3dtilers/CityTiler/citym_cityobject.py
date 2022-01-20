@@ -3,6 +3,7 @@ import sys
 from io import BytesIO
 
 from ..Common import ObjectToTile, ObjectsToTile
+from ..Texture import Texture
 
 
 class CityMCityObject(ObjectToTile):
@@ -14,6 +15,7 @@ class CityMCityObject(ObjectToTile):
     def __init__(self, database_id=None, gml_id=None):
         super().__init__(database_id)
         self.set_gml_id(gml_id)
+        self.texture_uri = None
 
     def get_database_id(self):
         return super().get_id()
@@ -34,11 +36,18 @@ class CityMCityObject(ObjectToTile):
         """
         return super().get_batchtable_data()['gml_id']
 
+    def get_texture(self):
+        stream = self.objects_type.get_image_from_binary(self.texture_uri, self.objects_type, CityMCityObjects.gml_cursor)
+        texture = Texture(stream, self.geom.triangles[1])
+        return texture.get_texture_image()
+
 
 class CityMCityObjects(ObjectsToTile):
     """
     A decorated list of CityMCityObject type objects.
     """
+
+    object_type = CityMCityObject
 
     gml_cursor = None
 
@@ -86,6 +95,7 @@ class CityMCityObjects(ObjectsToTile):
 
         if no_input:
             result_objects = objects_type()
+            object_type = objects_type.object_type
         else:
             # We need to deal with the fact that the answer will (generically)
             # not preserve the order of the objects that was given to the query
@@ -105,7 +115,7 @@ class CityMCityObjects(ObjectsToTile):
                 sys.exit(1)
             gml_id = t[2]
             if no_input:
-                new_object = CityMCityObject(object_id, gml_id)
+                new_object = object_type(object_id, gml_id)
                 result_objects.append(new_object)
             else:
                 cityobject = objects_with_gmlid_key[gml_id]
