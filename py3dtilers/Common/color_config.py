@@ -1,0 +1,60 @@
+import string
+from py3dtiles import GlTFMaterial
+
+
+class ColorConfig():
+    default_color = [1, 1, 1]
+
+    min_color = [0, 1, 0]
+    max_color = [1, 0, 0]
+    nb_colors = 20
+
+    color_dict = {
+        'default': [1, 1, 1]
+    }
+
+    def __init__(self):
+        self.min_color_code = self.to_material(self.min_color).rgba[:3]
+        self.max_color_code = self.to_material(self.max_color).rgba[:3]
+
+    def to_material(self, color):
+        """
+        Create a GlTFMaterial from a color code.
+        :param color: a color code (rgb or hexa)
+
+        :return: a GlTFMaterial
+        """
+        if isinstance(color, list):
+            return GlTFMaterial(rgb=color)
+        elif all(c in string.hexdigits for c in color.replace('#', '').replace('0x', '')):
+            return GlTFMaterial.from_hexa(color)
+        else:
+            return GlTFMaterial()
+
+    def get_color_by_key(self, key):
+        """
+        Get the color corresponding to the key.
+        :param key: the key in the color dictionary
+
+        :return: a GlTFMaterial
+        """
+        if key in self.color_dict:
+            return self.to_material(self.color_dict[key])
+        else:
+            return self.to_material(self.color_dict['default'])
+
+    def get_color_by_lerp(self, factor=0):
+        """
+        Get a color by interpolation between two colors (min and max colors).
+        :param float factor: the lerp factor
+
+        :return: a GlTFMaterial
+        """
+        return self.to_material([(max - min) * factor + min for min, max in zip(self.min_color_code, self.max_color_code)])
+
+    def get_default_color(self):
+        """
+        Get the default color.
+        :return: a GlTFMaterial
+        """
+        return self.to_material(self.default_color)

@@ -1,5 +1,7 @@
 import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup, GlTFMaterial
+from py3dtiles import BoundingVolumeBox, TriangleSoup
+
+from .color_config import ColorConfig
 
 
 class ObjectToTile(object):
@@ -90,7 +92,7 @@ class ObjectsToTile(object):
 
     def __init__(self, objects=None):
         self.objects = list()
-        self.materials = [GlTFMaterial()]
+        self.materials = [ColorConfig().get_default_color()]
         if(objects):
             self.objects.extend(objects)
 

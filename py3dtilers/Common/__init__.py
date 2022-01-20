@@ -1,4 +1,5 @@
 from .kd_tree import kd_tree
+from .color_config import ColorConfig
 from .object_to_tile import ObjectToTile, ObjectsToTile
 from .tree_with_children_and_parent import TreeWithChildrenAndParent
 from .group import Groups
@@ -19,4 +20,5 @@ __all__ = ['kd_tree',
            'LoaNode',
            'LodTree',
            'ObjWriter',
-           'Tiler']
+           'Tiler',
+           'ColorConfig']
