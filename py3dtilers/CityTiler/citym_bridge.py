@@ -8,14 +8,17 @@ class CityMBridge(CityMCityObject):
     Implementation of the Bridge Model objects from the CityGML model.
     """
 
-    def __init__(self, id=None):
-        super().__init__(id)
+    def __init__(self, database_id=None, gml_id=None):
+        super().__init__(database_id, gml_id)
+        self.objects_type = CityMBridges
 
 
 class CityMBridges(CityMCityObjects):
     """
     A decorated list of CityMBridge type objects.
     """
+
+    object_type = CityMBridge
 
     def __init__(self, objects=None):
         super().__init__(objects)

@@ -25,14 +25,18 @@ class CityMBuilding(CityMCityObject):
     Implementation of the Building Model objects from the CityGML model.
     """
 
-    def __init__(self, id=None):
-        super().__init__(id)
+    def __init__(self, database_id=None, gml_id=None):
+        super().__init__(database_id, gml_id)
+        self.objects_type = CityMBuildings
 
 
 class CityMBuildings(CityMCityObjects):
     """
     A decorated list of CityMBuilding type objects.
     """
+
+    object_type = CityMBuilding
+
     # with_bth value is set to False by default. the value of this variable
     # depends on the command line optional argument "--With_BTH" of CityTiler.
     with_bth = False
