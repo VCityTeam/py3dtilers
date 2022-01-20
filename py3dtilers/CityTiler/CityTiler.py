@@ -3,8 +3,7 @@ import numpy as np
 from py3dtiles import TriangleSoup
 
 from ..Common import Tiler
-from ..Texture import Texture
-from .citym_cityobject import CityMCityObjects, CityMCityObject
+from .citym_cityobject import CityMCityObjects
 from .citym_building import CityMBuildings
 from .citym_relief import CityMReliefs
 from .citym_waterbody import CityMWaterBodies
@@ -70,6 +69,7 @@ class CityTiler(Tiler):
         Each surface will be an ObjectToTile
         """
         surfaces = list()
+        object_type = objects_type.object_type
         for cityobject in cityobjects:
             id = '(' + str(cityobject.get_database_id()) + ')'
             cursor.execute(objects_type.sql_query_geometries(id, True))
@@ -77,17 +77,18 @@ class CityTiler(Tiler):
                 surface_id = t[0]
                 geom_as_string = t[1]
                 if geom_as_string is not None:
-                    surface = CityMCityObject(surface_id)
+                    surface = object_type(surface_id)
                     try:
                         surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
                         surface.set_box()
                         surfaces.append(surface)
                     except ValueError:
                         continue
-        return CityMCityObjects(surfaces)
+        return objects_type(surfaces)
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
         surfaces = list()
+        object_type = objects_type.object_type
         for cityobject in cityobjects:
             id = '(' + str(cityobject.get_database_id()) + ')'
             cursor.execute(objects_type.sql_query_geometries_with_texture_coordinates(id))
@@ -98,16 +99,13 @@ class CityTiler(Tiler):
                 uv_as_string = t[2]
                 texture_uri = t[3]
                 if geom_as_string is not None:
-                    surface = CityMCityObject(surface_id)
+                    surface = object_type(surface_id)
                     try:
                         associated_data = [uv_as_string]
                         surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
                         if len(surface.geom.triangles[0]) <= 0:
                             continue
-                        surface.geom.triangles.append(texture_uri)
-                        stream = objects_type.get_image_from_binary(texture_uri, objects_type, cursor)
-                        texture = Texture(stream, surface.geom.triangles[1])
-                        surface.set_texture(texture.get_texture_image())
+                        surface.texture_uri = texture_uri
                         surface.set_box()
                         surfaces.append(surface)
                         current_object_surfaces.append(surface)
@@ -118,7 +116,7 @@ class CityTiler(Tiler):
             for s in current_object_surfaces:
                 s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
 
-        return CityMCityObjects(surfaces)
+        return objects_type(surfaces)
 
     def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         """
