@@ -107,5 +107,5 @@ class Tiler():
         pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
         Texture.set_texture_folder(directory)
 
-    def get_color_config(self):
-        return ColorConfig()
+    def get_color_config(self, config_path="./py3dtilers/Color/default_config.json"):
+        return ColorConfig(config_path)

@@ -14,7 +14,7 @@ class ColorConfig():
         'default': [1, 1, 1]
     }
 
-    def __init__(self, config_path="./py3dtilers/Color/config.json"):
+    def __init__(self, config_path="./py3dtilers/Color/default_config.json"):
         if config_path is not None:
             with open(config_path) as f:
                 content = json.load(f)
