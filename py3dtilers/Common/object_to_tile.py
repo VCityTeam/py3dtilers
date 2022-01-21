@@ -1,7 +1,7 @@
 import numpy as np
 from py3dtiles import BoundingVolumeBox, TriangleSoup
 
-from .color_config import ColorConfig
+from ..Color import ColorConfig
 
 
 class ObjectToTile(object):

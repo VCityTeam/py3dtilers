@@ -4,7 +4,7 @@ import pathlib
 
 from .tileset_creation import create_tileset
 from .obj_writer import ObjWriter
-from .color_config import ColorConfig
+from ..Color import ColorConfig
 from ..Texture import Texture
 
 

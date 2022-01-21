@@ -1,4 +1,5 @@
 import string
+import json
 from py3dtiles import GlTFMaterial
 
 
@@ -13,7 +14,16 @@ class ColorConfig():
         'default': [1, 1, 1]
     }
 
-    def __init__(self):
+    def __init__(self, config_path="./py3dtilers/Color/config.json"):
+        if config_path is not None:
+            with open(config_path) as f:
+                content = json.load(f)
+            self.default_color = content['default_color'] if 'default_color' in content else self.default_color
+            self.min_color = content['min_color'] if 'min_color' in content else self.min_color
+            self.max_color = content['max_color'] if 'max_color' in content else self.max_color
+            self.nb_colors = content['nb_colors'] if 'nb_colors' in content else self.nb_colors
+            self.color_dict = content['color_dict'] if 'color_dict' in content else self.color_dict
+                
         self.min_color_code = self.to_material(self.min_color).rgba[:3]
         self.max_color_code = self.to_material(self.max_color).rgba[:3]
 
@@ -40,8 +50,10 @@ class ColorConfig():
         """
         if key in self.color_dict:
             return self.to_material(self.color_dict[key])
-        else:
+        elif 'default' in self.color_dict:
             return self.to_material(self.color_dict['default'])
+        else:
+            self.get_default_color()
 
     def get_color_by_lerp(self, factor=0):
         """

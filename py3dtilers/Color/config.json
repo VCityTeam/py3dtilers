@@ -1,0 +1,11 @@
+{
+    "default_color": [1, 1, 1],
+
+    "min_color": [0, 1, 0],
+    "max_color": [1, 0, 0],
+    "nb_colors": 20,
+
+    "color_dict": {
+        "default": [1, 1, 1]
+    }
+}
