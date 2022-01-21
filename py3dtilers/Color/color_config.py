@@ -23,7 +23,7 @@ class ColorConfig():
             self.max_color = content['max_color'] if 'max_color' in content else self.max_color
             self.nb_colors = content['nb_colors'] if 'nb_colors' in content else self.nb_colors
             self.color_dict = content['color_dict'] if 'color_dict' in content else self.color_dict
-                
+
         self.min_color_code = self.to_material(self.min_color).rgba[:3]
         self.max_color_code = self.to_material(self.max_color).rgba[:3]
 
