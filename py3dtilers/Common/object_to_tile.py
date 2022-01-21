@@ -90,9 +90,14 @@ class ObjectsToTile(object):
     A decorated list of ObjectsToTile type objects.
     """
 
+    # The material used by default for geometries
+    default_mat = None
+
     def __init__(self, objects=None):
         self.objects = list()
-        self.materials = [ColorConfig().get_default_color()]
+        if ObjectsToTile.default_mat is None:
+            ObjectsToTile.default_mat = ColorConfig().get_default_color()
+        self.materials = [ObjectsToTile.default_mat]
         if(objects):
             self.objects.extend(objects)
 
