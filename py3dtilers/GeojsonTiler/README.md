@@ -60,6 +60,8 @@ Example for semantic property:
 geojson-tiler --path <path> --add_color NATURE semantic
 ```
 
+The default colors are defined by a [JSON file](../Color/default_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md) for more details__)
+
 ### Properties
 
 The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ geometries. This width will define the size of the buffer applied to the lines.  

@@ -4,7 +4,7 @@ from os import listdir
 import json
 
 from pathlib import Path
-from py3dtiles import GlTFMaterial
+
 from .geojson import Geojson, Geojsons
 from .geojson_line import GeojsonLine
 from .geojson_polygon import GeojsonPolygon
@@ -128,26 +128,26 @@ class GeojsonTiler(Tiler):
         """
         colors = []
         att_length = len(Geojson.attribute_values)
+        color_config = self.get_color_config()
         if color_attribute[1] == 'numeric':
             max = Geojson.attribute_max
             min = Geojson.attribute_min
 
-            for i in range(0, 10, 1):
-                colors.append(GlTFMaterial(rgb=[i / 10, (10 - i) / 10, 0]))
+            n = color_config.nb_colors
+            for i in range(0, n, 1):
+                colors.append(color_config.get_color_by_lerp(i / n))
             for feature in objects_to_tile.get_objects():
                 factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
                 factor = round(factor * (len(colors) - 1)) + 1
                 feature.material_index = factor
         elif att_length > 1:
-            i = 0
-            step = 10 / (att_length - 1)
-            while len(colors) < att_length:
-                colors.append(GlTFMaterial(rgb=[i / 10, (10 - i) / 10, 0]))
-                i += step
+            attribute_dict = dict()
             for feature in objects_to_tile.get_objects():
                 value = feature.feature_properties[color_attribute[0]]
-                index = Geojson.attribute_values.index(value) + 1
-                feature.material_index = index
+                if value not in attribute_dict:
+                    attribute_dict[value] = len(colors)
+                    colors.append(color_config.get_color_by_key(value))
+                feature.material_index = attribute_dict[value]
         objects_to_tile.add_materials(colors)
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
