@@ -128,7 +128,8 @@ class GeojsonTiler(Tiler):
         """
         colors = []
         att_length = len(Geojson.attribute_values)
-        color_config = self.get_color_config()
+        config_path = os.path.join(os.path.dirname(__file__), "../Color/default_config.json")
+        color_config = self.get_color_config(config_path)
         if color_attribute[1] == 'numeric':
             max = Geojson.attribute_max
             min = Geojson.attribute_min

@@ -1,5 +1,6 @@
 import string
 import json
+import os
 from py3dtiles import GlTFMaterial
 
 
@@ -14,7 +15,7 @@ class ColorConfig():
         'default': [1, 1, 1]
     }
 
-    def __init__(self, config_path="./py3dtilers/Color/default_config.json"):
+    def __init__(self, config_path=os.path.join(os.path.dirname(__file__), "default_config.json")):
         if config_path is not None:
             try:
                 with open(config_path) as f:
