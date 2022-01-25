@@ -84,6 +84,8 @@ class CityTiler(Tiler):
                         surfaces.append(surface)
                     except ValueError:
                         continue
+                    except AttributeError:
+                        continue
         return objects_type(surfaces)
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
@@ -110,6 +112,8 @@ class CityTiler(Tiler):
                         surfaces.append(surface)
                         current_object_surfaces.append(surface)
                     except ValueError:
+                        continue
+                    except AttributeError:
                         continue
             cursor.execute(objects_type.sql_query_centroid(cityobject.get_database_id()))
             centroid = cursor.fetchall()
