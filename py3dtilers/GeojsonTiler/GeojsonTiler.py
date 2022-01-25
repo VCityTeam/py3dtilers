@@ -148,7 +148,7 @@ class GeojsonTiler(Tiler):
                 if value not in attribute_dict:
                     attribute_dict[value] = len(colors)
                     colors.append(color_config.get_color_by_key(value))
-                feature.material_index = attribute_dict[value]
+                feature.material_index = attribute_dict[value] + 1
         objects_to_tile.add_materials(colors)
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
