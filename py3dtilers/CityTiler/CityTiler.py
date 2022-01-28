@@ -23,7 +23,7 @@ class CityTiler(Tiler):
                                  type=str,
                                  help='Path(es) to the database configuration file(s)')
 
-        self.parser.add_argument('object_type',
+        self.parser.add_argument('--type',
                                  nargs='?',
                                  default='building',
                                  type=str,
@@ -163,18 +163,18 @@ def main():
 
     cursor = open_data_base(args.db_config_path[0])
 
-    if args.object_type == "building":
+    if args.type == "building":
         objects_type = CityMBuildings
         city_tiler.create_directory('junk_buildings')
         if args.with_BTH:
             CityMBuildings.set_bth()
-    elif args.object_type == "relief":
+    elif args.type == "relief":
         city_tiler.create_directory('junk_reliefs')
         objects_type = CityMReliefs
-    elif args.object_type == "water":
+    elif args.type == "water":
         city_tiler.create_directory('junk_water_bodies')
         objects_type = CityMWaterBodies
-    elif args.object_type == "bridge":
+    elif args.type == "bridge":
         city_tiler.create_directory('junk_bridges')
         objects_type = CityMBridges
 
@@ -196,13 +196,13 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    if args.object_type == "building":
+    if args.type == "building":
         tileset.write_to_directory('junk_buildings')
-    elif args.object_type == "relief":
+    elif args.type == "relief":
         tileset.write_to_directory('junk_reliefs')
-    elif args.object_type == "water":
+    elif args.type == "water":
         tileset.write_to_directory('junk_water_bodies')
-    elif args.object_type == "bridge":
+    elif args.type == "bridge":
         tileset.write_to_directory('junk_bridges')
 
 
