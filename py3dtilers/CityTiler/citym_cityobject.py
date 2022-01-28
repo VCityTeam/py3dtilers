@@ -36,11 +36,6 @@ class CityMCityObject(ObjectToTile):
         """
         return super().get_batchtable_data()['gml_id']
 
-    def get_texture(self):
-        stream = self.objects_type.get_image_from_binary(self.texture_uri, self.objects_type, CityMCityObjects.gml_cursor)
-        texture = Texture(stream, self.geom.triangles[1])
-        return texture.get_texture_image()
-
 
 class CityMCityObjects(ObjectsToTile):
     """
@@ -53,6 +48,21 @@ class CityMCityObjects(ObjectsToTile):
 
     def __init__(self, cityMCityObjects=None):
         super().__init__(cityMCityObjects)
+
+    def get_textures(self):
+        """
+        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        :return: a dictionary of textures
+        """
+        texture_dict = dict()
+        uri_dict = dict()
+        for object_to_tile in self.get_objects():
+            uri = object_to_tile.texture_uri
+            if uri not in uri_dict:
+                stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
+                uri_dict[uri] = Texture(stream)
+            texture_dict[object_to_tile.get_id()] = uri_dict[uri].get_cropped_texture_image(object_to_tile.geom.triangles[1])
+        return texture_dict
 
     @staticmethod
     def set_cursor(cursor):

@@ -6,18 +6,19 @@ class Texture():
 
     folder = None
 
-    def __init__(self, image_path, triangles):
+    def __init__(self, image_path):
         """
         :param image_path: path to the image (or a stream with image bytes)
-        :param triangles: the uvs
         Create a pillow.image:
         """
-        image = Image.open(image_path)
-        image = self.cropImage(image, triangles)
-        self.texture_image = image.convert("RGBA")
+        self.image = Image.open(image_path)
 
-    def get_texture_image(self):
-        return self.texture_image
+    def get_cropped_texture_image(self, uvs):
+        """
+        :param uvs: the uvs
+        """
+        image = self.cropImage(self.image, uvs)
+        return image.convert("RGBA")
 
     def cropImage(self, image, triangles):
         minX = 2

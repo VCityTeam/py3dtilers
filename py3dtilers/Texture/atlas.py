@@ -12,9 +12,10 @@ class Atlas():
         objects_with_id_key = dict()
         textures_with_id_key = dict()
 
+        textures = objects_to_tile.get_textures()
         for object_to_tile in objects_to_tile:
             objects_with_id_key[object_to_tile.get_id()] = object_to_tile.geom
-            textures_with_id_key[object_to_tile.get_id()] = object_to_tile.get_texture()
+            textures_with_id_key[object_to_tile.get_id()] = textures[object_to_tile.get_id()]
 
         # Sort textures by size, starting by the biggest one
         textures_sorted = sorted(textures_with_id_key.items(),
