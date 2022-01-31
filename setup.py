@@ -180,6 +180,9 @@ setup(
     },
     data_files=[('py3dtilers/CityTiler',
                  ['py3dtilers/CityTiler/CityTilerDBConfigReference.yml']
-                 )],
+                 ),
+                ('py3dtilers/Color',
+                 ['py3dtilers/Color/default_config.json']
+                )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )
