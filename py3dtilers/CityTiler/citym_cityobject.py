@@ -181,3 +181,23 @@ class CityMCityObjects(ObjectsToTile):
         LEFT_THUMB = imageBinaryData[0][0]
         stream = BytesIO(LEFT_THUMB)
         return stream
+
+    @staticmethod
+    def sql_query_centroid():
+        """
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        """
+        pass
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates():
+        """
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        """
+        pass
