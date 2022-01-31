@@ -47,3 +47,7 @@ class Test_Tile(unittest.TestCase):
         [cursor.close() for cursor in cursors]
 
         tile_set.write_to_directory("tests/city_temporal_tiler_test_data/junk/temporal")
+
+
+if __name__ == '__main__':
+    unittest.main()

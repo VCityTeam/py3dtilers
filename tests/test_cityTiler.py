@@ -218,3 +218,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset.write_to_directory(directory)
         cursor.close()
+
+
+if __name__ == '__main__':
+    unittest.main()
