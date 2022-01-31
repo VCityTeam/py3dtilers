@@ -225,6 +225,16 @@ class ObjectsToTile(object):
             object_to_tile.set_triangles(new_geom)
             object_to_tile.set_box()
 
+    def get_textures(self):
+        """
+        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        :return: a dictionary of textures
+        """
+        texture_dict = dict()
+        for object_to_tile in self.get_objects():
+            texture_dict[object_to_tile.get_id()] = object_to_tile.get_texture()
+        return texture_dict
+
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
         pass

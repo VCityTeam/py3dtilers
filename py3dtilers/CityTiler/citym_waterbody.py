@@ -67,7 +67,7 @@ class CityMWaterBodies(CityMCityObjects):
         """
         :param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
                             objects_type type objects whose geometries are sought.
-        :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+        :param split_surfaces: a boolean specifying if the surfaces of each water body tile will stay
                             splitted or be merged into one geometry
 
         :return: a string containing the right sql query that should be executed.
@@ -92,5 +92,58 @@ class CityMWaterBodies(CityMCityObjects):
                 "JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
                 "WHERE waterbody.id IN " + waterbodies_ids + " " + \
                 "GROUP BY waterbody.id "
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(water_bodies_ids=None):
+        """
+        param water_bodies_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right sql query that should be executed.
+        """
+        # cityobjects_ids contains ids of water_bodies
+        query = \
+            ("SELECT surface_geometry.id, "
+             "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
+             "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
+             "tex_image_uri AS uri "
+             "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf "
+             "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id "
+             "JOIN citydb.waterboundary_surface "
+             "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id "
+             "JOIN citydb.surface_geometry "
+             "ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id "
+             "JOIN citydb.textureparam "
+             "ON textureparam.surface_geometry_id=surface_geometry.id "
+             "JOIN citydb.surface_data "
+             "ON textureparam.surface_data_id=surface_data.id "
+             "JOIN citydb.tex_image "
+             "ON surface_data.tex_image_id=tex_image.id "
+             "WHERE waterbody.id IN " + water_bodies_ids)
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        """
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        """
+
+        query = \
+            "SELECT " + \
+            "ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), " + \
+            "ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
+            ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) " + \
+            "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf " + \
+            "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
+            "JOIN citydb.waterboundary_surface " + \
+            "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
+            "JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+            "WHERE waterbody.id = " + str(id) + \
+            " GROUP BY waterbody.id"
 
         return query

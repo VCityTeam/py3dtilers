@@ -68,8 +68,8 @@ class Obj(ObjectToTile):
             self.geom.triangles.append(uvs)
             if mesh.materials[0].texture is not None:
                 path = str(mesh.materials[0].texture._path).replace('\\', '/')
-                texture = Texture(path, self.geom.triangles[1])
-                self.set_texture(texture.get_texture_image())
+                texture = Texture(path)
+                self.set_texture(texture.get_cropped_texture_image(self.geom.triangles[1]))
         self.set_box()
 
         return True

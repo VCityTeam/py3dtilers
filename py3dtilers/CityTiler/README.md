@@ -33,30 +33,30 @@ The output folder contains:
 
 ### Objects type
 
-By default, the tiler will treat the data as __buildings__. You can change the type by adding one the 3 keywords:
+By default, the tiler will treat the data as __buildings__. You can change the type by adding the flag `--type` followed by one the 4 keywords:
 
 * `building`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml building
+citygml-tiler --db_config_path <path_to_file>/Config.yml --type building
 ```
 
 * `relief`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml relief
+citygml-tiler --db_config_path <path_to_file>/Config.yml --type relief
 ```
 
 * `water`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml water
+citygml-tiler --db_config_path <path_to_file>/Config.yml --type water
 ```
 
 * `bridge`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml bridge
+citygml-tiler --db_config_path <path_to_file>/Config.yml --type bridge
 ```
 
 ### Split surfaces
