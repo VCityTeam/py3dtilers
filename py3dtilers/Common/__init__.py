@@ -8,8 +8,8 @@ from .geometry_tree import GeometryTree
 from .lod_node import Lod1Node, LoaNode
 from .lod_tree import LodTree
 from .obj_writer import ObjWriter
+from .tileset_creation import FromGeometryTreeToTileset
 from .tiler import Tiler
-from .tileset_creation import create_tileset
 
 __all__ = ['kd_tree',
            'ObjectToTile',
@@ -24,4 +24,4 @@ __all__ = ['kd_tree',
            'LodTree',
            'ObjWriter',
            'Tiler',
-           'create_tileset']
+           'FromGeometryTreeToTileset']

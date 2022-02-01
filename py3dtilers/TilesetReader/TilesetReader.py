@@ -3,7 +3,7 @@ import sys
 from py3dtiles import TilesetReader
 from .tile_to_object_to_tile import TilesToObjectsToTile
 from .tileset_tree import TilesetTree
-from ..Common import Tiler, create_tileset
+from ..Common import Tiler, FromGeometryTreeToTileset
 
 
 class ThreeDTilesImporter(Tiler):
@@ -43,25 +43,28 @@ class ThreeDTilesImporter(Tiler):
         self.tile_index += 1
         return index
 
-    def create_tileset_from_geometries(self, tile_hierarchy, extension_name=None):
+    def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
+        """
+        Override the parent tileset creation.
+        """
         if hasattr(self.args, 'scale') and self.args.scale:
-            for objects in tile_hierarchy.get_all_objects():
+            for objects in tileset_tree.get_all_objects():
                 objects.scale_objects(self.args.scale)
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
             if self.args.offset[0] == 'centroid':
-                self.args.offset = tile_hierarchy.centroid
-            for objects in tile_hierarchy.get_all_objects():
+                self.args.offset = tileset_tree.centroid
+            for objects in tileset_tree.get_all_objects():
                 objects.translate_objects(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
-            for objects in tile_hierarchy.get_all_objects():
+            for objects in tileset_tree.get_all_objects():
                 self.change_projection(objects, self.args.crs_in, self.args.crs_out)
 
         if self.args.obj is not None:
-            self.write_geometries_as_obj(tile_hierarchy.get_leaf_objects(), self.args.obj)
+            self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
 
-        return create_tileset(tile_hierarchy, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
 
     def from_tileset(self, tileset):
         """
@@ -72,9 +75,9 @@ class ThreeDTilesImporter(Tiler):
         :return: a tileset
         """
         objects = TilesToObjectsToTile(tileset_paths_dict=self.tile_to_tileset_dict)
-        tile_hierarchy = TilesetTree(tileset, objects)
+        tileset_tree = TilesetTree(tileset, objects)
 
-        return self.create_tileset_from_geometries(tile_hierarchy)
+        return self.create_tileset_from_geometries(tileset_tree)
 
     def merge_tilesets(self, main_tileset, add_tileset_paths=list()):
         """
