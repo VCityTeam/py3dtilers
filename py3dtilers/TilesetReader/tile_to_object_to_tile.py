@@ -44,10 +44,11 @@ class TileToObjectToTile(ObjectToTile):
 
 class TilesToObjectsToTile(ObjectsToTile):
 
-    def __init__(self, objects=None, tileset_paths_dict=None):
-        super().__init__(objects)
+    def __init__(self, tile=None, tile_index=0, tileset_paths_dict=None):
         self.materials = []
         self.tileset_paths_dict = tileset_paths_dict
+        objects_to_tile = self.__convert_tile(tile, tile_index)
+        super().__init__(objects_to_tile)
 
     def __find_materials(self, gltf):
         """
@@ -107,9 +108,9 @@ class TilesToObjectsToTile(ObjectsToTile):
             feature = TileToObjectToTile(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], materials, self.tileset_paths_dict[tile_index])
             objects.append(feature)
-        return TilesToObjectsToTile(objects)
+        return ObjectsToTile(objects)
 
-    def convert_tile(self, tile, tile_index=0):
+    def __convert_tile(self, tile, tile_index=0):
         """
         Convert a tile to an ObjectsToTile instance.
         :param tile: the tile to convert

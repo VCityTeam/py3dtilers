@@ -1,7 +1,6 @@
 import sys
 
 from py3dtiles import TilesetReader
-from .tile_to_object_to_tile import TilesToObjectsToTile
 from .tileset_tree import TilesetTree
 from ..Common import Tiler, FromGeometryTreeToTileset
 
@@ -74,8 +73,7 @@ class ThreeDTilesImporter(Tiler):
 
         :return: a tileset
         """
-        objects = TilesToObjectsToTile(tileset_paths_dict=self.tile_to_tileset_dict)
-        tileset_tree = TilesetTree(tileset, objects)
+        tileset_tree = TilesetTree(tileset, self.tile_to_tileset_dict)
 
         return self.create_tileset_from_geometries(tileset_tree)
 
