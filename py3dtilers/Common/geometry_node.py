@@ -7,7 +7,7 @@ class GeometryNode():
 
     def __init__(self, objects_to_tile=None, geometric_error=50, with_texture=False):
         """
-        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries.
+        :param objects_to_tile: an instance of ObjectsToTile.
         :param geometric_error: the distance below which this node should be displayed.
         :param Boolean with_texture: if this node must keep the texture of the geometries or not.
         """
