@@ -6,7 +6,7 @@ In this example, we use the [CityGML Tiler](https://github.com/VCityTeam/py3dtil
 
 Before using the tiler, [install py3dtilers](https://github.com/VCityTeam/py3dtilers#installation-from-sources).
 
-To create 3DTiles from OBJ, GeoJSON or IFC files, check the [Tilers usage](https://github.com/VCityTeam/py3dtilers#usage). An example of the GeojsonTiler is available in [this tutorial](https://github.com/VCityTeam/UD-Reproducibility/blob/master/Computations/3DTiles/Lyon_Relief_Roads_Buildings_Water/Compute_Lyon_3DTiles.md)
+To create 3DTiles from OBJ, GeoJSON or IFC files, check the [Tilers usage](https://github.com/VCityTeam/py3dtilers#usage). An example of the GeojsonTiler is available in [this tutorial](./Doc/geoJSON_to_3DTiles_example.md)
 
 ## Configure the database
 
@@ -29,7 +29,7 @@ citygml-tiler --db_config_path <path_to_file>/CityTilerDBConfig.yml --type build
 
 ### Levels of detail
 
-To create [LOA](https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/CityTiler/README.md#loa), you can for example use _BDTOPO/1_DONNEES_LIVRAISON/ADMINISTRATIF/__ARRONDISSEMENT.shp___ from [BD Topo](https://geoservices.ign.fr/ressource/161992) ([IGN](https://geoservices.ign.fr/telechargement)). To be able to use it, export the .shp as GeoJson with QGIS (__the projection must be the same as buildings__, i.e EPSG:3946 for Lyon's CityGML data).
+To create [LOA](https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/CityTiler/README.md#loa), you can for example use _BDTOPO/1_DONNEES_LIVRAISON/ADMINISTRATIF/__ARRONDISSEMENT.shp___ from BD Topo ([IGN](https://geoservices.ign.fr/telechargement)). To be able to use it, export the .shp as GeoJson with QGIS (__the projection must be the same as buildings__, i.e EPSG:3946 for Lyon's CityGML data).
 
 To create the 3DTiles with levels of detail, run:
 
