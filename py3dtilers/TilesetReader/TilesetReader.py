@@ -1,12 +1,12 @@
 import sys
 
 from py3dtiles import TilesetReader
-from .parsed_b3dm import ParsedB3dms
-from .tile_hierarchy import TileHierarchy
+from .tile_to_object_to_tile import TilesToObjectsToTile
+from .tileset_tree import TilesetTree
 from ..Common import Tiler, create_tileset
 
 
-class B3dmTiler(Tiler):
+class ThreeDTilesImporter(Tiler):
 
     def __init__(self):
         super().__init__()
@@ -71,8 +71,8 @@ class B3dmTiler(Tiler):
 
         :return: a tileset
         """
-        objects = ParsedB3dms(tileset_paths_dict=self.tile_to_tileset_dict)
-        tile_hierarchy = TileHierarchy(tileset, objects)
+        objects = TilesToObjectsToTile(tileset_paths_dict=self.tile_to_tileset_dict)
+        tile_hierarchy = TilesetTree(tileset, objects)
 
         return self.create_tileset_from_geometries(tile_hierarchy)
 
@@ -109,19 +109,19 @@ class B3dmTiler(Tiler):
 
 def main():
 
-    tiler = B3dmTiler()
-    tiler.parse_command_line()
-    path = tiler.args.path[0]
-    tiler.create_directory("tileset_reader_output/")
+    importer = ThreeDTilesImporter()
+    importer.parse_command_line()
+    path = importer.args.path[0]
+    importer.create_directory("tileset_reader_output/")
     reader = TilesetReader()
     tileset_1 = reader.read_tileset(path)
-    tiler.link_tile_and_tileset(tileset_1, path)
+    importer.link_tile_and_tileset(tileset_1, path)
 
-    tilesets_to_merge = tiler.args.merge
+    tilesets_to_merge = importer.args.merge
     if len(tilesets_to_merge) > 0:
-        tiler.merge_tilesets(tileset_1, tilesets_to_merge)
+        importer.merge_tilesets(tileset_1, tilesets_to_merge)
 
-    tileset_2 = tiler.from_tileset(tileset_1)
+    tileset_2 = importer.from_tileset(tileset_1)
     tileset_2.write_to_directory("tileset_reader_output/")
 
 

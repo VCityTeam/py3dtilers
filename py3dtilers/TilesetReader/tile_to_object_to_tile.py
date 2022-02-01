@@ -5,7 +5,7 @@ from ..Common import ObjectsToTile, ObjectToTile
 from ..Texture import Texture
 
 
-class ParsedB3dm(ObjectToTile):
+class TileToObjectToTile(ObjectToTile):
 
     def __init__(self, id=None, triangle_soup=None, mat_index=0):
         super().__init__(id)
@@ -42,7 +42,7 @@ class ParsedB3dm(ObjectToTile):
             super().set_batchtable_data(data)
 
 
-class ParsedB3dms(ObjectsToTile):
+class TilesToObjectsToTile(ObjectsToTile):
 
     def __init__(self, objects=None, tileset_paths_dict=None):
         super().__init__(objects)
@@ -104,10 +104,10 @@ class ParsedB3dms(ObjectsToTile):
 
         objects = []
         for id in triangle_dict:
-            feature = ParsedB3dm(str(int(id)), triangle_dict[id], material_dict[id])
+            feature = TileToObjectToTile(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], materials, self.tileset_paths_dict[tile_index])
             objects.append(feature)
-        return ParsedB3dms(objects)
+        return TilesToObjectsToTile(objects)
 
     def parse_tile(self, tile, tile_index=0):
         """

@@ -1,7 +1,7 @@
 from ..Common import GeometryNode, GeometryTree, ObjectsToTile
 
 
-class TileHierarchy(GeometryTree):
+class TilesetTree(GeometryTree):
 
     def __init__(self, tileset, objects):
         self.tile_index = 0
