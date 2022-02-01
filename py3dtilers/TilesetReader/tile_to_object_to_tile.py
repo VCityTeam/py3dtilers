@@ -23,8 +23,8 @@ class TileToObjectToTile(ObjectToTile):
         self.material_index = mat_index
         if materials[mat_index].is_textured():
             path = os.path.join(tileset_path, "tiles", materials[mat_index].textureUri)
-            texture = Texture(path, self.geom.triangles[1])
-            self.set_texture(texture.get_texture_image())
+            texture = Texture(path)
+            self.set_texture(texture.get_cropped_texture_image(self.geom.triangles[1]))
 
     def set_batchtable_data(self, bt_attributes):
         """
