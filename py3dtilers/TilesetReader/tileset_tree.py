@@ -36,7 +36,7 @@ class TilesetTree(GeometryTree):
         """
         id = self.get_next_tile_index()
         geometric_error = tile.attributes["geometricError"]
-        objects_to_tile = objects.parse_tile(tile, id)
+        objects_to_tile = objects.convert_tile(tile, id)
         objects_to_tile.translate_objects(offset)
         objects.append(objects_to_tile)
         node = GeometryNode(objects_to_tile, geometric_error, with_texture=True)

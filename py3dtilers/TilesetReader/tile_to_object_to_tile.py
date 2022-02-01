@@ -49,9 +49,9 @@ class TilesToObjectsToTile(ObjectsToTile):
         self.materials = []
         self.tileset_paths_dict = tileset_paths_dict
 
-    def parse_materials(self, gltf):
+    def __find_materials(self, gltf):
         """
-        Parse the materials from the glTF and create GlTFMaterials.
+        Find the materials in the glTF and create GlTFMaterials.
         :param gltf: the gltf of the tile
 
         :return: a list of GlTFMaterials
@@ -71,14 +71,14 @@ class TilesToObjectsToTile(ObjectsToTile):
             gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba, textureUri=uri))
         return gltf_materials
 
-    def parse_triangle_soup(self, triangle_soup, materials, tile_index=0):
+    def __convert_triangle_soup(self, triangle_soup, materials, tile_index=0):
         """
-        Parse the triangle soup to re-create the geometries.
+        Convert the triangle soup to re-create the geometries.
         :param triangle_soup: the triangle soup
         :param materials: the materials of the tile
         :param tile_index: the index of the tile
 
-        :return: a list of geometries
+        :return: an ObjectsToTile instance
         """
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
@@ -109,19 +109,19 @@ class TilesToObjectsToTile(ObjectsToTile):
             objects.append(feature)
         return TilesToObjectsToTile(objects)
 
-    def parse_tile(self, tile, tile_index=0):
+    def convert_tile(self, tile, tile_index=0):
         """
-        Parse the tile to create materials and geometries.
-        :param tile: the tile to parse
+        Convert a tile to an ObjectsToTile instance.
+        :param tile: the tile to convert
         :param tile_index: the index if the tile
 
         :return: a list of geometries
         """
         gltf = tile.get_content().body.glTF
 
-        materials = self.parse_materials(gltf)
+        materials = self.__find_materials(gltf)
         ts = TriangleSoup.from_glTF(gltf)
-        objects_to_tile = self.parse_triangle_soup(ts, materials, tile_index)
+        objects_to_tile = self.__convert_triangle_soup(ts, materials, tile_index)
         objects_to_tile.add_materials(materials)
 
         bt_attributes = tile.get_content().body.batch_table.attributes
