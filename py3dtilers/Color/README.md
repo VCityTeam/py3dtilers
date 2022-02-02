@@ -43,7 +43,7 @@ The number of colors is used to create the colors of the [heatmap](https://en.wi
 
 ### color_dict
 
-The color dictionary is used to match colors with attribute values. Each attribute value must be a key of the dictionary. A key `default` should be present for geometries which don't have a value of the targeted attribute.
+The color dictionary is used to match colors with attribute values. Each attribute value must be a key of the dictionary. A key `default` should be present for geometries which don't have a value for the targeted attribute (or have a value not present in the dictionary).
 
 ```bash
 "color_dict": {

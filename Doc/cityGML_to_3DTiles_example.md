@@ -66,5 +66,4 @@ citygml-tiler --db_config_path <path_to_file>/CityTilerDBConfig.yml --type build
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152002003-921dd838-8b51-4901-bcf0-d5819777bb9c.png)  
-_Result for Lyon 1 with textures, viewed in [UD-Viz](https://github.com/VCityTeam/UD-Viz)_
-
+_Lyon's 1st borough buildings with texture_
