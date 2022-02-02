@@ -1,29 +1,23 @@
 import sys
 
-from py3dtiles import TilesetReader
+from py3dtiles import TilesetReader, TileSet
 from .tileset_tree import TilesetTree
 from ..Common import Tiler, FromGeometryTreeToTileset
 
 
-class ThreeDTilesImporter(Tiler):
+class TilesetTiler(Tiler):
 
     def __init__(self):
         super().__init__()
 
         # adding positional arguments
-        self.parser.add_argument('--path',
-                                 nargs=1,
-                                 type=str,
-                                 help='Path to a geojson file or a directory containing geojson files')
-
-        self.parser.add_argument('--merge',
+        self.parser.add_argument('--paths',
                                  nargs='*',
-                                 default=[],
                                  type=str,
-                                 help='Path(s) to the additional tileset(s) to merge with the main tileset.')
+                                 help='Paths to 3DTiles tilesets')
 
-        self.tile_to_tileset_dict = dict()
-        self.tile_index = 0
+        self.tileset_of_root_tiles = list()
+        self.reader = TilesetReader()
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -32,15 +26,6 @@ class ThreeDTilesImporter(Tiler):
             print("Please provide a path to a tileset.json file.")
             print("Exiting")
             sys.exit(1)
-
-    def get_next_tile_index(self):
-        """
-        Get the next tile index.
-        :return: an index
-        """
-        index = self.tile_index
-        self.tile_index += 1
-        return index
 
     def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
         """
@@ -65,65 +50,52 @@ class ThreeDTilesImporter(Tiler):
 
         return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
 
-    def from_tileset(self, tileset):
+    def transform_tileset(self, tileset):
         """
-        Create a new tileset from another tileset.
-        Allows to transform the old tileset before creating a new tileset.
-        :param tileset: the tileset to read and transform
+        Creates a TilesetTree where each node has ObjectsToTile.
+        Then, apply transformations (reprojection, translation, etc) on the ObjectsToTile.
+        :param tileset: the TileSet to transform
 
-        :return: a tileset
+        :return: a TileSet
         """
-        tileset_tree = TilesetTree(tileset, self.tile_to_tileset_dict)
-
+        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
         return self.create_tileset_from_geometries(tileset_tree)
 
-    def merge_tilesets(self, main_tileset, add_tileset_paths=list()):
+    def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         """
-        Merge additional tilesets to the main tileset.
-        :param main_tileset: the main tileset
-        :param add_tileset_paths: the path(s) of the additional tileset(s)
+        Read all tilesets and merge them into a single TileSet instance.
+        The paths of all tilesets are keeped to be able to find the source of each tile.
+        :param paths_to_tilesets: the paths of the tilesets
+
+        :return: a TileSet instance
         """
-        reader = TilesetReader()
-        for tileset_path in add_tileset_paths:
+        final_tileset = TileSet()
+        i = 0
+        for path in paths_to_tilesets:
             try:
-                tileset = reader.read_tileset(tileset_path)
+                tileset = self.reader.read_tileset(path)
                 root_tile = tileset.get_root_tile()
                 if 'children' in root_tile.attributes:
                     for tile in root_tile.attributes['children']:
-                        main_tileset.add_tile(tile)
-                self.link_tile_and_tileset(tileset, tileset_path)
+                        final_tileset.add_tile(tile)
+                        self.tileset_of_root_tiles.append(path)
+                        i += 1
             except Exception:
-                print("Couldn't merge the tileset", tileset_path)
-
-    def link_tile_and_tileset(self, tileset, tileset_path):
-        """
-        Link tile indexes with a tileset path.
-        :param tileset: the tileset containing the tiles to link
-        :param tileset_path: the path to the tileset
-        """
-        nb_tiles = len(tileset.get_root_tile().get_children())
-
-        for i in range(0, nb_tiles):
-            index = self.get_next_tile_index()
-            self.tile_to_tileset_dict[index] = tileset_path
+                print("Couldn't read the tileset", path)
+        return final_tileset
 
 
 def main():
 
-    importer = ThreeDTilesImporter()
-    importer.parse_command_line()
-    path = importer.args.path[0]
-    importer.create_directory("tileset_reader_output/")
-    reader = TilesetReader()
-    tileset_1 = reader.read_tileset(path)
-    importer.link_tile_and_tileset(tileset_1, path)
+    tiler = TilesetTiler()
+    tiler.parse_command_line()
+    paths_to_tilesets = tiler.args.path[0]
 
-    tilesets_to_merge = importer.args.merge
-    if len(tilesets_to_merge) > 0:
-        importer.merge_tilesets(tileset_1, tilesets_to_merge)
+    tileset = tiler.read_and_merge_tilesets(paths_to_tilesets)
 
-    tileset_2 = importer.from_tileset(tileset_1)
-    tileset_2.write_to_directory("tileset_reader_output/")
+    tiler.create_directory("tileset_reader_output/")
+    tileset = tiler.transform_tileset(tileset)
+    tileset.write_to_directory("tileset_reader_output/")
 
 
 if __name__ == '__main__':
