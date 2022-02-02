@@ -9,20 +9,18 @@ See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/REA
 ### Run the TilesetReader
 
 ```bash
-tileset-reader --path <tileset_path>
+tileset-reader --paths <tileset_path>
 ```
 
 Where `tileset_path` should point to the __root__ directory of a 3DTiles tileset.
 
-The produced 3DTiles will be in a directory named `tileset_reader_output`.
-
-### Merge tilesets
-
-The `--merge` flag allows to merge other tilesets with the main tileset (the one after the `--path` flag). To do so, add the paths of the __root__ of the additional tilesets after the `--merge` flag:
+If several paths to tilesets are putted after the `--paths` flag, all the tilesets will be red and merged into a single one.
 
 ```bash
-tileset-reader --path <tileset_path> --merge <path2> <path3> ...
+tileset-reader --paths <path1> <path2> <path3> ...
 ```
+
+The produced 3DTiles tileset will be in a directory named `tileset_reader_output`.
 
 ## Shared Tiler features
 
