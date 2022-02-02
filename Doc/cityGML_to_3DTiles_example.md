@@ -6,7 +6,7 @@ In this example, we use the [CityGML Tiler](https://github.com/VCityTeam/py3dtil
 
 Before using the tiler, [install py3dtilers](https://github.com/VCityTeam/py3dtilers#installation-from-sources).
 
-To create 3DTiles from OBJ, GeoJSON or IFC files, check the [Tilers usage](https://github.com/VCityTeam/py3dtilers#usage). An example of the GeojsonTiler is available in [this tutorial](./Doc/geoJSON_to_3DTiles_example.md)
+To create 3DTiles from OBJ, GeoJSON or IFC files, check the [Tilers usage](https://github.com/VCityTeam/py3dtilers#usage). An example of the GeojsonTiler is available in [this tutorial](geoJSON_to_3DTiles_example.md)
 
 ## Configure the database
 

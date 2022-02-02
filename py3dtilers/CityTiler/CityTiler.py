@@ -19,7 +19,7 @@ class CityTiler(Tiler):
         # adding positional arguments
         self.parser.add_argument('--db_config_path',
                                  nargs='*',
-                                 default='py3dtilers/CityTiler/CityTilerDBConfig.yml',
+                                 default=['py3dtilers/CityTiler/CityTilerDBConfig.yml'],
                                  type=str,
                                  help='Path(es) to the database configuration file(s)')
 
