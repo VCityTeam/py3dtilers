@@ -14,8 +14,7 @@ class TilesetTree(GeometryTree):
             offset = [c * -1 for c in tile.get_transform()[12:15]]
             self.root_nodes.append(self.tile_to_node(tile, tileset_paths[i], offset))
 
-        centroid = self.get_root_objects().get_centroid()
-        self.set_centroid(centroid)
+        self.set_centroid(self.get_root_objects().get_centroid())
 
     def tile_to_node(self, tile, tileset_path, offset):
         """

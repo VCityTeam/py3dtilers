@@ -7,10 +7,10 @@ class GeometryTree():
     It also contains the centroid of the root nodes.
     """
 
-    def __init__(self, objects_to_tile, root_nodes):
+    def __init__(self, root_nodes):
         self.root_nodes = root_nodes
         self.leaf_nodes = list()
-        self.centroid = objects_to_tile.get_centroid()
+        self.centroid = self.get_root_objects().get_centroid()
 
     def set_centroid(self, centroid):
         self.centroid = centroid

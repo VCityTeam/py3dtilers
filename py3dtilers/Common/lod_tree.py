@@ -30,7 +30,7 @@ class LodTree(GeometryTree):
 
             root_nodes.append(root_node)
 
-        super().__init__(objects_to_tile, root_nodes)
+        super().__init__(root_nodes)
 
     def group_features(self, objects_to_tile, polygons_path=None):
         """
