@@ -3,6 +3,7 @@ import os
 from argparse import Namespace
 
 from py3dtilers.TilesetReader.TilesetReader import TilesetTiler
+from py3dtilers.TilesetReader.TilesetMerger import TilesetMerger
 
 
 class Test_Tile(unittest.TestCase):
@@ -53,3 +54,13 @@ class Test_Tile(unittest.TestCase):
         tileset = tiler.read_and_merge_tilesets(paths)
         tileset = tiler.transform_tileset(tileset)
         tileset.write_to_directory("tests/tileset_reader_test_data/generated_tilesets/obj/")
+
+    def test_merger(self):
+        merger = TilesetMerger(output_path="tests/tileset_reader_test_data/generated_tilesets/merger/")
+        paths = ["tests/tileset_reader_test_data/white_buildings/", "tests/tileset_reader_test_data/textured_cube/"]
+        tilesets = merger.reader.read_tilesets(paths)
+
+        if not os.path.exists('tests/tileset_reader_test_data/generated_tilesets'):
+            os.makedirs('tests/tileset_reader_test_data/generated_tilesets')
+        tileset, root_tiles_paths = merger.merge_tilesets(tilesets, paths)
+        merger.write_merged_tileset(tileset, root_tiles_paths)
