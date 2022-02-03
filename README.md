@@ -141,19 +141,6 @@ $ source venv/bin/activate
 (venv)$ pytest
 ```
 
-### Documentation
-
-The documentation can be found in the [HTML](./html/py3dtilers/index.html) repository.
-
-To update the documentation :
-
-- assert that [Pdoc](https://pypi.org/project/pdoc3/) is installed
-- run the following command in the root folder on this repo :
-```bash
-$ pdoc --html .\py3dtilers --force
-```
-
-
 ### Concerning CityTiler
 
 * For developers, some [design notes](Doc/CityTilerDesignNotes.md)
