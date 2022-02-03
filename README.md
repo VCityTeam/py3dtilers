@@ -147,10 +147,12 @@ The documentation can be found in the [HTML](./html/py3dtilers/index.html) repos
 
 To update the documentation :
 
-- assert that [Pdoc](https://pypi.org/project/pdoc3/) is installed
+- assert that [Pdoc](https://pypi.org/project/pdoc3/) is installed using 
+```pip install -e .[dev]
+```
 - run the following command in the root folder on this repo :
 ```bash
-$ pdoc --html .\py3dtilers --force
+$ pdoc --html ./py3dtilers -o ./docs --force
 ```
 
 
