@@ -1,7 +1,8 @@
 import sys
 
-from py3dtiles import TilesetReader, TileSet
+from py3dtiles import TilesetReader
 from .tileset_tree import TilesetTree
+from .TilesetMerger import TilesetMerger
 from ..Common import Tiler, FromGeometryTreeToTileset
 
 
@@ -63,35 +64,23 @@ class TilesetTiler(Tiler):
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         """
-        Read all tilesets and merge them into a single TileSet instance.
+        Read all tilesets and merge them into a single TileSet instance with the TilesetMerger.
         The paths of all tilesets are keeped to be able to find the source of each tile.
         :param paths_to_tilesets: the paths of the tilesets
 
-        :return: a TileSet instance
+        :return: a TileSet
         """
-        final_tileset = TileSet()
-        i = 0
-        for path in paths_to_tilesets:
-            try:
-                tileset = self.reader.read_tileset(path)
-                root_tile = tileset.get_root_tile()
-                if 'children' in root_tile.attributes:
-                    for tile in root_tile.attributes['children']:
-                        final_tileset.add_tile(tile)
-                        self.tileset_of_root_tiles.append(path)
-                        i += 1
-            except Exception:
-                print("Couldn't read the tileset", path)
-        return final_tileset
+        tilesets = self.reader.read_tilesets(paths_to_tilesets)
+        tileset, self.tileset_of_root_tiles = TilesetMerger.merge_tilesets(tilesets, paths_to_tilesets)
+        return tileset
 
 
 def main():
 
     tiler = TilesetTiler()
     tiler.parse_command_line()
-    paths_to_tilesets = tiler.args.path[0]
 
-    tileset = tiler.read_and_merge_tilesets(paths_to_tilesets)
+    tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tiler.create_directory("tileset_reader_output/")
     tileset = tiler.transform_tileset(tileset)
