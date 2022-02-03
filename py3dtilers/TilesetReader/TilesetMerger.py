@@ -93,8 +93,9 @@ class TilesetMerger():
 
 def main():
     merger = TilesetMerger("tileset_merger_output")
-    tilesets = merger.reader.read_tilesets(merger.parse_paths())
-    tileset, root_tiles_paths = merger.merge_tilesets(tilesets, merger.paths)
+    paths = merger.parse_paths()
+    tilesets = merger.reader.read_tilesets(paths)
+    tileset, root_tiles_paths = merger.merge_tilesets(tilesets, paths)
     merger.write_merged_tileset(tileset, root_tiles_paths)
 
 

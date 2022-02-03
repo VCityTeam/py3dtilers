@@ -23,7 +23,7 @@ class TilesetTiler(Tiler):
     def parse_command_line(self):
         super().parse_command_line()
 
-        if(self.args.path is None):
+        if(len(self.args.paths) < 1):
             print("Please provide a path to a tileset.json file.")
             print("Exiting")
             sys.exit(1)
