@@ -61,8 +61,8 @@ geojson-tiler --path path/to/buildings.geojson --height 6 --z 0
 ### Color
 
 You can add colors to your buildings with the flag `--add_color`. The color of the material depends on the value of a selected property for each building.  
-If the property is numeric, we create a [heatmap](https://en.wikipedia.org/wiki/Heat_map) by interpolating the [minimal](../py3dtilers/Color/README.md#min_color) and the [maximal](../py3dtilers/Color/README.md#max_color) colors.  
-If the property is semantic, we choose the color depending on the value of the property. The color to use for each value __must__ be specified in the [color dictionary](../py3dtilers/Color/README.md#color_dict).
+If the property is numeric, we create a [heatmap](https://en.wikipedia.org/wiki/Heat_map) by interpolating the [minimal](../../py3dtilers/Color/README.md#min_color) and the [maximal](../../py3dtilers/Color/README.md#max_color) colors.  
+If the property is semantic, we choose the color depending on the value of the property. The color to use for each value __must__ be specified in the [color dictionary](../../py3dtilers/Color/README.md#color_dict).
 
 The flag takes 2 arguments: the name of the property and its type ('numeric' or 'semantic'). If only the name is given, the type will be 'numeric' by default. If no argument is given with the flag, the colors won't be added.
 
