@@ -8,15 +8,21 @@ from py3dtiles import TilesetReader, TileSet, BoundingVolumeBox
 class TilesetMerger():
 
     def __init__(self, output_path="tileset_merger_output"):
+        self.output_path = output_path
+        self.reader = TilesetReader()
+
+    def parse_paths(self):
+        """
+        Parse the arguments in command line and return the paths.
+        :return: a list of paths
+        """
         parser = argparse.ArgumentParser()
         parser.add_argument('--paths',
                             nargs='*',
                             type=str,
                             help='Paths to 3DTiles tilesets')
         args = parser.parse_args()
-        self.paths = args.paths
-        self.output_path = output_path
-        self.reader = TilesetReader()
+        return args.paths
 
     @staticmethod
     def merge_tilesets(tilesets, tileset_paths):
@@ -87,7 +93,7 @@ class TilesetMerger():
 
 def main():
     merger = TilesetMerger("tileset_merger_output")
-    tilesets = merger.reader.read_tilesets(merger.paths)
+    tilesets = merger.reader.read_tilesets(merger.parse_paths())
     tileset, root_tiles_paths = merger.merge_tilesets(tilesets, merger.paths)
     merger.write_merged_tileset(tileset, root_tiles_paths)
 
