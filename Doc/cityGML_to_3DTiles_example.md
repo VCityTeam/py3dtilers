@@ -73,22 +73,26 @@ The tileset is created with the command:
 citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
 ```
 
+![image](https://user-images.githubusercontent.com/32875283/152802557-6eaa2b1a-ea8f-4ddc-bfb7-6c7545d708e6.png)
+
 ### iTowns
 
-Your 3DTiles must be in the __EPSG:3946__ to be viewed in Cesium ion (see [reprojection](#reprojection)).
-
-The tileset is created with the command:
-
-```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
-```
-
-### UD-Viz
-
-Your 3DTiles must be in the __EPSG:3946__ to be viewed in Cesium ion (see [reprojection](#reprojection)).
+Your 3DTiles must be in the __EPSG:3946__ to be viewed in iTowns (see [reprojection](#reprojection)).
 
 The tileset is created with the command:
 
 ```bash
 citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
 ```
+
+### UD-Viz
+
+Your 3DTiles must be in the __EPSG:3946__ to be viewed in UD-Viz (see [reprojection](#reprojection)).
+
+The tileset is created with the command:
+
+```bash
+citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
+```
+
+![image](https://user-images.githubusercontent.com/32875283/152802714-141f0697-3553-4467-b85f-60fb1b7f1312.png)
