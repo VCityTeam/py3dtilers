@@ -90,9 +90,11 @@ The tileset is created with the command:
 geojson-tiler --path ../buildings.geojson --z 0 --crs_in EPSG:2154 --crs_out EPSG:4978
 ```
 
+![image](https://user-images.githubusercontent.com/32875283/152801507-a0bdcd2c-2040-4e2a-8a46-470353593255.png)
+
 ### iTowns
 
-Your 3DTiles must be in the __EPSG:3946__ to be viewed in Cesium ion (see [reprojection](#reprojection)).
+Your 3DTiles must be in the __EPSG:3946__ to be viewed in iTowns (see [reprojection](#reprojection)).
 
 The tileset is created with the command:
 
@@ -102,10 +104,12 @@ geojson-tiler --path ../buildings.geojson --crs_in EPSG:2154 --crs_out EPSG:3946
 
 ### UD-Viz
 
-Your 3DTiles must be in the __EPSG:3946__ to be viewed in Cesium ion (see [reprojection](#reprojection)).
+Your 3DTiles must be in the __EPSG:3946__ to be viewed in UD-Viz (see [reprojection](#reprojection)).
 
 The tileset is created with the command:
 
 ```bash
 geojson-tiler --path ../buildings.geojson --crs_in EPSG:2154 --crs_out EPSG:3946
 ```
+
+![image](https://user-images.githubusercontent.com/32875283/152801893-afc9e0e3-ebe7-488b-b3f5-1cab5cce994d.png)
