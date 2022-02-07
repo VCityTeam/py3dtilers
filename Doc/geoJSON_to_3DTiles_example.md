@@ -40,6 +40,16 @@ In order to change the CRS, you have to specify both __input__ CRS (`--crs_in` f
 geojson-tiler --path path/to/buildings.geojson --crs_in EPSG:2154 --crs_out EPSG:4978
 ```
 
+### Roofprint or footprint
+
+By default, the Tiler considers that the features in the GeoJSON file are __footprints__. But in BD TOPO data, the features are __roofprints__, meaning we have to substract the height of the building from the geometries to find the footprints.
+
+If the features are roofprints, use the flag `--is_roof` to create the buildings at the right altitude:
+
+```bash
+geojson-tiler --path path/to/buildings.geojson --is_roof
+```
+
 ### Altitude and height
 
 You can choose an arbitrary altitude and an arbitrary height for your buildings with the flags `--z` and `--height`. For example, to create 6 meters hight buildings at 0 m above the sea level, use:
@@ -99,8 +109,10 @@ Your 3DTiles must be in the __EPSG:3946__ to be viewed in iTowns (see [reproject
 The tileset is created with the command:
 
 ```bash
-geojson-tiler --path ../buildings.geojson --crs_in EPSG:2154 --crs_out EPSG:3946
+geojson-tiler --path ../buildings.geojson --is_roof --crs_in EPSG:2154 --crs_out EPSG:3946
 ```
+
+![image](https://user-images.githubusercontent.com/32875283/152789884-b2c1a0a8-de9b-4b3b-9db0-d396e36b7a72.png)
 
 ### UD-Viz
 
@@ -109,7 +121,7 @@ Your 3DTiles must be in the __EPSG:3946__ to be viewed in UD-Viz (see [reproject
 The tileset is created with the command:
 
 ```bash
-geojson-tiler --path ../buildings.geojson --crs_in EPSG:2154 --crs_out EPSG:3946
+geojson-tiler --path ../buildings.geojson --is_roof --crs_in EPSG:2154 --crs_out EPSG:3946
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152801893-afc9e0e3-ebe7-488b-b3f5-1cab5cce994d.png)
