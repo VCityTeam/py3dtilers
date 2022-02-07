@@ -85,6 +85,8 @@ The tileset is created with the command:
 citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
 ```
 
+![image](https://user-images.githubusercontent.com/32875283/152807847-c92c1f41-7cc6-46eb-9478-b006ac9b54cd.png)
+
 ### UD-Viz
 
 Your 3DTiles must be in the __EPSG:3946__ to be viewed in UD-Viz (see [reprojection](#reprojection)).
