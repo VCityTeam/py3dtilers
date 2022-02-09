@@ -19,13 +19,13 @@ class IfcTiler(Tiler):
                                  )
         self.parser.add_argument('--originalUnit',
                                  nargs='?',
-                                 default='m',
-                                 choices=['mm', 'cm', 'm', 'km'],
+                                 default="m",
+                                 type=str,
                                  help='original unit of the ifc file')
         self.parser.add_argument('--targetedUnit',
                                  nargs='?',
-                                 default='m',
-                                 choices=['mm', 'cm', 'm', 'km'],
+                                 default="m",
+                                 type=str,
                                  help='targeted unit of the 3DTiles produced')
 
     def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):

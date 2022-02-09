@@ -143,7 +143,7 @@ $ source venv/bin/activate
 
 ### Concerning CityTiler
 
-* For developers, some [design notes](Doc/CityTilerDesignNotes.md)
+* For developers, some [design notes](docs/Doc/CityTilerDesignNotes.md)
 * Credentials: CityTiler original code is due to Jeremy Gaillard (when working at LIRIS, University of Lyon, France)
 
 ### Configuring your IDE

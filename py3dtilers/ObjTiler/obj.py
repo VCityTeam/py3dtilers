@@ -25,6 +25,12 @@ class Obj(ObjectToTile):
         super().__init__(id)
 
     def parse_geom(self, mesh):
+        """
+        Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
+        :param mesh: an OBJ mesh
+
+        :return: True if the parsing is complete, False if the format wasn't supported
+        """
         # Realize the geometry conversion from OBJ to GLTF
         # GLTF expect the geometry to only be triangles that contains
         # the vertices position, i.e something in the form :
@@ -92,6 +98,7 @@ class Objs(ObjectsToTile):
     @staticmethod
     def retrieve_objs(path):
         """
+        Create Obj instance from OBJ file(s).
         :param path: a path to a directory
 
         :return: a list of Obj.

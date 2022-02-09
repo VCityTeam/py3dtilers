@@ -40,6 +40,12 @@ class Geojson(ObjectToTile):
         self.custom_triangulation = False
 
     def custom_triangulate(self, coordinates):
+        """
+        Custom triangulation method used when we triangulate buffered lines.
+        :param coordinates: an array of 3D points ([x, y, Z])
+
+        :return: a list of triangles
+        """
         triangles = list()
         length = len(coordinates)
 
@@ -73,7 +79,9 @@ class Geojson(ObjectToTile):
 
     def parse_geojson(self, target_properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
-        Parse a feature of the .geojson file to extract the height and the coordinates of the feature.
+        Parse a feature to extract the height and the coordinates of the feature.
+        :param target_properties: the names of the properties to read
+        :param Boolean is_roof: False when the coordinates are on floor level
         """
         # Current feature number (used for debug)
         Geojson.n_feature += 1
@@ -161,11 +169,12 @@ class Geojsons(ObjectsToTile):
     @staticmethod
     def parse_geojsons(features, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
+        Create 3D geometries from the GeoJson features.
         :param features: the features to parse
         :param properties: the properties used when parsing the features
         :param is_roof: substract the height from the features coordinates
 
-        :return: a list of Geojson instances.
+        :return: a list of triangulated Geojson instances.
         """
         geometries = list()
 

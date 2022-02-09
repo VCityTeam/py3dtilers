@@ -27,6 +27,7 @@ class ObjTiler(Tiler):
 
     def from_obj_directory(self, path):
         """
+        Create a tileset from OBJ files.
         :param path: a path to a directory
 
         :return: a tileset.
@@ -43,6 +44,12 @@ class ObjTiler(Tiler):
         return self.create_tileset_from_geometries(objects)
 
     def get_folder_name(self, path):
+        """
+        Create a folder name from the path of an OBJ file.
+        :param path: a path to an OBJ file
+
+        :return: the path/name of a folder
+        """
         print(path[-1])
         if(path[-1] == '\\') or (path[-1] == '\\'):
             path = path[:-1]
@@ -53,14 +60,13 @@ class ObjTiler(Tiler):
 
 def main():
     """
-    :return: no return value
-
-    this function creates either :
+    Run the ObjTiler, which creates either:
     - a repository named "obj_tileset" where the
     tileset is stored if the directory does only contains obj files.
     - or a repository named "obj_tilesets" that contains all tilesets are stored
     created from sub_directories
     and a classes.txt that contains the name of all tilesets
+    :return: no return value
     """
     obj_tiler = ObjTiler()
     obj_tiler.parse_command_line()
