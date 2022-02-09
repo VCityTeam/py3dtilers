@@ -13,10 +13,10 @@ See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/REA
 ### Run the IfcTiler
 
 ```bash
-(venv) ifc-tiler $PATH
+(venv) ifc-tiler --file_path <path>
 ```
 
-\$PATH should point to a directory holding an IFC file.
+\<path\> should point to a directory holding an IFC file.
 The resulting 3DTiles tileset will contain the ifc geometry, ordered by category :
 each tile will contain an IFC Object Type, that can be found in the batch table, along with its GUID
 
@@ -29,13 +29,13 @@ The `--grouped_by` flag allows to choose how to group the objects. The two are o
 Group by `IfcTypeObject`:
 
 ```bash
-ifc-tiler $PATH --grouped_by IfcTypeObject
+ifc-tiler --file_path <path> --grouped_by IfcTypeObject
 ```
 
 Group by `IfcGroup`:
 
 ```bash
-ifc-tiler $PATH --grouped_by IfcGroup
+ifc-tiler --file_path <path> --grouped_by IfcGroup
 ```
 
 ### Unit of length
@@ -43,7 +43,7 @@ ifc-tiler $PATH --grouped_by IfcGroup
 The flags `--originalUnit` and `--targetedUnit` respectively allow to choose the unit of length used to read the IFC file and the one used to write the geometries as 3DTiles. The default unit is meter. The options are millimeters (`mm`), centimeters (`cm`), meters (`m`) and kilometers (`km`).
 
 ```bash
-ifc-tiler $PATH --originalUnit cm --targetedUnit km
+ifc-tiler --file_path <path> --originalUnit cm --targetedUnit km
 ```
 
 ## Shared Tiler features
@@ -55,7 +55,7 @@ Using the LOA\* option creates a tileset with a __refinement hierarchy__. The le
 To use the LOA option:
 
 ```bash
-ifc-tiler $PATH --loa <path-to-polygons>
+ifc-tiler --file_path <path> --loa <path-to-polygons>
 ```
 
 \*_LOA (Level Of Abstraction): here, it is simple 3D extrusion of a polygon._
@@ -69,7 +69,7 @@ Using the LOD1 option creates a tileset with a __refinement hierarchy__. The lea
 To use the LOD1 option:
 
 ```bash
-ifc-tiler $PATH --lod1
+ifc-tiler --file_path <path> --lod1
 ```
 
 ### Obj creation
@@ -77,7 +77,7 @@ ifc-tiler $PATH --lod1
 An .obj model (without texture) is created if the `--obj` flag is present in command line. To create an obj file, use:
 
 ```bash
-ifc-tiler $PATH --obj <obj_file_name>
+ifc-tiler --file_path <path> --obj <obj_file_name>
 ```
 
 ### Scale
@@ -85,7 +85,7 @@ ifc-tiler $PATH --obj <obj_file_name>
 Rescale the geometries by a factor:
 
 ```bash
-ifc-tiler $PATH --scale 10
+ifc-tiler --file_path <path> --scale 10
 ```
 
 ### Offset
@@ -93,13 +93,13 @@ ifc-tiler $PATH --scale 10
 Translate the geometries by __substracting__ an offset. :
 
 ```bash
-ifc-tiler $PATH --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
+ifc-tiler --file_path <path> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
 ```
 
 It is also possible to translate a tileset by its own centroid by using `centroid` as parameter:
 
 ```bash
-ifc-tiler $PATH --offset centroid
+ifc-tiler --file_path <path> --offset centroid
 ```
 
 ### CRS in/out
@@ -107,7 +107,7 @@ ifc-tiler $PATH --offset centroid
 Project the geometries on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the geometries in another CRS (default output CRS is EPSG:3946).
 
 ```bash
-ifc-tiler $PATH --crs_in EPSG:3946 --crs_out EPSG:4171
+ifc-tiler --file_path <path> --crs_in EPSG:3946 --crs_out EPSG:4171
 ```
 
 ## About the tiler
