@@ -145,3 +145,23 @@ $ source venv/bin/activate
 
 * For developers, some [design notes](Doc/CityTilerDesignNotes.md)
 * Credentials: CityTiler original code is due to Jeremy Gaillard (when working at LIRIS, University of Lyon, France)
+
+### Configuring your IDE
+
+When configuring your IDE to run a specific tiler, you must indicate the  the module you want to run (e.g. py3dtilers.CityTiler.CityTiler) and not the path to the file (i.e. not ${workspace_root}/py3dtilers/CityTiler/CityTiler.py), otherwise python will not be able to resolve the relative import of the Tilers to the Common package of py3dtilers. An example of launch configuration in VSCode:
+
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "<launch_config_name>", // e.g. "CityTiler" or "bozo"
+            "type": "python",
+            "request": "launch",
+            "module": "<tiler_module>", // e.g. py3dtilers.CityTiler.CityTiler
+            "args": ["--db_config_path", "${workspaceRoot}/py3dtilers/CityTiler/<my_config_file.yml>"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
+```
