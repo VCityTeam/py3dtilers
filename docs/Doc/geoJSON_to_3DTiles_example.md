@@ -84,7 +84,7 @@ geojson-tiler --path path/to/buildings.geojson --add_color BOROUGH semantic
 ![image](https://user-images.githubusercontent.com/32875283/152183142-2bb18d7d-d8f2-4377-94cc-6f926a841a9b.png)  
 _The color depends on the "BOROUGH" attribute of each building ("2nd" -> red, "3rd" -> green, "7th" -> blue)_
 
-The default colors are defined by a [JSON file](../py3dtilers/Color/default_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../py3dtilers/Color/README.md) for more details__)
+The default colors are defined by a [JSON file](../../py3dtilers/Color/default_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../../py3dtilers/Color/README.md) for more details__)
 
 ## Visualisation
 
