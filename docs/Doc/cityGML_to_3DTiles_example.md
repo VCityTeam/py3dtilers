@@ -77,7 +77,7 @@ citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type
 
 ### iTowns
 
-Your 3DTiles must be in any projection (e.g. __EPSG:3946__ or __EPSG:4978__) to be viewed in iTowns, as long as you declare the correct view and coordinate system (i.e. `Planar View` with any planar projection such as `EPSG:3946` or `Globe View` with `EPSG:4978`) (see [reprojection](#reprojection)). In this example, the 3D Tiles is in the `EPSG:3946` CRS (the CRS of the input CityGML file).
+Your 3DTiles can be in any projection (e.g. __EPSG:3946__ or __EPSG:4978__) to be viewed in iTowns, as long as you declare the correct view and coordinate system (i.e. `Planar View` with any planar projection such as `EPSG:3946` or `Globe View` with `EPSG:4978`) (see [reprojection](#reprojection)). In this example, the 3D Tiles is in the `EPSG:3946` CRS (the CRS of the input CityGML file).
 
 The tileset is created with the command:
 
@@ -89,7 +89,7 @@ citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type
 
 ### UD-Viz
 
-Similarly to iTowns, your 3DTiles must be in any projection (e.g. __EPSG:3946__ or __EPSG:4978__) to be viewed in UD-Viz, since it is based on iTowns. In this example, the 3D Tiles is in the `EPSG:3946` CRS (the CRS of the input CityGML file).
+Similarly to iTowns, your 3DTiles can be in any projection (e.g. __EPSG:3946__ or __EPSG:4978__) to be viewed in UD-Viz, since it is based on iTowns. In this example, the 3D Tiles is in the `EPSG:3946` CRS (the CRS of the input CityGML file).
 
 The tileset is created with the command:
 
