@@ -40,11 +40,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/kd_tree'
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/kd_tree')
+        tileset.write_to_directory(directory)
 
     def test_lod1(self):
         object_to_tile = ObjectToTile("lod1")
@@ -53,11 +54,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/lod1'
+        tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/lod1')
+        tileset.write_to_directory(directory)
 
     def test_loa(self):
         object_to_tile = ObjectToTile("loa")
@@ -66,11 +68,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa='tests/tiler_test_data/loa_polygons', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/loa'
+        tiler.args = Namespace(obj=None, loa='tests/tiler_test_data/loa_polygons', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/loa')
+        tileset.write_to_directory(directory)
 
     def test_change_crs(self):
         object_to_tile = ObjectToTile("change_crs")
@@ -79,11 +82,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:4171', offset=[0, 0, 0], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/change_crs'
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:4171', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/change_crs')
+        tileset.write_to_directory(directory)
 
     def test_offset(self):
         object_to_tile = ObjectToTile("offset")
@@ -92,11 +96,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[100, 100, -200], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/offset'
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[100, 100, -200], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/offset')
+        tileset.write_to_directory(directory)
 
     def test_offset_centroid(self):
         object_to_tile = ObjectToTile("offset_centroid")
@@ -105,11 +110,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=['centroid'], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/offset_centroid'
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=['centroid'], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/offset_centroid')
+        tileset.write_to_directory(directory)
 
     def test_scale(self):
         object_to_tile = ObjectToTile("scale")
@@ -118,11 +124,12 @@ class Test_Tile(unittest.TestCase):
         objects_to_tile = ObjectsToTile([object_to_tile])
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=10)
+        directory = 'tests/tiler_test_data/tilesets/scale'
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=10, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/scale')
+        tileset.write_to_directory(directory)
 
     def test_obj(self):
         object_to_tile = ObjectToTile("scale")
@@ -135,11 +142,12 @@ class Test_Tile(unittest.TestCase):
         obj_name = 'tests/tiler_test_data/junk/cube.obj'
 
         tiler = Tiler()
-        tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        directory = 'tests/tiler_test_data/tilesets/scale'
+        tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(objects_to_tile)
 
-        tileset.write_to_directory('tests/tiler_test_data/tilesets/scale')
+        tileset.write_to_directory(directory)
 
 
 if __name__ == '__main__':

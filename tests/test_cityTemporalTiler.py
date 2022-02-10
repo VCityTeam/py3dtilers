@@ -20,7 +20,8 @@ class Test_Tile(unittest.TestCase):
 
     def test_temporal(self):
         city_temp_tiler = CityTemporalTiler()
-        city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False)
+        output_dir = "tests/city_temporal_tiler_test_data/junk/temporal"
+        city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=output_dir)
         cli_args = Args()
         graph = TemporalGraph(cli_args)
         graph.reconstruct_connectivity()
@@ -46,7 +47,7 @@ class Test_Tile(unittest.TestCase):
 
         [cursor.close() for cursor in cursors]
 
-        tile_set.write_to_directory("tests/city_temporal_tiler_test_data/junk/temporal")
+        tile_set.write_to_directory(output_dir)
 
 
 if __name__ == '__main__':
