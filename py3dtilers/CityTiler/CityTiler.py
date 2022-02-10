@@ -46,7 +46,6 @@ class CityTiler(Tiler):
         Get the surfaces of all the cityobjects and transform them into TriangleSoup
         Surfaces of the same cityObject are merged into one geometry
         """
-        cityobjects_with_geom = list()
         for cityobject in cityobjects:
             try:
                 id = '(' + str(cityobject.get_database_id()) + ')'
@@ -55,12 +54,10 @@ class CityTiler(Tiler):
                     geom_as_string = t[1]
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
                     cityobject.set_box()
-                    cityobjects_with_geom.append(cityobject)
             except AttributeError:
                 continue
             except ValueError:
                 continue
-        return objects_type(cityobjects_with_geom)
 
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         """
@@ -86,7 +83,7 @@ class CityTiler(Tiler):
                         continue
                     except AttributeError:
                         continue
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
         surfaces = list()
@@ -119,8 +116,7 @@ class CityTiler(Tiler):
             centroid = cursor.fetchall()
             for s in current_object_surfaces:
                 s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
-
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         """
@@ -136,18 +132,18 @@ class CityTiler(Tiler):
             raise ValueError(f'The database does not contain any {objects_type} object')
 
         if self.args.with_texture:
-            objects_to_tile = self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
+            self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
         else:
             if split_surfaces:
-                objects_to_tile = self.get_surfaces_split(cursor, cityobjects, objects_type)
+                self.get_surfaces_split(cursor, cityobjects, objects_type)
             else:
-                objects_to_tile = self.get_surfaces_merged(cursor, cityobjects, objects_type)
+                self.get_surfaces_merged(cursor, cityobjects, objects_type)
 
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
 
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name)
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 
 def main():

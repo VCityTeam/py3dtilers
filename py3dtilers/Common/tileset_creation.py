@@ -57,6 +57,7 @@ class FromGeometryTreeToTileset():
         # Else, add the created tile to its parent's children
         else:
             parent.add_child(tile)
+        node.objects_to_tile.objects = list()
 
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)

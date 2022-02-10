@@ -68,14 +68,13 @@ class Groups():
         :param polygons_path: the path to a folder containing polygons as .geojson files.
         When this param is not None, it means we want to group geometries by polygons
         """
-        self.objects_to_tile = objects_to_tile
         self.materials = objects_to_tile.materials
         if objects_to_tile.is_list_of_objects_to_tile():
-            self.group_objects_by_instance()
+            self.group_objects_by_instance(objects_to_tile)
         elif polygons_path is not None:
-            self.group_objects_by_polygons(polygons_path)
+            self.group_objects_by_polygons(objects_to_tile, polygons_path)
         else:
-            self.group_objects_with_kdtree()
+            self.group_objects_with_kdtree(objects_to_tile)
         self.set_materials(self.materials)
 
     def get_groups_as_list(self):
@@ -93,29 +92,29 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_objects_by_instance(self):
+    def group_objects_by_instance(self, objects_to_tile):
         """
         Create groups of geometries. One group is created per object in the ObjectsToTile.
         """
         groups = list()
-        for objects in self.objects_to_tile:
+        for objects in objects_to_tile:
             group = Group(objects)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_with_kdtree(self):
+    def group_objects_with_kdtree(self, objects_to_tile):
         """
         Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
         The distribution depends on the centroid of each geometry.
         """
         groups = list()
-        objects = kd_tree(self.objects_to_tile, 500)
+        objects = kd_tree(objects_to_tile, 500)
         for objects_to_tile in objects:
             group = Group(objects_to_tile)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, polygons_path):
+    def group_objects_by_polygons(self, objects_to_tile, polygons_path):
         """
         Load the polygons from the files in the folder
         :param polygons_path: the path to the file(s) containing polygons
@@ -143,9 +142,9 @@ class Groups():
                     if feature['geometry']['type'] == 'MultiPolygon':
                         coords = feature['geometry']['coordinates'][0][0][:-1]
                     polygons.append(Polygon(coords))
-        self.groups = self.distribute_objects_in_polygons(polygons)
+        self.groups = self.distribute_objects_in_polygons(objects_to_tile, polygons)
 
-    def distribute_objects_in_polygons(self, polygons):
+    def distribute_objects_in_polygons(self, objects_to_tile, polygons):
         """
         Distribute the geometries in the polygons.
         The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
@@ -153,7 +152,6 @@ class Groups():
         :param polygons: a list of Shapely polygons
         """
 
-        objects_to_tile = self.objects_to_tile
         objects_to_tile_dict = {}
         objects_to_tile_without_poly = {}
 
