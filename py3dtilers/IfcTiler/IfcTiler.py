@@ -28,6 +28,15 @@ class IfcTiler(Tiler):
                                  type=str,
                                  help='targeted unit of the 3DTiles produced')
 
+    def get_output_dir(self):
+        """
+        Return the directory name for the tileset.
+        """
+        if self.args.output_dir is None:
+            return "ifc_tileset"
+        else:
+            return self.args.output_dir
+
     def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
         """
         :param path: a path to a directory
@@ -57,7 +66,7 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory("ifc_tileset")
+        tileset.write_to_directory(ifc_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

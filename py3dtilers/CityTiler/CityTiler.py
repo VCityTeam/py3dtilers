@@ -41,6 +41,24 @@ class CityTiler(Tiler):
                                  action='store_true',
                                  help='Keeps the surfaces of the cityObjects split when defined')
 
+    def get_output_dir(self):
+        """
+        Return the directory name for the tileset.
+        """
+        if self.args.output_dir is None:
+            if self.args.type == "building":
+                return "junk_buildings"
+            elif self.args.type == "relief":
+                return "junk_reliefs"
+            elif self.args.type == "water":
+                return "junk_water_bodies"
+            elif self.args.type == "bridge":
+                return "junk_bridges"
+            else:
+                return "junk"
+        else:
+            return self.args.output_dir
+
     def get_surfaces_merged(self, cursor, cityobjects, objects_type):
         """
         Get the surfaces of all the cityobjects and transform them into TriangleSoup
@@ -161,17 +179,13 @@ def main():
 
     if args.type == "building":
         objects_type = CityMBuildings
-        city_tiler.create_directory('junk_buildings')
         if args.with_BTH:
             CityMBuildings.set_bth()
     elif args.type == "relief":
-        city_tiler.create_directory('junk_reliefs')
         objects_type = CityMReliefs
     elif args.type == "water":
-        city_tiler.create_directory('junk_water_bodies')
         objects_type = CityMWaterBodies
     elif args.type == "bridge":
-        city_tiler.create_directory('junk_bridges')
         objects_type = CityMBridges
 
     objects_type.set_cursor(cursor)
@@ -192,14 +206,7 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    if args.type == "building":
-        tileset.write_to_directory('junk_buildings')
-    elif args.type == "relief":
-        tileset.write_to_directory('junk_reliefs')
-    elif args.type == "water":
-        tileset.write_to_directory('junk_water_bodies')
-    elif args.type == "bridge":
-        tileset.write_to_directory('junk_bridges')
+    tileset.write_to_directory(city_tiler.get_output_dir())
 
 
 if __name__ == '__main__':
