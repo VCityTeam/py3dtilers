@@ -6,6 +6,8 @@ This document recaps the main features of the Tilers. For more detail about the 
 
 The Tilers allow to create 3DTiles tilesets from geospatial and urban data. They share common methods and a common structure.
 
+![image](https://user-images.githubusercontent.com/32875283/153424408-b228670b-9790-45cc-b158-f79491f1289f.png)
+
 ## Merge tilesets
 
 ## Temporal 3DTiles
@@ -72,7 +74,7 @@ Description: Projects the tileset in a different CRS.
 
 Flag(s): `--crs_in <epsg>` and `--crs_out <epsg>`
 
-Example: `citygml-tiler --db_config_path config.yml --file_path building.ifc --crs_in EPSG:3946 --crs_out EPSG:4978`
+Example: `citygml-tiler --db_config_path config.yml --crs_in EPSG:3946 --crs_out EPSG:4978`
 
 | Tiler | |
 | --- | --- |
