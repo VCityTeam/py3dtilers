@@ -98,6 +98,14 @@ geojson-tiler --path <path> --prec NONE
 
 ## Shared Tiler features
 
+### Output directory
+
+The flag `--output_dir` allows to choose the output directory of the Tiler.
+
+```bash
+geojson-tiler --path <path> --output_dir <output_directory_path>
+```
+
 ### LOA
 
 Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
