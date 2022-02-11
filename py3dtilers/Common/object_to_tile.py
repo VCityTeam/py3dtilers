@@ -79,9 +79,6 @@ class ObjectToTile(object):
     def has_texture(self):
         return self.texture is not None
 
-    def get_size(self):
-        return 1
-
 
 class ObjectsToTile(object):
     """
@@ -137,10 +134,6 @@ class ObjectsToTile(object):
         """Check if this instance of ObjectsToTile contains others ObjectsToTile"""
         return isinstance(self.objects[0], ObjectsToTile)
 
-    def get_size(self):
-        """Recursive method to get the length"""
-        return sum([obj.get_size() for obj in self])
-
     def get_centroid(self):
         """
         :param objects: an array containing objs
@@ -149,12 +142,10 @@ class ObjectsToTile(object):
         """
         centroid = [0., 0., 0.]
         for objectToTile in self:
-            centroid[0] += objectToTile.get_centroid()[0]
-            centroid[1] += objectToTile.get_centroid()[1]
-            centroid[2] += objectToTile.get_centroid()[2]
-        return np.array([centroid[0] / self.get_size(),
-                         centroid[1] / self.get_size(),
-                         centroid[2] / self.get_size()])
+            centroid += objectToTile.get_centroid()
+        return np.array([centroid[0] / len(self),
+                         centroid[1] / len(self),
+                         centroid[2] / len(self)])
 
     def set_materials(self, materials):
         """

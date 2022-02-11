@@ -1,35 +1,8 @@
-from ..Common import ObjectsToTile, ObjectToTile
+from ..Common import ObjectsToTile, ObjectToTile, GeometryNode
 from ..Common import ExtrudedPolygon
 
 
-class LodNode():
-    """
-    Each node contains a collection of objects to tile
-    and a list of child nodes
-    A node will correspond to a tile of the 3dtiles tileset
-    """
-
-    def __init__(self, objects_to_tile=None, geometric_error=50):
-        """
-        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-        :param geometric_error: the distance to display the 3D tile that will be created from this node.
-        """
-        self.objects_to_tile = objects_to_tile
-        self.child_nodes = list()
-        self.geometric_error = geometric_error
-        self.with_texture = False
-
-    def set_child_nodes(self, nodes=list()):
-        self.child_nodes = nodes
-
-    def add_child_node(self, node):
-        self.child_nodes.append(node)
-
-    def has_texture(self):
-        return self.with_texture
-
-
-class Lod1Node(LodNode):
+class Lod1Node(GeometryNode):
     """
     Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
     """
@@ -42,7 +15,7 @@ class Lod1Node(LodNode):
         super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)
 
 
-class LoaNode(LodNode):
+class LoaNode(GeometryNode):
     """
     Creates 3D extrusions of the polygons given as parameter.
     The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
