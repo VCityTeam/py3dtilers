@@ -1,4 +1,4 @@
-from os import path
+from pathlib import Path
 
 
 class ObjWriter():
@@ -80,8 +80,9 @@ class ObjWriter():
         :param file_name: the name of the OBJ file
         """
         centroid = self.get_centroid()
-        f = open(path.join(file_name), "w")
-        f.write("# " + file_name + "\n")
+        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        f = open(file_name, "w")
+        f.write("# " + str(file_name) + "\n")
 
         for vertex in self.vertices:
             f.write("v " + str(vertex[0] - centroid[0]) + " " + str(vertex[1] - centroid[1]) + " " + str(vertex[2] - centroid[2]) + "\n")

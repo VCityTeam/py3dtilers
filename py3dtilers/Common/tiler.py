@@ -1,6 +1,6 @@
 import argparse
 from pyproj import Transformer
-import pathlib
+from pathlib import Path
 
 from ..Common import LodTree, ObjWriter, FromGeometryTreeToTileset
 from ..Color import ColorConfig
@@ -125,10 +125,10 @@ class Tiler():
 
     def create_output_directory(self):
         dir = self.get_output_dir()
-        target_dir = pathlib.Path(dir).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        target_dir = pathlib.Path(dir + '/tiles').expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = Path(dir).expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = Path(dir, 'tiles').expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
         Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):

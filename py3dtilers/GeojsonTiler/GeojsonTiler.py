@@ -127,7 +127,7 @@ class GeojsonTiler(Tiler):
 
         # Reads and parse every features from the file(s)
         for geojson_file in files:
-            print("Reading " + geojson_file)
+            print("Reading " + str(geojson_file))
             with open(geojson_file) as f:
                 gjContent = json.load(f)
 
