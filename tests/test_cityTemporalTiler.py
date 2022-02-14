@@ -1,5 +1,6 @@
 import unittest
 from argparse import Namespace
+from pathlib import Path
 
 from py3dtiles import TemporalBoundingVolume
 
@@ -10,9 +11,9 @@ from py3dtilers.CityTiler.CityTemporalTiler import CityTemporalTiler
 
 class Args():
     def __init__(self):
-        self.temporal_graph = ["tests/city_temporal_tiler_test_data/graph_2009-2012.json"]
-        self.db_config_path = ["tests/city_temporal_tiler_test_data/test_config_2009.yml",
-                               "tests/city_temporal_tiler_test_data/test_config_2012.yml"]
+        self.temporal_graph = [Path("tests/city_temporal_tiler_test_data/graph_2009-2012.json")]
+        self.db_config_path = [Path("tests/city_temporal_tiler_test_data/test_config_2009.yml"),
+                               Path("tests/city_temporal_tiler_test_data/test_config_2012.yml")]
         self.time_stamps = ["2009", "2012"]
 
 
@@ -20,7 +21,7 @@ class Test_Tile(unittest.TestCase):
 
     def test_temporal(self):
         city_temp_tiler = CityTemporalTiler()
-        output_dir = "tests/city_temporal_tiler_test_data/junk/temporal"
+        output_dir = Path("tests/city_temporal_tiler_test_data/junk/temporal")
         city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=output_dir)
         cli_args = Args()
         graph = TemporalGraph(cli_args)
