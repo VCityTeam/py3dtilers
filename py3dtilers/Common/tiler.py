@@ -102,6 +102,7 @@ class Tiler():
         create_loa = self.args.loa is not None
 
         tree = self.create_tree(objects_to_tile, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+        objects_to_tile.delete_objects_ref()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 
     def create_directory(self, directory):

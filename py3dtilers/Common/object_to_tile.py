@@ -127,6 +127,10 @@ class ObjectsToTile(object):
                 objects.extend(objs.get_objects())
             return objects
 
+    def delete_objects_ref(self):
+        """Delete the reference to the objects contained by this instance, so the objects are destroyed when unused."""
+        self.objects = list()
+
     def __len__(self):
         return len(self.objects)
 

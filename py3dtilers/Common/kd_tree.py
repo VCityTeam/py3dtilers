@@ -27,11 +27,10 @@ def kd_tree(objects_to_tile, maxNumObjects, depth=0):
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
 
     objects_to_tile.objects = sorted(objects_to_tile,
-               key=lambda obj: obj.get_centroid()[axis])
+                                     key=lambda obj: obj.get_centroid()[axis])
     median = len(objects_to_tile) // 2
     lObjects = objects_to_tile[:median]
     rObjects = objects_to_tile[median:]
-    objects_to_tile = None
     pre_tiles = derived()
     if len(lObjects) > maxNumObjects:
         pre_tiles.extend(kd_tree(lObjects, maxNumObjects, depth + 1))
