@@ -36,6 +36,13 @@ class CityMCityObject(ObjectToTile):
         """
         return super().get_batchtable_data()['gml_id']
 
+    def has_texture(self):
+        """
+        Return True if the feature has a texture URI.
+        :return: a boolean
+        """
+        return self.texture_uri is not None
+
 
 class CityMCityObjects(ObjectsToTile):
     """
