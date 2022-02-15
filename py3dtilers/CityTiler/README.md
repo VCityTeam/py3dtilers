@@ -85,7 +85,7 @@ The City Temporal Tiler creates tilesets with a __temporal extension__. This ext
 
 ### Run the CityTemporalTiler
 
-In order to run the CityTemporalTiler you will first need to obtain the so called [evolution difference files](https://github.com/VCityTeam/UD-Reproducibility/tree/master/Computations/3DTiles/LyonTemporal/PythonCallingDocker) between various temporal vintages. Let us assume such difference files were computed in between three time stamps (2009, 2012, 2015) and for two boroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes **from the home directory**:
+In order to run the CityTemporalTiler you will first need to obtain the so called [evolution difference files](https://github.com/VCityTeam/UD-Reproducibility/tree/master/Computations/3DTiles/LyonTemporal/PythonCallingDocker) between various temporal vintages. Let us assume such difference files were computed in between three time stamps (2009, 2012, 2015) and for two boroughs (`LYON_1ER` and `LYON_2EME`). Then the invocation of the `CityTemporalTiler` goes __from the home directory__:
 
 ```bash
 citygml-tiler-temporal                                         \
@@ -102,6 +102,14 @@ citygml-tiler-temporal                                         \
 ## Shared Tiler features
 
 If you are using the __CityTemporalTiler__, replace `citygml-tiler` by `citygml-tiler-temporal`.
+
+### Output directory
+
+The flag `--output_dir` allows to choose the output directory of the Tiler.
+
+```bash
+citygml-tiler --db_config_path <path_to_file>/Config.yml --output_dir <output_directory_path>
+```
 
 ### LOA
 

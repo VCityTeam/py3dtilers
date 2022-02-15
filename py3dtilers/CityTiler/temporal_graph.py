@@ -905,7 +905,7 @@ class TemporalGraph(Graph):
                 Graph.__init__(self, current_nodes, current_edges)
             else:
                 self.extend_with_subgraph(Graph(current_nodes, current_edges))
-            debug_msg("   " + temporal_graph_filename + ": done.")
+            debug_msg("   " + str(temporal_graph_filename) + ": done.")
         debug_msg("  Loading of files: done.")
         debug_msg("Graph reconstruction: done.")
 

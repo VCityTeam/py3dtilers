@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 from ..Common import Tiler
 from .obj import Objs
@@ -15,6 +16,15 @@ class ObjTiler(Tiler):
                                  nargs='*',
                                  type=str,
                                  help='path to the database configuration file')
+
+    def get_output_dir(self):
+        """
+        Return the directory name for the tileset.
+        """
+        if self.args.output_dir is None:
+            return os.path.join("obj_tilesets", Path(self.current_path).name)
+        else:
+            return os.path.join(self.args.output_dir, Path(self.current_path).name)
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -43,20 +53,6 @@ class ObjTiler(Tiler):
 
         return self.create_tileset_from_geometries(objects)
 
-    def get_folder_name(self, path):
-        """
-        Create a folder name from the path of an OBJ file.
-        :param path: a path to an OBJ file
-
-        :return: the path/name of a folder
-        """
-        print(path[-1])
-        if(path[-1] == '\\') or (path[-1] == '\\'):
-            path = path[:-1]
-        folder_name = path.split('/')[-1]
-        folder_name = path.split('\\')[-1]
-        return folder_name
-
 
 def main():
     """
@@ -73,14 +69,13 @@ def main():
     paths = obj_tiler.args.paths
 
     for path in paths:
+        obj_tiler.current_path = path
         if(os.path.isdir(path)):
             print("Writing " + path)
-            folder_name = obj_tiler.get_folder_name(path)
-            obj_tiler.create_directory("obj_tilesets/" + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
-                print("tileset in obj_tilesets/" + folder_name)
-                tileset.write_to_directory("obj_tilesets/" + folder_name)
+                print("tileset in", obj_tiler.get_output_dir())
+                tileset.write_to_directory(obj_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import argparse
 from pyproj import Transformer
-import pathlib
+from pathlib import Path
 
 from ..Common import LodTree, ObjWriter, FromGeometryTreeToTileset
 from ..Color import ColorConfig
@@ -58,6 +58,11 @@ class Tiler():
                                  action='store_true',
                                  help='Adds texture to 3DTiles when defined')
 
+        self.parser.add_argument('--output_dir',
+                                 nargs='?',
+                                 type=str,
+                                 help='Output directory of the tileset.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -69,6 +74,15 @@ class Tiler():
                 self.args.offset.append(0)
         elif(len(self.args.offset) > 3):
             self.args.offset = self.args.offset[:3]
+
+    def get_output_dir(self):
+        """
+        Return the directory name for the tileset.
+        """
+        if self.args.output_dir is None:
+            return "output_tileset"
+        else:
+            return self.args.output_dir
 
     def write_geometries_as_obj(self, geometries, file_name):
         obj_writer = ObjWriter()
@@ -105,14 +119,16 @@ class Tiler():
             self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
 
         objects_to_tile.delete_objects_ref()
+        self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 
-    def create_directory(self, directory):
-        target_dir = pathlib.Path(directory).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        target_dir = pathlib.Path(directory + '/tiles').expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        Texture.set_texture_folder(directory)
+    def create_output_directory(self):
+        dir = self.get_output_dir()
+        target_dir = Path(dir).expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = Path(dir, 'tiles').expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
+        Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):
         return ColorConfig(config_path)
