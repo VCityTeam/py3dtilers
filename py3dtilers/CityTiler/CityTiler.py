@@ -126,23 +126,27 @@ class CityTiler(Tiler):
 
         :return: a tileset.
         """
+        print('Retrieving city objects from database...')
         cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
         if not cityobjects:
             raise ValueError(f'The database does not contain any {objects_type} object')
 
         if self.args.with_texture:
+            print('Retrieving surface with textures from database...')
             self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
         else:
             if split_surfaces:
+                print('Retrieving split surfaces from database...')
                 self.get_surfaces_split(cursor, cityobjects, objects_type)
             else:
+                print('Retrieving merged surfaces from database...')
                 self.get_surfaces_merged(cursor, cityobjects, objects_type)
 
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-
+        print('Creating tileset from geometries...')
         return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 
@@ -157,6 +161,7 @@ def main():
     city_tiler.parse_command_line()
     args = city_tiler.args
 
+    print('Connecting to database...')
     cursor = open_data_base(args.db_config_path[0])
 
     if args.type == "building":

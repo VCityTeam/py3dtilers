@@ -64,13 +64,13 @@ class CityMBuildings(CityMCityObjects):
         if not buildings:
             # No specific buildings were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT building.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT building.id, cityobject.gmlid " + \
                     "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id " + \
                     "WHERE building.id=building.building_root_id"
         else:
             building_gmlids = [n.get_gml_id() for n in buildings]
             building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
-            query = "SELECT building.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT building.id, cityobject.gmlid " + \
                     "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id " + \
                     "WHERE cityobject.gmlid IN " + building_gmlids_as_string + " " + \
                     "AND building.id=building.building_root_id"

@@ -122,7 +122,7 @@ class CityMCityObjects(ObjectsToTile):
 
         for obj in cursor.fetchall():
             object_id = obj[0]
-            gml_id = obj[2]
+            gml_id = obj[1]
             if no_input:
                 new_object = object_type(object_id, gml_id)
                 result_objects.append(new_object)

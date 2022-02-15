@@ -50,13 +50,13 @@ class CityMWaterBodies(CityMCityObjects):
         if not waterbodies:
             # No specific waterbodies were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT waterbody.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT waterbody.id, cityobject.gmlid " + \
                     "FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id"
 
         else:
             waterbody_gmlids = [n.get_gml_id() for n in waterbodies]
             waterbody_gmlids_as_string = "('" + "', '".join(waterbody_gmlids) + "')"
-            query = "SELECT waterbody.id, BOX3D(cityobject.envelope) " + \
+            query = "SELECT waterbody.id, cityobject.gmlid " + \
                     "FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id" + \
                     "WHERE cityobject.gmlid IN " + waterbody_gmlids_as_string
 
