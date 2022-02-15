@@ -120,17 +120,9 @@ class CityMCityObjects(ObjectsToTile):
             for cityobject in cityobjects:
                 objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
 
-        for t in cursor.fetchall():
-            object_id = t[0]
-            if not t[1]:
-                print("Warning: object with id ", object_id)
-                print("         has no 'cityobject.envelope'.")
-                if no_input:
-                    print("     Dropping this object (downstream trouble ?)")
-                    continue
-                print("     Exiting (is the database corrupted ?)")
-                sys.exit(1)
-            gml_id = t[2]
+        for obj in cursor.fetchall():
+            object_id = obj[0]
+            gml_id = obj[2]
             if no_input:
                 new_object = object_type(object_id, gml_id)
                 result_objects.append(new_object)
