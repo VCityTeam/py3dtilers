@@ -102,6 +102,10 @@ class IfcObjectsGeom(FeatureList):
     def __init__(self, objs=None):
         super().__init__(objs)
 
+    def create_batch_table_extension(extension_name, ids, objects):
+        print(ids)
+
+
     @staticmethod
     def retrievObjByType(path_to_file):
         """
