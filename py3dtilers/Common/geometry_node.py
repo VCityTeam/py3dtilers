@@ -53,3 +53,17 @@ class GeometryNode():
         for child in self.child_nodes:
             objects.extend(child.get_objects())
         return objects
+
+    def get_leaves(self):
+        """
+        Return the leaves of this node.
+        If the node has no child, return this node.
+        :return: a list of GeometryNode
+        """
+        if len(self.child_nodes) < 1:
+            return [self]
+        else:
+            leaves = list()
+            for node in self.child_nodes:
+                leaves.extend(node.get_leaves())
+            return leaves

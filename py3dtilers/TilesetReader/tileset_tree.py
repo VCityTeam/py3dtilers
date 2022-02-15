@@ -6,15 +6,14 @@ class TilesetTree(GeometryTree):
 
     def __init__(self, tileset, tileset_paths):
         self.tile_index = 0
-        self.leaf_nodes = list()
         root_tile = tileset.get_root_tile()
 
-        self.root_nodes = list()
+        root_nodes = list()
         for i, tile in enumerate(root_tile.attributes['children']):
             offset = [c * -1 for c in tile.get_transform()[12:15]]
-            self.root_nodes.append(self.tile_to_node(tile, tileset_paths[i], offset))
+            root_nodes.append(self.tile_to_node(tile, tileset_paths[i], offset))
 
-        self.set_centroid(self.get_root_objects().get_centroid())
+        super().__init__(root_nodes)
 
     def tile_to_node(self, tile, tileset_path, offset):
         """
@@ -33,7 +32,5 @@ class TilesetTree(GeometryTree):
         if 'children' in tile.attributes and len(tile.attributes['children']) > 0:
             for child in tile.attributes['children']:
                 node.add_child_node(self.tile_to_node(child, tileset_path, offset))
-        else:
-            self.leaf_nodes.append(node)
 
         return node
