@@ -34,7 +34,6 @@ class Tiler():
         self.parser.add_argument('--offset',
                                  nargs='*',
                                  default=[0, 0, 0],
-                                 type=float,
                                  help='Substract an offset to all the vertices.')
 
         self.parser.add_argument('--scale',
