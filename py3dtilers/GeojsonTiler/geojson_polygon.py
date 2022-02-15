@@ -1,3 +1,4 @@
+from shapely.geometry import LinearRing
 from .geojson import Geojson
 
 
@@ -12,9 +13,9 @@ class GeojsonPolygon(Geojson):
         super().parse_geojson(properties, is_roof, color_attribute)
 
         if self.is_multi_geom:
-            coords = self.feature_geometry['coordinates'][0][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry['coordinates'][0][0])
         else:
-            coords = self.feature_geometry['coordinates'][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry['coordinates'][0])
         if is_roof:
             for coord in coords:
                 coord[2] -= self.height
@@ -24,3 +25,13 @@ class GeojsonPolygon(Geojson):
         self.set_z(coords, z_name)
 
         return True
+
+    def get_clockwise_polygon(self, polygon):
+        """
+        Return a clockwise polygon without the last point (the last point is the same as the first one).
+        :return: a list of points
+        """
+        if LinearRing(polygon).is_ccw:
+            return polygon[:-1][::-1]
+        else:
+            return polygon[:-1]
