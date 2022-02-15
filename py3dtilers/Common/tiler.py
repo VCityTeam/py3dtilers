@@ -85,23 +85,26 @@ class Tiler():
         return lod_tree
 
     def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+        create_loa = self.args.loa is not None
+        tree = self.create_tree(objects_to_tile, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+
         if hasattr(self.args, 'scale') and self.args.scale:
-            objects_to_tile.scale_objects(self.args.scale)
+            for objects in tree.get_all_objects():
+                objects.scale_objects(self.args.scale)
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
             if self.args.offset[0] == 'centroid':
-                self.args.offset = objects_to_tile.get_centroid()
-            objects_to_tile.translate_objects(self.args.offset)
+                self.args.offset = tree.centroid
+            for objects in tree.get_all_objects():
+                objects.translate_objects(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
-            self.change_projection(objects_to_tile, self.args.crs_in, self.args.crs_out)
+            for objects in tree.get_all_objects():
+                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
 
         if self.args.obj is not None:
-            self.write_geometries_as_obj(objects_to_tile, self.args.obj)
+            self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
 
-        create_loa = self.args.loa is not None
-
-        tree = self.create_tree(objects_to_tile, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
         objects_to_tile.delete_objects_ref()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 
