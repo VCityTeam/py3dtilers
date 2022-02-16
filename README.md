@@ -177,3 +177,37 @@ When configuring your IDE to run a specific tiler, you must indicate the module 
     ]
 }
 ```
+
+### Profiling
+
+Python standard module [cProfile](https://docs.python.org/3/library/profile.html) allows to profile Python code.
+
+#### __In code__
+
+Import modules:
+
+```python
+import cProfile
+import pstats
+```
+
+Profile the code between `enable()` and `disable()`:
+
+```python
+cp = cProfile.Profile()
+cp.enable()  # Start profiling
+   
+# code here
+
+cp.disable()  # Stop profiling
+p = pstats.Stats(cp)
+p.sort_stats('tottime').print_stats()  # Sort stats by time and print them
+```
+
+#### __In command line__
+
+cProfile can be run in the shell with:
+
+```bash
+python -m cProfile script.py
+```
