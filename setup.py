@@ -186,6 +186,9 @@ setup(
                  ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/default_config.json']
+                ),
+                ('py3dtilers/Color',
+                 ['py3dtilers/Color/citytiler_config.json']
                 )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )

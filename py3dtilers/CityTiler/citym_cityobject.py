@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
 from py3dtiles import TriangleSoup
+import os
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -101,6 +102,9 @@ class CityMCityObjects(FeatureList):
     gml_cursor = None
 
     def __init__(self, cityMCityObjects=None):
+        if self.color_config is None:
+            config_path = os.path.join(os.path.dirname(__file__), ".." , "Color", "citytiler_config.json")
+            self.set_color_config(config_path)
         super().__init__(cityMCityObjects)
 
     def get_textures(self):

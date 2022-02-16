@@ -1,0 +1,10 @@
+{
+    "default_color": [0, 0, 0],
+
+    "color_dict": {
+        "BuildingRoofSurface": [1, 0, 0],
+        "BuildingWallSurface": [0, 0, 1],
+        "BuildingGroundSurface": [0, 1, 0],
+        "default": [0.5, 0.5, 0.5]
+    }
+}
