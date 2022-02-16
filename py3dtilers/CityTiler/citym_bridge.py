@@ -35,13 +35,13 @@ class CityMBridges(CityMCityObjects):
         if not bridges:
             # No specific bridges were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT bridge.id, cityobject.gmlid " + \
                     "FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id " + \
                     "WHERE bridge.id=bridge.bridge_root_id"
         else:
             bridge_gmlids = [n.get_gml_id() for n in bridges]
             bridge_gmlids_as_string = "('" + "', '".join(bridge_gmlids) + "')"
-            query = "SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT bridge.id, cityobject.gmlid " + \
                     "FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id " + \
                     "WHERE cityobject.gmlid IN " + bridge_gmlids_as_string + " " + \
                     "AND bridge.id=bridge.bridge_root_id"

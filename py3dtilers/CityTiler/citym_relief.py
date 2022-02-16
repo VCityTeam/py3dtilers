@@ -50,13 +50,13 @@ class CityMReliefs(CityMCityObjects):
         if not reliefs:
             # No specific reliefs were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = "SELECT relief_feature.id, BOX3D(cityobject.envelope), cityobject.gmlid " + \
+            query = "SELECT relief_feature.id, cityobject.gmlid " + \
                     "FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id"
 
         else:
             relief_gmlids = [n.get_gml_id() for n in reliefs]
             relief_gmlids_as_string = "('" + "', '".join(relief_gmlids) + "')"
-            query = "SELECT relief_feature.id, BOX3D(cityobject.envelope) " + \
+            query = "SELECT relief_feature.id, cityobject.gmlid " + \
                     "FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id" + \
                     "WHERE cityobject.gmlid IN " + relief_gmlids_as_string
 
