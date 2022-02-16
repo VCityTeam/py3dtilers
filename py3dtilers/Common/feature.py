@@ -136,13 +136,15 @@ class FeatureList(object):
     A decorated list of FeatureList type objects.
     """
 
-    # The material used by default for features
+    # The color config used to create colored materials
+    color_config = None
+    # The material used by default for geometries
     default_mat = None
 
     def __init__(self, objects=None):
         self.objects = list()
         if FeatureList.default_mat is None:
-            FeatureList.default_mat = ColorConfig().get_default_color()
+            FeatureList.default_mat = self.get_color_config().get_default_color()
         self.materials = [FeatureList.default_mat]
         if(objects):
             self.objects.extend(objects)
@@ -294,6 +296,25 @@ class FeatureList(object):
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments))
         self.objects = features_with_geom
+
+    @classmethod
+    def set_color_config(cls, config_path):
+        """
+        Set the ColorConfig from a JSON file.
+        The ColorConfig is used to created colored materials.
+        :param config_path: path to the JSON file 
+        """
+        ObjectsToTile.color_config = ColorConfig(config_path)
+
+    @classmethod
+    def get_color_config(cls):
+        """
+        Return the ColorConfig used to created colored materials.
+        :return: a ColorConfig
+        """
+        if ObjectsToTile.color_config is None:
+            ObjectsToTile.color_config = ColorConfig()
+        return ObjectsToTile.color_config
 
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
