@@ -56,7 +56,7 @@ class CityMCityObject(Feature):
         """
         return self.texture_uri is not None
 
-    def get_geom(self, user_arguments=None):
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
         """
         Set the geometry of the feature.
         :return: a list of Feature
@@ -72,6 +72,7 @@ class CityMCityObject(Feature):
             try:
                 feature_id = t[0]
                 geom_as_string = t[1]
+                surface_classname = t[2]
                 if geom_as_string is not None:
                     cityobject = self.__class__(feature_id, self.get_gml_id())
                     associated_data = []
@@ -81,6 +82,12 @@ class CityMCityObject(Feature):
                         texture_uri = t[3]
                         cityobject.texture_uri = texture_uri
                         associated_data = [uv_as_string]
+
+                    if surface_classname not in material_indexes:
+                        material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                        material_indexes[surface_classname] = len(feature_list.materials)
+                        feature_list.add_materials([material])
+                    cityobject.material_index = material_indexes[surface_classname]
 
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
                     if len(cityobject.geom.triangles[0]) > 0:
@@ -121,6 +128,17 @@ class CityMCityObjects(FeatureList):
                 uri_dict[uri] = Texture(stream)
             texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
+
+    def set_features_geom(self, user_arguments=None):
+        """
+        Set the geometry of the features.
+        Keep only the features with geometry.
+        """
+        features_with_geom = list()
+        material_indexes = dict()
+        for feature in self.objects:
+            features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
+        self.objects = features_with_geom
 
     @staticmethod
     def set_cursor(cursor):
