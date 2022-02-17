@@ -4,8 +4,9 @@ import time
 import numpy as np
 import ifcopenshell
 from py3dtiles import GlTFMaterial
-from ..Common import Feature, FeatureList
+from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
+from py3dtiles import BatchTableHierarchy
 
 
 class IfcObjectGeom(Feature):
@@ -20,6 +21,13 @@ class IfcObjectGeom(Feature):
 
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
+
+    def get_parents(self):
+
+        if(self.ifcObject.ContainedInStructure):
+            print("parent")
+
+
 
     def computeCenter(self, pointList):
         center = np.array([0.0, 0.0, 0.0])
@@ -103,6 +111,13 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     def create_batch_table_extension(extension_name, ids, objects):
+        resulting_bth = BatchTableHierarchy()
+        hierarchy = TreeWithChildrenAndParent()
+        classDict = {}
+
+        for obj in objects:
+            obj.get_parents(hierarchy,classDict)
+        
         print(ids)
 
 

@@ -19,6 +19,11 @@ class IfcTiler(Tiler):
                                  choices=['IfcTypeObject', 'IfcGroup'],
                                  help='Either IfcTypeObject or IfcGroup (default: %(default)s)'
                                  )
+        self.parser.add_argument('--with_BTH',
+                                 dest='with_BTH',
+                                 action='store_true',
+                                 help='Adds a Batch Table Hierarchy when defined')
+                                
 
     def get_output_dir(self):
         """
@@ -29,7 +34,7 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by):
+    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit,with_BTH):
         """
         :param path: a path to a directory
 
@@ -43,6 +48,9 @@ class IfcTiler(Tiler):
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         groups = Groups(objects).get_groups_as_list()
         return self.create_tileset_from_groups(groups)
+        # objects_to_tile = IfcObjectsGeom(objects)
+
+        # return self.create_tileset_from_geometries(objects_to_tile, "batch_table_hierarchy" if with_BTH  else None)
 
 
 def main():
@@ -57,8 +65,7 @@ def main():
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by,args.with_BTH)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
