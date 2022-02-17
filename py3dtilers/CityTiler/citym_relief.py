@@ -75,12 +75,14 @@ class CityMReliefs(CityMCityObjects):
         # cityobjects_ids contains ids of reliefs
         if split_surfaces:
             query = \
-                "SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) " + \
+                "SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), " + \
+                "objectclass.classname " + \
                 "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp " + \
                 "ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id " + \
                 "JOIN citydb.tin_relief " + \
                 "ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id " + \
                 "JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id " + \
+                "JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id " + \
                 "WHERE relief_feature.id IN " + reliefs_ids
         else:
             query = \
