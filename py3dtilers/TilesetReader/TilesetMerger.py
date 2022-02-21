@@ -21,7 +21,13 @@ class TilesetMerger():
                             nargs='*',
                             type=str,
                             help='Paths to 3DTiles tilesets')
+        parser.add_argument('--output_dir',
+                            nargs='?',
+                            type=str,
+                            help='Output directory of the tileset.')
         args = parser.parse_args()
+        if args.output_dir is not None:
+            self.output_path = Path(args.output_dir)
         return args.paths
 
     @staticmethod
@@ -82,9 +88,9 @@ class TilesetMerger():
         :param tileset_of_root_tiles: the paths to the original tilesets of each root tile
         """
         if 'children' in tileset.get_root_tile().attributes:
-            target_dir = Path(self.output_path).expanduser()
+            target_dir = Path(str(self.output_path)).expanduser()
             Path(target_dir).mkdir(parents=True, exist_ok=True)
-            target_dir = Path(self.output_path + '/tiles').expanduser()
+            target_dir = Path(str(self.output_path), 'tiles').expanduser()
             Path(target_dir).mkdir(parents=True, exist_ok=True)
 
             self.copy_tileset_texture_images(tileset, tileset_of_root_tiles)
