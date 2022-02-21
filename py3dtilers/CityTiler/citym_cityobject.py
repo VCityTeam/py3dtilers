@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from io import BytesIO
 
 from ..Common import ObjectToTile, ObjectsToTile
