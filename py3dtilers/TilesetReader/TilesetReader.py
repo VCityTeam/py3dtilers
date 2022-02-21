@@ -24,9 +24,18 @@ class TilesetTiler(Tiler):
         super().parse_command_line()
 
         if(len(self.args.paths) < 1):
-            print("Please provide a path to a tileset.json file.")
+            print("Please provide a path to directory containing the root of your 3DTiles.")
             print("Exiting")
             sys.exit(1)
+
+    def get_output_dir(self):
+        """
+        Return the directory name for the tileset.
+        """
+        if self.args.output_dir is None:
+            return "tileset_reader_output"
+        else:
+            return self.args.output_dir
 
     def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
         """
@@ -49,6 +58,7 @@ class TilesetTiler(Tiler):
         if self.args.obj is not None:
             self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
 
+        self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
 
     def transform_tileset(self, tileset):
@@ -82,9 +92,8 @@ def main():
 
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
-    tiler.create_directory("tileset_reader_output/")
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory("tileset_reader_output/")
+    tileset.write_to_directory(tiler.get_output_dir())
 
 
 if __name__ == '__main__':
