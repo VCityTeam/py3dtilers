@@ -119,7 +119,7 @@ class FeatureList(object):
         self.objects.extend(others)
 
     def get_objects(self):
-        if not self.is_list_of_objects_to_tile():
+        if not self.is_list_of_feature_list():
             return self.objects
         else:
             objects = list()
@@ -134,7 +134,7 @@ class FeatureList(object):
     def __len__(self):
         return len(self.objects)
 
-    def is_list_of_objects_to_tile(self):
+    def is_list_of_feature_list(self):
         """Check if this instance of FeatureList contains others FeatureList"""
         return isinstance(self.objects[0], FeatureList)
 

@@ -69,7 +69,7 @@ class Groups():
         When this param is not None, it means we want to group features by polygons
         """
         self.materials = feature_list.materials
-        if feature_list.is_list_of_objects_to_tile():
+        if feature_list.is_list_of_feature_list():
             self.group_objects_by_instance(feature_list)
         elif polygons_path is not None:
             self.group_objects_by_polygons(feature_list, polygons_path)
