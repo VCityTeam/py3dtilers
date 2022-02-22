@@ -11,7 +11,7 @@ The JSON file must contain the following fields:
 
 ### default_color
 
-The default color is used for the geometries which don't have a color setted.
+The default color is used for the features which don't have a color setted.
 
 ```bash
 "default_color": [1, 1, 1]
@@ -43,7 +43,7 @@ The number of colors is used to create the colors of the [heatmap](https://en.wi
 
 ### color_dict
 
-The color dictionary is used to match colors with attribute values. Each attribute value must be a key of the dictionary. A key `default` should be present for geometries which don't have a value for the targeted attribute (or have a value not present in the dictionary).
+The color dictionary is used to match colors with attribute values. Each attribute value must be a key of the dictionary. A key `default` should be present for features which don't have a value for the targeted attribute (or have a value not present in the dictionary).
 
 ```bash
 "color_dict": {

@@ -1,8 +1,8 @@
 ## [feature](feature.py)
 ### Feature
-An [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry, a bounding box, and optionally can contain semantic data.  
+A `Feature` instance contains a geometry, a bounding box, and optionally can contain semantic data.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
-To set the triangles of an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_, use:  
+To set the triangles of a `Feature` instance, use:  
 ```
 triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
               np.array([1., 0., 0.], dtype=np.float32),
@@ -13,7 +13,7 @@ triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
 feature = Feature("id")
 feature.geom.triangles.append()
 ```
-The bounding box is a box containing the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_'s geometry. It can be set with:
+The bounding box is a box containing the `Feature` instance's geometry. It can be set with:
 ```
 feature.set_box()
 ```
@@ -26,7 +26,7 @@ feature.set_batchtable_data()
 ```
 
 ### FeatureList
-An [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ instance contains a collection of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_. To create an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_, use:
+A `FeatureList` instance contains a list of `Feature` instances. To create a `FeatureList`, use:
 ```
 objects = [feature] # List of Feature(s)
 
@@ -36,18 +36,18 @@ for object in feature_list:
 ```
 
 ## [obj_writer](obj_writer.py)
-This class allows to write [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ in as an OBJ model. To write geometries in a file, use:
+This class allows to write `FeatureList` as an OBJ model. To write features in a file, use:
 
 ```
 obj_writer = ObjWriter()
-obj_writer.add_geometries(geometries)   # geometries contains Feature instances
+obj_writer.add_geometries(feature_list)   # feature_list contains Feature instances
 obj_writer.write_obj(file_name)
 ```
 
 ## [polygon_extrusion](polygon_extrusion.py)
 An instance of _ExtrudedPolygon_ contains a footprint (a polygon as list of points, and a point is a list of float), a minimal height and a maximal height.
 
-The static method `create_footprint_extrusion` from _ExtrudedPolygon_ allows to create an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ which is the extrusion of the footprint of another [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_. The height of the extrusion will be _max height - min height_ of the _ExtrudedPolygon_
+The static method `create_footprint_extrusion` from _ExtrudedPolygon_ allows to create a `Feature` instance which is the extrusion of the footprint of another `Feature` instance. The height of the extrusion will be _max height - min height_ of the _ExtrudedPolygon_
 
 To create an extrusion, use:
 ```
@@ -58,9 +58,9 @@ _Note_: the footprint to extrude is computed from the `feature` param, but you c
 extruded_object = ExtrudedPolygon.create_footprint_extrusion(feature, override_points=True, polygon=points)
 ```
 ## [group](group.py)
-An instance of _Group_ contains objects to tile ([:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_). It can also contains additional data which is polygons (a polygon as list of points, and a point is a list of float) and a dictionary to stock the indexes of the geometries contained in each polygon.
+An instance of _Group_ contains features (`FeatureList`). It can also contains additional data which is polygons (a polygon as list of points, and a point is a list of float) and a dictionary to stock the indexes of the features contained in each polygon.
 
-The static methods in the _Group_ class allow to distribute [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ into groups following specific rules.  
+The static methods in the _Group_ class allow to distribute `FeatureList` into groups following specific rules.  
 The groups can be created with:
 ```
 # Group together the objects which are in the same polygon
@@ -74,7 +74,7 @@ groups = Group.group_objects_with_kdtree(feature_list)
 ```
 
 ## [kd_tree](kd_tree.py)
-The kd_tree distributes the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ into multiple [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_. Each instance of [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ can have a maximum of `maxNumObjects`:
+The kd_tree distributes the `Feature` instances contained in a `FeatureList` into multiple `FeatureList`. Each instance of `FeatureList` can have a maximum of `maxNumObjects`:
 ```
 # Takes : an FeatureList
 # Returns : a list of FeatureList
@@ -83,12 +83,12 @@ distributed_objects = kd_tree(feature_list, 100) # Max 100 objects per FeatureLi
 
 ## [lod_node](lod_node.py)
 ### LodNode
-A _LodNode_ contains geometries as [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ and a list of child nodes. It also contains a [geometric error](http://docs.opengeospatial.org/cs/18-053r2/18-053r2.html#27) which is the distance to display the 3D tile created from this node.
+A _LodNode_ contains features as `FeatureList` and a list of child nodes. It also contains a [geometric error](http://docs.opengeospatial.org/cs/18-053r2/18-053r2.html#27) which is the distance to display the 3D tile created from this node.
 
 To create a _LodNode_:
 ```
-# Takes : geometries as FeatureList, a geometric error (int)
-# Returns : a node containing the geometries
+# Takes : features as FeatureList, a geometric error (int)
+# Returns : a node containing the features
 node = LodNode(feature_list, geometric_error=20)
 ```
 To add a child to a node:
@@ -96,21 +96,21 @@ To add a child to a node:
 node.add_child_node(other_node)
 ```
 ### Lod1Node
-_Lod1Node_ inherits from _LodNode_. When instanced, a _Lod1Node_ creates a 3D extrusion of the footprint of each [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ in the [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ parameter.
+_Lod1Node_ inherits from _LodNode_. When instanced, a _Lod1Node_ creates a 3D extrusion of the footprint of each `Feature` instance in the `FeatureList` parameter.
 
 To create a _Lod1Node_:
 ```
-# Takes : geometries as FeatureList, a geometric error (int)
-# Returns : a node containing 3D extrusions of the geometries
+# Takes : features as FeatureList, a geometric error (int)
+# Returns : a node containing 3D extrusions of the features
 node = Lod1Node(feature_list, geometric_error=20)
 ```
 
 ### LoaNode
-_LoaNode_ inherits from _LodNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter. The _LoaNode_ also takes a dictionary stocking the indexes of the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in each polygon.
+_LoaNode_ inherits from _LodNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter. The _LoaNode_ also takes a dictionary stocking the indexes of the `Feature` instances contained in each polygon.
 
 To create a _LoaNode_:
 ```
-# Takes : geometries as FeatureList,
+# Takes : features as FeatureList,
           a geometric error (int),
           a list of polygons,
           a dictionary {polygon_index -> [object_index(es)]}
@@ -119,13 +119,13 @@ node = LoaNode(feature_list, geometric_error=20, additional_points=polygons, poi
 ```
 
 ## [lod_tree](lod_tree.py)
-lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ (the geometries of the node) and a list of child nodes.
+lod_tree creates a tileset with a parent-child hierarchy. Each node of the tree contains a `FeatureList` (the features of the node) and a list of child nodes.
 A node will correspond to a tile (.b3dm file) of the tileset.  
-The leaves of the tree contain the geometries with the most details. The parent node of each node contains a lower level of details.
+The leaves of the tree contain the features with the most details. The parent node of each node contains a lower level of details.
 
-The lod_tree creation takes an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ (containing [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ with detailled geometries and bounding boxes) and returns a tileset.
+The lod_tree creation takes a `FeatureList` (containing `Feature` instances with detailled features and bounding boxes) and returns a tileset.
 
-The first step of the tree creation is the distribution of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ into groups. A group is an instance of [_Group_](#group) where the objects to tile ([:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_) are a group of detailed geometries. The group can also contains additional data which is polygons and a dictionary to stock the indexes of the geometries contained in each polygon, this additional data is used to create [_LoaNode(s)_](#loanode).  
+The first step of the tree creation is the distribution of `Feature` instances into groups. A group is an instance of [_Group_](#group) where the features (`FeatureList`) are a group of detailed features. The group can also contains additional data which is polygons and a dictionary to stock the indexes of the features contained in each polygon, this additional data is used to create [_LoaNode(s)_](#loanode).  
 The groups are either created with polygons or with the kd_tree (see [group](#group)).
 
 To create a tileset with LOA\*, use:
@@ -134,7 +134,7 @@ create_tileset(feature_list, # Objects to transform into 3Dtiles
                also_create_loa=True, # Indicate to create a LOA
                polygons_path="./path/to/dir") # Path to a Geojson file containing polygons, or a folder with many Geojson files
 ```
-\* _Level Of Abstraction_, it consists in a tile with a low level of details and an abstract geometry representing multiple geometries (for example a cube to represent a block of buildings).
+\* _Level Of Abstraction_, it consists in a tile with a low level of details and an abstract geometry representing multiple features (for example a cube to represent a block of buildings).
 
 Resulting tilesets:
 
@@ -164,7 +164,7 @@ If the LOA is created:
                     /                    \
             detailled tile          detailled tile
             
-LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_'s geometry.
+LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of a `Feature` instance's geometry.
 It consists in a 3D extrusion of the footprint of the geometry.
 
 To create a tileset with LOD1, use:
