@@ -5,15 +5,15 @@ from earclip import triangulate
 
 
 class ExtrudedPolygon():
-    def __init__(self, object_to_tile, override_points=False, polygon=None):
+    def __init__(self, feature, override_points=False, polygon=None):
         """
         Creates a 3D extrusion of the footprint of an Feature
-        :param object_to_tile: an instance Feature containing triangles
+        :param feature: an instance Feature containing triangles
         :param override_points: when true, the polygon extruded won't be the footprint
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         """
-        geom_triangles = object_to_tile.geom.triangles
+        geom_triangles = feature.geom.triangles
         points = list()
         minZ = np.Inf
         average_maxZ = 0
@@ -37,7 +37,7 @@ class ExtrudedPolygon():
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
 
-        self.object_to_tile = object_to_tile
+        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
@@ -74,7 +74,7 @@ class ExtrudedPolygon():
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = Feature(str(self.object_to_tile.get_id()) + "_extrude")
+        extruded_object = Feature(str(self.feature.get_id()) + "_extrude")
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()
         self.extruded_object = extruded_object

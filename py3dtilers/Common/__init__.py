@@ -1,5 +1,5 @@
 from .kd_tree import kd_tree
-from .object_to_tile import Feature, FeatureList
+from .feature import Feature, FeatureList
 from .tree_with_children_and_parent import TreeWithChildrenAndParent
 from .group import Groups
 from .polygon_extrusion import ExtrudedPolygon

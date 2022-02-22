@@ -1,4 +1,4 @@
-## [object_to_tile](object_to_tile.py)
+## [feature](feature.py)
 ### Feature
 An [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry, a bounding box, and optionally can contain semantic data.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
@@ -10,28 +10,28 @@ triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
              [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
               np.array([1., 0., 1.], dtype=np.float32),
               np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is a vertex with [x, y, z] coordinates
-object_to_tile = Feature("id")
-object_to_tile.geom.triangles.append()
+feature = Feature("id")
+feature.geom.triangles.append()
 ```
 The bounding box is a box containing the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_'s geometry. It can be set with:
 ```
-object_to_tile.set_box()
+feature.set_box()
 ```
 
 The semantic data contained in the object represents application specific data. This data can be added to the [Batch Table](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/BatchTable/README.md) in 3Dtiles.
 
 This data must be structured as a [Dictionary](https://www.w3schools.com/python/python_dictionaries.asp) of key/value pairs and can be set with:
 ```
-object_to_tile.set_batchtable_data()
+feature.set_batchtable_data()
 ```
 
 ### FeatureList
 An [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ instance contains a collection of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_. To create an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_, use:
 ```
-objects = [object_to_tile] # List of Feature(s)
+objects = [feature] # List of Feature(s)
 
-objects_to_tile = FeatureList(objects)
-for object in objects_to_tile:
+feature_list = FeatureList(objects)
+for object in feature_list:
     print(object.get_id())
 ```
 
@@ -51,11 +51,11 @@ The static method `create_footprint_extrusion` from _ExtrudedPolygon_ allows to 
 
 To create an extrusion, use:
 ```
-extruded_object = ExtrudedPolygon.create_footprint_extrusion(object_to_tile)
+extruded_object = ExtrudedPolygon.create_footprint_extrusion(feature)
 ```
-_Note_: the footprint to extrude is computed from the `object_to_tile` param, but you can give another polygon to extrude (that will replace the footprint):
+_Note_: the footprint to extrude is computed from the `feature` param, but you can give another polygon to extrude (that will replace the footprint):
 ```
-extruded_object = ExtrudedPolygon.create_footprint_extrusion(object_to_tile, override_points=True, polygon=points)
+extruded_object = ExtrudedPolygon.create_footprint_extrusion(feature, override_points=True, polygon=points)
 ```
 ## [group](group.py)
 An instance of _Group_ contains objects to tile ([:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_). It can also contains additional data which is polygons (a polygon as list of points, and a point is a list of float) and a dictionary to stock the indexes of the geometries contained in each polygon.
@@ -65,12 +65,12 @@ The groups can be created with:
 ```
 # Group together the objects which are in the same polygon
 # Takes : an FeatureList, a path to a Geojson file containing polygons, or a folder containing Geojson files
-groups = Group.group_objects_by_polygons(objects_to_tile, polygons_path)
+groups = Group.group_objects_by_polygons(feature_list, polygons_path)
 ```
 ```
 # Group together the objects with close centroids
 # Takes : an FeatureList
-groups = Group.group_objects_with_kdtree(objects_to_tile)
+groups = Group.group_objects_with_kdtree(feature_list)
 ```
 
 ## [kd_tree](kd_tree.py)
@@ -78,7 +78,7 @@ The kd_tree distributes the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToT
 ```
 # Takes : an FeatureList
 # Returns : a list of FeatureList
-distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per FeatureList
+distributed_objects = kd_tree(feature_list, 100) # Max 100 objects per FeatureList
 ```
 
 ## [lod_node](lod_node.py)
@@ -89,7 +89,7 @@ To create a _LodNode_:
 ```
 # Takes : geometries as FeatureList, a geometric error (int)
 # Returns : a node containing the geometries
-node = LodNode(objects_to_tile, geometric_error=20)
+node = LodNode(feature_list, geometric_error=20)
 ```
 To add a child to a node:
 ```
@@ -102,7 +102,7 @@ To create a _Lod1Node_:
 ```
 # Takes : geometries as FeatureList, a geometric error (int)
 # Returns : a node containing 3D extrusions of the geometries
-node = Lod1Node(objects_to_tile, geometric_error=20)
+node = Lod1Node(feature_list, geometric_error=20)
 ```
 
 ### LoaNode
@@ -115,7 +115,7 @@ To create a _LoaNode_:
           a list of polygons,
           a dictionary {polygon_index -> [object_index(es)]}
 # Returns : a node containing 3D extrusions of the polygons
-node = LoaNode(objects_to_tile, geometric_error=20, additional_points=polygons, points_dict=dictionary)
+node = LoaNode(feature_list, geometric_error=20, additional_points=polygons, points_dict=dictionary)
 ```
 
 ## [lod_tree](lod_tree.py)
@@ -130,7 +130,7 @@ The groups are either created with polygons or with the kd_tree (see [group](#gr
 
 To create a tileset with LOA\*, use:
 ```
-create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
+create_tileset(feature_list, # Objects to transform into 3Dtiles
                also_create_loa=True, # Indicate to create a LOA
                polygons_path="./path/to/dir") # Path to a Geojson file containing polygons, or a folder with many Geojson files
 ```
@@ -169,7 +169,7 @@ It consists in a 3D extrusion of the footprint of the geometry.
 
 To create a tileset with LOD1, use:
 ```
-create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
+create_tileset(feature_list, # Objects to transform into 3Dtiles
                also_create_lod1=True) # Indicate to create a LOD1
 ```
 Resulting tilesets:
@@ -190,7 +190,7 @@ Resulting tilesets:
             
 A tileset can be created with both LOD1 and LOA with:
 ```
-create_tileset(objects_to_tile, # Objects to transform into 3Dtiles
+create_tileset(feature_list, # Objects to transform into 3Dtiles
                also_create_lod1=True, # Indicate to create a LOD1
                also_create_loa=True, # Indicate to create a LOA
                polygons_path="./path/to/dir") # Path to a Geojson file containing polygons, or a folder with many Geojson files

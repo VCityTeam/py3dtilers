@@ -25,9 +25,9 @@ class TilesetTree(GeometryTree):
         :return: a GeometryNode
         """
         geometric_error = tile.attributes["geometricError"]
-        objects_to_tile = TilesToObjectsToTile(tile, tileset_path)
-        objects_to_tile.translate_objects(offset)
-        node = GeometryNode(objects_to_tile, geometric_error, with_texture=True)
+        feature_list = TilesToObjectsToTile(tile, tileset_path)
+        feature_list.translate_objects(offset)
+        node = GeometryNode(feature_list, geometric_error, with_texture=True)
 
         if 'children' in tile.attributes and len(tile.attributes['children']) > 0:
             for child in tile.attributes['children']:

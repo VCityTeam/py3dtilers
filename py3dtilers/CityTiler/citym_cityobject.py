@@ -62,12 +62,12 @@ class CityMCityObjects(FeatureList):
         """
         texture_dict = dict()
         uri_dict = dict()
-        for object_to_tile in self.get_objects():
-            uri = object_to_tile.texture_uri
+        for feature in self.get_objects():
+            uri = feature.texture_uri
             if uri not in uri_dict:
                 stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
                 uri_dict[uri] = Texture(stream)
-            texture_dict[object_to_tile.get_id()] = uri_dict[uri].get_cropped_texture_image(object_to_tile.geom.triangles[1])
+            texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
     @staticmethod

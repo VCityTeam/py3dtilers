@@ -25,7 +25,7 @@ class FromGeometryTreeToTileset():
 
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
-        objects = node.objects_to_tile
+        objects = node.feature_list
         objects.translate_objects(centroid)
 
         tile = Tile()
@@ -57,7 +57,7 @@ class FromGeometryTreeToTileset():
         # Else, add the created tile to its parent's children
         else:
             parent.add_child(tile)
-        node.objects_to_tile.delete_objects_ref()
+        node.feature_list.delete_objects_ref()
 
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)

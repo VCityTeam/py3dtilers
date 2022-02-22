@@ -47,8 +47,8 @@ class TilesToObjectsToTile(FeatureList):
     def __init__(self, tile=None, tileset_path=None):
         self.materials = []
         self.tileset_path = tileset_path
-        objects_to_tile = self.__convert_tile(tile)
-        super().__init__(objects_to_tile)
+        feature_list = self.__convert_tile(tile)
+        super().__init__(feature_list)
 
     def __find_materials(self, gltf):
         """
@@ -121,10 +121,10 @@ class TilesToObjectsToTile(FeatureList):
 
         materials = self.__find_materials(gltf)
         ts = TriangleSoup.from_glTF(gltf)
-        objects_to_tile = self.__convert_triangle_soup(ts, materials)
-        objects_to_tile.add_materials(materials)
+        feature_list = self.__convert_triangle_soup(ts, materials)
+        feature_list.add_materials(materials)
 
         bt_attributes = tile.get_content().body.batch_table.attributes
-        [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]
+        [feature.set_batchtable_data(bt_attributes) for feature in feature_list]
 
-        return objects_to_tile
+        return feature_list

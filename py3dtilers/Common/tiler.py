@@ -93,13 +93,13 @@ class Tiler():
         transformer = Transformer.from_crs(crs_in, crs_out)
         geometries.change_crs(transformer)
 
-    def create_tree(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
-        lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
+    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
         return lod_tree
 
-    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+    def create_tileset_from_geometries(self, feature_list, extension_name=None):
         create_loa = self.args.loa is not None
-        tree = self.create_tree(objects_to_tile, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
 
         if hasattr(self.args, 'scale') and self.args.scale:
             for objects in tree.get_all_objects():
@@ -118,7 +118,7 @@ class Tiler():
         if self.args.obj is not None:
             self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
 
-        objects_to_tile.delete_objects_ref()
+        feature_list.delete_objects_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 

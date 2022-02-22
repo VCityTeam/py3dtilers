@@ -5,13 +5,13 @@ class GeometryNode():
     A node will correspond to a tile of the 3dtiles tileset
     """
 
-    def __init__(self, objects_to_tile=None, geometric_error=50, with_texture=False):
+    def __init__(self, feature_list=None, geometric_error=50, with_texture=False):
         """
-        :param objects_to_tile: an instance of FeatureList.
+        :param feature_list: an instance of FeatureList.
         :param geometric_error: the distance below which this node should be displayed.
         :param Boolean with_texture: if this node must keep the texture of the geometries or not.
         """
-        self.objects_to_tile = objects_to_tile
+        self.feature_list = feature_list
         self.child_nodes = list()
         self.with_texture = with_texture and self.geometries_have_texture()
         self.geometric_error = geometric_error
@@ -42,14 +42,14 @@ class GeometryNode():
         Check if all the geometries in the node have a texture.
         :return: a boolean
         """
-        return all([feature.has_texture() for feature in self.objects_to_tile])
+        return all([feature.has_texture() for feature in self.feature_list])
 
     def get_objects(self):
         """
         Return the geometries in this node and the geometries in the child nodes (recursively).
         :return: a list of geometries
         """
-        objects = [self.objects_to_tile]
+        objects = [self.feature_list]
         for child in self.child_nodes:
             objects.extend(child.get_objects())
         return objects
