@@ -1,5 +1,5 @@
 from ..Common import GeometryNode, GeometryTree
-from .tile_to_object_to_tile import TilesToObjectsToTile
+from .tile_to_feature import TileToFeatureList
 
 
 class TilesetTree(GeometryTree):
@@ -25,7 +25,7 @@ class TilesetTree(GeometryTree):
         :return: a GeometryNode
         """
         geometric_error = tile.attributes["geometricError"]
-        feature_list = TilesToObjectsToTile(tile, tileset_path)
+        feature_list = TileToFeatureList(tile, tileset_path)
         feature_list.translate_objects(offset)
         node = GeometryNode(feature_list, geometric_error, with_texture=True)
 

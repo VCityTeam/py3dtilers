@@ -5,7 +5,7 @@ from ..Common import FeatureList, Feature
 from ..Texture import Texture
 
 
-class TileToObjectToTile(Feature):
+class TileToFeature(Feature):
 
     def __init__(self, id=None, triangle_soup=None, mat_index=0):
         super().__init__(id)
@@ -42,7 +42,7 @@ class TileToObjectToTile(Feature):
             super().set_batchtable_data(data)
 
 
-class TilesToObjectsToTile(FeatureList):
+class TileToFeatureList(FeatureList):
 
     def __init__(self, tile=None, tileset_path=None):
         self.materials = []
@@ -105,7 +105,7 @@ class TilesToObjectsToTile(FeatureList):
 
         objects = []
         for id in triangle_dict:
-            feature = TileToObjectToTile(str(int(id)), triangle_dict[id], material_dict[id])
+            feature = TileToFeature(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], materials, self.tileset_path)
             objects.append(feature)
         return FeatureList(objects)
