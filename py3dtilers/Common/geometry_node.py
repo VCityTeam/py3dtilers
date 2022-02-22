@@ -1,13 +1,13 @@
 class GeometryNode():
     """
-    Each node contains an instance of ObjectsToTile
+    Each node contains an instance of FeatureList
     and a list of child nodes
     A node will correspond to a tile of the 3dtiles tileset
     """
 
     def __init__(self, objects_to_tile=None, geometric_error=50, with_texture=False):
         """
-        :param objects_to_tile: an instance of ObjectsToTile.
+        :param objects_to_tile: an instance of FeatureList.
         :param geometric_error: the distance below which this node should be displayed.
         :param Boolean with_texture: if this node must keep the texture of the geometries or not.
         """

@@ -1,5 +1,5 @@
 ## [object_to_tile](object_to_tile.py)
-### ObjectToTile
+### Feature
 An [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_ instance contains a geometry, a bounding box, and optionally can contain semantic data.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
 To set the triangles of an [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_, use:  
@@ -10,7 +10,7 @@ triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
              [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
               np.array([1., 0., 1.], dtype=np.float32),
               np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is a vertex with [x, y, z] coordinates
-object_to_tile = ObjectToTile("id")
+object_to_tile = Feature("id")
 object_to_tile.geom.triangles.append()
 ```
 The bounding box is a box containing the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile_'s geometry. It can be set with:
@@ -25,12 +25,12 @@ This data must be structured as a [Dictionary](https://www.w3schools.com/python/
 object_to_tile.set_batchtable_data()
 ```
 
-### ObjectsToTile
+### FeatureList
 An [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ instance contains a collection of [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_. To create an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_, use:
 ```
-objects = [object_to_tile] # List of ObjectToTile(s)
+objects = [object_to_tile] # List of Feature(s)
 
-objects_to_tile = ObjectsToTile(objects)
+objects_to_tile = FeatureList(objects)
 for object in objects_to_tile:
     print(object.get_id())
 ```
@@ -40,7 +40,7 @@ This class allows to write [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ i
 
 ```
 obj_writer = ObjWriter()
-obj_writer.add_geometries(geometries)   # geometries contains ObjectToTile instances
+obj_writer.add_geometries(geometries)   # geometries contains Feature instances
 obj_writer.write_obj(file_name)
 ```
 
@@ -64,21 +64,21 @@ The static methods in the _Group_ class allow to distribute [:red_circle:](#obje
 The groups can be created with:
 ```
 # Group together the objects which are in the same polygon
-# Takes : an ObjectsToTile, a path to a Geojson file containing polygons, or a folder containing Geojson files
+# Takes : an FeatureList, a path to a Geojson file containing polygons, or a folder containing Geojson files
 groups = Group.group_objects_by_polygons(objects_to_tile, polygons_path)
 ```
 ```
 # Group together the objects with close centroids
-# Takes : an ObjectsToTile
+# Takes : an FeatureList
 groups = Group.group_objects_with_kdtree(objects_to_tile)
 ```
 
 ## [kd_tree](kd_tree.py)
 The kd_tree distributes the [:large_blue_circle:](#objecttotile)&nbsp;_ObjectToTile(s)_ contained in an [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ into multiple [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_. Each instance of [:red_circle:](#objectstotile)&nbsp;_ObjectsToTile_ can have a maximum of `maxNumObjects`:
 ```
-# Takes : an ObjectsToTile
-# Returns : a list of ObjectsToTile
-distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per ObjectsToTile
+# Takes : an FeatureList
+# Returns : a list of FeatureList
+distributed_objects = kd_tree(objects_to_tile, 100) # Max 100 objects per FeatureList
 ```
 
 ## [lod_node](lod_node.py)
@@ -87,7 +87,7 @@ A _LodNode_ contains geometries as [:red_circle:](#objectstotile)&nbsp;_ObjectsT
 
 To create a _LodNode_:
 ```
-# Takes : geometries as ObjectsToTile, a geometric error (int)
+# Takes : geometries as FeatureList, a geometric error (int)
 # Returns : a node containing the geometries
 node = LodNode(objects_to_tile, geometric_error=20)
 ```
@@ -100,7 +100,7 @@ _Lod1Node_ inherits from _LodNode_. When instanced, a _Lod1Node_ creates a 3D ex
 
 To create a _Lod1Node_:
 ```
-# Takes : geometries as ObjectsToTile, a geometric error (int)
+# Takes : geometries as FeatureList, a geometric error (int)
 # Returns : a node containing 3D extrusions of the geometries
 node = Lod1Node(objects_to_tile, geometric_error=20)
 ```
@@ -110,7 +110,7 @@ _LoaNode_ inherits from _LodNode_. When instanced, a _LoaNode_ creates a 3D extr
 
 To create a _LoaNode_:
 ```
-# Takes : geometries as ObjectsToTile,
+# Takes : geometries as FeatureList,
           a geometric error (int),
           a list of polygons,
           a dictionary {polygon_index -> [object_index(es)]}

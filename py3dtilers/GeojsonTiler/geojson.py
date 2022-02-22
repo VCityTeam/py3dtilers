@@ -2,7 +2,7 @@
 import numpy as np
 from earclip import triangulate
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -12,7 +12,7 @@ from ..Common import ObjectToTile, ObjectsToTile
 # Then we create the triangles of this face
 # and duplicate it with a Z offset to create the upper face
 # Then we create the side triangles to connect the upper and the lower faces
-class Geojson(ObjectToTile):
+class Geojson(Feature):
 
     n_feature = 0
 
@@ -158,7 +158,7 @@ class Geojson(ObjectToTile):
         return super().set_id(id)
 
 
-class Geojsons(ObjectsToTile):
+class Geojsons(FeatureList):
     """
         A decorated list of Geojson instances.
     """

@@ -1,5 +1,5 @@
 from .kd_tree import kd_tree
-from .object_to_tile import ObjectToTile, ObjectsToTile
+from .object_to_tile import Feature, FeatureList
 from .tree_with_children_and_parent import TreeWithChildrenAndParent
 from .group import Groups
 from .polygon_extrusion import ExtrudedPolygon
@@ -12,8 +12,8 @@ from .tileset_creation import FromGeometryTreeToTileset
 from .tiler import Tiler
 
 __all__ = ['kd_tree',
-           'ObjectToTile',
-           'ObjectsToTile',
+           'Feature',
+           'FeatureList',
            'TreeWithChildrenAndParent',
            'Groups',
            'ExtrudedPolygon',

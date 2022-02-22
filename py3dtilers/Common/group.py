@@ -2,13 +2,13 @@ import os
 from os import listdir
 import json
 from shapely.geometry import Point, Polygon
-from ..Common import ObjectsToTile
+from ..Common import FeatureList
 from ..Common import kd_tree
 
 
 class Group():
     """
-    Contains an instance of ObjectsToTile
+    Contains an instance of FeatureList
     It can also contain additional polygon points (used to create LOA nodes)
     """
 
@@ -64,7 +64,7 @@ class Groups():
         """
         Distribute the geometries contained in objects_to_tile into different Group
         The way to distribute the geometries depends on the parameters
-        :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to distribute into Group
+        :param objects_to_tile: an instance of FeatureList containing a list of geometries to distribute into Group
         :param polygons_path: the path to a folder containing polygons as .geojson files.
         When this param is not None, it means we want to group geometries by polygons
         """
@@ -94,7 +94,7 @@ class Groups():
 
     def group_objects_by_instance(self, objects_to_tile):
         """
-        Create groups of geometries. One group is created per object in the ObjectsToTile.
+        Create groups of geometries. One group is created per object in the FeatureList.
         """
         groups = list()
         for objects in objects_to_tile:
@@ -174,11 +174,11 @@ class Groups():
         groups = list()
         for key in objects_to_tile_dict:
             additional_points = polygons[key].exterior.coords[:-1]
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_dict[key]])
+            contained_objects = FeatureList([objects_to_tile[i] for i in objects_to_tile_dict[key]])
             group = Group(contained_objects, with_polygon=True, additional_points=additional_points)
             groups.append(group)
         for key in objects_to_tile_without_poly:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_without_poly[key]])
+            contained_objects = FeatureList([objects_to_tile[i] for i in objects_to_tile_without_poly[key]])
             group = Group(contained_objects)
             groups.append(group)
 
@@ -238,4 +238,4 @@ class Groups():
             else:
                 for object_to_tile in groups[index].objects_to_tile:
                     objects.append(object_to_tile)
-        return Group(ObjectsToTile(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)
+        return Group(FeatureList(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)

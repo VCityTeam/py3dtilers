@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 from ..Texture import Texture
 
 
-class CityMCityObject(ObjectToTile):
+class CityMCityObject(Feature):
     """
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
@@ -43,7 +43,7 @@ class CityMCityObject(ObjectToTile):
         return self.texture_uri is not None
 
 
-class CityMCityObjects(ObjectsToTile):
+class CityMCityObjects(FeatureList):
     """
     A decorated list of CityMCityObject type objects.
     """

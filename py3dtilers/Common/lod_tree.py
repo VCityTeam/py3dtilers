@@ -8,7 +8,7 @@ class LodTree(GeometryTree):
 
     def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         """
-        LodTree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
+        LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
         In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
         A Group contains geometries and an optional polygon that will be used for LoaNodes.
         """

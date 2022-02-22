@@ -1,4 +1,4 @@
-from ..Common import ObjectsToTile
+from ..Common import FeatureList
 
 
 class GeometryTree():
@@ -32,14 +32,14 @@ class GeometryTree():
         Return the geometries of the root nodes.
         :return: list of geometries
         """
-        return ObjectsToTile([node.objects_to_tile for node in self.root_nodes])
+        return FeatureList([node.objects_to_tile for node in self.root_nodes])
 
     def get_leaf_objects(self):
         """
         Return the geometries of the leaf nodes.
         :return: list of geometries
         """
-        return ObjectsToTile([node.objects_to_tile for node in self.get_leaf_nodes()])
+        return FeatureList([node.objects_to_tile for node in self.get_leaf_nodes()])
 
     def get_all_objects(self):
         """
@@ -49,4 +49,4 @@ class GeometryTree():
         objects = list()
         for node in self.root_nodes:
             objects.extend(node.get_objects())
-        return ObjectsToTile(objects)
+        return FeatureList(objects)

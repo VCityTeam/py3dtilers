@@ -3,7 +3,7 @@ from pathlib import Path
 
 class ObjWriter():
     """
-    A writer which write triangles from ObjectToTile geometries into an OBJ file
+    A writer which write triangles from Feature geometries into an OBJ file
     """
 
     def __init__(self):

@@ -1,4 +1,4 @@
-from ..Common import ObjectsToTile, ObjectToTile, GeometryNode
+from ..Common import FeatureList, Feature, GeometryNode
 from ..Common import ExtrudedPolygon
 
 
@@ -12,7 +12,7 @@ class Lod1Node(GeometryNode):
         for object_to_tile in objects_to_tile:
             extruded_polygon = ExtrudedPolygon(object_to_tile)
             lod1_list.append(extruded_polygon.get_extruded_object())
-        super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)
+        super().__init__(objects_to_tile=FeatureList(lod1_list), geometric_error=geometric_error)
 
 
 class LoaNode(GeometryNode):
@@ -25,11 +25,11 @@ class LoaNode(GeometryNode):
     def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):
         loas = list()
         for key in points_dict:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in points_dict[key]])
+            contained_objects = FeatureList([objects_to_tile[i] for i in points_dict[key]])
             loa = self.create_loa_from_polygon(contained_objects, additional_points[key], LoaNode.loa_index)
             loas.append(loa)
             LoaNode.loa_index += 1
-        super().__init__(objects_to_tile=ObjectsToTile(loas), geometric_error=geometric_error)
+        super().__init__(objects_to_tile=FeatureList(loas), geometric_error=geometric_error)
 
     def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
         """
@@ -40,7 +40,7 @@ class LoaNode(GeometryNode):
 
         :return: a 3D extrusion of the polygon
         """
-        loa_geometry = ObjectToTile("loa_" + str(index))
+        loa_geometry = Feature("loa_" + str(index))
         for object_to_tile in objects_to_tile:
             loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
 

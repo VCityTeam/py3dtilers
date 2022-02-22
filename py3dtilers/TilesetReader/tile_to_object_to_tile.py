@@ -1,11 +1,11 @@
 import os
 
 from py3dtiles import TriangleSoup, GlTFMaterial
-from ..Common import ObjectsToTile, ObjectToTile
+from ..Common import FeatureList, Feature
 from ..Texture import Texture
 
 
-class TileToObjectToTile(ObjectToTile):
+class TileToObjectToTile(Feature):
 
     def __init__(self, id=None, triangle_soup=None, mat_index=0):
         super().__init__(id)
@@ -42,7 +42,7 @@ class TileToObjectToTile(ObjectToTile):
             super().set_batchtable_data(data)
 
 
-class TilesToObjectsToTile(ObjectsToTile):
+class TilesToObjectsToTile(FeatureList):
 
     def __init__(self, tile=None, tileset_path=None):
         self.materials = []
@@ -79,7 +79,7 @@ class TilesToObjectsToTile(ObjectsToTile):
         :param triangle_soup: the triangle soup
         :param materials: the materials of the tile
 
-        :return: an ObjectsToTile instance
+        :return: an FeatureList instance
         """
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
@@ -108,11 +108,11 @@ class TilesToObjectsToTile(ObjectsToTile):
             feature = TileToObjectToTile(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], materials, self.tileset_path)
             objects.append(feature)
-        return ObjectsToTile(objects)
+        return FeatureList(objects)
 
     def __convert_tile(self, tile):
         """
-        Convert a tile to an ObjectsToTile instance.
+        Convert a tile to an FeatureList instance.
         :param tile: the tile to convert
 
         :return: a list of geometries

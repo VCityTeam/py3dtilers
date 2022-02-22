@@ -4,7 +4,7 @@ from argparse import Namespace
 from pathlib import Path
 
 from py3dtilers.Common.tiler import Tiler
-from py3dtilers.Common.object_to_tile import ObjectToTile, ObjectsToTile
+from py3dtilers.Common.object_to_tile import Feature, FeatureList
 
 
 triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
@@ -34,10 +34,10 @@ triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
 
 class Test_Tile(unittest.TestCase):
     def test_kd_tree(self):
-        object_to_tile = ObjectToTile("kd_tree")
+        object_to_tile = Feature("kd_tree")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/kd_tree')
@@ -48,10 +48,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_lod1(self):
-        object_to_tile = ObjectToTile("lod1")
+        object_to_tile = Feature("lod1")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/lod1')
@@ -62,10 +62,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_loa(self):
-        object_to_tile = ObjectToTile("loa")
+        object_to_tile = Feature("loa")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/loa')
@@ -76,10 +76,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_change_crs(self):
-        object_to_tile = ObjectToTile("change_crs")
+        object_to_tile = Feature("change_crs")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/change_crs')
@@ -90,10 +90,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_offset(self):
-        object_to_tile = ObjectToTile("offset")
+        object_to_tile = Feature("offset")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/offset')
@@ -104,10 +104,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_offset_centroid(self):
-        object_to_tile = ObjectToTile("offset_centroid")
+        object_to_tile = Feature("offset_centroid")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/offset_centroid')
@@ -118,10 +118,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_scale(self):
-        object_to_tile = ObjectToTile("scale")
+        object_to_tile = Feature("scale")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         tiler = Tiler()
         directory = Path('tests/tiler_test_data/tilesets/scale')
@@ -132,10 +132,10 @@ class Test_Tile(unittest.TestCase):
         tileset.write_to_directory(directory)
 
     def test_obj(self):
-        object_to_tile = ObjectToTile("scale")
+        object_to_tile = Feature("scale")
         object_to_tile.geom.triangles.append(triangles)
         object_to_tile.set_box()
-        objects_to_tile = ObjectsToTile([object_to_tile])
+        objects_to_tile = FeatureList([object_to_tile])
 
         obj_name = Path('tests/tiler_test_data/junk/cube.obj')
 

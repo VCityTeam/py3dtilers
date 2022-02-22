@@ -4,7 +4,7 @@ from py3dtiles import BoundingVolumeBox, TriangleSoup
 from ..Color import ColorConfig
 
 
-class ObjectToTile(object):
+class Feature(object):
     """
     The base class of all object that need to be tiled, in order to be
     used with the corresponding tiler.
@@ -80,9 +80,9 @@ class ObjectToTile(object):
         return self.texture is not None
 
 
-class ObjectsToTile(object):
+class FeatureList(object):
     """
-    A decorated list of ObjectsToTile type objects.
+    A decorated list of FeatureList type objects.
     """
 
     # The material used by default for geometries
@@ -90,9 +90,9 @@ class ObjectsToTile(object):
 
     def __init__(self, objects=None):
         self.objects = list()
-        if ObjectsToTile.default_mat is None:
-            ObjectsToTile.default_mat = ColorConfig().get_default_color()
-        self.materials = [ObjectsToTile.default_mat]
+        if FeatureList.default_mat is None:
+            FeatureList.default_mat = ColorConfig().get_default_color()
+        self.materials = [FeatureList.default_mat]
         if(objects):
             self.objects.extend(objects)
 
@@ -135,8 +135,8 @@ class ObjectsToTile(object):
         return len(self.objects)
 
     def is_list_of_objects_to_tile(self):
-        """Check if this instance of ObjectsToTile contains others ObjectsToTile"""
-        return isinstance(self.objects[0], ObjectsToTile)
+        """Check if this instance of FeatureList contains others FeatureList"""
+        return isinstance(self.objects[0], FeatureList)
 
     def get_centroid(self):
         """

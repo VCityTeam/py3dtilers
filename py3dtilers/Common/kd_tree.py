@@ -1,19 +1,19 @@
-from .object_to_tile import ObjectsToTile
+from .object_to_tile import FeatureList
 
 
 def kd_tree(objects_to_tile, maxNumObjects, depth=0):
     """
-    Distribute the geometries into ObjectsToTile.
+    Distribute the geometries into FeatureList.
     The objects are distributed by their centroid.
     :param objects: the geometries to distribute
     :param maxNumObjects: the max number of objects in each new group
     :param depth: the depth of the recursion
 
-    :return: a list of ObjectsToTile
+    :return: a list of FeatureList
     """
     # objects should herited from objects_to_tile and
     # dispose of a method get_centroid()
-    if (not isinstance(objects_to_tile, ObjectsToTile)):
+    if (not isinstance(objects_to_tile, FeatureList)):
         return None
 
     derived = objects_to_tile.__class__

@@ -3,7 +3,7 @@ import sys
 import math
 import numpy as np
 import ifcopenshell
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 
 
 def normalize(v):
@@ -37,7 +37,7 @@ def unitConversion(originalUnit, targetedUnit):
     return conversions[originalUnit][targetedUnit]
 
 
-class IfcObjectGeom(ObjectToTile):
+class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", transform_matrix=None, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
 
@@ -328,9 +328,9 @@ class IfcObjectGeom(ObjectToTile):
         return super().set_id(id)
 
 
-class IfcObjectsGeom(ObjectsToTile):
+class IfcObjectsGeom(FeatureList):
     """
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of FeatureList type objects.
     """
 
     def __init__(self, objs=None):

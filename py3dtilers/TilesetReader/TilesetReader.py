@@ -63,8 +63,8 @@ class TilesetTiler(Tiler):
 
     def transform_tileset(self, tileset):
         """
-        Creates a TilesetTree where each node has ObjectsToTile.
-        Then, apply transformations (reprojection, translation, etc) on the ObjectsToTile.
+        Creates a TilesetTree where each node has FeatureList.
+        Then, apply transformations (reprojection, translation, etc) on the FeatureList.
         :param tileset: the TileSet to transform
 
         :return: a TileSet

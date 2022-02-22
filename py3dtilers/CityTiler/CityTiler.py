@@ -85,7 +85,7 @@ class CityTiler(Tiler):
         """
         Get the surfaces of all the cityobjects and transform them into TriangleSoup
         Surfaces of each cityObject are split into different geometries
-        Each surface will be an ObjectToTile
+        Each surface will be an Feature
         """
         surfaces = list()
         object_type = objects_type.object_type
