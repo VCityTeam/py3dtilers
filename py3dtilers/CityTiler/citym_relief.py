@@ -66,7 +66,7 @@ class CityMReliefs(CityMCityObjects):
     def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
         """
         :param reliefs_ids: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose features are sought.
+                            objects_type type objects whose geometries are sought.
         :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
                             splitted or be merged into one geometry
 
@@ -99,7 +99,7 @@ class CityMReliefs(CityMCityObjects):
     def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
         """
         param reliefs_ids: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose features are sought.
+                            objects_type type objects whose geometries are sought.
         :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of reliefs

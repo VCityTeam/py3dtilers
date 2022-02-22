@@ -52,7 +52,7 @@ class CityMBridges(CityMCityObjects):
     def sql_query_geometries(bridges_ids_arg, split_surfaces=False):
         """
         :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose features are sought.
+                            objects_type type objects whose geometries are sought.
         :param split_surfaces: a boolean specifying if the surfaces of each bridge will stay
                             splitted or be merged into one geometry
 
@@ -109,7 +109,7 @@ class CityMBridges(CityMCityObjects):
     def sql_query_geometries_with_texture_coordinates(bridges_ids_arg):
         """
         :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose features are sought.
+                            objects_type type objects whose geometries are sought.
         :return: a string containing the right SQL query that should be executed.
         """
         # Because the 3DCityDB's bridge table regroups both the bridges mixed
