@@ -7,8 +7,8 @@ from earclip import triangulate
 class ExtrudedPolygon():
     def __init__(self, feature, override_points=False, polygon=None):
         """
-        Creates a 3D extrusion of the footprint of an Feature
-        :param feature: an instance Feature containing triangles
+        Creates a 3D extrusion of the footprint of a Feature
+        :param feature: an instance of Feature containing triangles
         :param override_points: when true, the polygon extruded won't be the footprint
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)

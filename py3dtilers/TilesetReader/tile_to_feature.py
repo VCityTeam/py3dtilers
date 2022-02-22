@@ -79,7 +79,7 @@ class TileToFeatureList(FeatureList):
         :param triangle_soup: the triangle soup
         :param materials: the materials of the tile
 
-        :return: an FeatureList instance
+        :return: a FeatureList instance
         """
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
@@ -112,7 +112,7 @@ class TileToFeatureList(FeatureList):
 
     def __convert_tile(self, tile):
         """
-        Convert a tile to an FeatureList instance.
+        Convert a tile to a FeatureList instance.
         :param tile: the tile to convert
 
         :return: a FeatureList
