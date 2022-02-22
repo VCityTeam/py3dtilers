@@ -3,8 +3,9 @@ from ..Common import FeatureList
 
 class GeometryTree():
     """
-    The GeometryTree contains the root nodes and the leaf nodes of the hierarchy.
-    It also contains the centroid of the root nodes.
+    The GeometryTree contains a list of GeometryNode instances.
+    Those instances are the root nodes of a tree.
+    The GeometryTree also contains the centroid of the root nodes.
     """
 
     def __init__(self, root_nodes):
@@ -30,21 +31,21 @@ class GeometryTree():
     def get_root_objects(self):
         """
         Return the features of the root nodes.
-        :return: list of features
+        :return: a FeatureList
         """
         return FeatureList([node.feature_list for node in self.root_nodes])
 
     def get_leaf_objects(self):
         """
         Return the features of the leaf nodes.
-        :return: list of features
+        :return: a FeatureList
         """
         return FeatureList([node.feature_list for node in self.get_leaf_nodes()])
 
     def get_all_objects(self):
         """
         Return the features of all the nodes.
-        :return: list of features
+        :return: a FeatureList
         """
         objects = list()
         for node in self.root_nodes:
