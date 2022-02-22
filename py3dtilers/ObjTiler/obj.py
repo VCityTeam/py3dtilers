@@ -21,6 +21,10 @@ from ..Texture import Texture
 # f 1 2 3
 # f 2 3 4
 class Obj(Feature):
+    """
+    The Python representation of an OBJ mesh.
+    """
+
     def __init__(self, id=None):
         super().__init__(id)
 
