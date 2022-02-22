@@ -12,6 +12,9 @@ from ..Common import Tiler
 
 
 class GeojsonTiler(Tiler):
+    """
+    The GeojsonTiler can read GeoJSON files and create 3DTiles.
+    """
 
     def __init__(self):
         super().__init__()

@@ -13,6 +13,10 @@ from ..Common import Feature, FeatureList
 # and duplicate it with a Z offset to create the upper face
 # Then we create the side triangles to connect the upper and the lower faces
 class Geojson(Feature):
+    """
+    The Python representation of a GeoJSON feature.
+    A Geojson instance has a geometry and properties.
+    """
 
     n_feature = 0
 
@@ -160,7 +164,7 @@ class Geojson(Feature):
 
 class Geojsons(FeatureList):
     """
-        A decorated list of Geojson instances.
+    A decorated list of Geojson instances.
     """
 
     def __init__(self, objects=None):

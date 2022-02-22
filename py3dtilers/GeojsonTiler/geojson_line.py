@@ -3,6 +3,10 @@ from .lineBuffer import LineBuffer
 
 
 class GeojsonLine(Geojson):
+    """
+    The Python representation of a GeoJSON line or multiline feature.
+    A GeojsonLine instance has a geometry and properties.
+    """
 
     # Default width will be used if no width is found when parsing LineString or MultiLineString
     default_width = 2
