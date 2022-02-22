@@ -31,6 +31,21 @@ The output folder contains:
 * a `tiles` folder containing the associated set of `.b3dm` files
   * The database and GML IDs of objects in the tileset are stored in the [Batch Table](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/BatchTable/README.md) of each `.b3dm` file
 
+If you run th Tiler from WSL (Windows Subsystem for Linux) and encounter the error
+
+```bash
+psycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+        Is the server running on that host and accepting TCP/IP connections?
+```
+
+See [How to connect to Windows postgres database from WSL](https://stackoverflow.com/a/67596486), then find the WSL IP with
+
+```bash
+grep nameserver /etc/resolv.conf | awk '{print $2}'
+```
+
+Use this IP in your .yml config file.
+
 ### Objects type
 
 By default, the tiler will treat the data as __buildings__. You can change the type by adding the flag `--type` followed by one the 4 keywords:
