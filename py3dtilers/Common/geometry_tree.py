@@ -48,5 +48,5 @@ class GeometryTree():
         """
         objects = list()
         for node in self.root_nodes:
-            objects.extend(node.get_objects())
+            objects.extend(node.get_features())
         return FeatureList(objects)

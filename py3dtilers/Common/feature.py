@@ -118,13 +118,13 @@ class FeatureList(object):
     def extend(self, others):
         self.objects.extend(others)
 
-    def get_objects(self):
+    def get_features(self):
         if not self.is_list_of_feature_list():
             return self.objects
         else:
             objects = list()
             for objs in self.objects:
-                objects.extend(objs.get_objects())
+                objects.extend(objs.get_features())
             return objects
 
     def delete_objects_ref(self):
@@ -172,13 +172,13 @@ class FeatureList(object):
         """
         return self.materials[index]
 
-    def translate_objects(self, offset):
+    def translate_features(self, offset):
         """
         Translate the features by substracting an offset
         :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset
-        for feature in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
@@ -195,7 +195,7 @@ class FeatureList(object):
         Project the features into another CRS
         :param transformer: the transformer used to change the crs
         """
-        for feature in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
@@ -206,13 +206,13 @@ class FeatureList(object):
             feature.set_triangles(new_geom)
             feature.set_box()
 
-    def scale_objects(self, scale_factor):
+    def scale_features(self, scale_factor):
         """
         Rescale the features.
         :param scale_factor: the factor to scale the objects
         """
         centroid = self.get_centroid()
-        for feature in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
             for triangle in feature.get_geom_as_triangles():
                 scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
@@ -226,7 +226,7 @@ class FeatureList(object):
         :return: a dictionary of textures
         """
         texture_dict = dict()
-        for feature in self.get_objects():
+        for feature in self.get_features():
             texture_dict[feature.get_id()] = feature.get_texture()
         return texture_dict
 

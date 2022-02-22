@@ -62,7 +62,7 @@ class CityMCityObjects(FeatureList):
         """
         texture_dict = dict()
         uri_dict = dict()
-        for feature in self.get_objects():
+        for feature in self.get_features():
             uri = feature.texture_uri
             if uri not in uri_dict:
                 stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)

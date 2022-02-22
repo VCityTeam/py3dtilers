@@ -86,7 +86,7 @@ class Tiler():
 
     def write_geometries_as_obj(self, features, file_name):
         obj_writer = ObjWriter()
-        obj_writer.add_geometries(features.get_objects())
+        obj_writer.add_geometries(features.get_features())
         obj_writer.write_obj(file_name)
 
     def change_projection(self, features, crs_in, crs_out):
@@ -103,13 +103,13 @@ class Tiler():
 
         if hasattr(self.args, 'scale') and self.args.scale:
             for objects in tree.get_all_objects():
-                objects.scale_objects(self.args.scale)
+                objects.scale_features(self.args.scale)
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
             if self.args.offset[0] == 'centroid':
                 self.args.offset = tree.get_centroid()
             for objects in tree.get_all_objects():
-                objects.translate_objects(self.args.offset)
+                objects.translate_features(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
             for objects in tree.get_all_objects():

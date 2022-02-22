@@ -44,14 +44,14 @@ class GeometryNode():
         """
         return all([feature.has_texture() for feature in self.feature_list])
 
-    def get_objects(self):
+    def get_features(self):
         """
         Return the features in this node and the features in the child nodes (recursively).
         :return: a FeatureList
         """
         objects = [self.feature_list]
         for child in self.child_nodes:
-            objects.extend(child.get_objects())
+            objects.extend(child.get_features())
         return objects
 
     def get_leaves(self):

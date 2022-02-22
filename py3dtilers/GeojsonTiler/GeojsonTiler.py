@@ -161,13 +161,13 @@ class GeojsonTiler(Tiler):
             n = color_config.nb_colors
             for i in range(0, n, 1):
                 colors.append(color_config.get_color_by_lerp(i / n))
-            for feature in feature_list.get_objects():
+            for feature in feature_list.get_features():
                 factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
                 factor = round(factor * (len(colors) - 1)) + 1
                 feature.material_index = factor
         elif att_length > 1:
             attribute_dict = dict()
-            for feature in feature_list.get_objects():
+            for feature in feature_list.get_features():
                 value = feature.feature_properties[color_attribute[0]]
                 if value not in attribute_dict:
                     attribute_dict[value] = len(colors)

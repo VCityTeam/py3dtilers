@@ -26,7 +26,7 @@ class FromGeometryTreeToTileset():
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
         objects = node.feature_list
-        objects.translate_objects(centroid)
+        objects.translate_features(centroid)
 
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)

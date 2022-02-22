@@ -26,7 +26,7 @@ class TilesetTree(GeometryTree):
         """
         geometric_error = tile.attributes["geometricError"]
         feature_list = TileToFeatureList(tile, tileset_path)
-        feature_list.translate_objects(offset)
+        feature_list.translate_features(offset)
         node = GeometryNode(feature_list, geometric_error, with_texture=True)
 
         if 'children' in tile.attributes and len(tile.attributes['children']) > 0:
