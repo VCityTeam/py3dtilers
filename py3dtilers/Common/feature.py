@@ -85,7 +85,7 @@ class FeatureList(object):
     A decorated list of FeatureList type objects.
     """
 
-    # The material used by default for geometries
+    # The material used by default for features
     default_mat = None
 
     def __init__(self, objects=None):
@@ -174,7 +174,7 @@ class FeatureList(object):
 
     def translate_objects(self, offset):
         """
-        Translate the geometries by substracting an offset
+        Translate the features by substracting an offset
         :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset
@@ -192,7 +192,7 @@ class FeatureList(object):
 
     def change_crs(self, transformer):
         """
-        Project the geometries into another CRS
+        Project the features into another CRS
         :param transformer: the transformer used to change the crs
         """
         for feature in self.get_objects():
@@ -208,7 +208,7 @@ class FeatureList(object):
 
     def scale_objects(self, scale_factor):
         """
-        Rescale the geometries.
+        Rescale the features.
         :param scale_factor: the factor to scale the objects
         """
         centroid = self.get_centroid()
@@ -222,7 +222,7 @@ class FeatureList(object):
 
     def get_textures(self):
         """
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         """
         texture_dict = dict()

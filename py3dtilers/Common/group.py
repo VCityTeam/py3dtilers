@@ -41,7 +41,7 @@ class Group():
     def add_materials(self, materials):
         """
         Keep only the materials used by the objects of this group,
-        among all the materials created, and add them to the geometries.
+        among all the materials created, and add them to the features.
         :param materials: an array of all the materials
         """
         seen_mat_indexes = dict()
@@ -62,11 +62,11 @@ class Groups():
 
     def __init__(self, feature_list, polygons_path=None):
         """
-        Distribute the geometries contained in feature_list into different Group
-        The way to distribute the geometries depends on the parameters
-        :param feature_list: an instance of FeatureList containing a list of geometries to distribute into Group
+        Distribute the features contained in feature_list into different Group
+        The way to distribute the features depends on the parameters
+        :param feature_list: an instance of FeatureList containing features to distribute into Group
         :param polygons_path: the path to a folder containing polygons as .geojson files.
-        When this param is not None, it means we want to group geometries by polygons
+        When this param is not None, it means we want to group features by polygons
         """
         self.materials = feature_list.materials
         if feature_list.is_list_of_objects_to_tile():
@@ -94,7 +94,7 @@ class Groups():
 
     def group_objects_by_instance(self, feature_list):
         """
-        Create groups of geometries. One group is created per object in the FeatureList.
+        Create groups of features. One group is created per object in the FeatureList.
         """
         groups = list()
         for objects in feature_list:
@@ -104,7 +104,7 @@ class Groups():
 
     def group_objects_with_kdtree(self, feature_list):
         """
-        Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
+        Create groups of features. The features are distributed into groups of (max) 500 objects.
         The distribution depends on the centroid of each geometry.
         """
         groups = list()
@@ -146,8 +146,8 @@ class Groups():
 
     def distribute_objects_in_polygons(self, feature_list, polygons):
         """
-        Distribute the geometries in the polygons.
-        The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
+        Distribute the features in the polygons.
+        The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
         If a geometry is not in any polygon, create a Group containing only this geometry. This group won't have addtional points.
         :param polygons: a list of Shapely polygons
         """
@@ -220,7 +220,7 @@ class Groups():
         :param group_indexes: the indexes of the groups to merge together
         :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
 
-        :return: a new group containing the geometries of all the groups
+        :return: a new group containing the features of all the groups
         """
 
         objects = list()

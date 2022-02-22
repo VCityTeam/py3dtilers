@@ -18,7 +18,7 @@ class Lod1Node(GeometryNode):
 class LoaNode(GeometryNode):
     """
     Creates 3D extrusions of the polygons given as parameter.
-    The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
+    The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     """
     loa_index = 0
 
@@ -33,8 +33,8 @@ class LoaNode(GeometryNode):
 
     def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
         """
-        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-        :param feature_list: the geometries contained in the LOA
+        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+        :param feature_list: the features contained in the LOA
         :param polygon_points: a polygon as list of 3D points
         :param int index: an index used for the LOA identifier
 

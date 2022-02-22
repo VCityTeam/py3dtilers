@@ -81,7 +81,7 @@ class CityMBuildings(CityMCityObjects):
     def sql_query_geometries(buildings_ids_arg, split_surfaces=False):
         """
         :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose geometries are sought.
+                            objects_type type objects whose features are sought.
         :param split_surfaces: a boolean specifying if the surfaces of each building will stay
                             splitted or be merged into one geometry
 
@@ -118,7 +118,7 @@ class CityMBuildings(CityMCityObjects):
     def sql_query_geometries_with_texture_coordinates(buildings_ids_arg):
         """
         :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose geometries are sought.
+                            objects_type type objects whose features are sought.
         :return: a string containing the right SQL query that should be executed.
         """
         # Because the 3DCityDB's Building table regroups both the buildings mixed

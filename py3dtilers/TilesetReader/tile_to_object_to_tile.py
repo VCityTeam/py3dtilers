@@ -75,7 +75,7 @@ class TilesToObjectsToTile(FeatureList):
 
     def __convert_triangle_soup(self, triangle_soup, materials):
         """
-        Convert the triangle soup to re-create the geometries.
+        Convert the triangle soup to re-create the features.
         :param triangle_soup: the triangle soup
         :param materials: the materials of the tile
 
@@ -115,7 +115,7 @@ class TilesToObjectsToTile(FeatureList):
         Convert a tile to an FeatureList instance.
         :param tile: the tile to convert
 
-        :return: a list of geometries
+        :return: a FeatureList
         """
         gltf = tile.get_content().body.glTF
 

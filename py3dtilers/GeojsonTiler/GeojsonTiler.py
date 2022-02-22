@@ -148,7 +148,7 @@ class GeojsonTiler(Tiler):
         The color depends on the value of the selected property of the feature.
         If the property is numeric, we determine a RGB with min and max values of this property.
         Else, we create a color per value of the property.
-        :param feature_list: An instance of FeatureList containing geometries
+        :param feature_list: An instance of FeatureList containing features
         """
         colors = []
         att_length = len(Geojson.attribute_values)

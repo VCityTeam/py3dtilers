@@ -9,8 +9,8 @@ class LodTree(GeometryTree):
     def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         """
         LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
-        In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-        A Group contains geometries and an optional polygon that will be used for LoaNodes.
+        In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+        A Group contains features and an optional polygon that will be used for LoaNodes.
         """
         root_nodes = list()
 
@@ -35,10 +35,10 @@ class LodTree(GeometryTree):
     def group_features(self, feature_list, polygons_path=None):
         """
         Distribute feature_list into groups to reduce the number of tiles.
-        :param feature_list: a list of geometries to distribute into groups.
+        :param feature_list: a FeatureList to distribute into groups.
         :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-        :return: a list of groups, each group containing geometries
+        :return: a list of groups, each group containing features
         """
         groups = Groups(feature_list, polygons_path)
         return groups.get_groups_as_list()

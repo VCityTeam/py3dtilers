@@ -42,7 +42,7 @@ geojson-tiler --path path/to/buildings.geojson --crs_in EPSG:2154 --crs_out EPSG
 
 ### Roofprint or footprint
 
-By default, the Tiler considers that the features in the GeoJSON file are __footprints__. But in BD TOPO data, the features are __roofprints__, meaning we have to substract the height of the building from the geometries to find the footprints.
+By default, the Tiler considers that the features in the GeoJSON file are __footprints__. But in BD TOPO data, the features are __roofprints__, meaning we have to substract the height of the building from the features to find the footprints.
 
 If the features are roofprints, use the flag `--is_roof` to create the buildings at the right altitude:
 

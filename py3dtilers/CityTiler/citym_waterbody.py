@@ -66,7 +66,7 @@ class CityMWaterBodies(CityMCityObjects):
     def sql_query_geometries(waterbodies_ids=None, split_surfaces=False):
         """
         :param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose geometries are sought.
+                            objects_type type objects whose features are sought.
         :param split_surfaces: a boolean specifying if the surfaces of each water body tile will stay
                             splitted or be merged into one geometry
 
@@ -99,7 +99,7 @@ class CityMWaterBodies(CityMCityObjects):
     def sql_query_geometries_with_texture_coordinates(water_bodies_ids=None):
         """
         param water_bodies_ids: a formatted list of (city)gml identifier corresponding to
-                            objects_type type objects whose geometries are sought.
+                            objects_type type objects whose features are sought.
         :return: a string containing the right sql query that should be executed.
         """
         # cityobjects_ids contains ids of water_bodies

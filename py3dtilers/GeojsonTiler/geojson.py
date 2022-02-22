@@ -169,14 +169,14 @@ class Geojsons(FeatureList):
     @staticmethod
     def parse_geojsons(features, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
-        Create 3D geometries from the GeoJson features.
-        :param features: the features to parse
+        Create 3D features from the GeoJson features.
+        :param features: the features to parse from the GeoJSON
         :param properties: the properties used when parsing the features
         :param is_roof: substract the height from the features coordinates
 
         :return: a list of triangulated Geojson instances.
         """
-        geometries = list()
+        feature_list = list()
 
         for feature in features:
             if not feature.parse_geojson(properties, is_roof, color_attribute):
@@ -184,6 +184,6 @@ class Geojsons(FeatureList):
 
             # Create geometry as expected from GLTF from an geojson file
             feature.parse_geom()
-            geometries.append(feature)
+            feature_list.append(feature)
 
-        return Geojsons(geometries)
+        return Geojsons(features)

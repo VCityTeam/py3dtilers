@@ -3,7 +3,7 @@ from pathlib import Path
 
 class ObjWriter():
     """
-    A writer which write triangles from Feature geometries into an OBJ file
+    A writer which write triangles from Feature instances into an OBJ file
     """
 
     def __init__(self):
@@ -64,12 +64,12 @@ class ObjWriter():
             indexes.append(self.get_vertex_index(vertex))
         self.triangles.append(indexes)
 
-    def add_geometries(self, geometries):
+    def add_geometries(self, feature_list):
         """
-        Add 3D geometries to the OBJ.
-        :param geometries: list of geometries
+        Add 3D features to the OBJ.
+        :param feature_list: list of features
         """
-        for geometry in geometries:
+        for geometry in feature_list:
             self.add_to_centroid(geometry.get_centroid())
             for triangle in geometry.get_geom_as_triangles():
                 self.add_triangle(triangle)

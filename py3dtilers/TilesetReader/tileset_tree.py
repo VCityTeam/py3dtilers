@@ -20,7 +20,7 @@ class TilesetTree(GeometryTree):
         Create a GeometryNode from a tile.
         :param tile: the tile to convert to node
         :param tileset_path: the path of the original tileset of the tile
-        :param offset: the offset used to translate the geometries of this tile
+        :param offset: the offset used to translate the features of this tile
 
         :return: a GeometryNode
         """

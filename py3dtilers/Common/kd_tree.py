@@ -3,9 +3,9 @@ from .feature import FeatureList
 
 def kd_tree(feature_list, maxNumObjects, depth=0):
     """
-    Distribute the geometries into FeatureList.
+    Distribute the features into FeatureList.
     The objects are distributed by their centroid.
-    :param objects: the geometries to distribute
+    :param objects: the features to distribute
     :param maxNumObjects: the max number of objects in each new group
     :param depth: the depth of the recursion
 

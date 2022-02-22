@@ -29,22 +29,22 @@ class GeometryTree():
 
     def get_root_objects(self):
         """
-        Return the geometries of the root nodes.
-        :return: list of geometries
+        Return the features of the root nodes.
+        :return: list of features
         """
         return FeatureList([node.feature_list for node in self.root_nodes])
 
     def get_leaf_objects(self):
         """
-        Return the geometries of the leaf nodes.
-        :return: list of geometries
+        Return the features of the leaf nodes.
+        :return: list of features
         """
         return FeatureList([node.feature_list for node in self.get_leaf_nodes()])
 
     def get_all_objects(self):
         """
-        Return the geometries of all the nodes.
-        :return: list of geometries
+        Return the features of all the nodes.
+        :return: list of features
         """
         objects = list()
         for node in self.root_nodes:

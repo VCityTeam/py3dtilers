@@ -9,7 +9,7 @@ class GeometryNode():
         """
         :param feature_list: an instance of FeatureList.
         :param geometric_error: the distance below which this node should be displayed.
-        :param Boolean with_texture: if this node must keep the texture of the geometries or not.
+        :param Boolean with_texture: if this node must keep the texture of the features or not.
         """
         self.feature_list = feature_list
         self.child_nodes = list()
@@ -32,22 +32,22 @@ class GeometryNode():
 
     def has_texture(self):
         """
-        Return True if this node must keep the texture of its geometries.
+        Return True if this node must keep the texture of its features.
         :return: boolean
         """
         return self.with_texture
 
     def geometries_have_texture(self):
         """
-        Check if all the geometries in the node have a texture.
+        Check if all the features in the node have a texture.
         :return: a boolean
         """
         return all([feature.has_texture() for feature in self.feature_list])
 
     def get_objects(self):
         """
-        Return the geometries in this node and the geometries in the child nodes (recursively).
-        :return: a list of geometries
+        Return the features in this node and the features in the child nodes (recursively).
+        :return: a FeatureList
         """
         objects = [self.feature_list]
         for child in self.child_nodes:

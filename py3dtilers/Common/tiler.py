@@ -39,7 +39,7 @@ class Tiler():
         self.parser.add_argument('--scale',
                                  nargs='?',
                                  type=float,
-                                 help='Scale geometries by the input factor.')
+                                 help='Scale features by the input factor.')
 
         self.parser.add_argument('--crs_in',
                                  nargs='?',
@@ -84,14 +84,14 @@ class Tiler():
         else:
             return self.args.output_dir
 
-    def write_geometries_as_obj(self, geometries, file_name):
+    def write_geometries_as_obj(self, features, file_name):
         obj_writer = ObjWriter()
-        obj_writer.add_geometries(geometries.get_objects())
+        obj_writer.add_geometries(features.get_objects())
         obj_writer.write_obj(file_name)
 
-    def change_projection(self, geometries, crs_in, crs_out):
+    def change_projection(self, features, crs_in, crs_out):
         transformer = Transformer.from_crs(crs_in, crs_out)
-        geometries.change_crs(transformer)
+        features.change_crs(transformer)
 
     def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)

@@ -84,7 +84,7 @@ class CityTiler(Tiler):
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         """
         Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of each cityObject are split into different geometries
+        Surfaces of each cityObject are split into different features
         Each surface will be an Feature
         """
         surfaces = list()
@@ -168,7 +168,7 @@ class CityTiler(Tiler):
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-        print('Creating tileset from geometries...')
+        print('Creating tileset from features...')
         return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 

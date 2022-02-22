@@ -130,6 +130,6 @@ class FromGeometryTreeToTileset():
             if extension is not None:
                 bt.add_extension(extension)
 
-        # Eventually wrap the geometries together with the optional
+        # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
         return B3dm.from_glTF(gltf, bt)

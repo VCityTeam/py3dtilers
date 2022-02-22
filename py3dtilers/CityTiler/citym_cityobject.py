@@ -57,7 +57,7 @@ class CityMCityObjects(FeatureList):
 
     def get_textures(self):
         """
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         """
         texture_dict = dict()
