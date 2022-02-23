@@ -8,6 +8,10 @@ from ..Texture import Rectangle, Node
 
 
 class Atlas():
+    """
+    An Atlas contains the texture images of a tile.
+    """
+
     def __init__(self, feature_list):
         objects_with_id_key = dict()
         textures_with_id_key = dict()
