@@ -61,11 +61,12 @@ class TilesToObjectsToTile(ObjectsToTile):
         gltf_materials = list()
         self.mat_offset = len(self.materials)
         for material in materials:
-            rgba = material['pbrMetallicRoughness']['baseColorFactor']
-            metallic_factor = material['pbrMetallicRoughness']['metallicFactor']
-            roughness_factor = material['pbrMetallicRoughness']['roughnessFactor']
-            if 'baseColorTexture' in material['pbrMetallicRoughness']:
-                index = material['pbrMetallicRoughness']['baseColorTexture']['index']
+            pbr = material['pbrMetallicRoughness']
+            rgba = pbr['baseColorFactor'] if 'baseColorFactor' in pbr else [1, 1, 1, 1]
+            metallic_factor = pbr['metallicFactor'] if 'metallicFactor' in pbr else 1
+            roughness_factor = pbr['roughnessFactor'] if 'roughnessFactor' in pbr else 1
+            if 'baseColorTexture' in pbr:
+                index = pbr['baseColorTexture']['index'] if 'index' in pbr['baseColorTexture'] else 0
                 uri = gltf.header['images'][gltf.header['textures'][index]['source']]['uri']
             else:
                 uri = None
