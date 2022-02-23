@@ -9,10 +9,13 @@ class GeometryTree():
 
     def __init__(self, root_nodes):
         self.root_nodes = root_nodes
-        self.centroid = self.get_root_objects().get_centroid()
 
-    def set_centroid(self, centroid):
-        self.centroid = centroid
+    def get_centroid(self):
+        """
+        Return the centroid of the tree.
+        The centroid of the tree is the centroid of the root nodes features.
+        """
+        return self.get_root_objects().get_centroid()
 
     def get_leaf_nodes(self):
         """

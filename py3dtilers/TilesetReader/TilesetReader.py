@@ -47,7 +47,7 @@ class TilesetTiler(Tiler):
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
             if self.args.offset[0] == 'centroid':
-                self.args.offset = tileset_tree.centroid
+                self.args.offset = tileset_tree.get_centroid()
             for objects in tileset_tree.get_all_objects():
                 objects.translate_objects(self.args.offset)
 

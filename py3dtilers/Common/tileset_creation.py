@@ -16,7 +16,7 @@ class FromGeometryTreeToTileset():
         :return: a Tileset
         """
         tileset = TileSet()
-        centroid = geometry_tree.centroid
+        centroid = geometry_tree.get_centroid()
         for root_node in geometry_tree.root_nodes:
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
