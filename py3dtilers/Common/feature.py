@@ -164,7 +164,7 @@ class FeatureList(object):
         Return (recursively) all the features in this FeatureList.
         :return: a list of Feature instances
         """
-        if not self.is_list_of_objects_to_tile():
+        if not self.is_list_of_feature_list():
             return self.objects
         else:
             objects = list()
