@@ -64,18 +64,22 @@ class CityTiler(Tiler):
         Get the surfaces of all the cityobjects and transform them into TriangleSoup
         Surfaces of the same cityObject are merged into one geometry
         """
+        cityobjects_with_geom = list()
         for cityobject in cityobjects:
             try:
                 id = '(' + str(cityobject.get_database_id()) + ')'
                 cursor.execute(objects_type.sql_query_geometries(id, False))
                 for t in cursor.fetchall():
                     geom_as_string = t[1]
-                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                    cityobject.set_box()
+                    if geom_as_string is not None:
+                        cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                        cityobject.set_box()
+                        cityobjects_with_geom.append(cityobject)
             except AttributeError:
                 continue
             except ValueError:
                 continue
+        cityobjects.objects = cityobjects_with_geom
 
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         """
