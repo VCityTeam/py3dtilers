@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 from ..Texture import Texture
 
 
-class CityMCityObject(ObjectToTile):
+class CityMCityObject(Feature):
     """
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
@@ -43,7 +43,7 @@ class CityMCityObject(ObjectToTile):
         return self.texture_uri is not None
 
 
-class CityMCityObjects(ObjectsToTile):
+class CityMCityObjects(FeatureList):
     """
     A decorated list of CityMCityObject type objects.
     """
@@ -57,17 +57,17 @@ class CityMCityObjects(ObjectsToTile):
 
     def get_textures(self):
         """
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         """
         texture_dict = dict()
         uri_dict = dict()
-        for object_to_tile in self.get_objects():
-            uri = object_to_tile.texture_uri
+        for feature in self.get_features():
+            uri = feature.texture_uri
             if uri not in uri_dict:
                 stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
                 uri_dict[uri] = Texture(stream)
-            texture_dict[object_to_tile.get_id()] = uri_dict[uri].get_cropped_texture_image(object_to_tile.geom.triangles[1])
+            texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
     @staticmethod

@@ -1,22 +1,22 @@
-from .object_to_tile import ObjectsToTile
+from .feature import FeatureList
 
 
-def kd_tree(objects_to_tile, maxNumObjects, depth=0):
+def kd_tree(feature_list, maxNumObjects, depth=0):
     """
-    Distribute the geometries into ObjectsToTile.
+    Distribute the features into FeatureList.
     The objects are distributed by their centroid.
-    :param objects: the geometries to distribute
+    :param objects: the features to distribute
     :param maxNumObjects: the max number of objects in each new group
     :param depth: the depth of the recursion
 
-    :return: a list of ObjectsToTile
+    :return: a list of FeatureList
     """
-    # objects should herited from objects_to_tile and
+    # objects should herited from feature_list and
     # dispose of a method get_centroid()
-    if (not isinstance(objects_to_tile, ObjectsToTile)):
+    if (not isinstance(feature_list, FeatureList)):
         return None
 
-    derived = objects_to_tile.__class__
+    derived = feature_list.__class__
 
     # The module argument of 2 (in the next line) hard-wires the fact that
     # this kd_tree is in fact a 2D_tree.
@@ -26,11 +26,11 @@ def kd_tree(objects_to_tile, maxNumObjects, depth=0):
     # bounding boxes of the city objects. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
 
-    objects_to_tile.objects = sorted(objects_to_tile,
-                                     key=lambda obj: obj.get_centroid()[axis])
-    median = len(objects_to_tile) // 2
-    lObjects = objects_to_tile[:median]
-    rObjects = objects_to_tile[median:]
+    feature_list.objects = sorted(feature_list,
+                                  key=lambda obj: obj.get_centroid()[axis])
+    median = len(feature_list) // 2
+    lObjects = feature_list[:median]
+    rObjects = feature_list[median:]
     pre_tiles = derived()
     if len(lObjects) > maxNumObjects:
         pre_tiles.extend(kd_tree(lObjects, maxNumObjects, depth + 1))

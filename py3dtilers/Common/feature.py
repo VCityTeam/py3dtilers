@@ -4,7 +4,7 @@ from py3dtiles import BoundingVolumeBox, TriangleSoup
 from ..Color import ColorConfig
 
 
-class ObjectToTile(object):
+class Feature(object):
     """
     The base class of all object that need to be tiled, in order to be
     used with the corresponding tiler.
@@ -80,19 +80,19 @@ class ObjectToTile(object):
         return self.texture is not None
 
 
-class ObjectsToTile(object):
+class FeatureList(object):
     """
-    A decorated list of ObjectsToTile type objects.
+    A decorated list of FeatureList type objects.
     """
 
-    # The material used by default for geometries
+    # The material used by default for features
     default_mat = None
 
     def __init__(self, objects=None):
         self.objects = list()
-        if ObjectsToTile.default_mat is None:
-            ObjectsToTile.default_mat = ColorConfig().get_default_color()
-        self.materials = [ObjectsToTile.default_mat]
+        if FeatureList.default_mat is None:
+            FeatureList.default_mat = ColorConfig().get_default_color()
+        self.materials = [FeatureList.default_mat]
         if(objects):
             self.objects.extend(objects)
 
@@ -118,13 +118,13 @@ class ObjectsToTile(object):
     def extend(self, others):
         self.objects.extend(others)
 
-    def get_objects(self):
-        if not self.is_list_of_objects_to_tile():
+    def get_features(self):
+        if not self.is_list_of_feature_list():
             return self.objects
         else:
             objects = list()
             for objs in self.objects:
-                objects.extend(objs.get_objects())
+                objects.extend(objs.get_features())
             return objects
 
     def delete_objects_ref(self):
@@ -134,9 +134,9 @@ class ObjectsToTile(object):
     def __len__(self):
         return len(self.objects)
 
-    def is_list_of_objects_to_tile(self):
-        """Check if this instance of ObjectsToTile contains others ObjectsToTile"""
-        return isinstance(self.objects[0], ObjectsToTile)
+    def is_list_of_feature_list(self):
+        """Check if this instance of FeatureList contains others FeatureList"""
+        return isinstance(self.objects[0], FeatureList)
 
     def get_centroid(self):
         """
@@ -172,62 +172,62 @@ class ObjectsToTile(object):
         """
         return self.materials[index]
 
-    def translate_objects(self, offset):
+    def translate_features(self, offset):
         """
-        Translate the geometries by substracting an offset
+        Translate the features by substracting an offset
         :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset
-        for object_to_tile in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
+            for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
                     # Must to do this this way to ensure that the new position
                     # stays in float32, which is mandatory for writing the GLTF
                     new_position.append(np.array(points - offset, dtype=np.float32))
                 new_geom.append(new_position)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
+            feature.set_triangles(new_geom)
+            feature.set_box()
 
     def change_crs(self, transformer):
         """
-        Project the geometries into another CRS
+        Project the features into another CRS
         :param transformer: the transformer used to change the crs
         """
-        for object_to_tile in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
+            for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for point in triangle:
                     new_point = transformer.transform(point[0], point[1], point[2])
                     new_position.append(np.array(new_point, dtype=np.float32))
                 new_geom.append(new_position)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
+            feature.set_triangles(new_geom)
+            feature.set_box()
 
-    def scale_objects(self, scale_factor):
+    def scale_features(self, scale_factor):
         """
-        Rescale the geometries.
+        Rescale the features.
         :param scale_factor: the factor to scale the objects
         """
         centroid = self.get_centroid()
-        for object_to_tile in self.get_objects():
+        for feature in self.get_features():
             new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
+            for triangle in feature.get_geom_as_triangles():
                 scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
                 new_geom.append(scaled_triangle)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
+            feature.set_triangles(new_geom)
+            feature.set_box()
 
     def get_textures(self):
         """
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         """
         texture_dict = dict()
-        for object_to_tile in self.get_objects():
-            texture_dict[object_to_tile.get_id()] = object_to_tile.get_texture()
+        for feature in self.get_features():
+            texture_dict[feature.get_id()] = feature.get_texture()
         return texture_dict
 
     @staticmethod

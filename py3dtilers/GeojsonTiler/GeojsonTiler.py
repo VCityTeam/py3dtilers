@@ -142,13 +142,13 @@ class GeojsonTiler(Tiler):
 
         return features
 
-    def add_colors(self, objects_to_tile, color_attribute=('NONE', 'numeric')):
+    def add_colors(self, feature_list, color_attribute=('NONE', 'numeric')):
         """
         Assigne a single-colored material to each feature.
         The color depends on the value of the selected property of the feature.
         If the property is numeric, we determine a RGB with min and max values of this property.
         Else, we create a color per value of the property.
-        :param objects_to_tile: An instance of ObjectsToTile containing geometries
+        :param feature_list: An instance of FeatureList containing features
         """
         colors = []
         att_length = len(Geojson.attribute_values)
@@ -161,19 +161,19 @@ class GeojsonTiler(Tiler):
             n = color_config.nb_colors
             for i in range(0, n, 1):
                 colors.append(color_config.get_color_by_lerp(i / n))
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
                 factor = round(factor * (len(colors) - 1)) + 1
                 feature.material_index = factor
         elif att_length > 1:
             attribute_dict = dict()
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 value = feature.feature_properties[color_attribute[0]]
                 if value not in attribute_dict:
                     attribute_dict[value] = len(colors)
                     colors.append(color_config.get_color_by_key(value))
                 feature.material_index = attribute_dict[value] + 1
-        objects_to_tile.add_materials(colors)
+        feature_list.add_materials(colors)
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """

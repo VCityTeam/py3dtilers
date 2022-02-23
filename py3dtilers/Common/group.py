@@ -2,18 +2,18 @@ import os
 from os import listdir
 import json
 from shapely.geometry import Point, Polygon
-from ..Common import ObjectsToTile
+from ..Common import FeatureList
 from ..Common import kd_tree
 
 
 class Group():
     """
-    Contains an instance of ObjectsToTile
+    Contains an instance of FeatureList
     It can also contain additional polygon points (used to create LOA nodes)
     """
 
-    def __init__(self, objects_to_tile, with_polygon=False, additional_points=list(), points_dict=dict()):
-        self.objects_to_tile = objects_to_tile
+    def __init__(self, feature_list, with_polygon=False, additional_points=list(), points_dict=dict()):
+        self.feature_list = feature_list
         self.with_polygon = with_polygon
         self.additional_points = additional_points
         self.points_dict = points_dict
@@ -23,7 +23,7 @@ class Group():
         Get the centroid of the group.
         :return: a 3D point ([x, y, z])
         """
-        return self.objects_to_tile.get_centroid()
+        return self.feature_list.get_centroid()
 
     def round_coordinates(self, coordinates, base):
         """
@@ -41,18 +41,18 @@ class Group():
     def add_materials(self, materials):
         """
         Keep only the materials used by the objects of this group,
-        among all the materials created, and add them to the geometries.
+        among all the materials created, and add them to the features.
         :param materials: an array of all the materials
         """
         seen_mat_indexes = dict()
         group_materials = []
-        for feature in self.objects_to_tile:
+        for feature in self.feature_list:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:
                 seen_mat_indexes[mat_index] = len(group_materials)
                 group_materials.append(materials[mat_index])
             feature.material_index = seen_mat_indexes[mat_index]
-        self.objects_to_tile.set_materials(group_materials)
+        self.feature_list.set_materials(group_materials)
 
 
 class Groups():
@@ -60,21 +60,21 @@ class Groups():
     Contains a list of Group
     """
 
-    def __init__(self, objects_to_tile, polygons_path=None):
+    def __init__(self, feature_list, polygons_path=None):
         """
-        Distribute the geometries contained in objects_to_tile into different Group
-        The way to distribute the geometries depends on the parameters
-        :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to distribute into Group
+        Distribute the features contained in feature_list into different Group
+        The way to distribute the features depends on the parameters
+        :param feature_list: an instance of FeatureList containing features to distribute into Group
         :param polygons_path: the path to a folder containing polygons as .geojson files.
-        When this param is not None, it means we want to group geometries by polygons
+        When this param is not None, it means we want to group features by polygons
         """
-        self.materials = objects_to_tile.materials
-        if objects_to_tile.is_list_of_objects_to_tile():
-            self.group_objects_by_instance(objects_to_tile)
+        self.materials = feature_list.materials
+        if feature_list.is_list_of_feature_list():
+            self.group_objects_by_instance(feature_list)
         elif polygons_path is not None:
-            self.group_objects_by_polygons(objects_to_tile, polygons_path)
+            self.group_objects_by_polygons(feature_list, polygons_path)
         else:
-            self.group_objects_with_kdtree(objects_to_tile)
+            self.group_objects_with_kdtree(feature_list)
         self.set_materials(self.materials)
 
     def get_groups_as_list(self):
@@ -92,29 +92,29 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_objects_by_instance(self, objects_to_tile):
+    def group_objects_by_instance(self, feature_list):
         """
-        Create groups of geometries. One group is created per object in the ObjectsToTile.
+        Create groups of features. One group is created per object in the FeatureList.
         """
         groups = list()
-        for objects in objects_to_tile:
+        for objects in feature_list:
             group = Group(objects)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_with_kdtree(self, objects_to_tile):
+    def group_objects_with_kdtree(self, feature_list):
         """
-        Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
+        Create groups of features. The features are distributed into groups of (max) 500 objects.
         The distribution depends on the centroid of each geometry.
         """
         groups = list()
-        objects = kd_tree(objects_to_tile, 500)
-        for objects_to_tile in objects:
-            group = Group(objects_to_tile)
+        objects = kd_tree(feature_list, 500)
+        for feature_list in objects:
+            group = Group(feature_list)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, objects_to_tile, polygons_path):
+    def group_objects_by_polygons(self, feature_list, polygons_path):
         """
         Load the polygons from the files in the folder
         :param polygons_path: the path to the file(s) containing polygons
@@ -142,12 +142,12 @@ class Groups():
                     if feature['geometry']['type'] == 'MultiPolygon':
                         coords = feature['geometry']['coordinates'][0][0][:-1]
                     polygons.append(Polygon(coords))
-        self.groups = self.distribute_objects_in_polygons(objects_to_tile, polygons)
+        self.groups = self.distribute_objects_in_polygons(feature_list, polygons)
 
-    def distribute_objects_in_polygons(self, objects_to_tile, polygons):
+    def distribute_objects_in_polygons(self, feature_list, polygons):
         """
-        Distribute the geometries in the polygons.
-        The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
+        Distribute the features in the polygons.
+        The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
         If a geometry is not in any polygon, create a Group containing only this geometry. This group won't have addtional points.
         :param polygons: a list of Shapely polygons
         """
@@ -156,8 +156,8 @@ class Groups():
         objects_to_tile_without_poly = {}
 
         # For each geometry, find the polygon containing it
-        for i, object_to_tile in enumerate(objects_to_tile):
-            p = Point(object_to_tile.get_centroid())
+        for i, feature in enumerate(feature_list):
+            p = Point(feature.get_centroid())
             in_polygon = False
             for index, polygon in enumerate(polygons):
                 if p.within(polygon):
@@ -174,11 +174,11 @@ class Groups():
         groups = list()
         for key in objects_to_tile_dict:
             additional_points = polygons[key].exterior.coords[:-1]
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_dict[key]])
+            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_dict[key]])
             group = Group(contained_objects, with_polygon=True, additional_points=additional_points)
             groups.append(group)
         for key in objects_to_tile_without_poly:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_without_poly[key]])
+            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_without_poly[key]])
             group = Group(contained_objects)
             groups.append(group)
 
@@ -220,7 +220,7 @@ class Groups():
         :param group_indexes: the indexes of the groups to merge together
         :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
 
-        :return: a new group containing the geometries of all the groups
+        :return: a new group containing the features of all the groups
         """
 
         objects = list()
@@ -232,10 +232,10 @@ class Groups():
                 additional_points_list.append(groups[index].additional_points)
                 points_index = len(additional_points_list) - 1
                 additional_points_dict[points_index] = []
-                for object_to_tile in groups[index].objects_to_tile:
-                    objects.append(object_to_tile)
+                for feature in groups[index].feature_list:
+                    objects.append(feature)
                     additional_points_dict[points_index].append(len(objects) - 1)
             else:
-                for object_to_tile in groups[index].objects_to_tile:
-                    objects.append(object_to_tile)
-        return Group(ObjectsToTile(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)
+                for feature in groups[index].feature_list:
+                    objects.append(feature)
+        return Group(FeatureList(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)

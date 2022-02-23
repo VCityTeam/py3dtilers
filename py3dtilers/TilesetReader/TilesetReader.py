@@ -43,13 +43,13 @@ class TilesetTiler(Tiler):
         """
         if hasattr(self.args, 'scale') and self.args.scale:
             for objects in tileset_tree.get_all_objects():
-                objects.scale_objects(self.args.scale)
+                objects.scale_features(self.args.scale)
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
             if self.args.offset[0] == 'centroid':
                 self.args.offset = tileset_tree.get_centroid()
             for objects in tileset_tree.get_all_objects():
-                objects.translate_objects(self.args.offset)
+                objects.translate_features(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
             for objects in tileset_tree.get_all_objects():
@@ -63,8 +63,8 @@ class TilesetTiler(Tiler):
 
     def transform_tileset(self, tileset):
         """
-        Creates a TilesetTree where each node has ObjectsToTile.
-        Then, apply transformations (reprojection, translation, etc) on the ObjectsToTile.
+        Creates a TilesetTree where each node has FeatureList.
+        Then, apply transformations (reprojection, translation, etc) on the FeatureList.
         :param tileset: the TileSet to transform
 
         :return: a TileSet

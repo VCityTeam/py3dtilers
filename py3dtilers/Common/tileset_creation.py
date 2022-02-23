@@ -25,8 +25,8 @@ class FromGeometryTreeToTileset():
 
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
-        objects = node.objects_to_tile
-        objects.translate_objects(centroid)
+        objects = node.feature_list
+        objects.translate_features(centroid)
 
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)
@@ -57,7 +57,7 @@ class FromGeometryTreeToTileset():
         # Else, add the created tile to its parent's children
         else:
             parent.add_child(tile)
-        node.objects_to_tile.delete_objects_ref()
+        node.feature_list.delete_objects_ref()
 
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
@@ -130,6 +130,6 @@ class FromGeometryTreeToTileset():
             if extension is not None:
                 bt.add_extension(extension)
 
-        # Eventually wrap the geometries together with the optional
+        # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
         return B3dm.from_glTF(gltf, bt)

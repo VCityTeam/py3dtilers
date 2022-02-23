@@ -40,7 +40,7 @@ tileset-reader --paths <tileset_path> --obj <obj_file_name>
 
 ### Scale
 
-Rescale the geometries by a factor:
+Rescale the features by a factor:
 
 ```bash
 tileset-reader --paths <tileset_path> --scale 10
@@ -48,7 +48,7 @@ tileset-reader --paths <tileset_path> --scale 10
 
 ### Offset
 
-Translate the geometries by __substracting__ an offset. :
+Translate the features by __substracting__ an offset. :
 
 ```bash
 tileset-reader --paths <tileset_path> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
@@ -62,7 +62,7 @@ tileset-reader --paths <tileset_path> --offset centroid
 
 ### CRS in/out
 
-Project the geometries on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the geometries in another CRS (default output CRS is EPSG:3946).
+Project the features on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the features in another CRS (default output CRS is EPSG:3946).
 
 ```bash
 tileset-reader --paths <tileset_path> --crs_in EPSG:3946 --crs_out EPSG:4171
@@ -91,3 +91,9 @@ tileset-merger --paths <tileset_path_1> <tileset_path_2> <tileset_path_3> ...
 Where `tileset_path_x` should point to the __root__ directory of a 3DTiles tileset.
 
 The produced 3DTiles tileset will be in a directory named `tileset_merger_output`.
+
+Use `--output_dir` followed by the path of a directory to choose the output:
+
+```bash
+tileset-merger --paths <tileset_path_1> <tileset_path_2> --output_dir ../merged_tileset
+```

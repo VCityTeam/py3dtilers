@@ -1,5 +1,5 @@
 from ..Common import GeometryNode, GeometryTree
-from .tile_to_object_to_tile import TilesToObjectsToTile
+from .tile_to_feature import TileToFeatureList
 
 
 class TilesetTree(GeometryTree):
@@ -20,14 +20,14 @@ class TilesetTree(GeometryTree):
         Create a GeometryNode from a tile.
         :param tile: the tile to convert to node
         :param tileset_path: the path of the original tileset of the tile
-        :param offset: the offset used to translate the geometries of this tile
+        :param offset: the offset used to translate the features of this tile
 
         :return: a GeometryNode
         """
         geometric_error = tile.attributes["geometricError"]
-        objects_to_tile = TilesToObjectsToTile(tile, tileset_path)
-        objects_to_tile.translate_objects(offset)
-        node = GeometryNode(objects_to_tile, geometric_error, with_texture=True)
+        feature_list = TileToFeatureList(tile, tileset_path)
+        feature_list.translate_features(offset)
+        node = GeometryNode(feature_list, geometric_error, with_texture=True)
 
         if 'children' in tile.attributes and len(tile.attributes['children']) > 0:
             for child in tile.attributes['children']:

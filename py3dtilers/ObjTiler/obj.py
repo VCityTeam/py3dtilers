@@ -5,7 +5,7 @@ from os import listdir
 import numpy as np
 import pywavefront
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 from ..Texture import Texture
 
 
@@ -20,7 +20,7 @@ from ..Texture import Texture
 #
 # f 1 2 3
 # f 2 3 4
-class Obj(ObjectToTile):
+class Obj(Feature):
     def __init__(self, id=None):
         super().__init__(id)
 
@@ -87,9 +87,9 @@ class Obj(ObjectToTile):
         return super().set_id(id)
 
 
-class Objs(ObjectsToTile):
+class Objs(FeatureList):
     """
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of FeatureList type objects.
     """
 
     def __init__(self, objs=None):

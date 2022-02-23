@@ -1,11 +1,11 @@
 import os
 
 from py3dtiles import TriangleSoup, GlTFMaterial
-from ..Common import ObjectsToTile, ObjectToTile
+from ..Common import FeatureList, Feature
 from ..Texture import Texture
 
 
-class TileToObjectToTile(ObjectToTile):
+class TileToFeature(Feature):
 
     def __init__(self, id=None, triangle_soup=None, mat_index=0):
         super().__init__(id)
@@ -42,13 +42,13 @@ class TileToObjectToTile(ObjectToTile):
             super().set_batchtable_data(data)
 
 
-class TilesToObjectsToTile(ObjectsToTile):
+class TileToFeatureList(FeatureList):
 
     def __init__(self, tile=None, tileset_path=None):
         self.materials = []
         self.tileset_path = tileset_path
-        objects_to_tile = self.__convert_tile(tile)
-        super().__init__(objects_to_tile)
+        feature_list = self.__convert_tile(tile)
+        super().__init__(feature_list)
 
     def __find_materials(self, gltf):
         """
@@ -75,11 +75,11 @@ class TilesToObjectsToTile(ObjectsToTile):
 
     def __convert_triangle_soup(self, triangle_soup, materials):
         """
-        Convert the triangle soup to re-create the geometries.
+        Convert the triangle soup to re-create the features.
         :param triangle_soup: the triangle soup
         :param materials: the materials of the tile
 
-        :return: an ObjectsToTile instance
+        :return: a FeatureList instance
         """
         triangles = triangle_soup.triangles[0]
         vertex_ids = triangle_soup.triangles[1]
@@ -105,26 +105,26 @@ class TilesToObjectsToTile(ObjectsToTile):
 
         objects = []
         for id in triangle_dict:
-            feature = TileToObjectToTile(str(int(id)), triangle_dict[id], material_dict[id])
+            feature = TileToFeature(str(int(id)), triangle_dict[id], material_dict[id])
             feature.set_material(material_dict[id], materials, self.tileset_path)
             objects.append(feature)
-        return ObjectsToTile(objects)
+        return FeatureList(objects)
 
     def __convert_tile(self, tile):
         """
-        Convert a tile to an ObjectsToTile instance.
+        Convert a tile to a FeatureList instance.
         :param tile: the tile to convert
 
-        :return: a list of geometries
+        :return: a FeatureList
         """
         gltf = tile.get_content().body.glTF
 
         materials = self.__find_materials(gltf)
         ts = TriangleSoup.from_glTF(gltf)
-        objects_to_tile = self.__convert_triangle_soup(ts, materials)
-        objects_to_tile.add_materials(materials)
+        feature_list = self.__convert_triangle_soup(ts, materials)
+        feature_list.add_materials(materials)
 
         bt_attributes = tile.get_content().body.batch_table.attributes
-        [feature.set_batchtable_data(bt_attributes) for feature in objects_to_tile]
+        [feature.set_batchtable_data(bt_attributes) for feature in feature_list]
 
-        return objects_to_tile
+        return feature_list

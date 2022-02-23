@@ -2,7 +2,7 @@
 import numpy as np
 from earclip import triangulate
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 
 
 # The GeoJson file contains the ground surface of urban elements, mainly buildings.
@@ -12,7 +12,7 @@ from ..Common import ObjectToTile, ObjectsToTile
 # Then we create the triangles of this face
 # and duplicate it with a Z offset to create the upper face
 # Then we create the side triangles to connect the upper and the lower faces
-class Geojson(ObjectToTile):
+class Geojson(Feature):
 
     n_feature = 0
 
@@ -158,7 +158,7 @@ class Geojson(ObjectToTile):
         return super().set_id(id)
 
 
-class Geojsons(ObjectsToTile):
+class Geojsons(FeatureList):
     """
         A decorated list of Geojson instances.
     """
@@ -169,14 +169,14 @@ class Geojsons(ObjectsToTile):
     @staticmethod
     def parse_geojsons(features, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
         """
-        Create 3D geometries from the GeoJson features.
-        :param features: the features to parse
+        Create 3D features from the GeoJson features.
+        :param features: the features to parse from the GeoJSON
         :param properties: the properties used when parsing the features
         :param is_roof: substract the height from the features coordinates
 
         :return: a list of triangulated Geojson instances.
         """
-        geometries = list()
+        feature_list = list()
 
         for feature in features:
             if not feature.parse_geojson(properties, is_roof, color_attribute):
@@ -184,6 +184,6 @@ class Geojsons(ObjectsToTile):
 
             # Create geometry as expected from GLTF from an geojson file
             feature.parse_geom()
-            geometries.append(feature)
+            feature_list.append(feature)
 
-        return Geojsons(geometries)
+        return Geojsons(features)

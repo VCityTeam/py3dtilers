@@ -65,7 +65,7 @@ The default colors are defined by a [JSON file](../Color/default_config.json). I
 
 ### Properties
 
-The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ geometries. This width will define the size of the buffer applied to the lines.  
+The Tiler uses '_height_' property to create 3D tiles from features. The '_width_' property will be used __only when parsing LineString or MultiLineString__ features. This width will define the size of the buffer applied to the lines.  
 The Tiler also uses the '_prec_' property to check if the altitude is usable and skip features without altitude (when the altitude is missing, the _prec_ is equal to 9999, so we skip features with prec >= 9999).  
 A '_z_' property can be used to specify a Z value used for all the coordinates of the feature's geometry. By default, the Z will be the values in the coordinates.
 
@@ -78,7 +78,7 @@ By default, those properties are equal to:
 
 It means the tiler will target the property 'HAUTEUR' to find the height, 'LARGEUR' to find the width and 'PREC_ALTI' to find the altitude precision. The tiler won't override the Z values by default.
 
-If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`. If the geometries don't have a Z (2D geometries), a Z can be targeted with `--z`.
+If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`. If the features don't have a Z (2D features), a Z can be targeted with `--z`.
 
 ```bash
 geojson-tiler --path <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME --z Z_NAME
@@ -108,7 +108,7 @@ geojson-tiler --path <path> --output_dir <output_directory_path>
 
 ### LOA
 
-Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA geometries of those detailed features. The LOA geometries are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA features of those detailed features. The LOA features are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
 
 To use the LOA option:
 
@@ -122,7 +122,7 @@ geojson-tiler --path <path> --loa <path-to-polygons>
 
 ___Warning__: creating LOD1 can be useless if the features are already footprints._
 
-Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 geometries of those detailed features. The LOD1 geometries are 3D extrusions of the footprints of the features.
+Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 features of those detailed features. The LOD1 features are 3D extrusions of the footprints of the features.
 
 To use the LOD1 option:
 
@@ -140,7 +140,7 @@ geojson-tiler --path <path> --obj <obj_file_name>
 
 ### Scale
 
-Rescale the geometries by a factor:
+Rescale the features by a factor:
 
 ```bash
 geojson-tiler --path <path> --scale 10
@@ -148,7 +148,7 @@ geojson-tiler --path <path> --scale 10
 
 ### Offset
 
-Translate the geometries by __substracting__ an offset. :
+Translate the features by __substracting__ an offset. :
 
 ```bash
 geojson-tiler --path <path> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
@@ -162,7 +162,7 @@ geojson-tiler --path <path> --offset centroid
 
 ### CRS in/out
 
-Project the geometries on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the geometries in another CRS (default output CRS is EPSG:3946).
+Project the features on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the features in another CRS (default output CRS is EPSG:3946).
 
 ```bash
 geojson-tiler --path <path> --crs_in EPSG:3946 --crs_out EPSG:4171

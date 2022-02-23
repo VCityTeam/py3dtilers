@@ -86,9 +86,9 @@ class CityTemporalTiler(CityTiler):
         if not buildings:
             raise ValueError(f'The database does not contain any {CityMBuildings} object')
 
-        objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+        feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name="temporal")
+        return self.create_tileset_from_geometries(feature_list, extension_name="temporal")
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)

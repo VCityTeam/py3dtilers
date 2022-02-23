@@ -49,9 +49,9 @@ class IfcTiler(Tiler):
             pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
-        objects_to_tile = IfcObjectsGeom(objects)
+        feature_list = IfcObjectsGeom(objects)
 
-        return self.create_tileset_from_geometries(objects_to_tile)
+        return self.create_tileset_from_geometries(feature_list)
 
 
 def main():
