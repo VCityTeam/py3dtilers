@@ -13,7 +13,7 @@ class GeometryNode():
         """
         self.feature_list = feature_list
         self.child_nodes = list()
-        self.with_texture = with_texture and self.geometries_have_texture()
+        self.with_texture = with_texture
         self.geometric_error = geometric_error
 
     def set_child_nodes(self, nodes=list()):
@@ -35,7 +35,7 @@ class GeometryNode():
         Return True if this node must keep the texture of its features.
         :return: boolean
         """
-        return self.with_texture
+        return self.with_texture and self.geometries_have_texture()
 
     def geometries_have_texture(self):
         """
@@ -47,12 +47,19 @@ class GeometryNode():
     def get_features(self):
         """
         Return the features in this node and the features in the child nodes (recursively).
-        :return: a FeatureList
+        :return: a list of Feature
         """
         objects = [self.feature_list]
         for child in self.child_nodes:
             objects.extend(child.get_features())
         return objects
+
+    def set_node_features_geometry(self, user_arguments=None):
+        """
+        Set the geometry of the features in this node and the features in the child nodes (recursively).
+        """
+        for features in reversed(self.get_features()):
+            features.set_features_geom(user_arguments)
 
     def get_leaves(self):
         """

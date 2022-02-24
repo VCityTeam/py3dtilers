@@ -1,7 +1,5 @@
 import numpy as np
 
-from py3dtiles import TriangleSoup
-
 from ..Common import Tiler
 from .citym_cityobject import CityMCityObjects
 from .citym_building import CityMBuildings
@@ -63,7 +61,7 @@ class CityTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def get_surfaces_merged(self, cursor, cityobjects, objects_type):
+    def set_features_centroid(self, cursor, cityobjects, objects_type):
         """
         Get the surfaces of all the cityobjects and transform them into TriangleSoup.
         Surfaces of the same cityObject are merged into one geometry.
@@ -71,94 +69,22 @@ class CityTiler(Tiler):
         :param cityobjects: the CityGML objects found in the database.
         :param objects_type: a class name among CityMCityObject derived classes.
         """
-        cityobjects_with_geom = list()
+        cityobjects_with_centroid = list()
         for cityobject in cityobjects:
             try:
-                id = '(' + str(cityobject.get_database_id()) + ')'
-                cursor.execute(objects_type.sql_query_geometries(id, False))
-                for t in cursor.fetchall():
-                    geom_as_string = t[1]
-                    if geom_as_string is not None:
-                        cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                        cityobject.set_box()
-                        cityobjects_with_geom.append(cityobject)
+                id = cityobject.get_database_id()
+                cursor.execute(objects_type.sql_query_centroid(id))
+                centroid = cursor.fetchall()
+                if centroid is not None:
+                    cityobject.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
+                    cityobjects_with_centroid.append(cityobject)
             except AttributeError:
                 continue
             except ValueError:
                 continue
-        cityobjects.objects = cityobjects_with_geom
+        cityobjects.objects = cityobjects_with_centroid
 
-    def get_surfaces_split(self, cursor, cityobjects, objects_type):
-        """
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
-        Surfaces of each cityObject are split into different features.
-        Each surface will be a Feature.
-        :param cursor: a database access cursor.
-        :param cityobjects: the CityGML objects found in the database.
-        :param objects_type: a class name among CityMCityObject derived classes.
-        """
-        surfaces = list()
-        object_type = objects_type.object_type
-        for cityobject in cityobjects:
-            id = '(' + str(cityobject.get_database_id()) + ')'
-            cursor.execute(objects_type.sql_query_geometries(id, True))
-            for t in cursor.fetchall():
-                surface_id = t[0]
-                geom_as_string = t[1]
-                if geom_as_string is not None:
-                    surface = object_type(surface_id)
-                    try:
-                        surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                        surface.set_box()
-                        surfaces.append(surface)
-                    except ValueError:
-                        continue
-                    except AttributeError:
-                        continue
-        cityobjects.objects = surfaces
-
-    def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
-        """
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
-        Surfaces of each cityObject are split into different features.
-        Each surface will be a textured Feature with a texture URI.
-        :param cursor: a database access cursor.
-        :param cityobjects: the CityGML objects found in the database.
-        :param objects_type: a class name among CityMCityObject derived classes.
-        """
-        surfaces = list()
-        object_type = objects_type.object_type
-        for cityobject in cityobjects:
-            id = '(' + str(cityobject.get_database_id()) + ')'
-            cursor.execute(objects_type.sql_query_geometries_with_texture_coordinates(id))
-            current_object_surfaces = list()
-            for t in cursor.fetchall():
-                surface_id = t[0]
-                geom_as_string = t[1]
-                uv_as_string = t[2]
-                texture_uri = t[3]
-                if geom_as_string is not None:
-                    surface = object_type(surface_id)
-                    try:
-                        associated_data = [uv_as_string]
-                        surface.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
-                        if len(surface.geom.triangles[0]) <= 0:
-                            continue
-                        surface.texture_uri = texture_uri
-                        surface.set_box()
-                        surfaces.append(surface)
-                        current_object_surfaces.append(surface)
-                    except ValueError:
-                        continue
-                    except AttributeError:
-                        continue
-            cursor.execute(objects_type.sql_query_centroid(cityobject.get_database_id()))
-            centroid = cursor.fetchall()
-            for s in current_object_surfaces:
-                s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
-        cityobjects.objects = surfaces
-
-    def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
+    def from_3dcitydb(self, cursor, objects_type):
         """
         Create a 3DTiles tileset from the objects contained in a database.
         :param cursor: a database access cursor.
@@ -184,6 +110,8 @@ class CityTiler(Tiler):
             else:
                 print('Retrieving merged surfaces from database...')
                 self.get_surfaces_merged(cursor, cityobjects, objects_type)
+            raise ValueError(f'The database does not contain any {objects_type} object')
+        self.set_features_centroid(cursor, cityobjects, objects_type)
 
         extension_name = None
         if CityMBuildings.is_bth_set():
@@ -217,9 +145,7 @@ def main():
 
     objects_type.set_cursor(cursor)
 
-    split_surfaces = args.split_surfaces or args.with_texture
-
-    tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces)
+    tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

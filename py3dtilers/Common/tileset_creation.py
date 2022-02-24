@@ -1,7 +1,9 @@
 import numpy as np
+from pyproj import Transformer
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Texture import Atlas
+# from .obj_writer import ObjWriter
 
 
 class FromGeometryTreeToTileset():
@@ -13,7 +15,7 @@ class FromGeometryTreeToTileset():
     nb_nodes = 0
 
     @staticmethod
-    def convert_to_tileset(geometry_tree, extension_name=None):
+    def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None):
         """
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
@@ -26,11 +28,35 @@ class FromGeometryTreeToTileset():
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         centroid = geometry_tree.get_centroid()
         for root_node in geometry_tree.root_nodes:
+            root_node.set_node_features_geometry(user_arguments)
+            FromGeometryTreeToTileset.__transform_node(root_node, centroid, user_arguments)
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", flush=True)
         return tileset
+
+    @staticmethod
+    def __transform_node(node, tree_centroid, user_args):
+        if hasattr(user_args, 'scale') and user_args.scale:
+            for objects in node.get_features():
+                objects.scale_features(user_args.scale)
+
+        if not all(v == 0 for v in user_args.offset) or user_args.offset[0] == 'centroid':
+            if user_args.offset[0] == 'centroid':
+                user_args.offset = tree_centroid
+            for objects in node.get_features():
+                objects.translate_features(user_args.offset)
+
+        if not user_args.crs_in == user_args.crs_out:
+            for objects in node.get_features():
+                transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
+                objects.change_crs(transformer)
+
+        # if user_args.obj is not None:
+        #     obj_writer = ObjWriter()
+        #     obj_writer.add_geometries(features.get_features())
+        #     obj_writer.write_obj(user_args.obj)
 
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):

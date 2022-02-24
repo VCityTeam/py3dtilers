@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
+from py3dtiles import TriangleSoup
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -53,6 +54,39 @@ class CityMCityObject(Feature):
         :return: a boolean
         """
         return self.texture_uri is not None
+
+    def get_geom(self, user_arguments=None):
+        """
+        Set the geometry of the feature.
+        :return: a list of Feature
+        """
+        id = '(' + str(self.get_database_id()) + ')'
+        cursor = self.objects_type.get_cursor()
+        cityobjects_with_geom = list()
+        if user_arguments.with_texture:
+            cursor.execute(self.objects_type.sql_query_geometries_with_texture_coordinates(id))
+        else:
+            cursor.execute(self.objects_type.sql_query_geometries(id, user_arguments.split_surfaces))
+        for t in cursor.fetchall():
+            try:
+                feature_id = t[0]
+                geom_as_string = t[1]
+                if geom_as_string is not None:
+                    cityobject = self.__class__(feature_id)
+                    associated_data = []
+
+                    if user_arguments.with_texture:
+                        uv_as_string = t[2]
+                        texture_uri = t[3]
+                        cityobject.texture_uri = texture_uri
+                        associated_data = [uv_as_string]
+
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
+                    cityobject.set_box()
+                    cityobjects_with_geom.append(cityobject)
+            except Exception:
+                continue
+        return cityobjects_with_geom
 
 
 class CityMCityObjects(FeatureList):
