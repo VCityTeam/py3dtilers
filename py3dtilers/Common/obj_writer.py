@@ -67,7 +67,7 @@ class ObjWriter():
     def add_geometries(self, feature_list):
         """
         Add 3D features to the OBJ.
-        :param feature_list: list of features
+        :param feature_list: a FeatureList
         """
         for geometry in feature_list:
             self.add_to_centroid(geometry.get_centroid())

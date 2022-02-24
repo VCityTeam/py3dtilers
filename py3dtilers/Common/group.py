@@ -105,7 +105,7 @@ class Groups():
     def group_objects_with_kdtree(self, feature_list):
         """
         Create groups of features. The features are distributed into groups of (max) 500 objects.
-        The distribution depends on the centroid of each geometry.
+        The distribution depends on the centroid of each feature.
         """
         groups = list()
         objects = kd_tree(feature_list, 500)
@@ -148,14 +148,14 @@ class Groups():
         """
         Distribute the features in the polygons.
         The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
-        If a geometry is not in any polygon, create a Group containing only this geometry. This group won't have addtional points.
+        If a feature is not in any polygon, create a Group containing only this feature. This group won't have addtional points.
         :param polygons: a list of Shapely polygons
         """
 
         objects_to_tile_dict = {}
         objects_to_tile_without_poly = {}
 
-        # For each geometry, find the polygon containing it
+        # For each feature, find the polygon containing it
         for i, feature in enumerate(feature_list):
             p = Point(feature.get_centroid())
             in_polygon = False

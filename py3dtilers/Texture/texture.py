@@ -3,6 +3,10 @@ from PIL import Image
 
 
 class Texture():
+    """
+    A Texture contains a Pillow Image.
+    A Texture can be cropped.
+    """
 
     folder = None
 
@@ -15,12 +19,21 @@ class Texture():
 
     def get_cropped_texture_image(self, uvs):
         """
+        Return a part of the original image.
+        The original is cropped to keep only the area defined by the UVs.
         :param uvs: the uvs
+        :return: a Pillow Image
         """
         image = self.cropImage(self.image, uvs)
         return image.convert("RGBA")
 
-    def cropImage(self, image, triangles):
+    def cropImage(self, image, uvs):
+        """
+        Crop the image to keep the area defined by the uvs.
+        :param image: the Pillow Image to crop.
+        :param uvs: the uvs defining the area.
+        :return: a Pillow Image
+        """
         minX = 2
         maxX = -1
 
@@ -28,7 +41,7 @@ class Texture():
         maxY = -1
 
         texture_size = image.size
-        for uv_triangle in triangles:
+        for uv_triangle in uvs:
             for uv in uv_triangle:
                 if uv[0] < minX:
                     minX = uv[0]
@@ -41,10 +54,15 @@ class Texture():
 
         cropped_image = image.crop((minX * texture_size[0], minY * texture_size[1], maxX * texture_size[0], maxY * texture_size[1]))
 
-        self.updateUvs(triangles, [minX, minY, maxX, maxY])
+        self.updateUvs(uvs, [minX, minY, maxX, maxY])
         return cropped_image
 
     def updateUvs(self, uvs, rect):
+        """
+        Update the UVs to match the new ratio.
+        :param uvs: the uvs
+        :param rect: the area (minX, minY, maxX, maxY)
+        """
         offsetX = rect[0]
         offsetY = rect[1]
         if rect[2] != rect[0]:

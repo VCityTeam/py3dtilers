@@ -12,6 +12,10 @@ from .database_accesses import open_data_base
 
 
 class CityTiler(Tiler):
+    """
+    The CityTiler can read 3DCityDB databases and create 3DTiles.
+    The database can contain buildings, bridges, relief or water bodies.
+    """
 
     def __init__(self):
         super().__init__()
@@ -61,8 +65,11 @@ class CityTiler(Tiler):
 
     def get_surfaces_merged(self, cursor, cityobjects, objects_type):
         """
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of the same cityObject are merged into one geometry
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of the same cityObject are merged into one geometry.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         """
         cityobjects_with_geom = list()
         for cityobject in cityobjects:
@@ -83,9 +90,12 @@ class CityTiler(Tiler):
 
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         """
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of each cityObject are split into different features
-        Each surface will be a Feature
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a Feature.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         """
         surfaces = list()
         object_type = objects_type.object_type
@@ -108,6 +118,14 @@ class CityTiler(Tiler):
         cityobjects.objects = surfaces
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
+        """
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a textured Feature with a texture URI.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        """
         surfaces = list()
         object_type = objects_type.object_type
         for cityobject in cityobjects:
@@ -142,6 +160,7 @@ class CityTiler(Tiler):
 
     def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         """
+        Create a 3DTiles tileset from the objects contained in a database.
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
                             For example, objects_type can be "CityMBuilding".
@@ -174,10 +193,9 @@ class CityTiler(Tiler):
 
 def main():
     """
+    Run the CityTiler: create a 3DTiles tileset from the CityGML objcts contained in a 3DCityDB database.
+    The tileset is writen in 'junk_<object_type>/' by default.
     :return: no return value
-
-    this function creates a repository name "junk_object_type" where the
-    tileset is stored.
     """
     city_tiler = CityTiler()
     city_tiler.parse_command_line()

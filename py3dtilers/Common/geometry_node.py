@@ -1,8 +1,8 @@
 class GeometryNode():
     """
     Each node contains an instance of FeatureList
-    and a list of child nodes
-    A node will correspond to a tile of the 3dtiles tileset
+    and a list of child nodes.
+    A node will correspond to a tile of the 3dtiles tileset.
     """
 
     def __init__(self, feature_list=None, geometric_error=50, with_texture=False):

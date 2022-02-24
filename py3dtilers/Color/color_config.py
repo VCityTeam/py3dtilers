@@ -5,6 +5,11 @@ from py3dtiles import GlTFMaterial
 
 
 class ColorConfig():
+    """
+    A ColorConfig contains the color codes used to create colored materials.
+    The color codes can be loaded from a JSON file.
+    """
+
     default_color = [1, 1, 1]
 
     min_color = [0, 1, 0]

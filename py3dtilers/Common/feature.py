@@ -33,35 +33,64 @@ class Feature(object):
         self.set_id(id)
 
     def set_id(self, id):
+        """
+        Set the id of this feature.
+        :param id: an id
+        """
         self.id = id
 
     def get_id(self):
+        """
+        Return the id of the feature.
+        """
         return self.id
 
     def set_batchtable_data(self, data):
+        """
+        Set the batch table data associed to this feature.
+        :param data: a dictionary
+        """
         self.batchtable_data = data
 
     def get_batchtable_data(self):
+        """
+        Return the batch table data associed to this feature.
+        :return: a dictionary
+        """
         return self.batchtable_data
 
     def get_centroid(self):
+        """
+        Return the centroid of this feature.
+        :return: a 3D point as np array
+        """
         return self.centroid
 
     def get_bounding_volume_box(self):
+        """
+        Return the BoundingVolumeBox of this feature.
+        :return: a BoundingVolumeBox
+        """
         return self.box
 
     def get_geom_as_triangles(self):
+        """
+        Return the triangles of this feature.
+        :return: a list of triangles
+        """
         return self.geom.triangles[0]
 
     def set_triangles(self, triangles):
+        """
+        Set the triangles of this feature.
+        :param triangles: a list of triangles.
+        """
         self.geom.triangles[0] = triangles
 
     def set_box(self):
         """
-        Parameters
-        ----------
-        Returns
-        -------
+        Set the BoundingVolumeBox of this feature from its triangles.
+        Also set the centroid.
         """
         bbox = self.geom.getBbox()
         self.box = BoundingVolumeBox()
@@ -71,12 +100,24 @@ class Feature(object):
         self.centroid = np.array(self.box.get_center())
 
     def get_texture(self):
+        """
+        Return the texture image of this feature.
+        :return: a Pillow image
+        """
         return self.texture
 
     def set_texture(self, texture):
+        """
+        Set the texture image of this feature.
+        :param texture: a Pillow image
+        """
         self.texture = texture
 
     def has_texture(self):
+        """
+        Check if the feature has a texture.
+        :return: a boolean
+        """
         return self.texture is not None
 
 
@@ -119,6 +160,10 @@ class FeatureList(object):
         self.objects.extend(others)
 
     def get_features(self):
+        """
+        Return (recursively) all the features in this FeatureList.
+        :return: a list of Feature instances
+        """
         if not self.is_list_of_feature_list():
             return self.objects
         else:
@@ -232,8 +277,10 @@ class FeatureList(object):
 
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
+        """Virtual method to create a batch table extension."""
         pass
 
     @staticmethod
     def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+        """Virtual method to create a bounding volume box extension."""
         pass

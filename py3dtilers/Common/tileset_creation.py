@@ -5,6 +5,9 @@ from ..Texture import Atlas
 
 
 class FromGeometryTreeToTileset():
+    """
+    A static class to create a 3DTiles tileset from a GeometryTree.
+    """
 
     @staticmethod
     def convert_to_tileset(geometry_tree, extension_name=None):

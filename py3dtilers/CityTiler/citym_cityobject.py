@@ -17,12 +17,24 @@ class CityMCityObject(Feature):
         self.texture_uri = None
 
     def get_database_id(self):
+        """
+        Return the database id of this object. The id from the database is used as the main id.
+        :return: the id of the object
+        """
         return super().get_id()
 
     def set_database_id(self, id):
+        """
+        Set the database id of this object. The id from the database is used as the main id.
+        :param id: the id
+        """
         super().set_id(id)
 
     def set_gml_id(self, gml_id):
+        """
+        Set the gml id of this object. The gml id is kept into the batch table.
+        :param gml_id: the id of the object
+        """
         batch_table_data = {
             'gml_id': gml_id
         }
@@ -72,10 +84,18 @@ class CityMCityObjects(FeatureList):
 
     @staticmethod
     def set_cursor(cursor):
+        """
+        Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+        :param cursor: the cursor of the current database
+        """
         CityMCityObjects.gml_cursor = cursor
 
     @staticmethod
     def get_cursor():
+        """
+        Return the current cursor to be able to execute queries in the database.
+        :return: the cursor of the current database
+        """
         return CityMCityObjects.gml_cursor
 
     @staticmethod
@@ -172,6 +192,13 @@ class CityMCityObjects(FeatureList):
 
     @staticmethod
     def get_image_from_binary(textureUri, objects_type, cursor):
+        """
+        Return the texture image as a byte stream.
+        :param textureUri: the URI of the texture image.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        :param cursor: a database access cursor
+        :return: an image as bytes
+        """
         imageBinaryData = objects_type.retrieve_textures(
             cursor,
             textureUri,

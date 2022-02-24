@@ -3,6 +3,10 @@ from .geojson import Geojson
 
 
 class GeojsonPolygon(Geojson):
+    """
+    The Python representation of a GeoJSON polygon or multipolygon feature.
+    A GeojsonPolygon instance has a geometry and properties.
+    """
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False):
         super().__init__(id, feature_properties, feature_geometry)

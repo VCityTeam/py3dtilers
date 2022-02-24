@@ -4,7 +4,7 @@ from ..Common import ExtrudedPolygon
 
 class Lod1Node(GeometryNode):
     """
-    Creates 3D extrusions of the footprint of each geometry in the feature_list parameter of the constructor.
+    Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.
     """
 
     def __init__(self, feature_list, geometric_error=50):
