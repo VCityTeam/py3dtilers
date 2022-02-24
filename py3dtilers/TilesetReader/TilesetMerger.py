@@ -64,11 +64,12 @@ class TilesetMerger():
         header = tile.get_content().body.glTF.header
         if 'images' in header:
             for image in header['images']:
-                path = Path(os.path.join(tileset_path, "tiles", image['uri']))
-                new_uri = f"{path.stem}_{index}_{path.suffix}"
-                image['uri'] = new_uri
-                new_file_path = Path(os.path.join(self.output_path, "tiles"), new_uri)
-                shutil.copyfile(path, new_file_path)
+                if 'uri' in image: # copy only external images (i.e. the one that have a uri)
+                    path = Path(os.path.join(tileset_path, "tiles", image['uri']))
+                    new_uri = f"{path.stem}_{index}_{path.suffix}"
+                    image['uri'] = new_uri
+                    new_file_path = Path(os.path.join(self.output_path, "tiles"), new_uri)
+                    shutil.copyfile(path, new_file_path)
 
     def copy_tileset_texture_images(self, tileset, tileset_of_root_tiles):
         """
