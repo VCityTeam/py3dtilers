@@ -63,13 +63,13 @@ class CityMBridges(CityMCityObjects):
         if not bridges:
             # No specific bridges were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
         else:
             bridge_gmlids = [n.get_gml_id() for n in bridges]
             bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
-            query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE cityobject.gmlid IN &#34; + bridge_gmlids_as_string + &#34; &#34; + \
                     &#34;AND bridge.id=bridge.bridge_root_id&#34;
@@ -190,14 +190,28 @@ class CityMBridges(CityMCityObjects):
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject">CityMCityObject</a></li>
-<li><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></li>
+<li><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject">CityMCityObject</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id">get_database_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id">get_gml_id</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_box" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id">set_database_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_gml_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_gml_id">set_gml_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
 </ul>
 </li>
 </ul>
@@ -234,13 +248,13 @@ class CityMBridges(CityMCityObjects):
         if not bridges:
             # No specific bridges were sought. We thus retrieve all the ones
             # we can find in the database:
-            query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
         else:
             bridge_gmlids = [n.get_gml_id() for n in bridges]
             bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
-            query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE cityobject.gmlid IN &#34; + bridge_gmlids_as_string + &#34; &#34; + \
                     &#34;AND bridge.id=bridge.bridge_root_id&#34;
@@ -331,7 +345,7 @@ class CityMBridges(CityMCityObjects):
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
-<li><a title="py3dtilers.Common.object_to_tile.ObjectsToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile">ObjectsToTile</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -477,13 +491,13 @@ def sql_query_objects(bridges):
     if not bridges:
         # No specific bridges were sought. We thus retrieve all the ones
         # we can find in the database:
-        query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+        query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                 &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                 &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
     else:
         bridge_gmlids = [n.get_gml_id() for n in bridges]
         bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
-        query = &#34;SELECT bridge.id, BOX3D(cityobject.envelope), cityobject.gmlid &#34; + \
+        query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                 &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                 &#34;WHERE cityobject.gmlid IN &#34; + bridge_gmlids_as_string + &#34; &#34; + \
                 &#34;AND bridge.id=bridge.bridge_root_id&#34;
@@ -496,20 +510,26 @@ def sql_query_objects(bridges):
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.add_materials">add_materials</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.change_crs">change_crs</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_centroid">get_centroid</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_material">get_material</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_size" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_size">get_size</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_textures">get_textures</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_objects_to_tile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.is_list_of_objects_to_tile">is_list_of_objects_to_tile</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.scale_objects">scale_objects</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.translate_objects">translate_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
 </ul>
 </li>
 </ul>

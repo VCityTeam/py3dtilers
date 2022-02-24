@@ -26,10 +26,15 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .geojson import Geojson
+<pre><code class="python">from shapely.geometry import LinearRing
+from .geojson import Geojson
 
 
 class GeojsonPolygon(Geojson):
+    &#34;&#34;&#34;
+    The Python representation of a GeoJSON polygon or multipolygon feature.
+    A GeojsonPolygon instance has a geometry and properties.
+    &#34;&#34;&#34;
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False):
         super().__init__(id, feature_properties, feature_geometry)
@@ -40,9 +45,9 @@ class GeojsonPolygon(Geojson):
         super().parse_geojson(properties, is_roof, color_attribute)
 
         if self.is_multi_geom:
-            coords = self.feature_geometry[&#39;coordinates&#39;][0][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry[&#39;coordinates&#39;][0][0])
         else:
-            coords = self.feature_geometry[&#39;coordinates&#39;][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry[&#39;coordinates&#39;][0])
         if is_roof:
             for coord in coords:
                 coord[2] -= self.height
@@ -51,7 +56,17 @@ class GeojsonPolygon(Geojson):
         z_name = properties[properties.index(&#39;z&#39;) + 1]
         self.set_z(coords, z_name)
 
-        return True</code></pre>
+        return True
+
+    def get_clockwise_polygon(self, polygon):
+        &#34;&#34;&#34;
+        Return a clockwise polygon without the last point (the last point is the same as the first one).
+        :return: a list of points
+        &#34;&#34;&#34;
+        if LinearRing(polygon).is_ccw:
+            return polygon[:-1][::-1]
+        else:
+            return polygon[:-1]</code></pre>
 </details>
 </section>
 <section>
@@ -68,14 +83,18 @@ class GeojsonPolygon(Geojson):
 <span>(</span><span>id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The base class of all object that need to be tiled, in order to be
-used with the corresponding tiler.</p>
+<div class="desc"><p>The Python representation of a GeoJSON polygon or multipolygon feature.
+A GeojsonPolygon instance has a geometry and properties.</p>
 <p>:param id: given identifier</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GeojsonPolygon(Geojson):
+    &#34;&#34;&#34;
+    The Python representation of a GeoJSON polygon or multipolygon feature.
+    A GeojsonPolygon instance has a geometry and properties.
+    &#34;&#34;&#34;
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False):
         super().__init__(id, feature_properties, feature_geometry)
@@ -86,9 +105,9 @@ used with the corresponding tiler.</p>
         super().parse_geojson(properties, is_roof, color_attribute)
 
         if self.is_multi_geom:
-            coords = self.feature_geometry[&#39;coordinates&#39;][0][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry[&#39;coordinates&#39;][0][0])
         else:
-            coords = self.feature_geometry[&#39;coordinates&#39;][0][:-1]
+            coords = self.get_clockwise_polygon(self.feature_geometry[&#39;coordinates&#39;][0])
         if is_roof:
             for coord in coords:
                 coord[2] -= self.height
@@ -97,22 +116,67 @@ used with the corresponding tiler.</p>
         z_name = properties[properties.index(&#39;z&#39;) + 1]
         self.set_z(coords, z_name)
 
-        return True</code></pre>
+        return True
+
+    def get_clockwise_polygon(self, polygon):
+        &#34;&#34;&#34;
+        Return a clockwise polygon without the last point (the last point is the same as the first one).
+        :return: a list of points
+        &#34;&#34;&#34;
+        if LinearRing(polygon).is_ccw:
+            return polygon[:-1][::-1]
+        else:
+            return polygon[:-1]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></li>
-<li><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></li>
+<li><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
 </ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.GeojsonTiler.geojson_polygon.GeojsonPolygon.get_clockwise_polygon"><code class="name flex">
+<span>def <span class="ident">get_clockwise_polygon</span></span>(<span>self, polygon)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a clockwise polygon without the last point (the last point is the same as the first one).
+:return: a list of points</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_clockwise_polygon(self, polygon):
+    &#34;&#34;&#34;
+    Return a clockwise polygon without the last point (the last point is the same as the first one).
+    :return: a list of points
+    &#34;&#34;&#34;
+    if LinearRing(polygon).is_ccw:
+        return polygon[:-1][::-1]
+    else:
+        return polygon[:-1]</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.custom_triangulate" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.custom_triangulate">custom_triangulate</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.has_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.has_texture">has_texture</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.height" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.height">height</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.parse_geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.parse_geojson">parse_geojson</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.parse_geom" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.parse_geom">parse_geom</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_box" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_z" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.set_z">set_z</a></code></li>
 </ul>
 </li>
@@ -136,6 +200,9 @@ used with the corresponding tiler.</p>
 <ul>
 <li>
 <h4><code><a title="py3dtilers.GeojsonTiler.geojson_polygon.GeojsonPolygon" href="#py3dtilers.GeojsonTiler.geojson_polygon.GeojsonPolygon">GeojsonPolygon</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.GeojsonTiler.geojson_polygon.GeojsonPolygon.get_clockwise_polygon" href="#py3dtilers.GeojsonTiler.geojson_polygon.GeojsonPolygon.get_clockwise_polygon">get_clockwise_polygon</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

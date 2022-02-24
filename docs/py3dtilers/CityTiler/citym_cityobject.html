@@ -27,14 +27,13 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
-import sys
 from io import BytesIO
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 from ..Texture import Texture
 
 
-class CityMCityObject(ObjectToTile):
+class CityMCityObject(Feature):
     &#34;&#34;&#34;
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
@@ -46,12 +45,24 @@ class CityMCityObject(ObjectToTile):
         self.texture_uri = None
 
     def get_database_id(self):
+        &#34;&#34;&#34;
+        Return the database id of this object. The id from the database is used as the main id.
+        :return: the id of the object
+        &#34;&#34;&#34;
         return super().get_id()
 
     def set_database_id(self, id):
+        &#34;&#34;&#34;
+        Set the database id of this object. The id from the database is used as the main id.
+        :param id: the id
+        &#34;&#34;&#34;
         super().set_id(id)
 
     def set_gml_id(self, gml_id):
+        &#34;&#34;&#34;
+        Set the gml id of this object. The gml id is kept into the batch table.
+        :param gml_id: the id of the object
+        &#34;&#34;&#34;
         batch_table_data = {
             &#39;gml_id&#39;: gml_id
         }
@@ -64,8 +75,15 @@ class CityMCityObject(ObjectToTile):
         &#34;&#34;&#34;
         return super().get_batchtable_data()[&#39;gml_id&#39;]
 
+    def has_texture(self):
+        &#34;&#34;&#34;
+        Return True if the feature has a texture URI.
+        :return: a boolean
+        &#34;&#34;&#34;
+        return self.texture_uri is not None
 
-class CityMCityObjects(ObjectsToTile):
+
+class CityMCityObjects(FeatureList):
     &#34;&#34;&#34;
     A decorated list of CityMCityObject type objects.
     &#34;&#34;&#34;
@@ -79,25 +97,33 @@ class CityMCityObjects(ObjectsToTile):
 
     def get_textures(self):
         &#34;&#34;&#34;
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         &#34;&#34;&#34;
         texture_dict = dict()
         uri_dict = dict()
-        for object_to_tile in self.get_objects():
-            uri = object_to_tile.texture_uri
+        for feature in self.get_features():
+            uri = feature.texture_uri
             if uri not in uri_dict:
                 stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
                 uri_dict[uri] = Texture(stream)
-            texture_dict[object_to_tile.get_id()] = uri_dict[uri].get_cropped_texture_image(object_to_tile.geom.triangles[1])
+            texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
     @staticmethod
     def set_cursor(cursor):
+        &#34;&#34;&#34;
+        Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+        :param cursor: the cursor of the current database
+        &#34;&#34;&#34;
         CityMCityObjects.gml_cursor = cursor
 
     @staticmethod
     def get_cursor():
+        &#34;&#34;&#34;
+        Return the current cursor to be able to execute queries in the database.
+        :return: the cursor of the current database
+        &#34;&#34;&#34;
         return CityMCityObjects.gml_cursor
 
     @staticmethod
@@ -141,17 +167,9 @@ class CityMCityObjects(ObjectsToTile):
             for cityobject in cityobjects:
                 objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
 
-        for t in cursor.fetchall():
-            object_id = t[0]
-            if not t[1]:
-                print(&#34;Warning: object with id &#34;, object_id)
-                print(&#34;         has no &#39;cityobject.envelope&#39;.&#34;)
-                if no_input:
-                    print(&#34;     Dropping this object (downstream trouble ?)&#34;)
-                    continue
-                print(&#34;     Exiting (is the database corrupted ?)&#34;)
-                sys.exit(1)
-            gml_id = t[2]
+        for obj in cursor.fetchall():
+            object_id = obj[0]
+            gml_id = obj[1]
             if no_input:
                 new_object = object_type(object_id, gml_id)
                 result_objects.append(new_object)
@@ -202,6 +220,13 @@ class CityMCityObjects(ObjectsToTile):
 
     @staticmethod
     def get_image_from_binary(textureUri, objects_type, cursor):
+        &#34;&#34;&#34;
+        Return the texture image as a byte stream.
+        :param textureUri: the URI of the texture image.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        :param cursor: a database access cursor
+        :return: an image as bytes
+        &#34;&#34;&#34;
         imageBinaryData = objects_type.retrieve_textures(
             cursor,
             textureUri,
@@ -252,7 +277,7 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class CityMCityObject(ObjectToTile):
+<pre><code class="python">class CityMCityObject(Feature):
     &#34;&#34;&#34;
     The base class of all thematic classes within CityGML’s data model is the abstract class
     _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).
@@ -264,12 +289,24 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
         self.texture_uri = None
 
     def get_database_id(self):
+        &#34;&#34;&#34;
+        Return the database id of this object. The id from the database is used as the main id.
+        :return: the id of the object
+        &#34;&#34;&#34;
         return super().get_id()
 
     def set_database_id(self, id):
+        &#34;&#34;&#34;
+        Set the database id of this object. The id from the database is used as the main id.
+        :param id: the id
+        &#34;&#34;&#34;
         super().set_id(id)
 
     def set_gml_id(self, gml_id):
+        &#34;&#34;&#34;
+        Set the gml id of this object. The gml id is kept into the batch table.
+        :param gml_id: the id of the object
+        &#34;&#34;&#34;
         batch_table_data = {
             &#39;gml_id&#39;: gml_id
         }
@@ -280,11 +317,18 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
         :return: the (city)gml identifier of an object that should be encountered
                 in the database.
         &#34;&#34;&#34;
-        return super().get_batchtable_data()[&#39;gml_id&#39;]</code></pre>
+        return super().get_batchtable_data()[&#39;gml_id&#39;]
+
+    def has_texture(self):
+        &#34;&#34;&#34;
+        Return True if the feature has a texture URI.
+        :return: a boolean
+        &#34;&#34;&#34;
+        return self.texture_uri is not None</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></li>
+<li><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -299,12 +343,17 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
 <span>def <span class="ident">get_database_id</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return the database id of this object. The id from the database is used as the main id.
+:return: the id of the object</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_database_id(self):
+    &#34;&#34;&#34;
+    Return the database id of this object. The id from the database is used as the main id.
+    :return: the id of the object
+    &#34;&#34;&#34;
     return super().get_id()</code></pre>
 </details>
 </dd>
@@ -326,16 +375,39 @@ in the database.</p></div>
     return super().get_batchtable_data()[&#39;gml_id&#39;]</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture"><code class="name flex">
+<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return True if the feature has a texture URI.
+:return: a boolean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_texture(self):
+    &#34;&#34;&#34;
+    Return True if the feature has a texture URI.
+    :return: a boolean
+    &#34;&#34;&#34;
+    return self.texture_uri is not None</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id"><code class="name flex">
 <span>def <span class="ident">set_database_id</span></span>(<span>self, id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set the database id of this object. The id from the database is used as the main id.
+:param id: the id</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_database_id(self, id):
+    &#34;&#34;&#34;
+    Set the database id of this object. The id from the database is used as the main id.
+    :param id: the id
+    &#34;&#34;&#34;
     super().set_id(id)</code></pre>
 </details>
 </dd>
@@ -343,12 +415,17 @@ in the database.</p></div>
 <span>def <span class="ident">set_gml_id</span></span>(<span>self, gml_id)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set the gml id of this object. The gml id is kept into the batch table.
+:param gml_id: the id of the object</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_gml_id(self, gml_id):
+    &#34;&#34;&#34;
+    Set the gml id of this object. The gml id is kept into the batch table.
+    :param gml_id: the id of the object
+    &#34;&#34;&#34;
     batch_table_data = {
         &#39;gml_id&#39;: gml_id
     }
@@ -358,9 +435,19 @@ in the database.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></b></code>:
+<li><code><b><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectToTile.set_box" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
 </ul>
 </li>
 </ul>
@@ -375,7 +462,7 @@ in the database.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class CityMCityObjects(ObjectsToTile):
+<pre><code class="python">class CityMCityObjects(FeatureList):
     &#34;&#34;&#34;
     A decorated list of CityMCityObject type objects.
     &#34;&#34;&#34;
@@ -389,25 +476,33 @@ in the database.</p></div>
 
     def get_textures(self):
         &#34;&#34;&#34;
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
+        Return a dictionary of all the textures where the keys are the IDs of the features.
         :return: a dictionary of textures
         &#34;&#34;&#34;
         texture_dict = dict()
         uri_dict = dict()
-        for object_to_tile in self.get_objects():
-            uri = object_to_tile.texture_uri
+        for feature in self.get_features():
+            uri = feature.texture_uri
             if uri not in uri_dict:
                 stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
                 uri_dict[uri] = Texture(stream)
-            texture_dict[object_to_tile.get_id()] = uri_dict[uri].get_cropped_texture_image(object_to_tile.geom.triangles[1])
+            texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
     @staticmethod
     def set_cursor(cursor):
+        &#34;&#34;&#34;
+        Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+        :param cursor: the cursor of the current database
+        &#34;&#34;&#34;
         CityMCityObjects.gml_cursor = cursor
 
     @staticmethod
     def get_cursor():
+        &#34;&#34;&#34;
+        Return the current cursor to be able to execute queries in the database.
+        :return: the cursor of the current database
+        &#34;&#34;&#34;
         return CityMCityObjects.gml_cursor
 
     @staticmethod
@@ -451,17 +546,9 @@ in the database.</p></div>
             for cityobject in cityobjects:
                 objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
 
-        for t in cursor.fetchall():
-            object_id = t[0]
-            if not t[1]:
-                print(&#34;Warning: object with id &#34;, object_id)
-                print(&#34;         has no &#39;cityobject.envelope&#39;.&#34;)
-                if no_input:
-                    print(&#34;     Dropping this object (downstream trouble ?)&#34;)
-                    continue
-                print(&#34;     Exiting (is the database corrupted ?)&#34;)
-                sys.exit(1)
-            gml_id = t[2]
+        for obj in cursor.fetchall():
+            object_id = obj[0]
+            gml_id = obj[1]
             if no_input:
                 new_object = object_type(object_id, gml_id)
                 result_objects.append(new_object)
@@ -512,6 +599,13 @@ in the database.</p></div>
 
     @staticmethod
     def get_image_from_binary(textureUri, objects_type, cursor):
+        &#34;&#34;&#34;
+        Return the texture image as a byte stream.
+        :param textureUri: the URI of the texture image.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        :param cursor: a database access cursor
+        :return: an image as bytes
+        &#34;&#34;&#34;
         imageBinaryData = objects_type.retrieve_textures(
             cursor,
             textureUri,
@@ -542,7 +636,7 @@ in the database.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.object_to_tile.ObjectsToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile">ObjectsToTile</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -569,13 +663,18 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p></div>
 <span>def <span class="ident">get_cursor</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return the current cursor to be able to execute queries in the database.
+:return: the cursor of the current database</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_cursor():
+    &#34;&#34;&#34;
+    Return the current cursor to be able to execute queries in the database.
+    :return: the cursor of the current database
+    &#34;&#34;&#34;
     return CityMCityObjects.gml_cursor</code></pre>
 </details>
 </dd>
@@ -583,13 +682,24 @@ def get_cursor():
 <span>def <span class="ident">get_image_from_binary</span></span>(<span>textureUri, objects_type, cursor)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return the texture image as a byte stream.
+:param textureUri: the URI of the texture image.
+:param objects_type: a class name among CityMCityObject derived classes.
+:param cursor: a database access cursor
+:return: an image as bytes</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_image_from_binary(textureUri, objects_type, cursor):
+    &#34;&#34;&#34;
+    Return the texture image as a byte stream.
+    :param textureUri: the URI of the texture image.
+    :param objects_type: a class name among CityMCityObject derived classes.
+    :param cursor: a database access cursor
+    :return: an image as bytes
+    &#34;&#34;&#34;
     imageBinaryData = objects_type.retrieve_textures(
         cursor,
         textureUri,
@@ -647,17 +757,9 @@ def retrieve_objects(cursor, objects_type, cityobjects=list()):
         for cityobject in cityobjects:
             objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
 
-    for t in cursor.fetchall():
-        object_id = t[0]
-        if not t[1]:
-            print(&#34;Warning: object with id &#34;, object_id)
-            print(&#34;         has no &#39;cityobject.envelope&#39;.&#34;)
-            if no_input:
-                print(&#34;     Dropping this object (downstream trouble ?)&#34;)
-                continue
-            print(&#34;     Exiting (is the database corrupted ?)&#34;)
-            sys.exit(1)
-        gml_id = t[2]
+    for obj in cursor.fetchall():
+        object_id = obj[0]
+        gml_id = obj[1]
         if no_input:
             new_object = object_type(object_id, gml_id)
             result_objects.append(new_object)
@@ -704,13 +806,18 @@ def retrieve_textures(cursor, image_uri, objects_type):
 <span>def <span class="ident">set_cursor</span></span>(<span>cursor)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+:param cursor: the cursor of the current database</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def set_cursor(cursor):
+    &#34;&#34;&#34;
+    Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+    :param cursor: the cursor of the current database
+    &#34;&#34;&#34;
     CityMCityObjects.gml_cursor = cursor</code></pre>
 </details>
 </dd>
@@ -827,18 +934,21 @@ def sql_query_textures(image_uri):
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="py3dtilers.Common.object_to_tile.ObjectsToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile">ObjectsToTile</a></b></code>:
+<li><code><b><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.add_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.add_materials">add_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.change_crs" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.change_crs">change_crs</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_centroid" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_centroid">get_centroid</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_material" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_material">get_material</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_size" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_size">get_size</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_textures" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_textures">get_textures</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.is_list_of_objects_to_tile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.is_list_of_objects_to_tile">is_list_of_objects_to_tile</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.scale_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.scale_objects">scale_objects</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.set_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.set_materials">set_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.translate_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.translate_objects">translate_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
 </ul>
 </li>
 </ul>
@@ -864,6 +974,7 @@ def sql_query_textures(image_uri):
 <ul class="">
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id">get_database_id</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id">get_gml_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture">has_texture</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id">set_database_id</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_gml_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_gml_id">set_gml_id</a></code></li>
 </ul>

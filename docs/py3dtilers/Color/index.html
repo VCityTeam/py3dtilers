@@ -50,15 +50,21 @@ __all__ = [&#39;ColorConfig&#39;]</code></pre>
 <dl>
 <dt id="py3dtilers.Color.ColorConfig"><code class="flex name class">
 <span>class <span class="ident">ColorConfig</span></span>
-<span>(</span><span>config_path='/mnt/c/Users/CColin/Documents/GitHub/py3dtilers/py3dtilers/Color/default_config.json')</span>
+<span>(</span><span>config_path='/mnt/c/Users/vcity/Documents/GitHub/py3dtilers/py3dtilers/Color/default_config.json')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A ColorConfig contains the color codes used to create colored materials.
+The color codes can be loaded from a JSON file.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ColorConfig():
+    &#34;&#34;&#34;
+    A ColorConfig contains the color codes used to create colored materials.
+    The color codes can be loaded from a JSON file.
+    &#34;&#34;&#34;
+
     default_color = [1, 1, 1]
 
     min_color = [0, 1, 0]

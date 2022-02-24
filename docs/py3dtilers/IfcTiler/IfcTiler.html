@@ -56,6 +56,15 @@ class IfcTiler(Tiler):
                                  type=str,
                                  help=&#39;targeted unit of the 3DTiles produced&#39;)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return &#34;ifc_tileset&#34;
+        else:
+            return self.args.output_dir
+
     def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
         &#34;&#34;&#34;
         :param path: a path to a directory
@@ -68,9 +77,9 @@ class IfcTiler(Tiler):
             pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-        objects_to_tile = IfcObjectsGeom(objects)
+        feature_list = IfcObjectsGeom(objects)
 
-        return self.create_tileset_from_geometries(objects_to_tile)
+        return self.create_tileset_from_geometries(feature_list)
 
 
 def main():
@@ -85,7 +94,7 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory(&#34;ifc_tileset&#34;)
+        tileset.write_to_directory(ifc_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -121,7 +130,7 @@ if __name__ == &#39;__main__&#39;:
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory(&#34;ifc_tileset&#34;)</code></pre>
+        tileset.write_to_directory(ifc_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -164,6 +173,15 @@ if __name__ == &#39;__main__&#39;:
                                  type=str,
                                  help=&#39;targeted unit of the 3DTiles produced&#39;)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return &#34;ifc_tileset&#34;
+        else:
+            return self.args.output_dir
+
     def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
         &#34;&#34;&#34;
         :param path: a path to a directory
@@ -176,9 +194,9 @@ if __name__ == &#39;__main__&#39;:
             pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-        objects_to_tile = IfcObjectsGeom(objects)
+        feature_list = IfcObjectsGeom(objects)
 
-        return self.create_tileset_from_geometries(objects_to_tile)</code></pre>
+        return self.create_tileset_from_geometries(feature_list)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -208,12 +226,20 @@ if __name__ == &#39;__main__&#39;:
         pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
     objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-    objects_to_tile = IfcObjectsGeom(objects)
+    feature_list = IfcObjectsGeom(objects)
 
-    return self.create_tileset_from_geometries(objects_to_tile)</code></pre>
+    return self.create_tileset_from_geometries(feature_list)</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>

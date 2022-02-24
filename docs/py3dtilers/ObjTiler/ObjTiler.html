@@ -28,6 +28,7 @@
 </summary>
 <pre><code class="python">import os
 import sys
+from pathlib import Path
 
 from ..Common import Tiler
 from .obj import Objs
@@ -43,6 +44,15 @@ class ObjTiler(Tiler):
                                  nargs=&#39;*&#39;,
                                  type=str,
                                  help=&#39;path to the database configuration file&#39;)
+
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return os.path.join(&#34;obj_tilesets&#34;, Path(self.current_path).name)
+        else:
+            return os.path.join(self.args.output_dir, Path(self.current_path).name)
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -71,20 +81,6 @@ class ObjTiler(Tiler):
 
         return self.create_tileset_from_geometries(objects)
 
-    def get_folder_name(self, path):
-        &#34;&#34;&#34;
-        Create a folder name from the path of an OBJ file.
-        :param path: a path to an OBJ file
-
-        :return: the path/name of a folder
-        &#34;&#34;&#34;
-        print(path[-1])
-        if(path[-1] == &#39;\\&#39;) or (path[-1] == &#39;\\&#39;):
-            path = path[:-1]
-        folder_name = path.split(&#39;/&#39;)[-1]
-        folder_name = path.split(&#39;\\&#39;)[-1]
-        return folder_name
-
 
 def main():
     &#34;&#34;&#34;
@@ -101,14 +97,13 @@ def main():
     paths = obj_tiler.args.paths
 
     for path in paths:
+        obj_tiler.current_path = path
         if(os.path.isdir(path)):
             print(&#34;Writing &#34; + path)
-            folder_name = obj_tiler.get_folder_name(path)
-            obj_tiler.create_directory(&#34;obj_tilesets/&#34; + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
-                print(&#34;tileset in obj_tilesets/&#34; + folder_name)
-                tileset.write_to_directory(&#34;obj_tilesets/&#34; + folder_name)
+                print(&#34;tileset in&#34;, obj_tiler.get_output_dir())
+                tileset.write_to_directory(obj_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -152,14 +147,13 @@ and a classes.txt that contains the name of all tilesets
     paths = obj_tiler.args.paths
 
     for path in paths:
+        obj_tiler.current_path = path
         if(os.path.isdir(path)):
             print(&#34;Writing &#34; + path)
-            folder_name = obj_tiler.get_folder_name(path)
-            obj_tiler.create_directory(&#34;obj_tilesets/&#34; + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
-                print(&#34;tileset in obj_tilesets/&#34; + folder_name)
-                tileset.write_to_directory(&#34;obj_tilesets/&#34; + folder_name)</code></pre>
+                print(&#34;tileset in&#34;, obj_tiler.get_output_dir())
+                tileset.write_to_directory(obj_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -187,6 +181,15 @@ and a classes.txt that contains the name of all tilesets
                                  type=str,
                                  help=&#39;path to the database configuration file&#39;)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return os.path.join(&#34;obj_tilesets&#34;, Path(self.current_path).name)
+        else:
+            return os.path.join(self.args.output_dir, Path(self.current_path).name)
+
     def parse_command_line(self):
         super().parse_command_line()
 
@@ -212,21 +215,7 @@ and a classes.txt that contains the name of all tilesets
         else:
             print(str(len(objects)) + &#34; .obj parsed&#34;)
 
-        return self.create_tileset_from_geometries(objects)
-
-    def get_folder_name(self, path):
-        &#34;&#34;&#34;
-        Create a folder name from the path of an OBJ file.
-        :param path: a path to an OBJ file
-
-        :return: the path/name of a folder
-        &#34;&#34;&#34;
-        print(path[-1])
-        if(path[-1] == &#39;\\&#39;) or (path[-1] == &#39;\\&#39;):
-            path = path[:-1]
-        folder_name = path.split(&#39;/&#39;)[-1]
-        folder_name = path.split(&#39;\\&#39;)[-1]
-        return folder_name</code></pre>
+        return self.create_tileset_from_geometries(objects)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -264,32 +253,6 @@ and a classes.txt that contains the name of all tilesets
     return self.create_tileset_from_geometries(objects)</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.ObjTiler.ObjTiler.ObjTiler.get_folder_name"><code class="name flex">
-<span>def <span class="ident">get_folder_name</span></span>(<span>self, path)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Create a folder name from the path of an OBJ file.
-:param path: a path to an OBJ file</p>
-<p>:return: the path/name of a folder</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_folder_name(self, path):
-    &#34;&#34;&#34;
-    Create a folder name from the path of an OBJ file.
-    :param path: a path to an OBJ file
-
-    :return: the path/name of a folder
-    &#34;&#34;&#34;
-    print(path[-1])
-    if(path[-1] == &#39;\\&#39;) or (path[-1] == &#39;\\&#39;):
-        path = path[:-1]
-    folder_name = path.split(&#39;/&#39;)[-1]
-    folder_name = path.split(&#39;\\&#39;)[-1]
-    return folder_name</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.ObjTiler.ObjTiler.ObjTiler.parse_command_line"><code class="name flex">
 <span>def <span class="ident">parse_command_line</span></span>(<span>self)</span>
 </code></dt>
@@ -310,6 +273,14 @@ and a classes.txt that contains the name of all tilesets
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -336,7 +307,6 @@ and a classes.txt that contains the name of all tilesets
 <h4><code><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler" href="#py3dtilers.ObjTiler.ObjTiler.ObjTiler">ObjTiler</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler.from_obj_directory" href="#py3dtilers.ObjTiler.ObjTiler.ObjTiler.from_obj_directory">from_obj_directory</a></code></li>
-<li><code><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler.get_folder_name" href="#py3dtilers.ObjTiler.ObjTiler.ObjTiler.get_folder_name">get_folder_name</a></code></li>
 <li><code><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler.parse_command_line" href="#py3dtilers.ObjTiler.ObjTiler.ObjTiler.parse_command_line">parse_command_line</a></code></li>
 </ul>
 </li>

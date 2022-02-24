@@ -26,58 +26,49 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from ..Common import LodNode, Lod1Node, LoaNode, Groups
+<pre><code class="python">from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode, Groups
 
 
-class LodTree():
+class LodTree(GeometryTree):
     &#34;&#34;&#34;
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+    def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         &#34;&#34;&#34;
-        create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
-        In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-        A Group contains geometries and an optional polygon that will be used for LoaNodes.
+        LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
+        In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+        A Group contains features and an optional polygon that will be used for LoaNodes.
         &#34;&#34;&#34;
         root_nodes = list()
 
-        groups = self.group_features(objects_to_tile, polygons_path)
+        groups = self.group_features(feature_list, polygons_path)
 
         for group in groups:
-            node = LodNode(group.objects_to_tile, 1)
-            node.with_texture = with_texture
+            node = GeometryNode(group.feature_list, 1, with_texture)
             root_node = node
             if create_lod1:
-                lod1_node = Lod1Node(group.objects_to_tile, 5)
+                lod1_node = Lod1Node(group.feature_list, 5)
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node
             if group.with_polygon:
-                loa_node = LoaNode(group.objects_to_tile, 20, group.additional_points, group.points_dict)
+                loa_node = LoaNode(group.feature_list, 20, group.additional_points, group.points_dict)
                 loa_node.add_child_node(root_node)
                 root_node = loa_node
 
             root_nodes.append(root_node)
 
-        self.root_nodes = root_nodes
-        self.centroid = objects_to_tile.get_centroid()
+        super().__init__(root_nodes)
 
-    def set_centroid(self, centroid):
+    def group_features(self, feature_list, polygons_path=None):
         &#34;&#34;&#34;
-        Set the centroid of the tree.
-        :param centroid: the centroid
-        &#34;&#34;&#34;
-        self.centroid = centroid
-
-    def group_features(self, objects_to_tile, polygons_path=None):
-        &#34;&#34;&#34;
-        Distribute objects_to_tile into groups to reduce the number of tiles.
-        :param objects_to_tile: a list of geometries to distribute into groups.
+        Distribute feature_list into groups to reduce the number of tiles.
+        :param feature_list: a FeatureList to distribute into groups.
         :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-        :return: a list of groups, each group containing geometries
+        :return: a list of groups, each group containing features
         &#34;&#34;&#34;
-        groups = Groups(objects_to_tile, polygons_path)
+        groups = Groups(feature_list, polygons_path)
         return groups.get_groups_as_list()</code></pre>
 </details>
 </section>
@@ -92,113 +83,102 @@ class LodTree():
 <dl>
 <dt id="py3dtilers.Common.lod_tree.LodTree"><code class="flex name class">
 <span>class <span class="ident">LodTree</span></span>
-<span>(</span><span>objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
+<span>(</span><span>feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset</p>
-<p>create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
-In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-A Group contains geometries and an optional polygon that will be used for LoaNodes.</p></div>
+<p>LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
+In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+A Group contains features and an optional polygon that will be used for LoaNodes.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class LodTree():
+<pre><code class="python">class LodTree(GeometryTree):
     &#34;&#34;&#34;
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+    def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         &#34;&#34;&#34;
-        create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
-        In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-        A Group contains geometries and an optional polygon that will be used for LoaNodes.
+        LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
+        In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+        A Group contains features and an optional polygon that will be used for LoaNodes.
         &#34;&#34;&#34;
         root_nodes = list()
 
-        groups = self.group_features(objects_to_tile, polygons_path)
+        groups = self.group_features(feature_list, polygons_path)
 
         for group in groups:
-            node = LodNode(group.objects_to_tile, 1)
-            node.with_texture = with_texture
+            node = GeometryNode(group.feature_list, 1, with_texture)
             root_node = node
             if create_lod1:
-                lod1_node = Lod1Node(group.objects_to_tile, 5)
+                lod1_node = Lod1Node(group.feature_list, 5)
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node
             if group.with_polygon:
-                loa_node = LoaNode(group.objects_to_tile, 20, group.additional_points, group.points_dict)
+                loa_node = LoaNode(group.feature_list, 20, group.additional_points, group.points_dict)
                 loa_node.add_child_node(root_node)
                 root_node = loa_node
 
             root_nodes.append(root_node)
 
-        self.root_nodes = root_nodes
-        self.centroid = objects_to_tile.get_centroid()
+        super().__init__(root_nodes)
 
-    def set_centroid(self, centroid):
+    def group_features(self, feature_list, polygons_path=None):
         &#34;&#34;&#34;
-        Set the centroid of the tree.
-        :param centroid: the centroid
-        &#34;&#34;&#34;
-        self.centroid = centroid
-
-    def group_features(self, objects_to_tile, polygons_path=None):
-        &#34;&#34;&#34;
-        Distribute objects_to_tile into groups to reduce the number of tiles.
-        :param objects_to_tile: a list of geometries to distribute into groups.
+        Distribute feature_list into groups to reduce the number of tiles.
+        :param feature_list: a FeatureList to distribute into groups.
         :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-        :return: a list of groups, each group containing geometries
+        :return: a list of groups, each group containing features
         &#34;&#34;&#34;
-        groups = Groups(objects_to_tile, polygons_path)
+        groups = Groups(feature_list, polygons_path)
         return groups.get_groups_as_list()</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.geometry_tree.GeometryTree" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree">GeometryTree</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.lod_tree.LodTree.group_features"><code class="name flex">
-<span>def <span class="ident">group_features</span></span>(<span>self, objects_to_tile, polygons_path=None)</span>
+<span>def <span class="ident">group_features</span></span>(<span>self, feature_list, polygons_path=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Distribute objects_to_tile into groups to reduce the number of tiles.
-:param objects_to_tile: a list of geometries to distribute into groups.
+<div class="desc"><p>Distribute feature_list into groups to reduce the number of tiles.
+:param feature_list: a FeatureList to distribute into groups.
 :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)</p>
-<p>:return: a list of groups, each group containing geometries</p></div>
+<p>:return: a list of groups, each group containing features</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_features(self, objects_to_tile, polygons_path=None):
+<pre><code class="python">def group_features(self, feature_list, polygons_path=None):
     &#34;&#34;&#34;
-    Distribute objects_to_tile into groups to reduce the number of tiles.
-    :param objects_to_tile: a list of geometries to distribute into groups.
+    Distribute feature_list into groups to reduce the number of tiles.
+    :param feature_list: a FeatureList to distribute into groups.
     :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-    :return: a list of groups, each group containing geometries
+    :return: a list of groups, each group containing features
     &#34;&#34;&#34;
-    groups = Groups(objects_to_tile, polygons_path)
+    groups = Groups(feature_list, polygons_path)
     return groups.get_groups_as_list()</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.lod_tree.LodTree.set_centroid"><code class="name flex">
-<span>def <span class="ident">set_centroid</span></span>(<span>self, centroid)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the centroid of the tree.
-:param centroid: the centroid</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_centroid(self, centroid):
-    &#34;&#34;&#34;
-    Set the centroid of the tree.
-    :param centroid: the centroid
-    &#34;&#34;&#34;
-    self.centroid = centroid</code></pre>
-</details>
-</dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.geometry_tree.GeometryTree" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree">GeometryTree</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects">get_all_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_centroid" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes">get_leaf_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects">get_leaf_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects">get_root_objects</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -220,7 +200,6 @@ A Group contains geometries and an optional polygon that will be used for LoaNod
 <h4><code><a title="py3dtilers.Common.lod_tree.LodTree" href="#py3dtilers.Common.lod_tree.LodTree">LodTree</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.Common.lod_tree.LodTree.group_features" href="#py3dtilers.Common.lod_tree.LodTree.group_features">group_features</a></code></li>
-<li><code><a title="py3dtilers.Common.lod_tree.LodTree.set_centroid" href="#py3dtilers.Common.lod_tree.LodTree.set_centroid">set_centroid</a></code></li>
 </ul>
 </li>
 </ul>

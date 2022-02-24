@@ -114,9 +114,9 @@ class CityTemporalTiler(CityTiler):
         if not buildings:
             raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
 
-        objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+        feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)
+        return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)
@@ -365,7 +365,7 @@ def main():
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(&#39;junk&#39;)
+    tile_set.write_to_directory(city_temp_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -447,7 +447,7 @@ if __name__ == &#39;__main__&#39;:
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(&#39;junk&#39;)</code></pre>
+    tile_set.write_to_directory(city_temp_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -459,7 +459,8 @@ if __name__ == &#39;__main__&#39;:
 <span>class <span class="ident">CityTemporalTiler</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The CityTiler can read 3DCityDB databases and create 3DTiles.
+The database can contain buildings, bridges, relief or water bodies.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -533,9 +534,9 @@ if __name__ == &#39;__main__&#39;:
         if not buildings:
             raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
 
-        objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+        feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)
+        return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)
@@ -959,9 +960,40 @@ as values
     if not buildings:
         raise ValueError(f&#39;The database does not contain any {CityMBuildings} object&#39;)
 
-    objects_to_tile = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
+    feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-    return self.create_tileset_from_geometries(objects_to_tile, extension_name=&#34;temporal&#34;)</code></pre>
+    return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.get_surfaces_merged"><code class="name flex">
+<span>def <span class="ident">get_surfaces_merged</span></span>(<span>self, cursors, cityobjects, objects_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup
+Surfaces of the same cityObject are merged into one geometry</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_surfaces_merged(self, cursors, cityobjects, objects_type):
+    &#34;&#34;&#34;
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup
+    Surfaces of the same cityObject are merged into one geometry
+    &#34;&#34;&#34;
+    cityobjects_with_geom = list()
+    for cityobject in cityobjects:
+        try:
+            id = &#39;(&#39; + str(cityobject.get_database_id()) + &#39;)&#39;
+            time_stamp = cityobject.get_time_stamp()
+            cursors[time_stamp].execute(objects_type.sql_query_geometries(id, False))
+            for t in cursors[time_stamp].fetchall():
+                geom_as_string = t[1]
+                cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                cityobject.set_box()
+                cityobjects_with_geom.append(cityobject)
+        except AttributeError:
+            continue
+    return objects_type(cityobjects_with_geom)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line"><code class="name flex">
@@ -1004,8 +1036,9 @@ as values
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_merged" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_merged">get_surfaces_merged</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split">get_surfaces_split</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_with_texture" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_with_texture">get_surfaces_with_texture</a></code></li>
 </ul>
 </li>
 </ul>
@@ -1037,6 +1070,7 @@ as values
 <li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.build_temporal_tile_set" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.build_temporal_tile_set">build_temporal_tile_set</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.combine_nodes_with_buildings_from_3dcitydb" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.combine_nodes_with_buildings_from_3dcitydb">combine_nodes_with_buildings_from_3dcitydb</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.from_3dcitydb" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.from_3dcitydb">from_3dcitydb</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.get_surfaces_merged" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.get_surfaces_merged">get_surfaces_merged</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line" href="#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.parse_command_line">parse_command_line</a></code></li>
 </ul>
 </li>

@@ -29,133 +29,141 @@
 <pre><code class="python">import numpy as np
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
-from ..Common import LodTree
 from ..Texture import Atlas
 
 
-def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
+class FromGeometryTreeToTileset():
     &#34;&#34;&#34;
-    Recursively creates a tileset from the nodes of a LodTree
-    :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
+    A static class to create a 3DTiles tileset from a GeometryTree.
     &#34;&#34;&#34;
-    lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
-    tileset = TileSet()
-    centroid = lod_tree.centroid
-    for root_node in lod_tree.root_nodes:
-        create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
-    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-    return tileset
+    @staticmethod
+    def convert_to_tileset(geometry_tree, extension_name=None):
+        &#34;&#34;&#34;
+        Recursively creates a tileset from the nodes of a GeometryTree
+        :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param extension_name: the name of an extension to add to the tileset.
 
+        :return: a Tileset
+        &#34;&#34;&#34;
+        tileset = TileSet()
+        centroid = geometry_tree.get_centroid()
+        for root_node in geometry_tree.root_nodes:
+            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
-def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
-    objects = node.objects_to_tile
-    objects.translate_objects(centroid)
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        return tileset
 
-    tile = Tile()
-    tile.set_geometric_error(node.geometric_error)
+    @staticmethod
+    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+        objects = node.feature_list
+        objects.translate_features(centroid)
 
-    content_b3dm = create_tile_content(objects, extension_name, node.has_texture())
-    tile.set_content(content_b3dm)
+        tile = Tile()
+        tile.set_geometric_error(node.geometric_error)
 
-    # Set the position of the tile. The position is relative to the parent tile&#39;s position
-    tile.set_transform([1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, 0,
-                        transform_offset[0], transform_offset[1], transform_offset[2], 1])
-    tile.set_refine_mode(&#39;REPLACE&#39;)
-    bounding_box = BoundingVolumeBox()
-    for feature in objects:
-        bounding_box.add(feature.get_bounding_volume_box())
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
+        tile.set_content(content_b3dm)
 
-    if extension_name is not None:
-        extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
-        if extension is not None:
-            bounding_box.add_extension(extension)
+        # Set the position of the tile. The position is relative to the parent tile&#39;s position
+        tile.set_transform([1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            transform_offset[0], transform_offset[1], transform_offset[2], 1])
+        tile.set_refine_mode(&#39;REPLACE&#39;)
+        bounding_box = BoundingVolumeBox()
+        for feature in objects:
+            bounding_box.add(feature.get_bounding_volume_box())
 
-    tile.set_bounding_volume(bounding_box)
+        if extension_name is not None:
+            extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
+            if extension is not None:
+                bounding_box.add_extension(extension)
 
-    # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
-    if depth == 0:
-        parent.add_tile(tile)
-    # Else, add the created tile to its parent&#39;s children
-    else:
-        parent.add_child(tile)
+        tile.set_bounding_volume(bounding_box)
 
-    for child_node in node.child_nodes:
-        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+        # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
+        if depth == 0:
+            parent.add_tile(tile)
+        # Else, add the created tile to its parent&#39;s children
+        else:
+            parent.add_child(tile)
+        node.feature_list.delete_objects_ref()
 
+        for child_node in node.child_nodes:
+            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
-def create_tile_content(objects, extension_name=None, with_texture=False):
-    &#34;&#34;&#34;
-    :param pre_tile: an array containing features of a single tile
+    @staticmethod
+    def __create_tile_content(objects, extension_name=None, with_texture=False):
+        &#34;&#34;&#34;
+        :param pre_tile: an array containing features of a single tile
 
-    :return: a B3dm tile.
-    &#34;&#34;&#34;
-    # create B3DM content
-    arrays = []
-    materials = []
-    seen_mat_indexes = []
-    if with_texture:
-        tile_atlas = Atlas(objects)
-        objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
-    for feature in objects:
-        mat_index = feature.material_index
-        if mat_index not in seen_mat_indexes:
-            seen_mat_indexes.append(mat_index)
-            materials.append(objects.get_material(mat_index))
-        content = {
-            &#39;position&#39;: feature.geom.getPositionArray(),
-            &#39;normal&#39;: feature.geom.getNormalArray(),
-            &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-            &#39;matIndex&#39;: mat_index
-        }
+        :return: a B3dm tile.
+        &#34;&#34;&#34;
+        # create B3DM content
+        arrays = []
+        materials = []
+        seen_mat_indexes = []
         if with_texture:
-            content[&#39;uv&#39;] = feature.geom.getDataArray(0)
-        arrays.append(content)
+            tile_atlas = Atlas(objects)
+            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
+        for feature in objects:
+            mat_index = feature.material_index
+            if mat_index not in seen_mat_indexes:
+                seen_mat_indexes.append(mat_index)
+                materials.append(objects.get_material(mat_index))
+            content = {
+                &#39;position&#39;: feature.geom.getPositionArray(),
+                &#39;normal&#39;: feature.geom.getNormalArray(),
+                &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
+                &#39;matIndex&#39;: mat_index
+            }
+            if with_texture:
+                content[&#39;uv&#39;] = feature.geom.getDataArray(0)
+            arrays.append(content)
 
-    # GlTF uses a y-up coordinate system whereas the geographical data (stored
-    # in the 3DCityDB database) uses a z-up coordinate system convention. In
-    # order to comply with Gltf we thus need to realize a z-up to y-up
-    # coordinate transform for the data to respect the glTF convention. This
-    # rotation gets &#34;corrected&#34; (taken care of) by the B3dm/gltf parser on the
-    # client side when using (displaying) the data.
-    # Refer to the note concerning the recommended data workflow
-    # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
-    # for more details on this matter.
-    transform = np.array([1, 0, 0, 0,
-                          0, 0, -1, 0,
-                          0, 1, 0, 0,
-                          0, 0, 0, 1])
+        # GlTF uses a y-up coordinate system whereas the geographical data (stored
+        # in the 3DCityDB database) uses a z-up coordinate system convention. In
+        # order to comply with Gltf we thus need to realize a z-up to y-up
+        # coordinate transform for the data to respect the glTF convention. This
+        # rotation gets &#34;corrected&#34; (taken care of) by the B3dm/gltf parser on the
+        # client side when using (displaying) the data.
+        # Refer to the note concerning the recommended data workflow
+        # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+        # for more details on this matter.
+        transform = np.array([1, 0, 0, 0,
+                              0, 0, -1, 0,
+                              0, 1, 0, 0,
+                              0, 0, 0, 1])
 
-    batched = len(materials) &lt;= 1
-    gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
+        batched = len(materials) &lt;= 1
+        gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
 
-    # Create a batch table and add the ID of each feature to it
-    ids = [feature.get_id() for feature in objects]
-    bt = BatchTable()
-    bt.add_property_from_array(&#34;id&#34;, ids)
+        # Create a batch table and add the ID of each feature to it
+        ids = [feature.get_id() for feature in objects]
+        bt = BatchTable()
+        bt.add_property_from_array(&#34;id&#34;, ids)
 
-    # if there is application specific data associated with the features, add it to the batch table
-    features_data = [feature.get_batchtable_data() for feature in objects]
-    if not all([feature_data is None for feature_data in features_data]):
-        # Construct a set of all possible batch table keys
-        bt_keys = set()
-        for key_subset in [feature_data.keys() for feature_data in features_data]:
-            bt_keys = bt_keys.union(set(key_subset))
-        # add feature data to batch table based on possible keys
-        for key in bt_keys:
-            key_data = [feature_data.get(key, None) for feature_data in features_data]
-            bt.add_property_from_array(key, key_data)
+        # if there is application specific data associated with the features, add it to the batch table
+        features_data = [feature.get_batchtable_data() for feature in objects]
+        if not all([feature_data is None for feature_data in features_data]):
+            # Construct a set of all possible batch table keys
+            bt_keys = set()
+            for key_subset in [feature_data.keys() for feature_data in features_data]:
+                bt_keys = bt_keys.union(set(key_subset))
+            # add feature data to batch table based on possible keys
+            for key in bt_keys:
+                key_data = [feature_data.get(key, None) for feature_data in features_data]
+                bt.add_property_from_array(key, key_data)
 
-    if extension_name is not None:
-        extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
-        if extension is not None:
-            bt.add_extension(extension)
+        if extension_name is not None:
+            extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
+            if extension is not None:
+                bt.add_extension(extension)
 
-    # Eventually wrap the geometries together with the optional
-    # BatchTableHierarchy within a B3dm:
-    return B3dm.from_glTF(gltf, bt)</code></pre>
+        # Eventually wrap the features together with the optional
+        # BatchTableHierarchy within a B3dm:
+        return B3dm.from_glTF(gltf, bt)</code></pre>
 </details>
 </section>
 <section>
@@ -163,165 +171,187 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="py3dtilers.Common.tileset_creation.create_tile"><code class="name flex">
-<span>def <span class="ident">create_tile</span></span>(<span>node, parent, centroid, transform_offset, depth, extension_name=None)</span>
+<dt id="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset"><code class="flex name class">
+<span>class <span class="ident">FromGeometryTreeToTileset</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A static class to create a 3DTiles tileset from a GeometryTree.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
-    objects = node.objects_to_tile
-    objects.translate_objects(centroid)
-
-    tile = Tile()
-    tile.set_geometric_error(node.geometric_error)
-
-    content_b3dm = create_tile_content(objects, extension_name, node.has_texture())
-    tile.set_content(content_b3dm)
-
-    # Set the position of the tile. The position is relative to the parent tile&#39;s position
-    tile.set_transform([1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, 0,
-                        transform_offset[0], transform_offset[1], transform_offset[2], 1])
-    tile.set_refine_mode(&#39;REPLACE&#39;)
-    bounding_box = BoundingVolumeBox()
-    for feature in objects:
-        bounding_box.add(feature.get_bounding_volume_box())
-
-    if extension_name is not None:
-        extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
-        if extension is not None:
-            bounding_box.add_extension(extension)
-
-    tile.set_bounding_volume(bounding_box)
-
-    # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
-    if depth == 0:
-        parent.add_tile(tile)
-    # Else, add the created tile to its parent&#39;s children
-    else:
-        parent.add_child(tile)
-
-    for child_node in node.child_nodes:
-        create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.tileset_creation.create_tile_content"><code class="name flex">
-<span>def <span class="ident">create_tile_content</span></span>(<span>objects, extension_name=None, with_texture=False)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>:param pre_tile: an array containing features of a single tile</p>
-<p>:return: a B3dm tile.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_tile_content(objects, extension_name=None, with_texture=False):
+<pre><code class="python">class FromGeometryTreeToTileset():
     &#34;&#34;&#34;
-    :param pre_tile: an array containing features of a single tile
-
-    :return: a B3dm tile.
+    A static class to create a 3DTiles tileset from a GeometryTree.
     &#34;&#34;&#34;
-    # create B3DM content
-    arrays = []
-    materials = []
-    seen_mat_indexes = []
-    if with_texture:
-        tile_atlas = Atlas(objects)
-        objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
-    for feature in objects:
-        mat_index = feature.material_index
-        if mat_index not in seen_mat_indexes:
-            seen_mat_indexes.append(mat_index)
-            materials.append(objects.get_material(mat_index))
-        content = {
-            &#39;position&#39;: feature.geom.getPositionArray(),
-            &#39;normal&#39;: feature.geom.getNormalArray(),
-            &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-            &#39;matIndex&#39;: mat_index
-        }
+
+    @staticmethod
+    def convert_to_tileset(geometry_tree, extension_name=None):
+        &#34;&#34;&#34;
+        Recursively creates a tileset from the nodes of a GeometryTree
+        :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param extension_name: the name of an extension to add to the tileset.
+
+        :return: a Tileset
+        &#34;&#34;&#34;
+        tileset = TileSet()
+        centroid = geometry_tree.get_centroid()
+        for root_node in geometry_tree.root_nodes:
+            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        return tileset
+
+    @staticmethod
+    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+        objects = node.feature_list
+        objects.translate_features(centroid)
+
+        tile = Tile()
+        tile.set_geometric_error(node.geometric_error)
+
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
+        tile.set_content(content_b3dm)
+
+        # Set the position of the tile. The position is relative to the parent tile&#39;s position
+        tile.set_transform([1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            transform_offset[0], transform_offset[1], transform_offset[2], 1])
+        tile.set_refine_mode(&#39;REPLACE&#39;)
+        bounding_box = BoundingVolumeBox()
+        for feature in objects:
+            bounding_box.add(feature.get_bounding_volume_box())
+
+        if extension_name is not None:
+            extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
+            if extension is not None:
+                bounding_box.add_extension(extension)
+
+        tile.set_bounding_volume(bounding_box)
+
+        # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
+        if depth == 0:
+            parent.add_tile(tile)
+        # Else, add the created tile to its parent&#39;s children
+        else:
+            parent.add_child(tile)
+        node.feature_list.delete_objects_ref()
+
+        for child_node in node.child_nodes:
+            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+
+    @staticmethod
+    def __create_tile_content(objects, extension_name=None, with_texture=False):
+        &#34;&#34;&#34;
+        :param pre_tile: an array containing features of a single tile
+
+        :return: a B3dm tile.
+        &#34;&#34;&#34;
+        # create B3DM content
+        arrays = []
+        materials = []
+        seen_mat_indexes = []
         if with_texture:
-            content[&#39;uv&#39;] = feature.geom.getDataArray(0)
-        arrays.append(content)
+            tile_atlas = Atlas(objects)
+            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
+        for feature in objects:
+            mat_index = feature.material_index
+            if mat_index not in seen_mat_indexes:
+                seen_mat_indexes.append(mat_index)
+                materials.append(objects.get_material(mat_index))
+            content = {
+                &#39;position&#39;: feature.geom.getPositionArray(),
+                &#39;normal&#39;: feature.geom.getNormalArray(),
+                &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
+                &#39;matIndex&#39;: mat_index
+            }
+            if with_texture:
+                content[&#39;uv&#39;] = feature.geom.getDataArray(0)
+            arrays.append(content)
 
-    # GlTF uses a y-up coordinate system whereas the geographical data (stored
-    # in the 3DCityDB database) uses a z-up coordinate system convention. In
-    # order to comply with Gltf we thus need to realize a z-up to y-up
-    # coordinate transform for the data to respect the glTF convention. This
-    # rotation gets &#34;corrected&#34; (taken care of) by the B3dm/gltf parser on the
-    # client side when using (displaying) the data.
-    # Refer to the note concerning the recommended data workflow
-    # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
-    # for more details on this matter.
-    transform = np.array([1, 0, 0, 0,
-                          0, 0, -1, 0,
-                          0, 1, 0, 0,
-                          0, 0, 0, 1])
+        # GlTF uses a y-up coordinate system whereas the geographical data (stored
+        # in the 3DCityDB database) uses a z-up coordinate system convention. In
+        # order to comply with Gltf we thus need to realize a z-up to y-up
+        # coordinate transform for the data to respect the glTF convention. This
+        # rotation gets &#34;corrected&#34; (taken care of) by the B3dm/gltf parser on the
+        # client side when using (displaying) the data.
+        # Refer to the note concerning the recommended data workflow
+        # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+        # for more details on this matter.
+        transform = np.array([1, 0, 0, 0,
+                              0, 0, -1, 0,
+                              0, 1, 0, 0,
+                              0, 0, 0, 1])
 
-    batched = len(materials) &lt;= 1
-    gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
+        batched = len(materials) &lt;= 1
+        gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
 
-    # Create a batch table and add the ID of each feature to it
-    ids = [feature.get_id() for feature in objects]
-    bt = BatchTable()
-    bt.add_property_from_array(&#34;id&#34;, ids)
+        # Create a batch table and add the ID of each feature to it
+        ids = [feature.get_id() for feature in objects]
+        bt = BatchTable()
+        bt.add_property_from_array(&#34;id&#34;, ids)
 
-    # if there is application specific data associated with the features, add it to the batch table
-    features_data = [feature.get_batchtable_data() for feature in objects]
-    if not all([feature_data is None for feature_data in features_data]):
-        # Construct a set of all possible batch table keys
-        bt_keys = set()
-        for key_subset in [feature_data.keys() for feature_data in features_data]:
-            bt_keys = bt_keys.union(set(key_subset))
-        # add feature data to batch table based on possible keys
-        for key in bt_keys:
-            key_data = [feature_data.get(key, None) for feature_data in features_data]
-            bt.add_property_from_array(key, key_data)
+        # if there is application specific data associated with the features, add it to the batch table
+        features_data = [feature.get_batchtable_data() for feature in objects]
+        if not all([feature_data is None for feature_data in features_data]):
+            # Construct a set of all possible batch table keys
+            bt_keys = set()
+            for key_subset in [feature_data.keys() for feature_data in features_data]:
+                bt_keys = bt_keys.union(set(key_subset))
+            # add feature data to batch table based on possible keys
+            for key in bt_keys:
+                key_data = [feature_data.get(key, None) for feature_data in features_data]
+                bt.add_property_from_array(key, key_data)
 
-    if extension_name is not None:
-        extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
-        if extension is not None:
-            bt.add_extension(extension)
+        if extension_name is not None:
+            extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
+            if extension is not None:
+                bt.add_extension(extension)
 
-    # Eventually wrap the geometries together with the optional
-    # BatchTableHierarchy within a B3dm:
-    return B3dm.from_glTF(gltf, bt)</code></pre>
+        # Eventually wrap the features together with the optional
+        # BatchTableHierarchy within a B3dm:
+        return B3dm.from_glTF(gltf, bt)</code></pre>
 </details>
-</dd>
-<dt id="py3dtilers.Common.tileset_creation.create_tileset"><code class="name flex">
-<span>def <span class="ident">create_tileset</span></span>(<span>objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False)</span>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset"><code class="name flex">
+<span>def <span class="ident">convert_to_tileset</span></span>(<span>geometry_tree, extension_name=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Recursively creates a tileset from the nodes of a LodTree
-:param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles</p></div>
+<div class="desc"><p>Recursively creates a tileset from the nodes of a GeometryTree
+:param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+:param extension_name: the name of an extension to add to the tileset.</p>
+<p>:return: a Tileset</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_tileset(objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, extension_name=None, with_texture=False):
+<pre><code class="python">@staticmethod
+def convert_to_tileset(geometry_tree, extension_name=None):
     &#34;&#34;&#34;
-    Recursively creates a tileset from the nodes of a LodTree
-    :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to transform into 3DTiles
+    Recursively creates a tileset from the nodes of a GeometryTree
+    :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+    :param extension_name: the name of an extension to add to the tileset.
+
+    :return: a Tileset
     &#34;&#34;&#34;
-    lod_tree = LodTree(objects_to_tile, create_lod1, create_loa, polygons_path, with_texture)
     tileset = TileSet()
-    centroid = lod_tree.centroid
-    for root_node in lod_tree.root_nodes:
-        create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+    centroid = geometry_tree.get_centroid()
+    for root_node in geometry_tree.root_nodes:
+        FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
     return tileset</code></pre>
 </details>
 </dd>
 </dl>
-</section>
-<section>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -335,11 +365,14 @@ def create_tile_content(objects, extension_name=None, with_texture=False):
 <li><code><a title="py3dtilers.Common" href="index.html">py3dtilers.Common</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset">FromGeometryTreeToTileset</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.Common.tileset_creation.create_tile" href="#py3dtilers.Common.tileset_creation.create_tile">create_tile</a></code></li>
-<li><code><a title="py3dtilers.Common.tileset_creation.create_tile_content" href="#py3dtilers.Common.tileset_creation.create_tile_content">create_tile_content</a></code></li>
-<li><code><a title="py3dtilers.Common.tileset_creation.create_tileset" href="#py3dtilers.Common.tileset_creation.create_tileset">create_tileset</a></code></li>
+<li><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset">convert_to_tileset</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

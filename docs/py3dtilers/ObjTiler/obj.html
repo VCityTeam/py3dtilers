@@ -33,7 +33,7 @@ from os import listdir
 import numpy as np
 import pywavefront
 
-from ..Common import ObjectToTile, ObjectsToTile
+from ..Common import Feature, FeatureList
 from ..Texture import Texture
 
 
@@ -48,7 +48,11 @@ from ..Texture import Texture
 #
 # f 1 2 3
 # f 2 3 4
-class Obj(ObjectToTile):
+class Obj(Feature):
+    &#34;&#34;&#34;
+    The Python representation of an OBJ mesh.
+    &#34;&#34;&#34;
+
     def __init__(self, id=None):
         super().__init__(id)
 
@@ -115,9 +119,9 @@ class Obj(ObjectToTile):
         return super().set_id(id)
 
 
-class Objs(ObjectsToTile):
+class Objs(FeatureList):
     &#34;&#34;&#34;
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of FeatureList type objects.
     &#34;&#34;&#34;
 
     def __init__(self, objs=None):
@@ -165,14 +169,17 @@ class Objs(ObjectsToTile):
 <span>(</span><span>id=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The base class of all object that need to be tiled, in order to be
-used with the corresponding tiler.</p>
+<div class="desc"><p>The Python representation of an OBJ mesh.</p>
 <p>:param id: given identifier</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Obj(ObjectToTile):
+<pre><code class="python">class Obj(Feature):
+    &#34;&#34;&#34;
+    The Python representation of an OBJ mesh.
+    &#34;&#34;&#34;
+
     def __init__(self, id=None):
         super().__init__(id)
 
@@ -240,7 +247,7 @@ used with the corresponding tiler.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></li>
+<li><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -341,9 +348,20 @@ used with the corresponding tiler.</p>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></b></code>:
+<li><code><b><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectToTile.set_box" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.has_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
 </ul>
 </li>
 </ul>
@@ -353,14 +371,14 @@ used with the corresponding tiler.</p>
 <span>(</span><span>objs=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A decorated list of ObjectsToTile type objects.</p></div>
+<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Objs(ObjectsToTile):
+<pre><code class="python">class Objs(FeatureList):
     &#34;&#34;&#34;
-        A decorated list of ObjectsToTile type objects.
+        A decorated list of FeatureList type objects.
     &#34;&#34;&#34;
 
     def __init__(self, objs=None):
@@ -395,7 +413,7 @@ used with the corresponding tiler.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.object_to_tile.ObjectsToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile">ObjectsToTile</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -441,18 +459,21 @@ def retrieve_objs(path):
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="py3dtilers.Common.object_to_tile.ObjectsToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile">ObjectsToTile</a></b></code>:
+<li><code><b><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></b></code>:
 <ul class="hlist">
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.add_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.add_materials">add_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.change_crs" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.change_crs">change_crs</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_centroid" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_centroid">get_centroid</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_material" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_material">get_material</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_size" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_size">get_size</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.get_textures" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.get_textures">get_textures</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.is_list_of_objects_to_tile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.is_list_of_objects_to_tile">is_list_of_objects_to_tile</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.scale_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.scale_objects">scale_objects</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.set_materials" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.set_materials">set_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile.ObjectsToTile.translate_objects" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectsToTile.translate_objects">translate_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
 </ul>
 </li>
 </ul>

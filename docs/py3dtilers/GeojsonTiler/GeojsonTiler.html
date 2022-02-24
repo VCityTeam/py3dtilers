@@ -40,6 +40,9 @@ from ..Common import Tiler
 
 
 class GeojsonTiler(Tiler):
+    &#34;&#34;&#34;
+    The GeojsonTiler can read GeoJSON files and create 3DTiles.
+    &#34;&#34;&#34;
 
     def __init__(self):
         super().__init__()
@@ -107,6 +110,15 @@ class GeojsonTiler(Tiler):
             print(&#34;Exiting&#34;)
             sys.exit(1)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return &#34;geojson_tilesets&#34;
+        else:
+            return self.args.output_dir
+
     def get_geojson_instance(self, id, feature_geometry, feature_properties):
         &#34;&#34;&#34;
         Create a Geojson instance with the geometry and the properties of a feature.
@@ -146,7 +158,7 @@ class GeojsonTiler(Tiler):
 
         # Reads and parse every features from the file(s)
         for geojson_file in files:
-            print(&#34;Reading &#34; + geojson_file)
+            print(&#34;Reading &#34; + str(geojson_file))
             with open(geojson_file) as f:
                 gjContent = json.load(f)
 
@@ -161,13 +173,13 @@ class GeojsonTiler(Tiler):
 
         return features
 
-    def add_colors(self, objects_to_tile, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+    def add_colors(self, feature_list, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
         &#34;&#34;&#34;
         Assigne a single-colored material to each feature.
         The color depends on the value of the selected property of the feature.
         If the property is numeric, we determine a RGB with min and max values of this property.
         Else, we create a color per value of the property.
-        :param objects_to_tile: An instance of ObjectsToTile containing geometries
+        :param feature_list: An instance of FeatureList containing features
         &#34;&#34;&#34;
         colors = []
         att_length = len(Geojson.attribute_values)
@@ -180,19 +192,19 @@ class GeojsonTiler(Tiler):
             n = color_config.nb_colors
             for i in range(0, n, 1):
                 colors.append(color_config.get_color_by_lerp(i / n))
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
                 factor = round(factor * (len(colors) - 1)) + 1
                 feature.material_index = factor
         elif att_length &gt; 1:
             attribute_dict = dict()
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 value = feature.feature_properties[color_attribute[0]]
                 if value not in attribute_dict:
                     attribute_dict[value] = len(colors)
                     colors.append(color_config.get_color_by_key(value))
                 feature.material_index = attribute_dict[value] + 1
-        objects_to_tile.add_materials(colors)
+        feature_list.add_materials(colors)
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
         &#34;&#34;&#34;
@@ -235,8 +247,8 @@ def main():
     if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
-            print(&#34;tileset in geojson_tilesets&#34;)
-            tileset.write_to_directory(&#34;geojson_tilesets&#34;)
+            print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
+            tileset.write_to_directory(geojson_tiler.get_output_dir())
     else:
         print(path, &#34;is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.&#34;)
 
@@ -280,8 +292,8 @@ The tileset is writen in '/geojson_tilesets/'.
     if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
-            print(&#34;tileset in geojson_tilesets&#34;)
-            tileset.write_to_directory(&#34;geojson_tilesets&#34;)
+            print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
+            tileset.write_to_directory(geojson_tiler.get_output_dir())
     else:
         print(path, &#34;is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.&#34;)</code></pre>
 </details>
@@ -295,12 +307,15 @@ The tileset is writen in '/geojson_tilesets/'.
 <span>class <span class="ident">GeojsonTiler</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The GeojsonTiler can read GeoJSON files and create 3DTiles.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GeojsonTiler(Tiler):
+    &#34;&#34;&#34;
+    The GeojsonTiler can read GeoJSON files and create 3DTiles.
+    &#34;&#34;&#34;
 
     def __init__(self):
         super().__init__()
@@ -368,6 +383,15 @@ The tileset is writen in '/geojson_tilesets/'.
             print(&#34;Exiting&#34;)
             sys.exit(1)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return &#34;geojson_tilesets&#34;
+        else:
+            return self.args.output_dir
+
     def get_geojson_instance(self, id, feature_geometry, feature_properties):
         &#34;&#34;&#34;
         Create a Geojson instance with the geometry and the properties of a feature.
@@ -407,7 +431,7 @@ The tileset is writen in '/geojson_tilesets/'.
 
         # Reads and parse every features from the file(s)
         for geojson_file in files:
-            print(&#34;Reading &#34; + geojson_file)
+            print(&#34;Reading &#34; + str(geojson_file))
             with open(geojson_file) as f:
                 gjContent = json.load(f)
 
@@ -422,13 +446,13 @@ The tileset is writen in '/geojson_tilesets/'.
 
         return features
 
-    def add_colors(self, objects_to_tile, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+    def add_colors(self, feature_list, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
         &#34;&#34;&#34;
         Assigne a single-colored material to each feature.
         The color depends on the value of the selected property of the feature.
         If the property is numeric, we determine a RGB with min and max values of this property.
         Else, we create a color per value of the property.
-        :param objects_to_tile: An instance of ObjectsToTile containing geometries
+        :param feature_list: An instance of FeatureList containing features
         &#34;&#34;&#34;
         colors = []
         att_length = len(Geojson.attribute_values)
@@ -441,19 +465,19 @@ The tileset is writen in '/geojson_tilesets/'.
             n = color_config.nb_colors
             for i in range(0, n, 1):
                 colors.append(color_config.get_color_by_lerp(i / n))
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
                 factor = round(factor * (len(colors) - 1)) + 1
                 feature.material_index = factor
         elif att_length &gt; 1:
             attribute_dict = dict()
-            for feature in objects_to_tile.get_objects():
+            for feature in feature_list.get_features():
                 value = feature.feature_properties[color_attribute[0]]
                 if value not in attribute_dict:
                     attribute_dict[value] = len(colors)
                     colors.append(color_config.get_color_by_key(value))
                 feature.material_index = attribute_dict[value] + 1
-        objects_to_tile.add_materials(colors)
+        feature_list.add_materials(colors)
 
     def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
         &#34;&#34;&#34;
@@ -485,25 +509,25 @@ The tileset is writen in '/geojson_tilesets/'.
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler.add_colors"><code class="name flex">
-<span>def <span class="ident">add_colors</span></span>(<span>self, objects_to_tile, color_attribute=('NONE', 'numeric'))</span>
+<span>def <span class="ident">add_colors</span></span>(<span>self, feature_list, color_attribute=('NONE', 'numeric'))</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Assigne a single-colored material to each feature.
 The color depends on the value of the selected property of the feature.
 If the property is numeric, we determine a RGB with min and max values of this property.
 Else, we create a color per value of the property.
-:param objects_to_tile: An instance of ObjectsToTile containing geometries</p></div>
+:param feature_list: An instance of FeatureList containing features</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_colors(self, objects_to_tile, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+<pre><code class="python">def add_colors(self, feature_list, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
     &#34;&#34;&#34;
     Assigne a single-colored material to each feature.
     The color depends on the value of the selected property of the feature.
     If the property is numeric, we determine a RGB with min and max values of this property.
     Else, we create a color per value of the property.
-    :param objects_to_tile: An instance of ObjectsToTile containing geometries
+    :param feature_list: An instance of FeatureList containing features
     &#34;&#34;&#34;
     colors = []
     att_length = len(Geojson.attribute_values)
@@ -516,19 +540,19 @@ Else, we create a color per value of the property.
         n = color_config.nb_colors
         for i in range(0, n, 1):
             colors.append(color_config.get_color_by_lerp(i / n))
-        for feature in objects_to_tile.get_objects():
+        for feature in feature_list.get_features():
             factor = (feature.feature_properties[color_attribute[0]] - min) / (max - min)
             factor = round(factor * (len(colors) - 1)) + 1
             feature.material_index = factor
     elif att_length &gt; 1:
         attribute_dict = dict()
-        for feature in objects_to_tile.get_objects():
+        for feature in feature_list.get_features():
             value = feature.feature_properties[color_attribute[0]]
             if value not in attribute_dict:
                 attribute_dict[value] = len(colors)
                 colors.append(color_config.get_color_by_key(value))
             feature.material_index = attribute_dict[value] + 1
-    objects_to_tile.add_materials(colors)</code></pre>
+    feature_list.add_materials(colors)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler.from_geojson_directory"><code class="name flex">
@@ -656,7 +680,7 @@ Return a list of Geojson instances containing properties and a geometry.
 
     # Reads and parse every features from the file(s)
     for geojson_file in files:
-        print(&#34;Reading &#34; + geojson_file)
+        print(&#34;Reading &#34; + str(geojson_file))
         with open(geojson_file) as f:
             gjContent = json.load(f)
 
@@ -673,6 +697,14 @@ Return a list of Geojson instances containing properties and a geometry.
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>

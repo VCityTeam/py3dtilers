@@ -27,32 +27,49 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from .kd_tree import kd_tree
-from .object_to_tile import ObjectToTile, ObjectsToTile
+from .feature import Feature, FeatureList
 from .tree_with_children_and_parent import TreeWithChildrenAndParent
 from .group import Groups
 from .polygon_extrusion import ExtrudedPolygon
-from .lod_node import LodNode, Lod1Node, LoaNode
+from .geometry_node import GeometryNode
+from .geometry_tree import GeometryTree
+from .lod_node import Lod1Node, LoaNode
 from .lod_tree import LodTree
 from .obj_writer import ObjWriter
+from .tileset_creation import FromGeometryTreeToTileset
 from .tiler import Tiler
 
 __all__ = [&#39;kd_tree&#39;,
-           &#39;ObjectToTile&#39;,
-           &#39;ObjectsToTile&#39;,
+           &#39;Feature&#39;,
+           &#39;FeatureList&#39;,
            &#39;TreeWithChildrenAndParent&#39;,
            &#39;Groups&#39;,
            &#39;ExtrudedPolygon&#39;,
-           &#39;LodNode&#39;,
+           &#39;GeometryNode&#39;,
+           &#39;GeometryTree&#39;,
            &#39;Lod1Node&#39;,
            &#39;LoaNode&#39;,
            &#39;LodTree&#39;,
            &#39;ObjWriter&#39;,
-           &#39;Tiler&#39;]</code></pre>
+           &#39;Tiler&#39;,
+           &#39;FromGeometryTreeToTileset&#39;]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="py3dtilers.Common.feature" href="feature.html">py3dtilers.Common.feature</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="py3dtilers.Common.geometry_node" href="geometry_node.html">py3dtilers.Common.geometry_node</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="py3dtilers.Common.geometry_tree" href="geometry_tree.html">py3dtilers.Common.geometry_tree</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt><code class="name"><a title="py3dtilers.Common.group" href="group.html">py3dtilers.Common.group</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -66,10 +83,6 @@ __all__ = [&#39;kd_tree&#39;,
 <div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="py3dtilers.Common.obj_writer" href="obj_writer.html">py3dtilers.Common.obj_writer</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.Common.object_to_tile" href="object_to_tile.html">py3dtilers.Common.object_to_tile</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -97,35 +110,35 @@ __all__ = [&#39;kd_tree&#39;,
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="py3dtilers.Common.kd_tree"><code class="name flex">
-<span>def <span class="ident">kd_tree</span></span>(<span>objects, maxNumObjects, depth=0)</span>
+<span>def <span class="ident">kd_tree</span></span>(<span>feature_list, maxNumObjects, depth=0)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Distribute the geometries into ObjectsToTile.
+<div class="desc"><p>Distribute the features into FeatureList.
 The objects are distributed by their centroid.
-:param objects: the geometries to distribute
+:param objects: the features to distribute
 :param maxNumObjects: the max number of objects in each new group
 :param depth: the depth of the recursion</p>
-<p>:return: a list of ObjectsToTile</p></div>
+<p>:return: a list of FeatureList</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def kd_tree(objects, maxNumObjects, depth=0):
+<pre><code class="python">def kd_tree(feature_list, maxNumObjects, depth=0):
     &#34;&#34;&#34;
-    Distribute the geometries into ObjectsToTile.
+    Distribute the features into FeatureList.
     The objects are distributed by their centroid.
-    :param objects: the geometries to distribute
+    :param objects: the features to distribute
     :param maxNumObjects: the max number of objects in each new group
     :param depth: the depth of the recursion
 
-    :return: a list of ObjectsToTile
+    :return: a list of FeatureList
     &#34;&#34;&#34;
-    # objects should herited from objects_to_tile and
+    # objects should herited from feature_list and
     # dispose of a method get_centroid()
-    if (not isinstance(objects, ObjectsToTile)):
+    if (not isinstance(feature_list, FeatureList)):
         return None
 
-    derived = objects.__class__
+    derived = feature_list.__class__
 
     # The module argument of 2 (in the next line) hard-wires the fact that
     # this kd_tree is in fact a 2D_tree.
@@ -135,12 +148,11 @@ The objects are distributed by their centroid.
     # bounding boxes of the city objects. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
 
-    sObjects = derived(
-        sorted(objects,
-               key=lambda obj: obj.get_centroid()[axis]))
-    median = len(sObjects) // 2
-    lObjects = sObjects[:median]
-    rObjects = sObjects[median:]
+    feature_list.objects = sorted(feature_list,
+                                  key=lambda obj: obj.get_centroid()[axis])
+    median = len(feature_list) // 2
+    lObjects = feature_list[:median]
+    rObjects = feature_list[median:]
     pre_tiles = derived()
     if len(lObjects) &gt; maxNumObjects:
         pre_tiles.extend(kd_tree(lObjects, maxNumObjects, depth + 1))
@@ -160,11 +172,11 @@ The objects are distributed by their centroid.
 <dl>
 <dt id="py3dtilers.Common.ExtrudedPolygon"><code class="flex name class">
 <span>class <span class="ident">ExtrudedPolygon</span></span>
-<span>(</span><span>object_to_tile, override_points=False, polygon=None)</span>
+<span>(</span><span>feature, override_points=False, polygon=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates a 3D extrusion of the footprint of an ObjectToTile
-:param object_to_tile: an instance ObjectToTile containing triangles
+<div class="desc"><p>Creates a 3D extrusion of the footprint of a Feature
+:param feature: an instance of Feature containing triangles
 :param override_points: when true, the polygon extruded won't be the footprint
 but another polygon
 :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)</p></div>
@@ -173,15 +185,15 @@ but another polygon
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ExtrudedPolygon():
-    def __init__(self, object_to_tile, override_points=False, polygon=None):
+    def __init__(self, feature, override_points=False, polygon=None):
         &#34;&#34;&#34;
-        Creates a 3D extrusion of the footprint of an ObjectToTile
-        :param object_to_tile: an instance ObjectToTile containing triangles
+        Creates a 3D extrusion of the footprint of a Feature
+        :param feature: an instance of Feature containing triangles
         :param override_points: when true, the polygon extruded won&#39;t be the footprint
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         &#34;&#34;&#34;
-        geom_triangles = object_to_tile.geom.triangles
+        geom_triangles = feature.geom.triangles
         points = list()
         minZ = np.Inf
         average_maxZ = 0
@@ -205,7 +217,7 @@ but another polygon
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
 
-        self.object_to_tile = object_to_tile
+        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
@@ -242,7 +254,7 @@ but another polygon
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + &#34;_extrude&#34;)
+        extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()
         self.extruded_object = extruded_object</code></pre>
@@ -285,7 +297,7 @@ but another polygon
         triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
         triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-    extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + &#34;_extrude&#34;)
+    extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
     extruded_object.geom.triangles.append(triangles)
     extruded_object.set_box()
     self.extruded_object = extruded_object</code></pre>
@@ -306,17 +318,1417 @@ but another polygon
 </dd>
 </dl>
 </dd>
+<dt id="py3dtilers.Common.Feature"><code class="flex name class">
+<span>class <span class="ident">Feature</span></span>
+<span>(</span><span>id=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The base class of all object that need to be tiled, in order to be
+used with the corresponding tiler.</p>
+<p>:param id: given identifier</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Feature(object):
+    &#34;&#34;&#34;
+    The base class of all object that need to be tiled, in order to be
+    used with the corresponding tiler.
+    &#34;&#34;&#34;
+
+    def __init__(self, id=None):
+        &#34;&#34;&#34;
+        :param id: given identifier
+        &#34;&#34;&#34;
+
+        self.geom = TriangleSoup()
+
+        # Optional application specific data to be added to the batch table for this object
+        self.batchtable_data = None
+
+        # A Bounding Volume Box object
+        self.box = None
+
+        # The centroid of the box
+        self.centroid = np.array([0, 0, 0])
+
+        self.texture = None
+
+        self.material_index = 0
+
+        self.set_id(id)
+
+    def set_id(self, id):
+        &#34;&#34;&#34;
+        Set the id of this feature.
+        :param id: an id
+        &#34;&#34;&#34;
+        self.id = id
+
+    def get_id(self):
+        &#34;&#34;&#34;
+        Return the id of the feature.
+        &#34;&#34;&#34;
+        return self.id
+
+    def set_batchtable_data(self, data):
+        &#34;&#34;&#34;
+        Set the batch table data associed to this feature.
+        :param data: a dictionary
+        &#34;&#34;&#34;
+        self.batchtable_data = data
+
+    def get_batchtable_data(self):
+        &#34;&#34;&#34;
+        Return the batch table data associed to this feature.
+        :return: a dictionary
+        &#34;&#34;&#34;
+        return self.batchtable_data
+
+    def get_centroid(self):
+        &#34;&#34;&#34;
+        Return the centroid of this feature.
+        :return: a 3D point as np array
+        &#34;&#34;&#34;
+        return self.centroid
+
+    def get_bounding_volume_box(self):
+        &#34;&#34;&#34;
+        Return the BoundingVolumeBox of this feature.
+        :return: a BoundingVolumeBox
+        &#34;&#34;&#34;
+        return self.box
+
+    def get_geom_as_triangles(self):
+        &#34;&#34;&#34;
+        Return the triangles of this feature.
+        :return: a list of triangles
+        &#34;&#34;&#34;
+        return self.geom.triangles[0]
+
+    def set_triangles(self, triangles):
+        &#34;&#34;&#34;
+        Set the triangles of this feature.
+        :param triangles: a list of triangles.
+        &#34;&#34;&#34;
+        self.geom.triangles[0] = triangles
+
+    def set_box(self):
+        &#34;&#34;&#34;
+        Set the BoundingVolumeBox of this feature from its triangles.
+        Also set the centroid.
+        &#34;&#34;&#34;
+        bbox = self.geom.getBbox()
+        self.box = BoundingVolumeBox()
+        self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
+
+        # Set centroid from Bbox center
+        self.centroid = np.array(self.box.get_center())
+
+    def get_texture(self):
+        &#34;&#34;&#34;
+        Return the texture image of this feature.
+        :return: a Pillow image
+        &#34;&#34;&#34;
+        return self.texture
+
+    def set_texture(self, texture):
+        &#34;&#34;&#34;
+        Set the texture image of this feature.
+        :param texture: a Pillow image
+        &#34;&#34;&#34;
+        self.texture = texture
+
+    def has_texture(self):
+        &#34;&#34;&#34;
+        Check if the feature has a texture.
+        :return: a boolean
+        &#34;&#34;&#34;
+        return self.texture is not None</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject" href="../CityTiler/citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject">CityMCityObject</a></li>
+<li><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="../GeojsonTiler/geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></li>
+<li><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom" href="../IfcTiler/ifcObjectGeom.html#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom">IfcObjectGeom</a></li>
+<li><a title="py3dtilers.ObjTiler.obj.Obj" href="../ObjTiler/obj.html#py3dtilers.ObjTiler.obj.Obj">Obj</a></li>
+<li><a title="py3dtilers.TilesetReader.tile_to_feature.TileToFeature" href="../TilesetReader/tile_to_feature.html#py3dtilers.TilesetReader.tile_to_feature.TileToFeature">TileToFeature</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.Common.Feature.get_batchtable_data"><code class="name flex">
+<span>def <span class="ident">get_batchtable_data</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the batch table data associed to this feature.
+:return: a dictionary</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_batchtable_data(self):
+    &#34;&#34;&#34;
+    Return the batch table data associed to this feature.
+    :return: a dictionary
+    &#34;&#34;&#34;
+    return self.batchtable_data</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.get_bounding_volume_box"><code class="name flex">
+<span>def <span class="ident">get_bounding_volume_box</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the BoundingVolumeBox of this feature.
+:return: a BoundingVolumeBox</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_bounding_volume_box(self):
+    &#34;&#34;&#34;
+    Return the BoundingVolumeBox of this feature.
+    :return: a BoundingVolumeBox
+    &#34;&#34;&#34;
+    return self.box</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.get_centroid"><code class="name flex">
+<span>def <span class="ident">get_centroid</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the centroid of this feature.
+:return: a 3D point as np array</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_centroid(self):
+    &#34;&#34;&#34;
+    Return the centroid of this feature.
+    :return: a 3D point as np array
+    &#34;&#34;&#34;
+    return self.centroid</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.get_geom_as_triangles"><code class="name flex">
+<span>def <span class="ident">get_geom_as_triangles</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the triangles of this feature.
+:return: a list of triangles</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_geom_as_triangles(self):
+    &#34;&#34;&#34;
+    Return the triangles of this feature.
+    :return: a list of triangles
+    &#34;&#34;&#34;
+    return self.geom.triangles[0]</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.get_id"><code class="name flex">
+<span>def <span class="ident">get_id</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the id of the feature.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_id(self):
+    &#34;&#34;&#34;
+    Return the id of the feature.
+    &#34;&#34;&#34;
+    return self.id</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.get_texture"><code class="name flex">
+<span>def <span class="ident">get_texture</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the texture image of this feature.
+:return: a Pillow image</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_texture(self):
+    &#34;&#34;&#34;
+    Return the texture image of this feature.
+    :return: a Pillow image
+    &#34;&#34;&#34;
+    return self.texture</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.has_texture"><code class="name flex">
+<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if the feature has a texture.
+:return: a boolean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_texture(self):
+    &#34;&#34;&#34;
+    Check if the feature has a texture.
+    :return: a boolean
+    &#34;&#34;&#34;
+    return self.texture is not None</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.set_batchtable_data"><code class="name flex">
+<span>def <span class="ident">set_batchtable_data</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the batch table data associed to this feature.
+:param data: a dictionary</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_batchtable_data(self, data):
+    &#34;&#34;&#34;
+    Set the batch table data associed to this feature.
+    :param data: a dictionary
+    &#34;&#34;&#34;
+    self.batchtable_data = data</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.set_box"><code class="name flex">
+<span>def <span class="ident">set_box</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the BoundingVolumeBox of this feature from its triangles.
+Also set the centroid.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_box(self):
+    &#34;&#34;&#34;
+    Set the BoundingVolumeBox of this feature from its triangles.
+    Also set the centroid.
+    &#34;&#34;&#34;
+    bbox = self.geom.getBbox()
+    self.box = BoundingVolumeBox()
+    self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
+
+    # Set centroid from Bbox center
+    self.centroid = np.array(self.box.get_center())</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.set_id"><code class="name flex">
+<span>def <span class="ident">set_id</span></span>(<span>self, id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the id of this feature.
+:param id: an id</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_id(self, id):
+    &#34;&#34;&#34;
+    Set the id of this feature.
+    :param id: an id
+    &#34;&#34;&#34;
+    self.id = id</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.set_texture"><code class="name flex">
+<span>def <span class="ident">set_texture</span></span>(<span>self, texture)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the texture image of this feature.
+:param texture: a Pillow image</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_texture(self, texture):
+    &#34;&#34;&#34;
+    Set the texture image of this feature.
+    :param texture: a Pillow image
+    &#34;&#34;&#34;
+    self.texture = texture</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Feature.set_triangles"><code class="name flex">
+<span>def <span class="ident">set_triangles</span></span>(<span>self, triangles)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the triangles of this feature.
+:param triangles: a list of triangles.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_triangles(self, triangles):
+    &#34;&#34;&#34;
+    Set the triangles of this feature.
+    :param triangles: a list of triangles.
+    &#34;&#34;&#34;
+    self.geom.triangles[0] = triangles</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="py3dtilers.Common.FeatureList"><code class="flex name class">
+<span>class <span class="ident">FeatureList</span></span>
+<span>(</span><span>objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FeatureList(object):
+    &#34;&#34;&#34;
+    A decorated list of FeatureList type objects.
+    &#34;&#34;&#34;
+
+    # The material used by default for features
+    default_mat = None
+
+    def __init__(self, objects=None):
+        self.objects = list()
+        if FeatureList.default_mat is None:
+            FeatureList.default_mat = ColorConfig().get_default_color()
+        self.materials = [FeatureList.default_mat]
+        if(objects):
+            self.objects.extend(objects)
+
+    def __iter__(self):
+        return iter(self.objects)
+
+    def __getitem__(self, item):
+        if isinstance(item, slice):
+            objects_class = self.__class__
+            return objects_class(self.objects.__getitem__(item))
+        # item is then an int type:
+        return self.objects.__getitem__(item)
+
+    def __add__(self, other):
+        objects_class = self.__class__
+        new_objects = objects_class(self.objects)
+        new_objects.objects.extend(other.objects)
+        return new_objects
+
+    def append(self, obj):
+        self.objects.append(obj)
+
+    def extend(self, others):
+        self.objects.extend(others)
+
+    def get_features(self):
+        &#34;&#34;&#34;
+        Return (recursively) all the features in this FeatureList.
+        :return: a list of Feature instances
+        &#34;&#34;&#34;
+        if not self.is_list_of_feature_list():
+            return self.objects
+        else:
+            objects = list()
+            for objs in self.objects:
+                objects.extend(objs.get_features())
+            return objects
+
+    def delete_objects_ref(self):
+        &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
+        self.objects = list()
+
+    def __len__(self):
+        return len(self.objects)
+
+    def is_list_of_feature_list(self):
+        &#34;&#34;&#34;Check if this instance of FeatureList contains others FeatureList&#34;&#34;&#34;
+        return isinstance(self.objects[0], FeatureList)
+
+    def get_centroid(self):
+        &#34;&#34;&#34;
+        :param objects: an array containing objs
+
+        :return: the centroid of the tileset.
+        &#34;&#34;&#34;
+        centroid = [0., 0., 0.]
+        for objectToTile in self:
+            centroid += objectToTile.get_centroid()
+        return np.array([centroid[0] / len(self),
+                         centroid[1] / len(self),
+                         centroid[2] / len(self)])
+
+    def set_materials(self, materials):
+        &#34;&#34;&#34;
+        Set the materials of this object to a new array of materials.
+        :param materials: an array of GlTFMaterial
+        &#34;&#34;&#34;
+        self.materials = materials
+
+    def add_materials(self, materials):
+        &#34;&#34;&#34;
+        Extend the materials of this object with another array of materials.
+        :param materials: an array of GlTFMaterial
+        &#34;&#34;&#34;
+        self.materials.extend(materials)
+
+    def get_material(self, index):
+        &#34;&#34;&#34;
+        Get the material at the index.
+        :param index: the index (int) of the material
+        &#34;&#34;&#34;
+        return self.materials[index]
+
+    def translate_features(self, offset):
+        &#34;&#34;&#34;
+        Translate the features by substracting an offset
+        :param offset: the Vec3 translation offset
+        &#34;&#34;&#34;
+        # Translate the position of each object by an offset
+        for feature in self.get_features():
+            new_geom = []
+            for triangle in feature.get_geom_as_triangles():
+                new_position = []
+                for points in triangle:
+                    # Must to do this this way to ensure that the new position
+                    # stays in float32, which is mandatory for writing the GLTF
+                    new_position.append(np.array(points - offset, dtype=np.float32))
+                new_geom.append(new_position)
+            feature.set_triangles(new_geom)
+            feature.set_box()
+
+    def change_crs(self, transformer):
+        &#34;&#34;&#34;
+        Project the features into another CRS
+        :param transformer: the transformer used to change the crs
+        &#34;&#34;&#34;
+        for feature in self.get_features():
+            new_geom = []
+            for triangle in feature.get_geom_as_triangles():
+                new_position = []
+                for point in triangle:
+                    new_point = transformer.transform(point[0], point[1], point[2])
+                    new_position.append(np.array(new_point, dtype=np.float32))
+                new_geom.append(new_position)
+            feature.set_triangles(new_geom)
+            feature.set_box()
+
+    def scale_features(self, scale_factor):
+        &#34;&#34;&#34;
+        Rescale the features.
+        :param scale_factor: the factor to scale the objects
+        &#34;&#34;&#34;
+        centroid = self.get_centroid()
+        for feature in self.get_features():
+            new_geom = []
+            for triangle in feature.get_geom_as_triangles():
+                scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
+                new_geom.append(scaled_triangle)
+            feature.set_triangles(new_geom)
+            feature.set_box()
+
+    def get_textures(self):
+        &#34;&#34;&#34;
+        Return a dictionary of all the textures where the keys are the IDs of the features.
+        :return: a dictionary of textures
+        &#34;&#34;&#34;
+        texture_dict = dict()
+        for feature in self.get_features():
+            texture_dict[feature.get_id()] = feature.get_texture()
+        return texture_dict
+
+    @staticmethod
+    def create_batch_table_extension(extension_name, ids=None, objects=None):
+        &#34;&#34;&#34;Virtual method to create a batch table extension.&#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+        &#34;&#34;&#34;Virtual method to create a bounding volume box extension.&#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="../CityTiler/citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
+<li><a title="py3dtilers.GeojsonTiler.geojson.Geojsons" href="../GeojsonTiler/geojson.html#py3dtilers.GeojsonTiler.geojson.Geojsons">Geojsons</a></li>
+<li><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom" href="../IfcTiler/ifcObjectGeom.html#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom">IfcObjectsGeom</a></li>
+<li><a title="py3dtilers.ObjTiler.obj.Objs" href="../ObjTiler/obj.html#py3dtilers.ObjTiler.obj.Objs">Objs</a></li>
+<li><a title="py3dtilers.TilesetReader.tile_to_feature.TileToFeatureList" href="../TilesetReader/tile_to_feature.html#py3dtilers.TilesetReader.tile_to_feature.TileToFeatureList">TileToFeatureList</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.Common.FeatureList.default_mat"><code class="name">var <span class="ident">default_mat</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.Common.FeatureList.create_batch_table_extension"><code class="name flex">
+<span>def <span class="ident">create_batch_table_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method to create a batch table extension.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def create_batch_table_extension(extension_name, ids=None, objects=None):
+    &#34;&#34;&#34;Virtual method to create a batch table extension.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.create_bounding_volume_extension"><code class="name flex">
+<span>def <span class="ident">create_bounding_volume_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method to create a bounding volume box extension.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+    &#34;&#34;&#34;Virtual method to create a bounding volume box extension.&#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.Common.FeatureList.add_materials"><code class="name flex">
+<span>def <span class="ident">add_materials</span></span>(<span>self, materials)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extend the materials of this object with another array of materials.
+:param materials: an array of GlTFMaterial</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_materials(self, materials):
+    &#34;&#34;&#34;
+    Extend the materials of this object with another array of materials.
+    :param materials: an array of GlTFMaterial
+    &#34;&#34;&#34;
+    self.materials.extend(materials)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, obj)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, obj):
+    self.objects.append(obj)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.change_crs"><code class="name flex">
+<span>def <span class="ident">change_crs</span></span>(<span>self, transformer)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Project the features into another CRS
+:param transformer: the transformer used to change the crs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def change_crs(self, transformer):
+    &#34;&#34;&#34;
+    Project the features into another CRS
+    :param transformer: the transformer used to change the crs
+    &#34;&#34;&#34;
+    for feature in self.get_features():
+        new_geom = []
+        for triangle in feature.get_geom_as_triangles():
+            new_position = []
+            for point in triangle:
+                new_point = transformer.transform(point[0], point[1], point[2])
+                new_position.append(np.array(new_point, dtype=np.float32))
+            new_geom.append(new_position)
+        feature.set_triangles(new_geom)
+        feature.set_box()</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.delete_objects_ref"><code class="name flex">
+<span>def <span class="ident">delete_objects_ref</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete_objects_ref(self):
+    &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
+    self.objects = list()</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.extend"><code class="name flex">
+<span>def <span class="ident">extend</span></span>(<span>self, others)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def extend(self, others):
+    self.objects.extend(others)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.get_centroid"><code class="name flex">
+<span>def <span class="ident">get_centroid</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param objects: an array containing objs</p>
+<p>:return: the centroid of the tileset.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_centroid(self):
+    &#34;&#34;&#34;
+    :param objects: an array containing objs
+
+    :return: the centroid of the tileset.
+    &#34;&#34;&#34;
+    centroid = [0., 0., 0.]
+    for objectToTile in self:
+        centroid += objectToTile.get_centroid()
+    return np.array([centroid[0] / len(self),
+                     centroid[1] / len(self),
+                     centroid[2] / len(self)])</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.get_features"><code class="name flex">
+<span>def <span class="ident">get_features</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return (recursively) all the features in this FeatureList.
+:return: a list of Feature instances</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_features(self):
+    &#34;&#34;&#34;
+    Return (recursively) all the features in this FeatureList.
+    :return: a list of Feature instances
+    &#34;&#34;&#34;
+    if not self.is_list_of_feature_list():
+        return self.objects
+    else:
+        objects = list()
+        for objs in self.objects:
+            objects.extend(objs.get_features())
+        return objects</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.get_material"><code class="name flex">
+<span>def <span class="ident">get_material</span></span>(<span>self, index)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the material at the index.
+:param index: the index (int) of the material</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_material(self, index):
+    &#34;&#34;&#34;
+    Get the material at the index.
+    :param index: the index (int) of the material
+    &#34;&#34;&#34;
+    return self.materials[index]</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.get_textures"><code class="name flex">
+<span>def <span class="ident">get_textures</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a dictionary of all the textures where the keys are the IDs of the features.
+:return: a dictionary of textures</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_textures(self):
+    &#34;&#34;&#34;
+    Return a dictionary of all the textures where the keys are the IDs of the features.
+    :return: a dictionary of textures
+    &#34;&#34;&#34;
+    texture_dict = dict()
+    for feature in self.get_features():
+        texture_dict[feature.get_id()] = feature.get_texture()
+    return texture_dict</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.is_list_of_feature_list"><code class="name flex">
+<span>def <span class="ident">is_list_of_feature_list</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if this instance of FeatureList contains others FeatureList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_list_of_feature_list(self):
+    &#34;&#34;&#34;Check if this instance of FeatureList contains others FeatureList&#34;&#34;&#34;
+    return isinstance(self.objects[0], FeatureList)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.scale_features"><code class="name flex">
+<span>def <span class="ident">scale_features</span></span>(<span>self, scale_factor)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Rescale the features.
+:param scale_factor: the factor to scale the objects</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def scale_features(self, scale_factor):
+    &#34;&#34;&#34;
+    Rescale the features.
+    :param scale_factor: the factor to scale the objects
+    &#34;&#34;&#34;
+    centroid = self.get_centroid()
+    for feature in self.get_features():
+        new_geom = []
+        for triangle in feature.get_geom_as_triangles():
+            scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
+            new_geom.append(scaled_triangle)
+        feature.set_triangles(new_geom)
+        feature.set_box()</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.set_materials"><code class="name flex">
+<span>def <span class="ident">set_materials</span></span>(<span>self, materials)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the materials of this object to a new array of materials.
+:param materials: an array of GlTFMaterial</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_materials(self, materials):
+    &#34;&#34;&#34;
+    Set the materials of this object to a new array of materials.
+    :param materials: an array of GlTFMaterial
+    &#34;&#34;&#34;
+    self.materials = materials</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.FeatureList.translate_features"><code class="name flex">
+<span>def <span class="ident">translate_features</span></span>(<span>self, offset)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate the features by substracting an offset
+:param offset: the Vec3 translation offset</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def translate_features(self, offset):
+    &#34;&#34;&#34;
+    Translate the features by substracting an offset
+    :param offset: the Vec3 translation offset
+    &#34;&#34;&#34;
+    # Translate the position of each object by an offset
+    for feature in self.get_features():
+        new_geom = []
+        for triangle in feature.get_geom_as_triangles():
+            new_position = []
+            for points in triangle:
+                # Must to do this this way to ensure that the new position
+                # stays in float32, which is mandatory for writing the GLTF
+                new_position.append(np.array(points - offset, dtype=np.float32))
+            new_geom.append(new_position)
+        feature.set_triangles(new_geom)
+        feature.set_box()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="py3dtilers.Common.FromGeometryTreeToTileset"><code class="flex name class">
+<span>class <span class="ident">FromGeometryTreeToTileset</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A static class to create a 3DTiles tileset from a GeometryTree.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FromGeometryTreeToTileset():
+    &#34;&#34;&#34;
+    A static class to create a 3DTiles tileset from a GeometryTree.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def convert_to_tileset(geometry_tree, extension_name=None):
+        &#34;&#34;&#34;
+        Recursively creates a tileset from the nodes of a GeometryTree
+        :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param extension_name: the name of an extension to add to the tileset.
+
+        :return: a Tileset
+        &#34;&#34;&#34;
+        tileset = TileSet()
+        centroid = geometry_tree.get_centroid()
+        for root_node in geometry_tree.root_nodes:
+            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+
+        tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        return tileset
+
+    @staticmethod
+    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+        objects = node.feature_list
+        objects.translate_features(centroid)
+
+        tile = Tile()
+        tile.set_geometric_error(node.geometric_error)
+
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
+        tile.set_content(content_b3dm)
+
+        # Set the position of the tile. The position is relative to the parent tile&#39;s position
+        tile.set_transform([1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            transform_offset[0], transform_offset[1], transform_offset[2], 1])
+        tile.set_refine_mode(&#39;REPLACE&#39;)
+        bounding_box = BoundingVolumeBox()
+        for feature in objects:
+            bounding_box.add(feature.get_bounding_volume_box())
+
+        if extension_name is not None:
+            extension = objects.__class__.create_bounding_volume_extension(extension_name, None, objects)
+            if extension is not None:
+                bounding_box.add_extension(extension)
+
+        tile.set_bounding_volume(bounding_box)
+
+        # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
+        if depth == 0:
+            parent.add_tile(tile)
+        # Else, add the created tile to its parent&#39;s children
+        else:
+            parent.add_child(tile)
+        node.feature_list.delete_objects_ref()
+
+        for child_node in node.child_nodes:
+            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+
+    @staticmethod
+    def __create_tile_content(objects, extension_name=None, with_texture=False):
+        &#34;&#34;&#34;
+        :param pre_tile: an array containing features of a single tile
+
+        :return: a B3dm tile.
+        &#34;&#34;&#34;
+        # create B3DM content
+        arrays = []
+        materials = []
+        seen_mat_indexes = []
+        if with_texture:
+            tile_atlas = Atlas(objects)
+            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
+        for feature in objects:
+            mat_index = feature.material_index
+            if mat_index not in seen_mat_indexes:
+                seen_mat_indexes.append(mat_index)
+                materials.append(objects.get_material(mat_index))
+            content = {
+                &#39;position&#39;: feature.geom.getPositionArray(),
+                &#39;normal&#39;: feature.geom.getNormalArray(),
+                &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
+                &#39;matIndex&#39;: mat_index
+            }
+            if with_texture:
+                content[&#39;uv&#39;] = feature.geom.getDataArray(0)
+            arrays.append(content)
+
+        # GlTF uses a y-up coordinate system whereas the geographical data (stored
+        # in the 3DCityDB database) uses a z-up coordinate system convention. In
+        # order to comply with Gltf we thus need to realize a z-up to y-up
+        # coordinate transform for the data to respect the glTF convention. This
+        # rotation gets &#34;corrected&#34; (taken care of) by the B3dm/gltf parser on the
+        # client side when using (displaying) the data.
+        # Refer to the note concerning the recommended data workflow
+        # https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#gltf-transforms
+        # for more details on this matter.
+        transform = np.array([1, 0, 0, 0,
+                              0, 0, -1, 0,
+                              0, 1, 0, 0,
+                              0, 0, 0, 1])
+
+        batched = len(materials) &lt;= 1
+        gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
+
+        # Create a batch table and add the ID of each feature to it
+        ids = [feature.get_id() for feature in objects]
+        bt = BatchTable()
+        bt.add_property_from_array(&#34;id&#34;, ids)
+
+        # if there is application specific data associated with the features, add it to the batch table
+        features_data = [feature.get_batchtable_data() for feature in objects]
+        if not all([feature_data is None for feature_data in features_data]):
+            # Construct a set of all possible batch table keys
+            bt_keys = set()
+            for key_subset in [feature_data.keys() for feature_data in features_data]:
+                bt_keys = bt_keys.union(set(key_subset))
+            # add feature data to batch table based on possible keys
+            for key in bt_keys:
+                key_data = [feature_data.get(key, None) for feature_data in features_data]
+                bt.add_property_from_array(key, key_data)
+
+        if extension_name is not None:
+            extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
+            if extension is not None:
+                bt.add_extension(extension)
+
+        # Eventually wrap the features together with the optional
+        # BatchTableHierarchy within a B3dm:
+        return B3dm.from_glTF(gltf, bt)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.Common.FromGeometryTreeToTileset.convert_to_tileset"><code class="name flex">
+<span>def <span class="ident">convert_to_tileset</span></span>(<span>geometry_tree, extension_name=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Recursively creates a tileset from the nodes of a GeometryTree
+:param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+:param extension_name: the name of an extension to add to the tileset.</p>
+<p>:return: a Tileset</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def convert_to_tileset(geometry_tree, extension_name=None):
+    &#34;&#34;&#34;
+    Recursively creates a tileset from the nodes of a GeometryTree
+    :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+    :param extension_name: the name of an extension to add to the tileset.
+
+    :return: a Tileset
+    &#34;&#34;&#34;
+    tileset = TileSet()
+    centroid = geometry_tree.get_centroid()
+    for root_node in geometry_tree.root_nodes:
+        FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+
+    tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+    return tileset</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode"><code class="flex name class">
+<span>class <span class="ident">GeometryNode</span></span>
+<span>(</span><span>feature_list=None, geometric_error=50, with_texture=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Each node contains an instance of FeatureList
+and a list of child nodes.
+A node will correspond to a tile of the 3dtiles tileset.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the distance below which this node should be displayed.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GeometryNode():
+    &#34;&#34;&#34;
+    Each node contains an instance of FeatureList
+    and a list of child nodes.
+    A node will correspond to a tile of the 3dtiles tileset.
+    &#34;&#34;&#34;
+
+    def __init__(self, feature_list=None, geometric_error=50, with_texture=False):
+        &#34;&#34;&#34;
+        :param feature_list: an instance of FeatureList.
+        :param geometric_error: the distance below which this node should be displayed.
+        :param Boolean with_texture: if this node must keep the texture of the features or not.
+        &#34;&#34;&#34;
+        self.feature_list = feature_list
+        self.child_nodes = list()
+        self.with_texture = with_texture and self.geometries_have_texture()
+        self.geometric_error = geometric_error
+
+    def set_child_nodes(self, nodes=list()):
+        &#34;&#34;&#34;
+        Set the child nodes of this node.
+        :param nodes: list of nodes
+        &#34;&#34;&#34;
+        self.child_nodes = nodes
+
+    def add_child_node(self, node):
+        &#34;&#34;&#34;
+        Add a child to the child nodes.
+        :param node: a node
+        &#34;&#34;&#34;
+        self.child_nodes.append(node)
+
+    def has_texture(self):
+        &#34;&#34;&#34;
+        Return True if this node must keep the texture of its features.
+        :return: boolean
+        &#34;&#34;&#34;
+        return self.with_texture
+
+    def geometries_have_texture(self):
+        &#34;&#34;&#34;
+        Check if all the features in the node have a texture.
+        :return: a boolean
+        &#34;&#34;&#34;
+        return all([feature.has_texture() for feature in self.feature_list])
+
+    def get_features(self):
+        &#34;&#34;&#34;
+        Return the features in this node and the features in the child nodes (recursively).
+        :return: a FeatureList
+        &#34;&#34;&#34;
+        objects = [self.feature_list]
+        for child in self.child_nodes:
+            objects.extend(child.get_features())
+        return objects
+
+    def get_leaves(self):
+        &#34;&#34;&#34;
+        Return the leaves of this node.
+        If the node has no child, return this node.
+        :return: a list of GeometryNode
+        &#34;&#34;&#34;
+        if len(self.child_nodes) &lt; 1:
+            return [self]
+        else:
+            leaves = list()
+            for node in self.child_nodes:
+                leaves.extend(node.get_leaves())
+            return leaves</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.lod_node.LoaNode" href="lod_node.html#py3dtilers.Common.lod_node.LoaNode">LoaNode</a></li>
+<li><a title="py3dtilers.Common.lod_node.Lod1Node" href="lod_node.html#py3dtilers.Common.lod_node.Lod1Node">Lod1Node</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.Common.GeometryNode.add_child_node"><code class="name flex">
+<span>def <span class="ident">add_child_node</span></span>(<span>self, node)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a child to the child nodes.
+:param node: a node</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_child_node(self, node):
+    &#34;&#34;&#34;
+    Add a child to the child nodes.
+    :param node: a node
+    &#34;&#34;&#34;
+    self.child_nodes.append(node)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode.geometries_have_texture"><code class="name flex">
+<span>def <span class="ident">geometries_have_texture</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if all the features in the node have a texture.
+:return: a boolean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def geometries_have_texture(self):
+    &#34;&#34;&#34;
+    Check if all the features in the node have a texture.
+    :return: a boolean
+    &#34;&#34;&#34;
+    return all([feature.has_texture() for feature in self.feature_list])</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode.get_features"><code class="name flex">
+<span>def <span class="ident">get_features</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the features in this node and the features in the child nodes (recursively).
+:return: a FeatureList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_features(self):
+    &#34;&#34;&#34;
+    Return the features in this node and the features in the child nodes (recursively).
+    :return: a FeatureList
+    &#34;&#34;&#34;
+    objects = [self.feature_list]
+    for child in self.child_nodes:
+        objects.extend(child.get_features())
+    return objects</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode.get_leaves"><code class="name flex">
+<span>def <span class="ident">get_leaves</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the leaves of this node.
+If the node has no child, return this node.
+:return: a list of GeometryNode</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_leaves(self):
+    &#34;&#34;&#34;
+    Return the leaves of this node.
+    If the node has no child, return this node.
+    :return: a list of GeometryNode
+    &#34;&#34;&#34;
+    if len(self.child_nodes) &lt; 1:
+        return [self]
+    else:
+        leaves = list()
+        for node in self.child_nodes:
+            leaves.extend(node.get_leaves())
+        return leaves</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode.has_texture"><code class="name flex">
+<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return True if this node must keep the texture of its features.
+:return: boolean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_texture(self):
+    &#34;&#34;&#34;
+    Return True if this node must keep the texture of its features.
+    :return: boolean
+    &#34;&#34;&#34;
+    return self.with_texture</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryNode.set_child_nodes"><code class="name flex">
+<span>def <span class="ident">set_child_nodes</span></span>(<span>self, nodes=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the child nodes of this node.
+:param nodes: list of nodes</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_child_nodes(self, nodes=list()):
+    &#34;&#34;&#34;
+    Set the child nodes of this node.
+    :param nodes: list of nodes
+    &#34;&#34;&#34;
+    self.child_nodes = nodes</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="py3dtilers.Common.GeometryTree"><code class="flex name class">
+<span>class <span class="ident">GeometryTree</span></span>
+<span>(</span><span>root_nodes)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The GeometryTree contains a list of GeometryNode instances.
+Those instances are the root nodes of a tree.
+The GeometryTree also contains the centroid of the root nodes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GeometryTree():
+    &#34;&#34;&#34;
+    The GeometryTree contains a list of GeometryNode instances.
+    Those instances are the root nodes of a tree.
+    The GeometryTree also contains the centroid of the root nodes.
+    &#34;&#34;&#34;
+
+    def __init__(self, root_nodes):
+        self.root_nodes = root_nodes
+
+    def get_centroid(self):
+        &#34;&#34;&#34;
+        Return the centroid of the tree.
+        The centroid of the tree is the centroid of the root nodes features.
+        &#34;&#34;&#34;
+        return self.get_root_objects().get_centroid()
+
+    def get_leaf_nodes(self):
+        &#34;&#34;&#34;
+        Return the leaf nodes of the tree.
+        :return: a list of GeometryNode
+        &#34;&#34;&#34;
+        leaf_nodes = list()
+        for node in self.root_nodes:
+            leaf_nodes.extend(node.get_leaves())
+        return leaf_nodes
+
+    def get_root_objects(self):
+        &#34;&#34;&#34;
+        Return the features of the root nodes.
+        :return: a FeatureList
+        &#34;&#34;&#34;
+        return FeatureList([node.feature_list for node in self.root_nodes])
+
+    def get_leaf_objects(self):
+        &#34;&#34;&#34;
+        Return the features of the leaf nodes.
+        :return: a FeatureList
+        &#34;&#34;&#34;
+        return FeatureList([node.feature_list for node in self.get_leaf_nodes()])
+
+    def get_all_objects(self):
+        &#34;&#34;&#34;
+        Return the features of all the nodes.
+        :return: a FeatureList
+        &#34;&#34;&#34;
+        objects = list()
+        for node in self.root_nodes:
+            objects.extend(node.get_features())
+        return FeatureList(objects)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.lod_tree.LodTree" href="lod_tree.html#py3dtilers.Common.lod_tree.LodTree">LodTree</a></li>
+<li><a title="py3dtilers.TilesetReader.tileset_tree.TilesetTree" href="../TilesetReader/tileset_tree.html#py3dtilers.TilesetReader.tileset_tree.TilesetTree">TilesetTree</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.Common.GeometryTree.get_all_objects"><code class="name flex">
+<span>def <span class="ident">get_all_objects</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the features of all the nodes.
+:return: a FeatureList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_all_objects(self):
+    &#34;&#34;&#34;
+    Return the features of all the nodes.
+    :return: a FeatureList
+    &#34;&#34;&#34;
+    objects = list()
+    for node in self.root_nodes:
+        objects.extend(node.get_features())
+    return FeatureList(objects)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryTree.get_centroid"><code class="name flex">
+<span>def <span class="ident">get_centroid</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the centroid of the tree.
+The centroid of the tree is the centroid of the root nodes features.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_centroid(self):
+    &#34;&#34;&#34;
+    Return the centroid of the tree.
+    The centroid of the tree is the centroid of the root nodes features.
+    &#34;&#34;&#34;
+    return self.get_root_objects().get_centroid()</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryTree.get_leaf_nodes"><code class="name flex">
+<span>def <span class="ident">get_leaf_nodes</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the leaf nodes of the tree.
+:return: a list of GeometryNode</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_leaf_nodes(self):
+    &#34;&#34;&#34;
+    Return the leaf nodes of the tree.
+    :return: a list of GeometryNode
+    &#34;&#34;&#34;
+    leaf_nodes = list()
+    for node in self.root_nodes:
+        leaf_nodes.extend(node.get_leaves())
+    return leaf_nodes</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryTree.get_leaf_objects"><code class="name flex">
+<span>def <span class="ident">get_leaf_objects</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the features of the leaf nodes.
+:return: a FeatureList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_leaf_objects(self):
+    &#34;&#34;&#34;
+    Return the features of the leaf nodes.
+    :return: a FeatureList
+    &#34;&#34;&#34;
+    return FeatureList([node.feature_list for node in self.get_leaf_nodes()])</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.GeometryTree.get_root_objects"><code class="name flex">
+<span>def <span class="ident">get_root_objects</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the features of the root nodes.
+:return: a FeatureList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_root_objects(self):
+    &#34;&#34;&#34;
+    Return the features of the root nodes.
+    :return: a FeatureList
+    &#34;&#34;&#34;
+    return FeatureList([node.feature_list for node in self.root_nodes])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="py3dtilers.Common.Groups"><code class="flex name class">
 <span>class <span class="ident">Groups</span></span>
-<span>(</span><span>objects_to_tile, polygons_path=None)</span>
+<span>(</span><span>feature_list, polygons_path=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Contains a list of Group</p>
-<p>Distribute the geometries contained in objects_to_tile into different Group
-The way to distribute the geometries depends on the parameters
-:param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to distribute into Group
+<p>Distribute the features contained in feature_list into different Group
+The way to distribute the features depends on the parameters
+:param feature_list: an instance of FeatureList containing features to distribute into Group
 :param polygons_path: the path to a folder containing polygons as .geojson files.
-When this param is not None, it means we want to group geometries by polygons</p></div>
+When this param is not None, it means we want to group features by polygons</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -326,22 +1738,21 @@ When this param is not None, it means we want to group geometries by polygons</p
     Contains a list of Group
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, polygons_path=None):
+    def __init__(self, feature_list, polygons_path=None):
         &#34;&#34;&#34;
-        Distribute the geometries contained in objects_to_tile into different Group
-        The way to distribute the geometries depends on the parameters
-        :param objects_to_tile: an instance of ObjectsToTile containing a list of geometries to distribute into Group
+        Distribute the features contained in feature_list into different Group
+        The way to distribute the features depends on the parameters
+        :param feature_list: an instance of FeatureList containing features to distribute into Group
         :param polygons_path: the path to a folder containing polygons as .geojson files.
-        When this param is not None, it means we want to group geometries by polygons
+        When this param is not None, it means we want to group features by polygons
         &#34;&#34;&#34;
-        self.objects_to_tile = objects_to_tile
-        self.materials = objects_to_tile.materials
-        if objects_to_tile.is_list_of_objects_to_tile():
-            self.group_objects_by_instance()
+        self.materials = feature_list.materials
+        if feature_list.is_list_of_feature_list():
+            self.group_objects_by_instance(feature_list)
         elif polygons_path is not None:
-            self.group_objects_by_polygons(polygons_path)
+            self.group_objects_by_polygons(feature_list, polygons_path)
         else:
-            self.group_objects_with_kdtree()
+            self.group_objects_with_kdtree(feature_list)
         self.set_materials(self.materials)
 
     def get_groups_as_list(self):
@@ -359,29 +1770,29 @@ When this param is not None, it means we want to group geometries by polygons</p
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_objects_by_instance(self):
+    def group_objects_by_instance(self, feature_list):
         &#34;&#34;&#34;
-        Create groups of geometries. One group is created per object in the ObjectsToTile.
+        Create groups of features. One group is created per object in the FeatureList.
         &#34;&#34;&#34;
         groups = list()
-        for objects in self.objects_to_tile:
+        for objects in feature_list:
             group = Group(objects)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_with_kdtree(self):
+    def group_objects_with_kdtree(self, feature_list):
         &#34;&#34;&#34;
-        Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
-        The distribution depends on the centroid of each geometry.
+        Create groups of features. The features are distributed into groups of (max) 500 objects.
+        The distribution depends on the centroid of each feature.
         &#34;&#34;&#34;
         groups = list()
-        objects = kd_tree(self.objects_to_tile, 500)
-        for objects_to_tile in objects:
-            group = Group(objects_to_tile)
+        objects = kd_tree(feature_list, 500)
+        for feature_list in objects:
+            group = Group(feature_list)
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, polygons_path):
+    def group_objects_by_polygons(self, feature_list, polygons_path):
         &#34;&#34;&#34;
         Load the polygons from the files in the folder
         :param polygons_path: the path to the file(s) containing polygons
@@ -409,23 +1820,22 @@ When this param is not None, it means we want to group geometries by polygons</p
                     if feature[&#39;geometry&#39;][&#39;type&#39;] == &#39;MultiPolygon&#39;:
                         coords = feature[&#39;geometry&#39;][&#39;coordinates&#39;][0][0][:-1]
                     polygons.append(Polygon(coords))
-        self.groups = self.distribute_objects_in_polygons(polygons)
+        self.groups = self.distribute_objects_in_polygons(feature_list, polygons)
 
-    def distribute_objects_in_polygons(self, polygons):
+    def distribute_objects_in_polygons(self, feature_list, polygons):
         &#34;&#34;&#34;
-        Distribute the geometries in the polygons.
-        The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
-        If a geometry is not in any polygon, create a Group containing only this geometry. This group won&#39;t have addtional points.
+        Distribute the features in the polygons.
+        The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
+        If a feature is not in any polygon, create a Group containing only this feature. This group won&#39;t have addtional points.
         :param polygons: a list of Shapely polygons
         &#34;&#34;&#34;
 
-        objects_to_tile = self.objects_to_tile
         objects_to_tile_dict = {}
         objects_to_tile_without_poly = {}
 
-        # For each geometry, find the polygon containing it
-        for i, object_to_tile in enumerate(objects_to_tile):
-            p = Point(object_to_tile.get_centroid())
+        # For each feature, find the polygon containing it
+        for i, feature in enumerate(feature_list):
+            p = Point(feature.get_centroid())
             in_polygon = False
             for index, polygon in enumerate(polygons):
                 if p.within(polygon):
@@ -442,11 +1852,11 @@ When this param is not None, it means we want to group geometries by polygons</p
         groups = list()
         for key in objects_to_tile_dict:
             additional_points = polygons[key].exterior.coords[:-1]
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_dict[key]])
+            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_dict[key]])
             group = Group(contained_objects, with_polygon=True, additional_points=additional_points)
             groups.append(group)
         for key in objects_to_tile_without_poly:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_without_poly[key]])
+            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_without_poly[key]])
             group = Group(contained_objects)
             groups.append(group)
 
@@ -488,7 +1898,7 @@ When this param is not None, it means we want to group geometries by polygons</p
         :param group_indexes: the indexes of the groups to merge together
         :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
 
-        :return: a new group containing the geometries of all the groups
+        :return: a new group containing the features of all the groups
         &#34;&#34;&#34;
 
         objects = list()
@@ -500,13 +1910,13 @@ When this param is not None, it means we want to group geometries by polygons</p
                 additional_points_list.append(groups[index].additional_points)
                 points_index = len(additional_points_list) - 1
                 additional_points_dict[points_index] = []
-                for object_to_tile in groups[index].objects_to_tile:
-                    objects.append(object_to_tile)
+                for feature in groups[index].feature_list:
+                    objects.append(feature)
                     additional_points_dict[points_index].append(len(objects) - 1)
             else:
-                for object_to_tile in groups[index].objects_to_tile:
-                    objects.append(object_to_tile)
-        return Group(ObjectsToTile(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)</code></pre>
+                for feature in groups[index].feature_list:
+                    objects.append(feature)
+        return Group(FeatureList(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -555,32 +1965,31 @@ To avoid conflicts, the groups with a polygon are not merged with those without 
 </details>
 </dd>
 <dt id="py3dtilers.Common.Groups.distribute_objects_in_polygons"><code class="name flex">
-<span>def <span class="ident">distribute_objects_in_polygons</span></span>(<span>self, polygons)</span>
+<span>def <span class="ident">distribute_objects_in_polygons</span></span>(<span>self, feature_list, polygons)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Distribute the geometries in the polygons.
-The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
-If a geometry is not in any polygon, create a Group containing only this geometry. This group won't have addtional points.
+<div class="desc"><p>Distribute the features in the polygons.
+The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
+If a feature is not in any polygon, create a Group containing only this feature. This group won't have addtional points.
 :param polygons: a list of Shapely polygons</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def distribute_objects_in_polygons(self, polygons):
+<pre><code class="python">def distribute_objects_in_polygons(self, feature_list, polygons):
     &#34;&#34;&#34;
-    Distribute the geometries in the polygons.
-    The geometries in the same polygon are grouped together. The Group created will also contain the points of the polygon.
-    If a geometry is not in any polygon, create a Group containing only this geometry. This group won&#39;t have addtional points.
+    Distribute the features in the polygons.
+    The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
+    If a feature is not in any polygon, create a Group containing only this feature. This group won&#39;t have addtional points.
     :param polygons: a list of Shapely polygons
     &#34;&#34;&#34;
 
-    objects_to_tile = self.objects_to_tile
     objects_to_tile_dict = {}
     objects_to_tile_without_poly = {}
 
-    # For each geometry, find the polygon containing it
-    for i, object_to_tile in enumerate(objects_to_tile):
-        p = Point(object_to_tile.get_centroid())
+    # For each feature, find the polygon containing it
+    for i, feature in enumerate(feature_list):
+        p = Point(feature.get_centroid())
         in_polygon = False
         for index, polygon in enumerate(polygons):
             if p.within(polygon):
@@ -597,11 +2006,11 @@ If a geometry is not in any polygon, create a Group containing only this geometr
     groups = list()
     for key in objects_to_tile_dict:
         additional_points = polygons[key].exterior.coords[:-1]
-        contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_dict[key]])
+        contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_dict[key]])
         group = Group(contained_objects, with_polygon=True, additional_points=additional_points)
         groups.append(group)
     for key in objects_to_tile_without_poly:
-        contained_objects = ObjectsToTile([objects_to_tile[i] for i in objects_to_tile_without_poly[key]])
+        contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_without_poly[key]])
         group = Group(contained_objects)
         groups.append(group)
 
@@ -627,27 +2036,27 @@ If a geometry is not in any polygon, create a Group containing only this geometr
 </details>
 </dd>
 <dt id="py3dtilers.Common.Groups.group_objects_by_instance"><code class="name flex">
-<span>def <span class="ident">group_objects_by_instance</span></span>(<span>self)</span>
+<span>def <span class="ident">group_objects_by_instance</span></span>(<span>self, feature_list)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create groups of geometries. One group is created per object in the ObjectsToTile.</p></div>
+<div class="desc"><p>Create groups of features. One group is created per object in the FeatureList.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_by_instance(self):
+<pre><code class="python">def group_objects_by_instance(self, feature_list):
     &#34;&#34;&#34;
-    Create groups of geometries. One group is created per object in the ObjectsToTile.
+    Create groups of features. One group is created per object in the FeatureList.
     &#34;&#34;&#34;
     groups = list()
-    for objects in self.objects_to_tile:
+    for objects in feature_list:
         group = Group(objects)
         groups.append(group)
     self.groups = groups</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Groups.group_objects_by_polygons"><code class="name flex">
-<span>def <span class="ident">group_objects_by_polygons</span></span>(<span>self, polygons_path)</span>
+<span>def <span class="ident">group_objects_by_polygons</span></span>(<span>self, feature_list, polygons_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load the polygons from the files in the folder
@@ -656,7 +2065,7 @@ If a geometry is not in any polygon, create a Group containing only this geometr
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_by_polygons(self, polygons_path):
+<pre><code class="python">def group_objects_by_polygons(self, feature_list, polygons_path):
     &#34;&#34;&#34;
     Load the polygons from the files in the folder
     :param polygons_path: the path to the file(s) containing polygons
@@ -684,28 +2093,28 @@ If a geometry is not in any polygon, create a Group containing only this geometr
                 if feature[&#39;geometry&#39;][&#39;type&#39;] == &#39;MultiPolygon&#39;:
                     coords = feature[&#39;geometry&#39;][&#39;coordinates&#39;][0][0][:-1]
                 polygons.append(Polygon(coords))
-    self.groups = self.distribute_objects_in_polygons(polygons)</code></pre>
+    self.groups = self.distribute_objects_in_polygons(feature_list, polygons)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Groups.group_objects_with_kdtree"><code class="name flex">
-<span>def <span class="ident">group_objects_with_kdtree</span></span>(<span>self)</span>
+<span>def <span class="ident">group_objects_with_kdtree</span></span>(<span>self, feature_list)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
-The distribution depends on the centroid of each geometry.</p></div>
+<div class="desc"><p>Create groups of features. The features are distributed into groups of (max) 500 objects.
+The distribution depends on the centroid of each feature.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_with_kdtree(self):
+<pre><code class="python">def group_objects_with_kdtree(self, feature_list):
     &#34;&#34;&#34;
-    Create groups of geometries. The geometries are distributed into groups of (max) 500 objects.
-    The distribution depends on the centroid of each geometry.
+    Create groups of features. The features are distributed into groups of (max) 500 objects.
+    The distribution depends on the centroid of each feature.
     &#34;&#34;&#34;
     groups = list()
-    objects = kd_tree(self.objects_to_tile, 500)
-    for objects_to_tile in objects:
-        group = Group(objects_to_tile)
+    objects = kd_tree(feature_list, 500)
+    for feature_list in objects:
+        group = Group(feature_list)
         groups.append(group)
     self.groups = groups</code></pre>
 </details>
@@ -718,7 +2127,7 @@ The distribution depends on the centroid of each geometry.</p></div>
 :param groups: all the groups
 :param group_indexes: the indexes of the groups to merge together
 :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group</p>
-<p>:return: a new group containing the geometries of all the groups</p></div>
+<p>:return: a new group containing the features of all the groups</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -730,7 +2139,7 @@ The distribution depends on the centroid of each geometry.</p></div>
     :param group_indexes: the indexes of the groups to merge together
     :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
 
-    :return: a new group containing the geometries of all the groups
+    :return: a new group containing the features of all the groups
     &#34;&#34;&#34;
 
     objects = list()
@@ -742,13 +2151,13 @@ The distribution depends on the centroid of each geometry.</p></div>
             additional_points_list.append(groups[index].additional_points)
             points_index = len(additional_points_list) - 1
             additional_points_dict[points_index] = []
-            for object_to_tile in groups[index].objects_to_tile:
-                objects.append(object_to_tile)
+            for feature in groups[index].feature_list:
+                objects.append(feature)
                 additional_points_dict[points_index].append(len(objects) - 1)
         else:
-            for object_to_tile in groups[index].objects_to_tile:
-                objects.append(object_to_tile)
-    return Group(ObjectsToTile(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)</code></pre>
+            for feature in groups[index].feature_list:
+                objects.append(feature)
+    return Group(FeatureList(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Groups.set_materials"><code class="name flex">
@@ -774,52 +2183,53 @@ The distribution depends on the centroid of each geometry.</p></div>
 </dd>
 <dt id="py3dtilers.Common.LoaNode"><code class="flex name class">
 <span>class <span class="ident">LoaNode</span></span>
-<span>(</span><span>objects_to_tile, geometric_error=50, additional_points=[], points_dict={})</span>
+<span>(</span><span>feature_list, geometric_error=50, additional_points=[], points_dict={})</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates 3D extrusions of the polygons given as parameter.
-The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
+The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the distance below which this node should be displayed.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class LoaNode(LodNode):
+<pre><code class="python">class LoaNode(GeometryNode):
     &#34;&#34;&#34;
     Creates 3D extrusions of the polygons given as parameter.
-    The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
+    The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     &#34;&#34;&#34;
     loa_index = 0
 
-    def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):
+    def __init__(self, feature_list, geometric_error=50, additional_points=list(), points_dict=dict()):
         loas = list()
         for key in points_dict:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in points_dict[key]])
+            contained_objects = FeatureList([feature_list[i] for i in points_dict[key]])
             loa = self.create_loa_from_polygon(contained_objects, additional_points[key], LoaNode.loa_index)
             loas.append(loa)
             LoaNode.loa_index += 1
-        super().__init__(objects_to_tile=ObjectsToTile(loas), geometric_error=geometric_error)
+        super().__init__(feature_list=FeatureList(loas), geometric_error=geometric_error)
 
-    def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+    def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
         &#34;&#34;&#34;
-        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-        :param objects_to_tile: the geometries contained in the LOA
+        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+        :param feature_list: the features contained in the LOA
         :param polygon_points: a polygon as list of 3D points
         :param int index: an index used for the LOA identifier
 
         :return: a 3D extrusion of the polygon
         &#34;&#34;&#34;
-        loa_geometry = ObjectToTile(&#34;loa_&#34; + str(index))
-        for object_to_tile in objects_to_tile:
-            loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
+        loa_geometry = Feature(&#34;loa_&#34; + str(index))
+        for feature in feature_list:
+            loa_geometry.geom.triangles.append(feature.geom.triangles[0])
 
         extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
         return extruded_polygon.get_extruded_object()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LodNode" href="lod_node.html#py3dtilers.Common.lod_node.LodNode">LodNode</a></li>
+<li><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -831,11 +2241,11 @@ The LoaNode also takes a dictionary stocking the indexes of the geometries conta
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.LoaNode.create_loa_from_polygon"><code class="name flex">
-<span>def <span class="ident">create_loa_from_polygon</span></span>(<span>self, objects_to_tile, polygon_points, index=0)</span>
+<span>def <span class="ident">create_loa_from_polygon</span></span>(<span>self, feature_list, polygon_points, index=0)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-:param objects_to_tile: the geometries contained in the LOA
+<div class="desc"><p>Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+:param feature_list: the features contained in the LOA
 :param polygon_points: a polygon as list of 3D points
 :param int index: an index used for the LOA identifier</p>
 <p>:return: a 3D extrusion of the polygon</p></div>
@@ -843,264 +2253,192 @@ The LoaNode also takes a dictionary stocking the indexes of the geometries conta
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+<pre><code class="python">def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
     &#34;&#34;&#34;
-    Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-    :param objects_to_tile: the geometries contained in the LOA
+    Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+    :param feature_list: the features contained in the LOA
     :param polygon_points: a polygon as list of 3D points
     :param int index: an index used for the LOA identifier
 
     :return: a 3D extrusion of the polygon
     &#34;&#34;&#34;
-    loa_geometry = ObjectToTile(&#34;loa_&#34; + str(index))
-    for object_to_tile in objects_to_tile:
-        loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
+    loa_geometry = Feature(&#34;loa_&#34; + str(index))
+    for feature in feature_list:
+        loa_geometry.geom.triangles.append(feature.geom.triangles[0])
 
     extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
     return extruded_polygon.get_extruded_object()</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="py3dtilers.Common.Lod1Node"><code class="flex name class">
 <span>class <span class="ident">Lod1Node</span></span>
-<span>(</span><span>objects_to_tile, geometric_error=50)</span>
+<span>(</span><span>feature_list, geometric_error=50)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
+<div class="desc"><p>Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the distance below which this node should be displayed.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Lod1Node(LodNode):
+<pre><code class="python">class Lod1Node(GeometryNode):
     &#34;&#34;&#34;
-    Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
+    Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, geometric_error=50):
+    def __init__(self, feature_list, geometric_error=50):
         lod1_list = list()
-        for object_to_tile in objects_to_tile:
-            extruded_polygon = ExtrudedPolygon(object_to_tile)
+        for feature in feature_list:
+            extruded_polygon = ExtrudedPolygon(feature)
             lod1_list.append(extruded_polygon.get_extruded_object())
-        super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)</code></pre>
+        super().__init__(feature_list=FeatureList(lod1_list), geometric_error=geometric_error)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LodNode" href="lod_node.html#py3dtilers.Common.lod_node.LodNode">LodNode</a></li>
+<li><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></li>
 </ul>
-</dd>
-<dt id="py3dtilers.Common.LodNode"><code class="flex name class">
-<span>class <span class="ident">LodNode</span></span>
-<span>(</span><span>objects_to_tile=None, geometric_error=50)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Each node contains a collection of objects to tile
-and a list of child nodes
-A node will correspond to a tile of the 3dtiles tileset</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class LodNode():
-    &#34;&#34;&#34;
-    Each node contains a collection of objects to tile
-    and a list of child nodes
-    A node will correspond to a tile of the 3dtiles tileset
-    &#34;&#34;&#34;
-
-    def __init__(self, objects_to_tile=None, geometric_error=50):
-        &#34;&#34;&#34;
-        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-        :param geometric_error: the distance to display the 3D tile that will be created from this node.
-        &#34;&#34;&#34;
-        self.objects_to_tile = objects_to_tile
-        self.child_nodes = list()
-        self.geometric_error = geometric_error
-        self.with_texture = False
-
-    def set_child_nodes(self, nodes=list()):
-        self.child_nodes = nodes
-
-    def add_child_node(self, node):
-        self.child_nodes.append(node)
-
-    def has_texture(self):
-        return self.with_texture</code></pre>
-</details>
-<h3>Subclasses</h3>
+<h3>Inherited members</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LoaNode" href="lod_node.html#py3dtilers.Common.lod_node.LoaNode">LoaNode</a></li>
-<li><a title="py3dtilers.Common.lod_node.Lod1Node" href="lod_node.html#py3dtilers.Common.lod_node.Lod1Node">Lod1Node</a></li>
+<li><code><b><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="py3dtilers.Common.LodNode.add_child_node"><code class="name flex">
-<span>def <span class="ident">add_child_node</span></span>(<span>self, node)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_child_node(self, node):
-    self.child_nodes.append(node)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.LodNode.has_texture"><code class="name flex">
-<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def has_texture(self):
-    return self.with_texture</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.LodNode.set_child_nodes"><code class="name flex">
-<span>def <span class="ident">set_child_nodes</span></span>(<span>self, nodes=[])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_child_nodes(self, nodes=list()):
-    self.child_nodes = nodes</code></pre>
-</details>
-</dd>
-</dl>
+</li>
+</ul>
 </dd>
 <dt id="py3dtilers.Common.LodTree"><code class="flex name class">
 <span>class <span class="ident">LodTree</span></span>
-<span>(</span><span>objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
+<span>(</span><span>feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset</p>
-<p>create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
-In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-A Group contains geometries and an optional polygon that will be used for LoaNodes.</p></div>
+<p>LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
+In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+A Group contains features and an optional polygon that will be used for LoaNodes.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class LodTree():
+<pre><code class="python">class LodTree(GeometryTree):
     &#34;&#34;&#34;
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+    def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
         &#34;&#34;&#34;
-        create_lod_tree takes an instance of ObjectsToTile (which contains a collection of ObjectToTile) and creates nodes.
-        In order to reduce the number of .b3dm, it also distributes the geometries into a list of Group.
-        A Group contains geometries and an optional polygon that will be used for LoaNodes.
+        LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
+        In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
+        A Group contains features and an optional polygon that will be used for LoaNodes.
         &#34;&#34;&#34;
         root_nodes = list()
 
-        groups = self.group_features(objects_to_tile, polygons_path)
+        groups = self.group_features(feature_list, polygons_path)
 
         for group in groups:
-            node = LodNode(group.objects_to_tile, 1)
-            node.with_texture = with_texture
+            node = GeometryNode(group.feature_list, 1, with_texture)
             root_node = node
             if create_lod1:
-                lod1_node = Lod1Node(group.objects_to_tile, 5)
+                lod1_node = Lod1Node(group.feature_list, 5)
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node
             if group.with_polygon:
-                loa_node = LoaNode(group.objects_to_tile, 20, group.additional_points, group.points_dict)
+                loa_node = LoaNode(group.feature_list, 20, group.additional_points, group.points_dict)
                 loa_node.add_child_node(root_node)
                 root_node = loa_node
 
             root_nodes.append(root_node)
 
-        self.root_nodes = root_nodes
-        self.centroid = objects_to_tile.get_centroid()
+        super().__init__(root_nodes)
 
-    def set_centroid(self, centroid):
+    def group_features(self, feature_list, polygons_path=None):
         &#34;&#34;&#34;
-        Set the centroid of the tree.
-        :param centroid: the centroid
-        &#34;&#34;&#34;
-        self.centroid = centroid
-
-    def group_features(self, objects_to_tile, polygons_path=None):
-        &#34;&#34;&#34;
-        Distribute objects_to_tile into groups to reduce the number of tiles.
-        :param objects_to_tile: a list of geometries to distribute into groups.
+        Distribute feature_list into groups to reduce the number of tiles.
+        :param feature_list: a FeatureList to distribute into groups.
         :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-        :return: a list of groups, each group containing geometries
+        :return: a list of groups, each group containing features
         &#34;&#34;&#34;
-        groups = Groups(objects_to_tile, polygons_path)
+        groups = Groups(feature_list, polygons_path)
         return groups.get_groups_as_list()</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.geometry_tree.GeometryTree" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree">GeometryTree</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.LodTree.group_features"><code class="name flex">
-<span>def <span class="ident">group_features</span></span>(<span>self, objects_to_tile, polygons_path=None)</span>
+<span>def <span class="ident">group_features</span></span>(<span>self, feature_list, polygons_path=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Distribute objects_to_tile into groups to reduce the number of tiles.
-:param objects_to_tile: a list of geometries to distribute into groups.
+<div class="desc"><p>Distribute feature_list into groups to reduce the number of tiles.
+:param feature_list: a FeatureList to distribute into groups.
 :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)</p>
-<p>:return: a list of groups, each group containing geometries</p></div>
+<p>:return: a list of groups, each group containing features</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_features(self, objects_to_tile, polygons_path=None):
+<pre><code class="python">def group_features(self, feature_list, polygons_path=None):
     &#34;&#34;&#34;
-    Distribute objects_to_tile into groups to reduce the number of tiles.
-    :param objects_to_tile: a list of geometries to distribute into groups.
+    Distribute feature_list into groups to reduce the number of tiles.
+    :param feature_list: a FeatureList to distribute into groups.
     :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
 
-    :return: a list of groups, each group containing geometries
+    :return: a list of groups, each group containing features
     &#34;&#34;&#34;
-    groups = Groups(objects_to_tile, polygons_path)
+    groups = Groups(feature_list, polygons_path)
     return groups.get_groups_as_list()</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.LodTree.set_centroid"><code class="name flex">
-<span>def <span class="ident">set_centroid</span></span>(<span>self, centroid)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the centroid of the tree.
-:param centroid: the centroid</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_centroid(self, centroid):
-    &#34;&#34;&#34;
-    Set the centroid of the tree.
-    :param centroid: the centroid
-    &#34;&#34;&#34;
-    self.centroid = centroid</code></pre>
-</details>
-</dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.geometry_tree.GeometryTree" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree">GeometryTree</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects">get_all_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_centroid" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes">get_leaf_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects">get_leaf_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects" href="geometry_tree.html#py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects">get_root_objects</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="py3dtilers.Common.ObjWriter"><code class="flex name class">
 <span>class <span class="ident">ObjWriter</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>A writer which write triangles from ObjectToTile geometries into an OBJ file</p></div>
+<div class="desc"><p>A writer which write triangles from Feature instances into an OBJ file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ObjWriter():
     &#34;&#34;&#34;
-    A writer which write triangles from ObjectToTile geometries into an OBJ file
+    A writer which write triangles from Feature instances into an OBJ file
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -1161,12 +2499,12 @@ A Group contains geometries and an optional polygon that will be used for LoaNod
             indexes.append(self.get_vertex_index(vertex))
         self.triangles.append(indexes)
 
-    def add_geometries(self, geometries):
+    def add_geometries(self, feature_list):
         &#34;&#34;&#34;
-        Add 3D geometries to the OBJ.
-        :param geometries: list of geometries
+        Add 3D features to the OBJ.
+        :param feature_list: a FeatureList
         &#34;&#34;&#34;
-        for geometry in geometries:
+        for geometry in feature_list:
             self.add_to_centroid(geometry.get_centroid())
             for triangle in geometry.get_geom_as_triangles():
                 self.add_triangle(triangle)
@@ -1177,8 +2515,9 @@ A Group contains geometries and an optional polygon that will be used for LoaNod
         :param file_name: the name of the OBJ file
         &#34;&#34;&#34;
         centroid = self.get_centroid()
-        f = open(path.join(file_name), &#34;w&#34;)
-        f.write(&#34;# &#34; + file_name + &#34;\n&#34;)
+        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        f = open(file_name, &#34;w&#34;)
+        f.write(&#34;# &#34; + str(file_name) + &#34;\n&#34;)
 
         for vertex in self.vertices:
             f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
@@ -1189,21 +2528,21 @@ A Group contains geometries and an optional polygon that will be used for LoaNod
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.ObjWriter.add_geometries"><code class="name flex">
-<span>def <span class="ident">add_geometries</span></span>(<span>self, geometries)</span>
+<span>def <span class="ident">add_geometries</span></span>(<span>self, feature_list)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Add 3D geometries to the OBJ.
-:param geometries: list of geometries</p></div>
+<div class="desc"><p>Add 3D features to the OBJ.
+:param feature_list: a FeatureList</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_geometries(self, geometries):
+<pre><code class="python">def add_geometries(self, feature_list):
     &#34;&#34;&#34;
-    Add 3D geometries to the OBJ.
-    :param geometries: list of geometries
+    Add 3D features to the OBJ.
+    :param feature_list: a FeatureList
     &#34;&#34;&#34;
-    for geometry in geometries:
+    for geometry in feature_list:
         self.add_to_centroid(geometry.get_centroid())
         for triangle in geometry.get_geom_as_triangles():
             self.add_triangle(triangle)</code></pre>
@@ -1332,770 +2671,15 @@ If no index is associated to the vertex, create a new index.
     :param file_name: the name of the OBJ file
     &#34;&#34;&#34;
     centroid = self.get_centroid()
-    f = open(path.join(file_name), &#34;w&#34;)
-    f.write(&#34;# &#34; + file_name + &#34;\n&#34;)
+    Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+    f = open(file_name, &#34;w&#34;)
+    f.write(&#34;# &#34; + str(file_name) + &#34;\n&#34;)
 
     for vertex in self.vertices:
         f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
 
     for triangle in self.triangles:
         f.write(&#34;f &#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile"><code class="flex name class">
-<span>class <span class="ident">ObjectToTile</span></span>
-<span>(</span><span>id=None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The base class of all object that need to be tiled, in order to be
-used with the corresponding tiler.</p>
-<p>:param id: given identifier</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ObjectToTile(object):
-    &#34;&#34;&#34;
-    The base class of all object that need to be tiled, in order to be
-    used with the corresponding tiler.
-    &#34;&#34;&#34;
-
-    def __init__(self, id=None):
-        &#34;&#34;&#34;
-        :param id: given identifier
-        &#34;&#34;&#34;
-
-        self.geom = TriangleSoup()
-
-        # Optional application specific data to be added to the batch table for this object
-        self.batchtable_data = None
-
-        # A Bounding Volume Box object
-        self.box = None
-
-        # The centroid of the box
-        self.centroid = np.array([0, 0, 0])
-
-        self.texture = None
-
-        self.material_index = 0
-
-        self.set_id(id)
-
-    def set_id(self, id):
-        self.id = id
-
-    def get_id(self):
-        return self.id
-
-    def set_batchtable_data(self, data):
-        self.batchtable_data = data
-
-    def get_batchtable_data(self):
-        return self.batchtable_data
-
-    def get_centroid(self):
-        return self.centroid
-
-    def get_bounding_volume_box(self):
-        return self.box
-
-    def get_geom_as_triangles(self):
-        return self.geom.triangles[0]
-
-    def set_triangles(self, triangles):
-        self.geom.triangles[0] = triangles
-
-    def set_box(self):
-        &#34;&#34;&#34;
-        Parameters
-        ----------
-        Returns
-        -------
-        &#34;&#34;&#34;
-        bbox = self.geom.getBbox()
-        self.box = BoundingVolumeBox()
-        self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
-
-        # Set centroid from Bbox center
-        self.centroid = np.array(self.box.get_center())
-
-    def get_texture(self):
-        return self.texture
-
-    def set_texture(self, texture):
-        self.texture = texture
-
-    def has_texture(self):
-        return self.texture is not None
-
-    def get_size(self):
-        return 1</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject" href="../CityTiler/citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject">CityMCityObject</a></li>
-<li><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="../GeojsonTiler/geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></li>
-<li><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom" href="../IfcTiler/ifcObjectGeom.html#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom">IfcObjectGeom</a></li>
-<li><a title="py3dtilers.ObjTiler.obj.Obj" href="../ObjTiler/obj.html#py3dtilers.ObjTiler.obj.Obj">Obj</a></li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="py3dtilers.Common.ObjectToTile.get_batchtable_data"><code class="name flex">
-<span>def <span class="ident">get_batchtable_data</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_batchtable_data(self):
-    return self.batchtable_data</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_bounding_volume_box"><code class="name flex">
-<span>def <span class="ident">get_bounding_volume_box</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_bounding_volume_box(self):
-    return self.box</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_centroid"><code class="name flex">
-<span>def <span class="ident">get_centroid</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_centroid(self):
-    return self.centroid</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_geom_as_triangles"><code class="name flex">
-<span>def <span class="ident">get_geom_as_triangles</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_geom_as_triangles(self):
-    return self.geom.triangles[0]</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_id"><code class="name flex">
-<span>def <span class="ident">get_id</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_id(self):
-    return self.id</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_size"><code class="name flex">
-<span>def <span class="ident">get_size</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_size(self):
-    return 1</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.get_texture"><code class="name flex">
-<span>def <span class="ident">get_texture</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_texture(self):
-    return self.texture</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.has_texture"><code class="name flex">
-<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def has_texture(self):
-    return self.texture is not None</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.set_batchtable_data"><code class="name flex">
-<span>def <span class="ident">set_batchtable_data</span></span>(<span>self, data)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_batchtable_data(self, data):
-    self.batchtable_data = data</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.set_box"><code class="name flex">
-<span>def <span class="ident">set_box</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><h2 id="parameters">Parameters</h2>
-<h2 id="returns">Returns</h2></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_box(self):
-    &#34;&#34;&#34;
-    Parameters
-    ----------
-    Returns
-    -------
-    &#34;&#34;&#34;
-    bbox = self.geom.getBbox()
-    self.box = BoundingVolumeBox()
-    self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
-
-    # Set centroid from Bbox center
-    self.centroid = np.array(self.box.get_center())</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.set_id"><code class="name flex">
-<span>def <span class="ident">set_id</span></span>(<span>self, id)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_id(self, id):
-    self.id = id</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.set_texture"><code class="name flex">
-<span>def <span class="ident">set_texture</span></span>(<span>self, texture)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_texture(self, texture):
-    self.texture = texture</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectToTile.set_triangles"><code class="name flex">
-<span>def <span class="ident">set_triangles</span></span>(<span>self, triangles)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_triangles(self, triangles):
-    self.geom.triangles[0] = triangles</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile"><code class="flex name class">
-<span>class <span class="ident">ObjectsToTile</span></span>
-<span>(</span><span>objects=None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>A decorated list of ObjectsToTile type objects.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ObjectsToTile(object):
-    &#34;&#34;&#34;
-    A decorated list of ObjectsToTile type objects.
-    &#34;&#34;&#34;
-
-    # The material used by default for geometries
-    default_mat = None
-
-    def __init__(self, objects=None):
-        self.objects = list()
-        if ObjectsToTile.default_mat is None:
-            ObjectsToTile.default_mat = ColorConfig().get_default_color()
-        self.materials = [ObjectsToTile.default_mat]
-        if(objects):
-            self.objects.extend(objects)
-
-    def __iter__(self):
-        return iter(self.objects)
-
-    def __getitem__(self, item):
-        if isinstance(item, slice):
-            objects_class = self.__class__
-            return objects_class(self.objects.__getitem__(item))
-        # item is then an int type:
-        return self.objects.__getitem__(item)
-
-    def __add__(self, other):
-        objects_class = self.__class__
-        new_objects = objects_class(self.objects)
-        new_objects.objects.extend(other.objects)
-        return new_objects
-
-    def append(self, obj):
-        self.objects.append(obj)
-
-    def extend(self, others):
-        self.objects.extend(others)
-
-    def get_objects(self):
-        if not self.is_list_of_objects_to_tile():
-            return self.objects
-        else:
-            objects = list()
-            for objs in self.objects:
-                objects.extend(objs.get_objects())
-            return objects
-
-    def __len__(self):
-        return len(self.objects)
-
-    def is_list_of_objects_to_tile(self):
-        &#34;&#34;&#34;Check if this instance of ObjectsToTile contains others ObjectsToTile&#34;&#34;&#34;
-        return isinstance(self.objects[0], ObjectsToTile)
-
-    def get_size(self):
-        &#34;&#34;&#34;Recursive method to get the length&#34;&#34;&#34;
-        return sum([obj.get_size() for obj in self])
-
-    def get_centroid(self):
-        &#34;&#34;&#34;
-        :param objects: an array containing objs
-
-        :return: the centroid of the tileset.
-        &#34;&#34;&#34;
-        centroid = [0., 0., 0.]
-        for objectToTile in self:
-            centroid[0] += objectToTile.get_centroid()[0]
-            centroid[1] += objectToTile.get_centroid()[1]
-            centroid[2] += objectToTile.get_centroid()[2]
-        return np.array([centroid[0] / self.get_size(),
-                         centroid[1] / self.get_size(),
-                         centroid[2] / self.get_size()])
-
-    def set_materials(self, materials):
-        &#34;&#34;&#34;
-        Set the materials of this object to a new array of materials.
-        :param materials: an array of GlTFMaterial
-        &#34;&#34;&#34;
-        self.materials = materials
-
-    def add_materials(self, materials):
-        &#34;&#34;&#34;
-        Extend the materials of this object with another array of materials.
-        :param materials: an array of GlTFMaterial
-        &#34;&#34;&#34;
-        self.materials.extend(materials)
-
-    def get_material(self, index):
-        &#34;&#34;&#34;
-        Get the material at the index.
-        :param index: the index (int) of the material
-        &#34;&#34;&#34;
-        return self.materials[index]
-
-    def translate_objects(self, offset):
-        &#34;&#34;&#34;
-        Translate the geometries by substracting an offset
-        :param offset: the Vec3 translation offset
-        &#34;&#34;&#34;
-        # Translate the position of each object by an offset
-        for object_to_tile in self.get_objects():
-            new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
-                new_position = []
-                for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
-                new_geom.append(new_position)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
-
-    def change_crs(self, transformer):
-        &#34;&#34;&#34;
-        Project the geometries into another CRS
-        :param transformer: the transformer used to change the crs
-        &#34;&#34;&#34;
-        for object_to_tile in self.get_objects():
-            new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
-                new_position = []
-                for point in triangle:
-                    new_point = transformer.transform(point[0], point[1], point[2])
-                    new_position.append(np.array(new_point, dtype=np.float32))
-                new_geom.append(new_position)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
-
-    def scale_objects(self, scale_factor):
-        &#34;&#34;&#34;
-        Rescale the geometries.
-        :param scale_factor: the factor to scale the objects
-        &#34;&#34;&#34;
-        centroid = self.get_centroid()
-        for object_to_tile in self.get_objects():
-            new_geom = []
-            for triangle in object_to_tile.get_geom_as_triangles():
-                scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
-                new_geom.append(scaled_triangle)
-            object_to_tile.set_triangles(new_geom)
-            object_to_tile.set_box()
-
-    def get_textures(self):
-        &#34;&#34;&#34;
-        Return a dictionary of all the textures where the keys are the IDs of the geometries.
-        :return: a dictionary of textures
-        &#34;&#34;&#34;
-        texture_dict = dict()
-        for object_to_tile in self.get_objects():
-            texture_dict[object_to_tile.get_id()] = object_to_tile.get_texture()
-        return texture_dict
-
-    @staticmethod
-    def create_batch_table_extension(extension_name, ids=None, objects=None):
-        pass
-
-    @staticmethod
-    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
-        pass</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="../CityTiler/citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
-<li><a title="py3dtilers.GeojsonTiler.geojson.Geojsons" href="../GeojsonTiler/geojson.html#py3dtilers.GeojsonTiler.geojson.Geojsons">Geojsons</a></li>
-<li><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom" href="../IfcTiler/ifcObjectGeom.html#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom">IfcObjectsGeom</a></li>
-<li><a title="py3dtilers.ObjTiler.obj.Objs" href="../ObjTiler/obj.html#py3dtilers.ObjTiler.obj.Objs">Objs</a></li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="py3dtilers.Common.ObjectsToTile.default_mat"><code class="name">var <span class="ident">default_mat</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Static methods</h3>
-<dl>
-<dt id="py3dtilers.Common.ObjectsToTile.create_batch_table_extension"><code class="name flex">
-<span>def <span class="ident">create_batch_table_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def create_batch_table_extension(extension_name, ids=None, objects=None):
-    pass</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.create_bounding_volume_extension"><code class="name flex">
-<span>def <span class="ident">create_bounding_volume_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def create_bounding_volume_extension(extension_name, ids=None, objects=None):
-    pass</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="py3dtilers.Common.ObjectsToTile.add_materials"><code class="name flex">
-<span>def <span class="ident">add_materials</span></span>(<span>self, materials)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Extend the materials of this object with another array of materials.
-:param materials: an array of GlTFMaterial</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_materials(self, materials):
-    &#34;&#34;&#34;
-    Extend the materials of this object with another array of materials.
-    :param materials: an array of GlTFMaterial
-    &#34;&#34;&#34;
-    self.materials.extend(materials)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.append"><code class="name flex">
-<span>def <span class="ident">append</span></span>(<span>self, obj)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def append(self, obj):
-    self.objects.append(obj)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.change_crs"><code class="name flex">
-<span>def <span class="ident">change_crs</span></span>(<span>self, transformer)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Project the geometries into another CRS
-:param transformer: the transformer used to change the crs</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def change_crs(self, transformer):
-    &#34;&#34;&#34;
-    Project the geometries into another CRS
-    :param transformer: the transformer used to change the crs
-    &#34;&#34;&#34;
-    for object_to_tile in self.get_objects():
-        new_geom = []
-        for triangle in object_to_tile.get_geom_as_triangles():
-            new_position = []
-            for point in triangle:
-                new_point = transformer.transform(point[0], point[1], point[2])
-                new_position.append(np.array(new_point, dtype=np.float32))
-            new_geom.append(new_position)
-        object_to_tile.set_triangles(new_geom)
-        object_to_tile.set_box()</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.extend"><code class="name flex">
-<span>def <span class="ident">extend</span></span>(<span>self, others)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def extend(self, others):
-    self.objects.extend(others)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.get_centroid"><code class="name flex">
-<span>def <span class="ident">get_centroid</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>:param objects: an array containing objs</p>
-<p>:return: the centroid of the tileset.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_centroid(self):
-    &#34;&#34;&#34;
-    :param objects: an array containing objs
-
-    :return: the centroid of the tileset.
-    &#34;&#34;&#34;
-    centroid = [0., 0., 0.]
-    for objectToTile in self:
-        centroid[0] += objectToTile.get_centroid()[0]
-        centroid[1] += objectToTile.get_centroid()[1]
-        centroid[2] += objectToTile.get_centroid()[2]
-    return np.array([centroid[0] / self.get_size(),
-                     centroid[1] / self.get_size(),
-                     centroid[2] / self.get_size()])</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.get_material"><code class="name flex">
-<span>def <span class="ident">get_material</span></span>(<span>self, index)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the material at the index.
-:param index: the index (int) of the material</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_material(self, index):
-    &#34;&#34;&#34;
-    Get the material at the index.
-    :param index: the index (int) of the material
-    &#34;&#34;&#34;
-    return self.materials[index]</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.get_objects"><code class="name flex">
-<span>def <span class="ident">get_objects</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_objects(self):
-    if not self.is_list_of_objects_to_tile():
-        return self.objects
-    else:
-        objects = list()
-        for objs in self.objects:
-            objects.extend(objs.get_objects())
-        return objects</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.get_size"><code class="name flex">
-<span>def <span class="ident">get_size</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Recursive method to get the length</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_size(self):
-    &#34;&#34;&#34;Recursive method to get the length&#34;&#34;&#34;
-    return sum([obj.get_size() for obj in self])</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.get_textures"><code class="name flex">
-<span>def <span class="ident">get_textures</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return a dictionary of all the textures where the keys are the IDs of the geometries.
-:return: a dictionary of textures</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_textures(self):
-    &#34;&#34;&#34;
-    Return a dictionary of all the textures where the keys are the IDs of the geometries.
-    :return: a dictionary of textures
-    &#34;&#34;&#34;
-    texture_dict = dict()
-    for object_to_tile in self.get_objects():
-        texture_dict[object_to_tile.get_id()] = object_to_tile.get_texture()
-    return texture_dict</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.is_list_of_objects_to_tile"><code class="name flex">
-<span>def <span class="ident">is_list_of_objects_to_tile</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Check if this instance of ObjectsToTile contains others ObjectsToTile</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_list_of_objects_to_tile(self):
-    &#34;&#34;&#34;Check if this instance of ObjectsToTile contains others ObjectsToTile&#34;&#34;&#34;
-    return isinstance(self.objects[0], ObjectsToTile)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.scale_objects"><code class="name flex">
-<span>def <span class="ident">scale_objects</span></span>(<span>self, scale_factor)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Rescale the geometries.
-:param scale_factor: the factor to scale the objects</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def scale_objects(self, scale_factor):
-    &#34;&#34;&#34;
-    Rescale the geometries.
-    :param scale_factor: the factor to scale the objects
-    &#34;&#34;&#34;
-    centroid = self.get_centroid()
-    for object_to_tile in self.get_objects():
-        new_geom = []
-        for triangle in object_to_tile.get_geom_as_triangles():
-            scaled_triangle = [((vertex - centroid) * scale_factor) + centroid for vertex in triangle]
-            new_geom.append(scaled_triangle)
-        object_to_tile.set_triangles(new_geom)
-        object_to_tile.set_box()</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.set_materials"><code class="name flex">
-<span>def <span class="ident">set_materials</span></span>(<span>self, materials)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the materials of this object to a new array of materials.
-:param materials: an array of GlTFMaterial</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_materials(self, materials):
-    &#34;&#34;&#34;
-    Set the materials of this object to a new array of materials.
-    :param materials: an array of GlTFMaterial
-    &#34;&#34;&#34;
-    self.materials = materials</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.ObjectsToTile.translate_objects"><code class="name flex">
-<span>def <span class="ident">translate_objects</span></span>(<span>self, offset)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Translate the geometries by substracting an offset
-:param offset: the Vec3 translation offset</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def translate_objects(self, offset):
-    &#34;&#34;&#34;
-    Translate the geometries by substracting an offset
-    :param offset: the Vec3 translation offset
-    &#34;&#34;&#34;
-    # Translate the position of each object by an offset
-    for object_to_tile in self.get_objects():
-        new_geom = []
-        for triangle in object_to_tile.get_geom_as_triangles():
-            new_position = []
-            for points in triangle:
-                # Must to do this this way to ensure that the new position
-                # stays in float32, which is mandatory for writing the GLTF
-                new_position.append(np.array(points - offset, dtype=np.float32))
-            new_geom.append(new_position)
-        object_to_tile.set_triangles(new_geom)
-        object_to_tile.set_box()</code></pre>
 </details>
 </dd>
 </dl>
@@ -2136,13 +2720,12 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
         self.parser.add_argument(&#39;--offset&#39;,
                                  nargs=&#39;*&#39;,
                                  default=[0, 0, 0],
-                                 type=float,
                                  help=&#39;Substract an offset to all the vertices.&#39;)
 
         self.parser.add_argument(&#39;--scale&#39;,
                                  nargs=&#39;?&#39;,
                                  type=float,
-                                 help=&#39;Scale geometries by the input factor.&#39;)
+                                 help=&#39;Scale features by the input factor.&#39;)
 
         self.parser.add_argument(&#39;--crs_in&#39;,
                                  nargs=&#39;?&#39;,
@@ -2161,6 +2744,11 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
                                  action=&#39;store_true&#39;,
                                  help=&#39;Adds texture to 3DTiles when defined&#39;)
 
+        self.parser.add_argument(&#39;--output_dir&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=str,
+                                 help=&#39;Output directory of the tileset.&#39;)
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -2173,40 +2761,60 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
         elif(len(self.args.offset) &gt; 3):
             self.args.offset = self.args.offset[:3]
 
-    def write_geometries_as_obj(self, geometries, file_name):
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            return &#34;output_tileset&#34;
+        else:
+            return self.args.output_dir
+
+    def write_geometries_as_obj(self, features, file_name):
         obj_writer = ObjWriter()
-        obj_writer.add_geometries(geometries.get_objects())
+        obj_writer.add_geometries(features.get_features())
         obj_writer.write_obj(file_name)
 
-    def change_projection(self, geometries, crs_in, crs_out):
+    def change_projection(self, features, crs_in, crs_out):
         transformer = Transformer.from_crs(crs_in, crs_out)
-        geometries.change_crs(transformer)
+        features.change_crs(transformer)
 
-    def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
+        return lod_tree
+
+    def create_tileset_from_geometries(self, feature_list, extension_name=None):
+        create_loa = self.args.loa is not None
+        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+
         if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-            objects_to_tile.scale_objects(self.args.scale)
+            for objects in tree.get_all_objects():
+                objects.scale_features(self.args.scale)
 
         if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
             if self.args.offset[0] == &#39;centroid&#39;:
-                self.args.offset = objects_to_tile.get_centroid()
-            objects_to_tile.translate_objects(self.args.offset)
+                self.args.offset = tree.get_centroid()
+            for objects in tree.get_all_objects():
+                objects.translate_features(self.args.offset)
 
         if not self.args.crs_in == self.args.crs_out:
-            self.change_projection(objects_to_tile, self.args.crs_in, self.args.crs_out)
+            for objects in tree.get_all_objects():
+                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
 
         if self.args.obj is not None:
-            self.write_geometries_as_obj(objects_to_tile, self.args.obj)
+            self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
 
-        create_loa = self.args.loa is not None
+        feature_list.delete_objects_ref()
+        self.create_output_directory()
+        return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 
-        return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, self.args.with_texture)
-
-    def create_directory(self, directory):
-        target_dir = pathlib.Path(directory).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        target_dir = pathlib.Path(directory + &#39;/tiles&#39;).expanduser()
-        pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-        Texture.set_texture_folder(directory)
+    def create_output_directory(self):
+        dir = self.get_output_dir()
+        target_dir = Path(dir).expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
+        target_dir = Path(dir, &#39;tiles&#39;).expanduser()
+        Path(target_dir).mkdir(parents=True, exist_ok=True)
+        Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):
         return ColorConfig(config_path)</code></pre>
@@ -2217,11 +2825,12 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 <li><a title="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler" href="../GeojsonTiler/GeojsonTiler.html#py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler">GeojsonTiler</a></li>
 <li><a title="py3dtilers.IfcTiler.IfcTiler.IfcTiler" href="../IfcTiler/IfcTiler.html#py3dtilers.IfcTiler.IfcTiler.IfcTiler">IfcTiler</a></li>
 <li><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler" href="../ObjTiler/ObjTiler.html#py3dtilers.ObjTiler.ObjTiler.ObjTiler">ObjTiler</a></li>
+<li><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler" href="../TilesetReader/TilesetReader.html#py3dtilers.TilesetReader.TilesetReader.TilesetTiler">TilesetTiler</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.Tiler.change_projection"><code class="name flex">
-<span>def <span class="ident">change_projection</span></span>(<span>self, geometries, crs_in, crs_out)</span>
+<span>def <span class="ident">change_projection</span></span>(<span>self, features, crs_in, crs_out)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2229,13 +2838,13 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def change_projection(self, geometries, crs_in, crs_out):
+<pre><code class="python">def change_projection(self, features, crs_in, crs_out):
     transformer = Transformer.from_crs(crs_in, crs_out)
-    geometries.change_crs(transformer)</code></pre>
+    features.change_crs(transformer)</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.Tiler.create_directory"><code class="name flex">
-<span>def <span class="ident">create_directory</span></span>(<span>self, directory)</span>
+<dt id="py3dtilers.Common.Tiler.create_output_directory"><code class="name flex">
+<span>def <span class="ident">create_output_directory</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2243,16 +2852,17 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_directory(self, directory):
-    target_dir = pathlib.Path(directory).expanduser()
-    pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-    target_dir = pathlib.Path(directory + &#39;/tiles&#39;).expanduser()
-    pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)
-    Texture.set_texture_folder(directory)</code></pre>
+<pre><code class="python">def create_output_directory(self):
+    dir = self.get_output_dir()
+    target_dir = Path(dir).expanduser()
+    Path(target_dir).mkdir(parents=True, exist_ok=True)
+    target_dir = Path(dir, &#39;tiles&#39;).expanduser()
+    Path(target_dir).mkdir(parents=True, exist_ok=True)
+    Texture.set_texture_folder(dir)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Tiler.create_tileset_from_geometries"><code class="name flex">
-<span>def <span class="ident">create_tileset_from_geometries</span></span>(<span>self, objects_to_tile, extension_name=None)</span>
+<span>def <span class="ident">create_tileset_from_geometries</span></span>(<span>self, feature_list, extension_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2260,24 +2870,44 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_tileset_from_geometries(self, objects_to_tile, extension_name=None):
+<pre><code class="python">def create_tileset_from_geometries(self, feature_list, extension_name=None):
+    create_loa = self.args.loa is not None
+    tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
+
     if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-        objects_to_tile.scale_objects(self.args.scale)
+        for objects in tree.get_all_objects():
+            objects.scale_features(self.args.scale)
 
     if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
         if self.args.offset[0] == &#39;centroid&#39;:
-            self.args.offset = objects_to_tile.get_centroid()
-        objects_to_tile.translate_objects(self.args.offset)
+            self.args.offset = tree.get_centroid()
+        for objects in tree.get_all_objects():
+            objects.translate_features(self.args.offset)
 
     if not self.args.crs_in == self.args.crs_out:
-        self.change_projection(objects_to_tile, self.args.crs_in, self.args.crs_out)
+        for objects in tree.get_all_objects():
+            self.change_projection(objects, self.args.crs_in, self.args.crs_out)
 
     if self.args.obj is not None:
-        self.write_geometries_as_obj(objects_to_tile, self.args.obj)
+        self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
 
-    create_loa = self.args.loa is not None
-
-    return create_tileset(objects_to_tile, self.args.lod1, create_loa, self.args.loa, extension_name, self.args.with_texture)</code></pre>
+    feature_list.delete_objects_ref()
+    self.create_output_directory()
+    return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Tiler.create_tree"><code class="name flex">
+<span>def <span class="ident">create_tree</span></span>(<span>self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
+    lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
+    return lod_tree</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Tiler.get_color_config"><code class="name flex">
@@ -2291,6 +2921,25 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 </summary>
 <pre><code class="python">def get_color_config(self, config_path):
     return ColorConfig(config_path)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.Tiler.get_output_dir"><code class="name flex">
+<span>def <span class="ident">get_output_dir</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the directory name for the tileset.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_output_dir(self):
+    &#34;&#34;&#34;
+    Return the directory name for the tileset.
+    &#34;&#34;&#34;
+    if self.args.output_dir is None:
+        return &#34;output_tileset&#34;
+    else:
+        return self.args.output_dir</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.Tiler.parse_command_line"><code class="name flex">
@@ -2316,7 +2965,7 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 </details>
 </dd>
 <dt id="py3dtilers.Common.Tiler.write_geometries_as_obj"><code class="name flex">
-<span>def <span class="ident">write_geometries_as_obj</span></span>(<span>self, geometries, file_name)</span>
+<span>def <span class="ident">write_geometries_as_obj</span></span>(<span>self, features, file_name)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2324,9 +2973,9 @@ def create_bounding_volume_extension(extension_name, ids=None, objects=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def write_geometries_as_obj(self, geometries, file_name):
+<pre><code class="python">def write_geometries_as_obj(self, features, file_name):
     obj_writer = ObjWriter()
-    obj_writer.add_geometries(geometries.get_objects())
+    obj_writer.add_geometries(features.get_features())
     obj_writer.write_obj(file_name)</code></pre>
 </details>
 </dd>
@@ -2436,11 +3085,13 @@ weak references.</p>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="py3dtilers.Common.feature" href="feature.html">py3dtilers.Common.feature</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node" href="geometry_node.html">py3dtilers.Common.geometry_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree" href="geometry_tree.html">py3dtilers.Common.geometry_tree</a></code></li>
 <li><code><a title="py3dtilers.Common.group" href="group.html">py3dtilers.Common.group</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_node" href="lod_node.html">py3dtilers.Common.lod_node</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_tree" href="lod_tree.html">py3dtilers.Common.lod_tree</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer" href="obj_writer.html">py3dtilers.Common.obj_writer</a></code></li>
-<li><code><a title="py3dtilers.Common.object_to_tile" href="object_to_tile.html">py3dtilers.Common.object_to_tile</a></code></li>
 <li><code><a title="py3dtilers.Common.polygon_extrusion" href="polygon_extrusion.html">py3dtilers.Common.polygon_extrusion</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler" href="tiler.html">py3dtilers.Common.tiler</a></code></li>
 <li><code><a title="py3dtilers.Common.tileset_creation" href="tileset_creation.html">py3dtilers.Common.tileset_creation</a></code></li>
@@ -2459,6 +3110,71 @@ weak references.</p>
 <ul class="">
 <li><code><a title="py3dtilers.Common.ExtrudedPolygon.extrude_footprint" href="#py3dtilers.Common.ExtrudedPolygon.extrude_footprint">extrude_footprint</a></code></li>
 <li><code><a title="py3dtilers.Common.ExtrudedPolygon.get_extruded_object" href="#py3dtilers.Common.ExtrudedPolygon.get_extruded_object">get_extruded_object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.Common.Feature" href="#py3dtilers.Common.Feature">Feature</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.Feature.get_batchtable_data" href="#py3dtilers.Common.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.get_bounding_volume_box" href="#py3dtilers.Common.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.get_centroid" href="#py3dtilers.Common.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.get_geom_as_triangles" href="#py3dtilers.Common.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.get_id" href="#py3dtilers.Common.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.get_texture" href="#py3dtilers.Common.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.has_texture" href="#py3dtilers.Common.Feature.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.set_batchtable_data" href="#py3dtilers.Common.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.set_box" href="#py3dtilers.Common.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.set_id" href="#py3dtilers.Common.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.set_texture" href="#py3dtilers.Common.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.Feature.set_triangles" href="#py3dtilers.Common.Feature.set_triangles">set_triangles</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.Common.FeatureList" href="#py3dtilers.Common.FeatureList">FeatureList</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.FeatureList.add_materials" href="#py3dtilers.Common.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.append" href="#py3dtilers.Common.FeatureList.append">append</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.change_crs" href="#py3dtilers.Common.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.create_batch_table_extension" href="#py3dtilers.Common.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.create_bounding_volume_extension" href="#py3dtilers.Common.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.default_mat" href="#py3dtilers.Common.FeatureList.default_mat">default_mat</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.delete_objects_ref" href="#py3dtilers.Common.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.extend" href="#py3dtilers.Common.FeatureList.extend">extend</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.get_centroid" href="#py3dtilers.Common.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.get_features" href="#py3dtilers.Common.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.get_material" href="#py3dtilers.Common.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.get_textures" href="#py3dtilers.Common.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.is_list_of_feature_list" href="#py3dtilers.Common.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.scale_features" href="#py3dtilers.Common.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.set_materials" href="#py3dtilers.Common.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.translate_features" href="#py3dtilers.Common.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.Common.FromGeometryTreeToTileset" href="#py3dtilers.Common.FromGeometryTreeToTileset">FromGeometryTreeToTileset</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.FromGeometryTreeToTileset.convert_to_tileset" href="#py3dtilers.Common.FromGeometryTreeToTileset.convert_to_tileset">convert_to_tileset</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.Common.GeometryNode" href="#py3dtilers.Common.GeometryNode">GeometryNode</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.GeometryNode.add_child_node" href="#py3dtilers.Common.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryNode.geometries_have_texture" href="#py3dtilers.Common.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryNode.get_features" href="#py3dtilers.Common.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryNode.get_leaves" href="#py3dtilers.Common.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryNode.has_texture" href="#py3dtilers.Common.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryNode.set_child_nodes" href="#py3dtilers.Common.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.Common.GeometryTree" href="#py3dtilers.Common.GeometryTree">GeometryTree</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.GeometryTree.get_all_objects" href="#py3dtilers.Common.GeometryTree.get_all_objects">get_all_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryTree.get_centroid" href="#py3dtilers.Common.GeometryTree.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryTree.get_leaf_nodes" href="#py3dtilers.Common.GeometryTree.get_leaf_nodes">get_leaf_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryTree.get_leaf_objects" href="#py3dtilers.Common.GeometryTree.get_leaf_objects">get_leaf_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.GeometryTree.get_root_objects" href="#py3dtilers.Common.GeometryTree.get_root_objects">get_root_objects</a></code></li>
 </ul>
 </li>
 <li>
@@ -2485,18 +3201,9 @@ weak references.</p>
 <h4><code><a title="py3dtilers.Common.Lod1Node" href="#py3dtilers.Common.Lod1Node">Lod1Node</a></code></h4>
 </li>
 <li>
-<h4><code><a title="py3dtilers.Common.LodNode" href="#py3dtilers.Common.LodNode">LodNode</a></code></h4>
-<ul class="">
-<li><code><a title="py3dtilers.Common.LodNode.add_child_node" href="#py3dtilers.Common.LodNode.add_child_node">add_child_node</a></code></li>
-<li><code><a title="py3dtilers.Common.LodNode.has_texture" href="#py3dtilers.Common.LodNode.has_texture">has_texture</a></code></li>
-<li><code><a title="py3dtilers.Common.LodNode.set_child_nodes" href="#py3dtilers.Common.LodNode.set_child_nodes">set_child_nodes</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="py3dtilers.Common.LodTree" href="#py3dtilers.Common.LodTree">LodTree</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.Common.LodTree.group_features" href="#py3dtilers.Common.LodTree.group_features">group_features</a></code></li>
-<li><code><a title="py3dtilers.Common.LodTree.set_centroid" href="#py3dtilers.Common.LodTree.set_centroid">set_centroid</a></code></li>
 </ul>
 </li>
 <li>
@@ -2512,51 +3219,14 @@ weak references.</p>
 </ul>
 </li>
 <li>
-<h4><code><a title="py3dtilers.Common.ObjectToTile" href="#py3dtilers.Common.ObjectToTile">ObjectToTile</a></code></h4>
-<ul class="">
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_batchtable_data" href="#py3dtilers.Common.ObjectToTile.get_batchtable_data">get_batchtable_data</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_bounding_volume_box" href="#py3dtilers.Common.ObjectToTile.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_centroid" href="#py3dtilers.Common.ObjectToTile.get_centroid">get_centroid</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_geom_as_triangles" href="#py3dtilers.Common.ObjectToTile.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_id" href="#py3dtilers.Common.ObjectToTile.get_id">get_id</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_size" href="#py3dtilers.Common.ObjectToTile.get_size">get_size</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.get_texture" href="#py3dtilers.Common.ObjectToTile.get_texture">get_texture</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.has_texture" href="#py3dtilers.Common.ObjectToTile.has_texture">has_texture</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.set_batchtable_data" href="#py3dtilers.Common.ObjectToTile.set_batchtable_data">set_batchtable_data</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.set_box" href="#py3dtilers.Common.ObjectToTile.set_box">set_box</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.set_id" href="#py3dtilers.Common.ObjectToTile.set_id">set_id</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.set_texture" href="#py3dtilers.Common.ObjectToTile.set_texture">set_texture</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectToTile.set_triangles" href="#py3dtilers.Common.ObjectToTile.set_triangles">set_triangles</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="py3dtilers.Common.ObjectsToTile" href="#py3dtilers.Common.ObjectsToTile">ObjectsToTile</a></code></h4>
-<ul class="">
-<li><code><a title="py3dtilers.Common.ObjectsToTile.add_materials" href="#py3dtilers.Common.ObjectsToTile.add_materials">add_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.append" href="#py3dtilers.Common.ObjectsToTile.append">append</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.change_crs" href="#py3dtilers.Common.ObjectsToTile.change_crs">change_crs</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.create_batch_table_extension" href="#py3dtilers.Common.ObjectsToTile.create_batch_table_extension">create_batch_table_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.create_bounding_volume_extension" href="#py3dtilers.Common.ObjectsToTile.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.default_mat" href="#py3dtilers.Common.ObjectsToTile.default_mat">default_mat</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.extend" href="#py3dtilers.Common.ObjectsToTile.extend">extend</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.get_centroid" href="#py3dtilers.Common.ObjectsToTile.get_centroid">get_centroid</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.get_material" href="#py3dtilers.Common.ObjectsToTile.get_material">get_material</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.get_objects" href="#py3dtilers.Common.ObjectsToTile.get_objects">get_objects</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.get_size" href="#py3dtilers.Common.ObjectsToTile.get_size">get_size</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.get_textures" href="#py3dtilers.Common.ObjectsToTile.get_textures">get_textures</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.is_list_of_objects_to_tile" href="#py3dtilers.Common.ObjectsToTile.is_list_of_objects_to_tile">is_list_of_objects_to_tile</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.scale_objects" href="#py3dtilers.Common.ObjectsToTile.scale_objects">scale_objects</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.set_materials" href="#py3dtilers.Common.ObjectsToTile.set_materials">set_materials</a></code></li>
-<li><code><a title="py3dtilers.Common.ObjectsToTile.translate_objects" href="#py3dtilers.Common.ObjectsToTile.translate_objects">translate_objects</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="py3dtilers.Common.Tiler" href="#py3dtilers.Common.Tiler">Tiler</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.Common.Tiler.change_projection" href="#py3dtilers.Common.Tiler.change_projection">change_projection</a></code></li>
-<li><code><a title="py3dtilers.Common.Tiler.create_directory" href="#py3dtilers.Common.Tiler.create_directory">create_directory</a></code></li>
+<li><code><a title="py3dtilers.Common.Tiler.create_output_directory" href="#py3dtilers.Common.Tiler.create_output_directory">create_output_directory</a></code></li>
 <li><code><a title="py3dtilers.Common.Tiler.create_tileset_from_geometries" href="#py3dtilers.Common.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.Tiler.create_tree" href="#py3dtilers.Common.Tiler.create_tree">create_tree</a></code></li>
 <li><code><a title="py3dtilers.Common.Tiler.get_color_config" href="#py3dtilers.Common.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.Tiler.get_output_dir" href="#py3dtilers.Common.Tiler.get_output_dir">get_output_dir</a></code></li>
 <li><code><a title="py3dtilers.Common.Tiler.parse_command_line" href="#py3dtilers.Common.Tiler.parse_command_line">parse_command_line</a></code></li>
 <li><code><a title="py3dtilers.Common.Tiler.write_geometries_as_obj" href="#py3dtilers.Common.Tiler.write_geometries_as_obj">write_geometries_as_obj</a></code></li>
 </ul>

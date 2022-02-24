@@ -933,7 +933,7 @@ class TemporalGraph(Graph):
                 Graph.__init__(self, current_nodes, current_edges)
             else:
                 self.extend_with_subgraph(Graph(current_nodes, current_edges))
-            debug_msg(&#34;   &#34; + temporal_graph_filename + &#34;: done.&#34;)
+            debug_msg(&#34;   &#34; + str(temporal_graph_filename) + &#34;: done.&#34;)
         debug_msg(&#34;  Loading of files: done.&#34;)
         debug_msg(&#34;Graph reconstruction: done.&#34;)
 
@@ -3566,7 +3566,7 @@ the node start_date then set the start_date with that value
                 Graph.__init__(self, current_nodes, current_edges)
             else:
                 self.extend_with_subgraph(Graph(current_nodes, current_edges))
-            debug_msg(&#34;   &#34; + temporal_graph_filename + &#34;: done.&#34;)
+            debug_msg(&#34;   &#34; + str(temporal_graph_filename) + &#34;: done.&#34;)
         debug_msg(&#34;  Loading of files: done.&#34;)
         debug_msg(&#34;Graph reconstruction: done.&#34;)
 
@@ -3865,7 +3865,7 @@ as extracted from the node's global identifiers.</p></div>
             Graph.__init__(self, current_nodes, current_edges)
         else:
             self.extend_with_subgraph(Graph(current_nodes, current_edges))
-        debug_msg(&#34;   &#34; + temporal_graph_filename + &#34;: done.&#34;)
+        debug_msg(&#34;   &#34; + str(temporal_graph_filename) + &#34;: done.&#34;)
     debug_msg(&#34;  Loading of files: done.&#34;)
     debug_msg(&#34;Graph reconstruction: done.&#34;)</code></pre>
 </details>

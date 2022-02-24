@@ -26,78 +26,51 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from ..Common import ObjectsToTile, ObjectToTile
+<pre><code class="python">from ..Common import FeatureList, Feature, GeometryNode
 from ..Common import ExtrudedPolygon
 
 
-class LodNode():
+class Lod1Node(GeometryNode):
     &#34;&#34;&#34;
-    Each node contains a collection of objects to tile
-    and a list of child nodes
-    A node will correspond to a tile of the 3dtiles tileset
+    Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile=None, geometric_error=50):
-        &#34;&#34;&#34;
-        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-        :param geometric_error: the distance to display the 3D tile that will be created from this node.
-        &#34;&#34;&#34;
-        self.objects_to_tile = objects_to_tile
-        self.child_nodes = list()
-        self.geometric_error = geometric_error
-        self.with_texture = False
-
-    def set_child_nodes(self, nodes=list()):
-        self.child_nodes = nodes
-
-    def add_child_node(self, node):
-        self.child_nodes.append(node)
-
-    def has_texture(self):
-        return self.with_texture
-
-
-class Lod1Node(LodNode):
-    &#34;&#34;&#34;
-    Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
-    &#34;&#34;&#34;
-
-    def __init__(self, objects_to_tile, geometric_error=50):
+    def __init__(self, feature_list, geometric_error=50):
         lod1_list = list()
-        for object_to_tile in objects_to_tile:
-            extruded_polygon = ExtrudedPolygon(object_to_tile)
+        for feature in feature_list:
+            extruded_polygon = ExtrudedPolygon(feature)
             lod1_list.append(extruded_polygon.get_extruded_object())
-        super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)
+        super().__init__(feature_list=FeatureList(lod1_list), geometric_error=geometric_error)
 
 
-class LoaNode(LodNode):
+class LoaNode(GeometryNode):
     &#34;&#34;&#34;
     Creates 3D extrusions of the polygons given as parameter.
-    The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
+    The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     &#34;&#34;&#34;
     loa_index = 0
 
-    def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):
+    def __init__(self, feature_list, geometric_error=50, additional_points=list(), points_dict=dict()):
         loas = list()
         for key in points_dict:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in points_dict[key]])
+            contained_objects = FeatureList([feature_list[i] for i in points_dict[key]])
             loa = self.create_loa_from_polygon(contained_objects, additional_points[key], LoaNode.loa_index)
             loas.append(loa)
             LoaNode.loa_index += 1
-        super().__init__(objects_to_tile=ObjectsToTile(loas), geometric_error=geometric_error)
+        super().__init__(feature_list=FeatureList(loas), geometric_error=geometric_error)
 
-    def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+    def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
         &#34;&#34;&#34;
-        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-        :param objects_to_tile: the geometries contained in the LOA
+        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+        :param feature_list: the features contained in the LOA
         :param polygon_points: a polygon as list of 3D points
         :param int index: an index used for the LOA identifier
 
         :return: a 3D extrusion of the polygon
         &#34;&#34;&#34;
-        loa_geometry = ObjectToTile(&#34;loa_&#34; + str(index))
-        for object_to_tile in objects_to_tile:
-            loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
+        loa_geometry = Feature(&#34;loa_&#34; + str(index))
+        for feature in feature_list:
+            loa_geometry.geom.triangles.append(feature.geom.triangles[0])
 
         extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
         return extruded_polygon.get_extruded_object()</code></pre>
@@ -114,52 +87,53 @@ class LoaNode(LodNode):
 <dl>
 <dt id="py3dtilers.Common.lod_node.LoaNode"><code class="flex name class">
 <span>class <span class="ident">LoaNode</span></span>
-<span>(</span><span>objects_to_tile, geometric_error=50, additional_points=[], points_dict={})</span>
+<span>(</span><span>feature_list, geometric_error=50, additional_points=[], points_dict={})</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates 3D extrusions of the polygons given as parameter.
-The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
+The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the distance below which this node should be displayed.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class LoaNode(LodNode):
+<pre><code class="python">class LoaNode(GeometryNode):
     &#34;&#34;&#34;
     Creates 3D extrusions of the polygons given as parameter.
-    The LoaNode also takes a dictionary stocking the indexes of the geometries contained in each polygon.
+    The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     &#34;&#34;&#34;
     loa_index = 0
 
-    def __init__(self, objects_to_tile, geometric_error=50, additional_points=list(), points_dict=dict()):
+    def __init__(self, feature_list, geometric_error=50, additional_points=list(), points_dict=dict()):
         loas = list()
         for key in points_dict:
-            contained_objects = ObjectsToTile([objects_to_tile[i] for i in points_dict[key]])
+            contained_objects = FeatureList([feature_list[i] for i in points_dict[key]])
             loa = self.create_loa_from_polygon(contained_objects, additional_points[key], LoaNode.loa_index)
             loas.append(loa)
             LoaNode.loa_index += 1
-        super().__init__(objects_to_tile=ObjectsToTile(loas), geometric_error=geometric_error)
+        super().__init__(feature_list=FeatureList(loas), geometric_error=geometric_error)
 
-    def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+    def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
         &#34;&#34;&#34;
-        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-        :param objects_to_tile: the geometries contained in the LOA
+        Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+        :param feature_list: the features contained in the LOA
         :param polygon_points: a polygon as list of 3D points
         :param int index: an index used for the LOA identifier
 
         :return: a 3D extrusion of the polygon
         &#34;&#34;&#34;
-        loa_geometry = ObjectToTile(&#34;loa_&#34; + str(index))
-        for object_to_tile in objects_to_tile:
-            loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
+        loa_geometry = Feature(&#34;loa_&#34; + str(index))
+        for feature in feature_list:
+            loa_geometry.geom.triangles.append(feature.geom.triangles[0])
 
         extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
         return extruded_polygon.get_extruded_object()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LodNode" href="#py3dtilers.Common.lod_node.LodNode">LodNode</a></li>
+<li><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -171,11 +145,11 @@ The LoaNode also takes a dictionary stocking the indexes of the geometries conta
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.lod_node.LoaNode.create_loa_from_polygon"><code class="name flex">
-<span>def <span class="ident">create_loa_from_polygon</span></span>(<span>self, objects_to_tile, polygon_points, index=0)</span>
+<span>def <span class="ident">create_loa_from_polygon</span></span>(<span>self, feature_list, polygon_points, index=0)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-:param objects_to_tile: the geometries contained in the LOA
+<div class="desc"><p>Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+:param feature_list: the features contained in the LOA
 :param polygon_points: a polygon as list of 3D points
 :param int index: an index used for the LOA identifier</p>
 <p>:return: a 3D extrusion of the polygon</p></div>
@@ -183,141 +157,80 @@ The LoaNode also takes a dictionary stocking the indexes of the geometries conta
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_loa_from_polygon(self, objects_to_tile, polygon_points, index=0):
+<pre><code class="python">def create_loa_from_polygon(self, feature_list, polygon_points, index=0):
     &#34;&#34;&#34;
-    Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of geometries.
-    :param objects_to_tile: the geometries contained in the LOA
+    Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
+    :param feature_list: the features contained in the LOA
     :param polygon_points: a polygon as list of 3D points
     :param int index: an index used for the LOA identifier
 
     :return: a 3D extrusion of the polygon
     &#34;&#34;&#34;
-    loa_geometry = ObjectToTile(&#34;loa_&#34; + str(index))
-    for object_to_tile in objects_to_tile:
-        loa_geometry.geom.triangles.append(object_to_tile.geom.triangles[0])
+    loa_geometry = Feature(&#34;loa_&#34; + str(index))
+    for feature in feature_list:
+        loa_geometry.geom.triangles.append(feature.geom.triangles[0])
 
     extruded_polygon = ExtrudedPolygon(loa_geometry, override_points=True, polygon=polygon_points)
     return extruded_polygon.get_extruded_object()</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="py3dtilers.Common.lod_node.Lod1Node"><code class="flex name class">
 <span>class <span class="ident">Lod1Node</span></span>
-<span>(</span><span>objects_to_tile, geometric_error=50)</span>
+<span>(</span><span>feature_list, geometric_error=50)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
+<div class="desc"><p>Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the distance below which this node should be displayed.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Lod1Node(LodNode):
+<pre><code class="python">class Lod1Node(GeometryNode):
     &#34;&#34;&#34;
-    Creates 3D extrusions of the footprint of each geometry in the objects_to_tile parameter of the constructor.
+    Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.
     &#34;&#34;&#34;
 
-    def __init__(self, objects_to_tile, geometric_error=50):
+    def __init__(self, feature_list, geometric_error=50):
         lod1_list = list()
-        for object_to_tile in objects_to_tile:
-            extruded_polygon = ExtrudedPolygon(object_to_tile)
+        for feature in feature_list:
+            extruded_polygon = ExtrudedPolygon(feature)
             lod1_list.append(extruded_polygon.get_extruded_object())
-        super().__init__(objects_to_tile=ObjectsToTile(lod1_list), geometric_error=geometric_error)</code></pre>
+        super().__init__(feature_list=FeatureList(lod1_list), geometric_error=geometric_error)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LodNode" href="#py3dtilers.Common.lod_node.LodNode">LodNode</a></li>
+<li><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></li>
 </ul>
-</dd>
-<dt id="py3dtilers.Common.lod_node.LodNode"><code class="flex name class">
-<span>class <span class="ident">LodNode</span></span>
-<span>(</span><span>objects_to_tile=None, geometric_error=50)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Each node contains a collection of objects to tile
-and a list of child nodes
-A node will correspond to a tile of the 3dtiles tileset</p>
-<p>:param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-:param geometric_error: the distance to display the 3D tile that will be created from this node.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class LodNode():
-    &#34;&#34;&#34;
-    Each node contains a collection of objects to tile
-    and a list of child nodes
-    A node will correspond to a tile of the 3dtiles tileset
-    &#34;&#34;&#34;
-
-    def __init__(self, objects_to_tile=None, geometric_error=50):
-        &#34;&#34;&#34;
-        :param objects_to_tile: an instance ObjectsToTile containing the list of geometries contained in the node
-        :param geometric_error: the distance to display the 3D tile that will be created from this node.
-        &#34;&#34;&#34;
-        self.objects_to_tile = objects_to_tile
-        self.child_nodes = list()
-        self.geometric_error = geometric_error
-        self.with_texture = False
-
-    def set_child_nodes(self, nodes=list()):
-        self.child_nodes = nodes
-
-    def add_child_node(self, node):
-        self.child_nodes.append(node)
-
-    def has_texture(self):
-        return self.with_texture</code></pre>
-</details>
-<h3>Subclasses</h3>
+<h3>Inherited members</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LoaNode" href="#py3dtilers.Common.lod_node.LoaNode">LoaNode</a></li>
-<li><a title="py3dtilers.Common.lod_node.Lod1Node" href="#py3dtilers.Common.lod_node.Lod1Node">Lod1Node</a></li>
+<li><code><b><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="py3dtilers.Common.lod_node.LodNode.add_child_node"><code class="name flex">
-<span>def <span class="ident">add_child_node</span></span>(<span>self, node)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_child_node(self, node):
-    self.child_nodes.append(node)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.lod_node.LodNode.has_texture"><code class="name flex">
-<span>def <span class="ident">has_texture</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def has_texture(self):
-    return self.with_texture</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.lod_node.LodNode.set_child_nodes"><code class="name flex">
-<span>def <span class="ident">set_child_nodes</span></span>(<span>self, nodes=[])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_child_nodes(self, nodes=list()):
-    self.child_nodes = nodes</code></pre>
-</details>
-</dd>
-</dl>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -344,14 +257,6 @@ A node will correspond to a tile of the 3dtiles tileset</p>
 </li>
 <li>
 <h4><code><a title="py3dtilers.Common.lod_node.Lod1Node" href="#py3dtilers.Common.lod_node.Lod1Node">Lod1Node</a></code></h4>
-</li>
-<li>
-<h4><code><a title="py3dtilers.Common.lod_node.LodNode" href="#py3dtilers.Common.lod_node.LodNode">LodNode</a></code></h4>
-<ul class="">
-<li><code><a title="py3dtilers.Common.lod_node.LodNode.add_child_node" href="#py3dtilers.Common.lod_node.LodNode.add_child_node">add_child_node</a></code></li>
-<li><code><a title="py3dtilers.Common.lod_node.LodNode.has_texture" href="#py3dtilers.Common.lod_node.LodNode.has_texture">has_texture</a></code></li>
-<li><code><a title="py3dtilers.Common.lod_node.LodNode.set_child_nodes" href="#py3dtilers.Common.lod_node.LodNode.set_child_nodes">set_child_nodes</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

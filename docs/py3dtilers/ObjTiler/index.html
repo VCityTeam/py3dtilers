@@ -79,14 +79,13 @@ and a classes.txt that contains the name of all tilesets
     paths = obj_tiler.args.paths
 
     for path in paths:
+        obj_tiler.current_path = path
         if(os.path.isdir(path)):
             print(&#34;Writing &#34; + path)
-            folder_name = obj_tiler.get_folder_name(path)
-            obj_tiler.create_directory(&#34;obj_tilesets/&#34; + folder_name)
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
-                print(&#34;tileset in obj_tilesets/&#34; + folder_name)
-                tileset.write_to_directory(&#34;obj_tilesets/&#34; + folder_name)</code></pre>
+                print(&#34;tileset in&#34;, obj_tiler.get_output_dir())
+                tileset.write_to_directory(obj_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>

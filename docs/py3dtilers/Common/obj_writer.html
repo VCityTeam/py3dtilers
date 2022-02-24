@@ -26,12 +26,12 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from os import path
+<pre><code class="python">from pathlib import Path
 
 
 class ObjWriter():
     &#34;&#34;&#34;
-    A writer which write triangles from ObjectToTile geometries into an OBJ file
+    A writer which write triangles from Feature instances into an OBJ file
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -92,12 +92,12 @@ class ObjWriter():
             indexes.append(self.get_vertex_index(vertex))
         self.triangles.append(indexes)
 
-    def add_geometries(self, geometries):
+    def add_geometries(self, feature_list):
         &#34;&#34;&#34;
-        Add 3D geometries to the OBJ.
-        :param geometries: list of geometries
+        Add 3D features to the OBJ.
+        :param feature_list: a FeatureList
         &#34;&#34;&#34;
-        for geometry in geometries:
+        for geometry in feature_list:
             self.add_to_centroid(geometry.get_centroid())
             for triangle in geometry.get_geom_as_triangles():
                 self.add_triangle(triangle)
@@ -108,8 +108,9 @@ class ObjWriter():
         :param file_name: the name of the OBJ file
         &#34;&#34;&#34;
         centroid = self.get_centroid()
-        f = open(path.join(file_name), &#34;w&#34;)
-        f.write(&#34;# &#34; + file_name + &#34;\n&#34;)
+        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        f = open(file_name, &#34;w&#34;)
+        f.write(&#34;# &#34; + str(file_name) + &#34;\n&#34;)
 
         for vertex in self.vertices:
             f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
@@ -131,14 +132,14 @@ class ObjWriter():
 <span>class <span class="ident">ObjWriter</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>A writer which write triangles from ObjectToTile geometries into an OBJ file</p></div>
+<div class="desc"><p>A writer which write triangles from Feature instances into an OBJ file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ObjWriter():
     &#34;&#34;&#34;
-    A writer which write triangles from ObjectToTile geometries into an OBJ file
+    A writer which write triangles from Feature instances into an OBJ file
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -199,12 +200,12 @@ class ObjWriter():
             indexes.append(self.get_vertex_index(vertex))
         self.triangles.append(indexes)
 
-    def add_geometries(self, geometries):
+    def add_geometries(self, feature_list):
         &#34;&#34;&#34;
-        Add 3D geometries to the OBJ.
-        :param geometries: list of geometries
+        Add 3D features to the OBJ.
+        :param feature_list: a FeatureList
         &#34;&#34;&#34;
-        for geometry in geometries:
+        for geometry in feature_list:
             self.add_to_centroid(geometry.get_centroid())
             for triangle in geometry.get_geom_as_triangles():
                 self.add_triangle(triangle)
@@ -215,8 +216,9 @@ class ObjWriter():
         :param file_name: the name of the OBJ file
         &#34;&#34;&#34;
         centroid = self.get_centroid()
-        f = open(path.join(file_name), &#34;w&#34;)
-        f.write(&#34;# &#34; + file_name + &#34;\n&#34;)
+        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        f = open(file_name, &#34;w&#34;)
+        f.write(&#34;# &#34; + str(file_name) + &#34;\n&#34;)
 
         for vertex in self.vertices:
             f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
@@ -227,21 +229,21 @@ class ObjWriter():
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.obj_writer.ObjWriter.add_geometries"><code class="name flex">
-<span>def <span class="ident">add_geometries</span></span>(<span>self, geometries)</span>
+<span>def <span class="ident">add_geometries</span></span>(<span>self, feature_list)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Add 3D geometries to the OBJ.
-:param geometries: list of geometries</p></div>
+<div class="desc"><p>Add 3D features to the OBJ.
+:param feature_list: a FeatureList</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_geometries(self, geometries):
+<pre><code class="python">def add_geometries(self, feature_list):
     &#34;&#34;&#34;
-    Add 3D geometries to the OBJ.
-    :param geometries: list of geometries
+    Add 3D features to the OBJ.
+    :param feature_list: a FeatureList
     &#34;&#34;&#34;
-    for geometry in geometries:
+    for geometry in feature_list:
         self.add_to_centroid(geometry.get_centroid())
         for triangle in geometry.get_geom_as_triangles():
             self.add_triangle(triangle)</code></pre>
@@ -370,8 +372,9 @@ If no index is associated to the vertex, create a new index.
     :param file_name: the name of the OBJ file
     &#34;&#34;&#34;
     centroid = self.get_centroid()
-    f = open(path.join(file_name), &#34;w&#34;)
-    f.write(&#34;# &#34; + file_name + &#34;\n&#34;)
+    Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+    f = open(file_name, &#34;w&#34;)
+    f.write(&#34;# &#34; + str(file_name) + &#34;\n&#34;)
 
     for vertex in self.vertices:
         f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)

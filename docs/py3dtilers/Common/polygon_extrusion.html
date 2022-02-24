@@ -27,21 +27,21 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import numpy as np
-from ..Common import ObjectToTile
+from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
 
 
 class ExtrudedPolygon():
-    def __init__(self, object_to_tile, override_points=False, polygon=None):
+    def __init__(self, feature, override_points=False, polygon=None):
         &#34;&#34;&#34;
-        Creates a 3D extrusion of the footprint of an ObjectToTile
-        :param object_to_tile: an instance ObjectToTile containing triangles
+        Creates a 3D extrusion of the footprint of a Feature
+        :param feature: an instance of Feature containing triangles
         :param override_points: when true, the polygon extruded won&#39;t be the footprint
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         &#34;&#34;&#34;
-        geom_triangles = object_to_tile.geom.triangles
+        geom_triangles = feature.geom.triangles
         points = list()
         minZ = np.Inf
         average_maxZ = 0
@@ -65,7 +65,7 @@ class ExtrudedPolygon():
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
 
-        self.object_to_tile = object_to_tile
+        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
@@ -102,7 +102,7 @@ class ExtrudedPolygon():
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + &#34;_extrude&#34;)
+        extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()
         self.extruded_object = extruded_object</code></pre>
@@ -119,11 +119,11 @@ class ExtrudedPolygon():
 <dl>
 <dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon"><code class="flex name class">
 <span>class <span class="ident">ExtrudedPolygon</span></span>
-<span>(</span><span>object_to_tile, override_points=False, polygon=None)</span>
+<span>(</span><span>feature, override_points=False, polygon=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates a 3D extrusion of the footprint of an ObjectToTile
-:param object_to_tile: an instance ObjectToTile containing triangles
+<div class="desc"><p>Creates a 3D extrusion of the footprint of a Feature
+:param feature: an instance of Feature containing triangles
 :param override_points: when true, the polygon extruded won't be the footprint
 but another polygon
 :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)</p></div>
@@ -132,15 +132,15 @@ but another polygon
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ExtrudedPolygon():
-    def __init__(self, object_to_tile, override_points=False, polygon=None):
+    def __init__(self, feature, override_points=False, polygon=None):
         &#34;&#34;&#34;
-        Creates a 3D extrusion of the footprint of an ObjectToTile
-        :param object_to_tile: an instance ObjectToTile containing triangles
+        Creates a 3D extrusion of the footprint of a Feature
+        :param feature: an instance of Feature containing triangles
         :param override_points: when true, the polygon extruded won&#39;t be the footprint
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         &#34;&#34;&#34;
-        geom_triangles = object_to_tile.geom.triangles
+        geom_triangles = feature.geom.triangles
         points = list()
         minZ = np.Inf
         average_maxZ = 0
@@ -164,7 +164,7 @@ but another polygon
             hull = alphashape(points, 0.)
             points = hull.exterior.coords[:-1]
 
-        self.object_to_tile = object_to_tile
+        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
@@ -201,7 +201,7 @@ but another polygon
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + &#34;_extrude&#34;)
+        extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
         extruded_object.geom.triangles.append(triangles)
         extruded_object.set_box()
         self.extruded_object = extruded_object</code></pre>
@@ -244,7 +244,7 @@ but another polygon
         triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
         triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-    extruded_object = ObjectToTile(str(self.object_to_tile.get_id()) + &#34;_extrude&#34;)
+    extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
     extruded_object.geom.triangles.append(triangles)
     extruded_object.set_box()
     self.extruded_object = extruded_object</code></pre>

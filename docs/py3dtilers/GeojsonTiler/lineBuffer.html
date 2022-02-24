@@ -31,6 +31,10 @@ from shapely.geometry import LineString
 
 
 class LineBuffer():
+    &#34;&#34;&#34;
+    A LineBuffer allows to create a polygon from a line by applying a buffer on this line.
+    The buffer size depends on the offset of the LineBuffer instance.
+    &#34;&#34;&#34;
 
     def __init__(self, buffer_size=1):
         self.offset = buffer_size / 2
@@ -112,12 +116,17 @@ class LineBuffer():
 <span>(</span><span>buffer_size=1)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A LineBuffer allows to create a polygon from a line by applying a buffer on this line.
+The buffer size depends on the offset of the LineBuffer instance.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LineBuffer():
+    &#34;&#34;&#34;
+    A LineBuffer allows to create a polygon from a line by applying a buffer on this line.
+    The buffer size depends on the offset of the LineBuffer instance.
+    &#34;&#34;&#34;
 
     def __init__(self, buffer_size=1):
         self.offset = buffer_size / 2

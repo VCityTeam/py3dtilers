@@ -40,6 +40,10 @@ from .database_accesses import open_data_base
 
 
 class CityTiler(Tiler):
+    &#34;&#34;&#34;
+    The CityTiler can read 3DCityDB databases and create 3DTiles.
+    The database can contain buildings, bridges, relief or water bodies.
+    &#34;&#34;&#34;
 
     def __init__(self):
         super().__init__()
@@ -69,10 +73,31 @@ class CityTiler(Tiler):
                                  action=&#39;store_true&#39;,
                                  help=&#39;Keeps the surfaces of the cityObjects split when defined&#39;)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            if self.args.type == &#34;building&#34;:
+                return &#34;junk_buildings&#34;
+            elif self.args.type == &#34;relief&#34;:
+                return &#34;junk_reliefs&#34;
+            elif self.args.type == &#34;water&#34;:
+                return &#34;junk_water_bodies&#34;
+            elif self.args.type == &#34;bridge&#34;:
+                return &#34;junk_bridges&#34;
+            else:
+                return &#34;junk&#34;
+        else:
+            return self.args.output_dir
+
     def get_surfaces_merged(self, cursor, cityobjects, objects_type):
         &#34;&#34;&#34;
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of the same cityObject are merged into one geometry
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of the same cityObject are merged into one geometry.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         &#34;&#34;&#34;
         cityobjects_with_geom = list()
         for cityobject in cityobjects:
@@ -81,20 +106,24 @@ class CityTiler(Tiler):
                 cursor.execute(objects_type.sql_query_geometries(id, False))
                 for t in cursor.fetchall():
                     geom_as_string = t[1]
-                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                    cityobject.set_box()
-                    cityobjects_with_geom.append(cityobject)
+                    if geom_as_string is not None:
+                        cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                        cityobject.set_box()
+                        cityobjects_with_geom.append(cityobject)
             except AttributeError:
                 continue
             except ValueError:
                 continue
-        return objects_type(cityobjects_with_geom)
+        cityobjects.objects = cityobjects_with_geom
 
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         &#34;&#34;&#34;
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of each cityObject are split into different geometries
-        Each surface will be an ObjectToTile
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a Feature.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         &#34;&#34;&#34;
         surfaces = list()
         object_type = objects_type.object_type
@@ -114,9 +143,17 @@ class CityTiler(Tiler):
                         continue
                     except AttributeError:
                         continue
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
+        &#34;&#34;&#34;
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a textured Feature with a texture URI.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        &#34;&#34;&#34;
         surfaces = list()
         object_type = objects_type.object_type
         for cityobject in cityobjects:
@@ -147,63 +184,63 @@ class CityTiler(Tiler):
             centroid = cursor.fetchall()
             for s in current_object_surfaces:
                 s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
-
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         &#34;&#34;&#34;
+        Create a 3DTiles tileset from the objects contained in a database.
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
                             For example, objects_type can be &#34;CityMBuilding&#34;.
 
         :return: a tileset.
         &#34;&#34;&#34;
+        print(&#39;Retrieving city objects from database...&#39;)
         cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
         if not cityobjects:
             raise ValueError(f&#39;The database does not contain any {objects_type} object&#39;)
 
         if self.args.with_texture:
-            objects_to_tile = self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
+            print(&#39;Retrieving surface with textures from database...&#39;)
+            self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
         else:
             if split_surfaces:
-                objects_to_tile = self.get_surfaces_split(cursor, cityobjects, objects_type)
+                print(&#39;Retrieving split surfaces from database...&#39;)
+                self.get_surfaces_split(cursor, cityobjects, objects_type)
             else:
-                objects_to_tile = self.get_surfaces_merged(cursor, cityobjects, objects_type)
+                print(&#39;Retrieving merged surfaces from database...&#39;)
+                self.get_surfaces_merged(cursor, cityobjects, objects_type)
 
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = &#34;batch_table_hierarchy&#34;
-
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name)
+        print(&#39;Creating tileset from features...&#39;)
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 
 def main():
     &#34;&#34;&#34;
+    Run the CityTiler: create a 3DTiles tileset from the CityGML objcts contained in a 3DCityDB database.
+    The tileset is writen in &#39;junk_&lt;object_type&gt;/&#39; by default.
     :return: no return value
-
-    this function creates a repository name &#34;junk_object_type&#34; where the
-    tileset is stored.
     &#34;&#34;&#34;
     city_tiler = CityTiler()
     city_tiler.parse_command_line()
     args = city_tiler.args
 
+    print(&#39;Connecting to database...&#39;)
     cursor = open_data_base(args.db_config_path[0])
 
     if args.type == &#34;building&#34;:
         objects_type = CityMBuildings
-        city_tiler.create_directory(&#39;junk_buildings&#39;)
         if args.with_BTH:
             CityMBuildings.set_bth()
     elif args.type == &#34;relief&#34;:
-        city_tiler.create_directory(&#39;junk_reliefs&#39;)
         objects_type = CityMReliefs
     elif args.type == &#34;water&#34;:
-        city_tiler.create_directory(&#39;junk_water_bodies&#39;)
         objects_type = CityMWaterBodies
     elif args.type == &#34;bridge&#34;:
-        city_tiler.create_directory(&#39;junk_bridges&#39;)
         objects_type = CityMBridges
 
     objects_type.set_cursor(cursor)
@@ -224,14 +261,7 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    if args.type == &#34;building&#34;:
-        tileset.write_to_directory(&#39;junk_buildings&#39;)
-    elif args.type == &#34;relief&#34;:
-        tileset.write_to_directory(&#39;junk_reliefs&#39;)
-    elif args.type == &#34;water&#34;:
-        tileset.write_to_directory(&#39;junk_water_bodies&#39;)
-    elif args.type == &#34;bridge&#34;:
-        tileset.write_to_directory(&#39;junk_bridges&#39;)
+    tileset.write_to_directory(city_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -249,39 +279,35 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>:return: no return value</p>
-<p>this function creates a repository name "junk_object_type" where the
-tileset is stored.</p></div>
+<div class="desc"><p>Run the CityTiler: create a 3DTiles tileset from the CityGML objcts contained in a 3DCityDB database.
+The tileset is writen in 'junk_<object_type>/' by default.
+:return: no return value</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
     &#34;&#34;&#34;
+    Run the CityTiler: create a 3DTiles tileset from the CityGML objcts contained in a 3DCityDB database.
+    The tileset is writen in &#39;junk_&lt;object_type&gt;/&#39; by default.
     :return: no return value
-
-    this function creates a repository name &#34;junk_object_type&#34; where the
-    tileset is stored.
     &#34;&#34;&#34;
     city_tiler = CityTiler()
     city_tiler.parse_command_line()
     args = city_tiler.args
 
+    print(&#39;Connecting to database...&#39;)
     cursor = open_data_base(args.db_config_path[0])
 
     if args.type == &#34;building&#34;:
         objects_type = CityMBuildings
-        city_tiler.create_directory(&#39;junk_buildings&#39;)
         if args.with_BTH:
             CityMBuildings.set_bth()
     elif args.type == &#34;relief&#34;:
-        city_tiler.create_directory(&#39;junk_reliefs&#39;)
         objects_type = CityMReliefs
     elif args.type == &#34;water&#34;:
-        city_tiler.create_directory(&#39;junk_water_bodies&#39;)
         objects_type = CityMWaterBodies
     elif args.type == &#34;bridge&#34;:
-        city_tiler.create_directory(&#39;junk_bridges&#39;)
         objects_type = CityMBridges
 
     objects_type.set_cursor(cursor)
@@ -302,14 +328,7 @@ tileset is stored.</p></div>
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    if args.type == &#34;building&#34;:
-        tileset.write_to_directory(&#39;junk_buildings&#39;)
-    elif args.type == &#34;relief&#34;:
-        tileset.write_to_directory(&#39;junk_reliefs&#39;)
-    elif args.type == &#34;water&#34;:
-        tileset.write_to_directory(&#39;junk_water_bodies&#39;)
-    elif args.type == &#34;bridge&#34;:
-        tileset.write_to_directory(&#39;junk_bridges&#39;)</code></pre>
+    tileset.write_to_directory(city_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -321,12 +340,17 @@ tileset is stored.</p></div>
 <span>class <span class="ident">CityTiler</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The CityTiler can read 3DCityDB databases and create 3DTiles.
+The database can contain buildings, bridges, relief or water bodies.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CityTiler(Tiler):
+    &#34;&#34;&#34;
+    The CityTiler can read 3DCityDB databases and create 3DTiles.
+    The database can contain buildings, bridges, relief or water bodies.
+    &#34;&#34;&#34;
 
     def __init__(self):
         super().__init__()
@@ -356,10 +380,31 @@ tileset is stored.</p></div>
                                  action=&#39;store_true&#39;,
                                  help=&#39;Keeps the surfaces of the cityObjects split when defined&#39;)
 
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            if self.args.type == &#34;building&#34;:
+                return &#34;junk_buildings&#34;
+            elif self.args.type == &#34;relief&#34;:
+                return &#34;junk_reliefs&#34;
+            elif self.args.type == &#34;water&#34;:
+                return &#34;junk_water_bodies&#34;
+            elif self.args.type == &#34;bridge&#34;:
+                return &#34;junk_bridges&#34;
+            else:
+                return &#34;junk&#34;
+        else:
+            return self.args.output_dir
+
     def get_surfaces_merged(self, cursor, cityobjects, objects_type):
         &#34;&#34;&#34;
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of the same cityObject are merged into one geometry
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of the same cityObject are merged into one geometry.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         &#34;&#34;&#34;
         cityobjects_with_geom = list()
         for cityobject in cityobjects:
@@ -368,20 +413,24 @@ tileset is stored.</p></div>
                 cursor.execute(objects_type.sql_query_geometries(id, False))
                 for t in cursor.fetchall():
                     geom_as_string = t[1]
-                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                    cityobject.set_box()
-                    cityobjects_with_geom.append(cityobject)
+                    if geom_as_string is not None:
+                        cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                        cityobject.set_box()
+                        cityobjects_with_geom.append(cityobject)
             except AttributeError:
                 continue
             except ValueError:
                 continue
-        return objects_type(cityobjects_with_geom)
+        cityobjects.objects = cityobjects_with_geom
 
     def get_surfaces_split(self, cursor, cityobjects, objects_type):
         &#34;&#34;&#34;
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup
-        Surfaces of each cityObject are split into different geometries
-        Each surface will be an ObjectToTile
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a Feature.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
         &#34;&#34;&#34;
         surfaces = list()
         object_type = objects_type.object_type
@@ -401,9 +450,17 @@ tileset is stored.</p></div>
                         continue
                     except AttributeError:
                         continue
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
+        &#34;&#34;&#34;
+        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+        Surfaces of each cityObject are split into different features.
+        Each surface will be a textured Feature with a texture URI.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        &#34;&#34;&#34;
         surfaces = list()
         object_type = objects_type.object_type
         for cityobject in cityobjects:
@@ -434,35 +491,39 @@ tileset is stored.</p></div>
             centroid = cursor.fetchall()
             for s in current_object_surfaces:
                 s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
-
-        return objects_type(surfaces)
+        cityobjects.objects = surfaces
 
     def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
         &#34;&#34;&#34;
+        Create a 3DTiles tileset from the objects contained in a database.
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
                             For example, objects_type can be &#34;CityMBuilding&#34;.
 
         :return: a tileset.
         &#34;&#34;&#34;
+        print(&#39;Retrieving city objects from database...&#39;)
         cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
         if not cityobjects:
             raise ValueError(f&#39;The database does not contain any {objects_type} object&#39;)
 
         if self.args.with_texture:
-            objects_to_tile = self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
+            print(&#39;Retrieving surface with textures from database...&#39;)
+            self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
         else:
             if split_surfaces:
-                objects_to_tile = self.get_surfaces_split(cursor, cityobjects, objects_type)
+                print(&#39;Retrieving split surfaces from database...&#39;)
+                self.get_surfaces_split(cursor, cityobjects, objects_type)
             else:
-                objects_to_tile = self.get_surfaces_merged(cursor, cityobjects, objects_type)
+                print(&#39;Retrieving merged surfaces from database...&#39;)
+                self.get_surfaces_merged(cursor, cityobjects, objects_type)
 
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = &#34;batch_table_hierarchy&#34;
-
-        return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name)</code></pre>
+        print(&#39;Creating tileset from features...&#39;)
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -478,7 +539,8 @@ tileset is stored.</p></div>
 <span>def <span class="ident">from_3dcitydb</span></span>(<span>self, cursor, objects_type, split_surfaces=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>:param cursor: a database access cursor.
+<div class="desc"><p>Create a 3DTiles tileset from the objects contained in a database.
+:param cursor: a database access cursor.
 :param objects_type: a class name among CityMCityObject derived classes.
 For example, objects_type can be "CityMBuilding".</p>
 <p>:return: a tileset.</p></div>
@@ -488,46 +550,57 @@ For example, objects_type can be "CityMBuilding".</p>
 </summary>
 <pre><code class="python">def from_3dcitydb(self, cursor, objects_type, split_surfaces=False):
     &#34;&#34;&#34;
+    Create a 3DTiles tileset from the objects contained in a database.
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
                         For example, objects_type can be &#34;CityMBuilding&#34;.
 
     :return: a tileset.
     &#34;&#34;&#34;
+    print(&#39;Retrieving city objects from database...&#39;)
     cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
 
     if not cityobjects:
         raise ValueError(f&#39;The database does not contain any {objects_type} object&#39;)
 
     if self.args.with_texture:
-        objects_to_tile = self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
+        print(&#39;Retrieving surface with textures from database...&#39;)
+        self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
     else:
         if split_surfaces:
-            objects_to_tile = self.get_surfaces_split(cursor, cityobjects, objects_type)
+            print(&#39;Retrieving split surfaces from database...&#39;)
+            self.get_surfaces_split(cursor, cityobjects, objects_type)
         else:
-            objects_to_tile = self.get_surfaces_merged(cursor, cityobjects, objects_type)
+            print(&#39;Retrieving merged surfaces from database...&#39;)
+            self.get_surfaces_merged(cursor, cityobjects, objects_type)
 
     extension_name = None
     if CityMBuildings.is_bth_set():
         extension_name = &#34;batch_table_hierarchy&#34;
-
-    return self.create_tileset_from_geometries(objects_to_tile, extension_name=extension_name)</code></pre>
+    print(&#39;Creating tileset from features...&#39;)
+    return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_merged"><code class="name flex">
 <span>def <span class="ident">get_surfaces_merged</span></span>(<span>self, cursor, cityobjects, objects_type)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup
-Surfaces of the same cityObject are merged into one geometry</p></div>
+<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+Surfaces of the same cityObject are merged into one geometry.
+:param cursor: a database access cursor.
+:param cityobjects: the CityGML objects found in the database.
+:param objects_type: a class name among CityMCityObject derived classes.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_surfaces_merged(self, cursor, cityobjects, objects_type):
     &#34;&#34;&#34;
-    Get the surfaces of all the cityobjects and transform them into TriangleSoup
-    Surfaces of the same cityObject are merged into one geometry
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+    Surfaces of the same cityObject are merged into one geometry.
+    :param cursor: a database access cursor.
+    :param cityobjects: the CityGML objects found in the database.
+    :param objects_type: a class name among CityMCityObject derived classes.
     &#34;&#34;&#34;
     cityobjects_with_geom = list()
     for cityobject in cityobjects:
@@ -536,32 +609,39 @@ Surfaces of the same cityObject are merged into one geometry</p></div>
             cursor.execute(objects_type.sql_query_geometries(id, False))
             for t in cursor.fetchall():
                 geom_as_string = t[1]
-                cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
-                cityobject.set_box()
-                cityobjects_with_geom.append(cityobject)
+                if geom_as_string is not None:
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string)
+                    cityobject.set_box()
+                    cityobjects_with_geom.append(cityobject)
         except AttributeError:
             continue
         except ValueError:
             continue
-    return objects_type(cityobjects_with_geom)</code></pre>
+    cityobjects.objects = cityobjects_with_geom</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split"><code class="name flex">
 <span>def <span class="ident">get_surfaces_split</span></span>(<span>self, cursor, cityobjects, objects_type)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup
-Surfaces of each cityObject are split into different geometries
-Each surface will be an ObjectToTile</p></div>
+<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+Surfaces of each cityObject are split into different features.
+Each surface will be a Feature.
+:param cursor: a database access cursor.
+:param cityobjects: the CityGML objects found in the database.
+:param objects_type: a class name among CityMCityObject derived classes.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_surfaces_split(self, cursor, cityobjects, objects_type):
     &#34;&#34;&#34;
-    Get the surfaces of all the cityobjects and transform them into TriangleSoup
-    Surfaces of each cityObject are split into different geometries
-    Each surface will be an ObjectToTile
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+    Surfaces of each cityObject are split into different features.
+    Each surface will be a Feature.
+    :param cursor: a database access cursor.
+    :param cityobjects: the CityGML objects found in the database.
+    :param objects_type: a class name among CityMCityObject derived classes.
     &#34;&#34;&#34;
     surfaces = list()
     object_type = objects_type.object_type
@@ -581,19 +661,32 @@ Each surface will be an ObjectToTile</p></div>
                     continue
                 except AttributeError:
                     continue
-    return objects_type(surfaces)</code></pre>
+    cityobjects.objects = surfaces</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_with_texture"><code class="name flex">
 <span>def <span class="ident">get_surfaces_with_texture</span></span>(<span>self, cursor, cityobjects, objects_type)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+Surfaces of each cityObject are split into different features.
+Each surface will be a textured Feature with a texture URI.
+:param cursor: a database access cursor.
+:param cityobjects: the CityGML objects found in the database.
+:param objects_type: a class name among CityMCityObject derived classes.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_surfaces_with_texture(self, cursor, cityobjects, objects_type):
+    &#34;&#34;&#34;
+    Get the surfaces of all the cityobjects and transform them into TriangleSoup.
+    Surfaces of each cityObject are split into different features.
+    Each surface will be a textured Feature with a texture URI.
+    :param cursor: a database access cursor.
+    :param cityobjects: the CityGML objects found in the database.
+    :param objects_type: a class name among CityMCityObject derived classes.
+    &#34;&#34;&#34;
     surfaces = list()
     object_type = objects_type.object_type
     for cityobject in cityobjects:
@@ -624,11 +717,18 @@ Each surface will be an ObjectToTile</p></div>
         centroid = cursor.fetchall()
         for s in current_object_surfaces:
             s.centroid = np.array([centroid[0].st_x, centroid[0].st_y, centroid[0].st_z])
-
-    return objects_type(surfaces)</code></pre>
+    cityobjects.objects = surfaces</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>

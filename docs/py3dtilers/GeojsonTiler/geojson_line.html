@@ -31,6 +31,10 @@ from .lineBuffer import LineBuffer
 
 
 class GeojsonLine(Geojson):
+    &#34;&#34;&#34;
+    The Python representation of a GeoJSON line or multiline feature.
+    A GeojsonLine instance has a geometry and properties.
+    &#34;&#34;&#34;
 
     # Default width will be used if no width is found when parsing LineString or MultiLineString
     default_width = 2
@@ -88,14 +92,18 @@ class GeojsonLine(Geojson):
 <span>(</span><span>id=None, feature_properties=None, feature_geometry=None, is_multi_geom=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The base class of all object that need to be tiled, in order to be
-used with the corresponding tiler.</p>
+<div class="desc"><p>The Python representation of a GeoJSON line or multiline feature.
+A GeojsonLine instance has a geometry and properties.</p>
 <p>:param id: given identifier</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GeojsonLine(Geojson):
+    &#34;&#34;&#34;
+    The Python representation of a GeoJSON line or multiline feature.
+    A GeojsonLine instance has a geometry and properties.
+    &#34;&#34;&#34;
 
     # Default width will be used if no width is found when parsing LineString or MultiLineString
     default_width = 2
@@ -141,7 +149,7 @@ used with the corresponding tiler.</p>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></li>
-<li><a title="py3dtilers.Common.object_to_tile.ObjectToTile" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile">ObjectToTile</a></li>
+<li><a title="py3dtilers.Common.feature.Feature" href="../Common/feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -162,10 +170,21 @@ used with the corresponding tiler.</p>
 <li><code><b><a title="py3dtilers.GeojsonTiler.geojson.Geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson">Geojson</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.custom_triangulate" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.custom_triangulate">custom_triangulate</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.has_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.has_texture">has_texture</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.height" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.height">height</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.parse_geojson" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.parse_geojson">parse_geojson</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.parse_geom" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.parse_geom">parse_geom</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_box" href="../Common/object_to_tile.html#py3dtilers.Common.object_to_tile.ObjectToTile.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
 <li><code><a title="py3dtilers.GeojsonTiler.geojson.Geojson.set_z" href="geojson.html#py3dtilers.GeojsonTiler.geojson.Geojson.set_z">set_z</a></code></li>
 </ul>
 </li>

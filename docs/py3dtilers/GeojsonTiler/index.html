@@ -89,8 +89,8 @@ The tileset is writen in '/geojson_tilesets/'.
     if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
-            print(&#34;tileset in geojson_tilesets&#34;)
-            tileset.write_to_directory(&#34;geojson_tilesets&#34;)
+            print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
+            tileset.write_to_directory(geojson_tiler.get_output_dir())
     else:
         print(path, &#34;is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.&#34;)</code></pre>
 </details>
