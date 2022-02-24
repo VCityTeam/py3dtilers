@@ -20,11 +20,11 @@ class LodTree(GeometryTree):
             node = GeometryNode(group.feature_list, 1, with_texture)
             root_node = node
             if create_lod1:
-                lod1_node = Lod1Node(group.feature_list, 5)
+                lod1_node = Lod1Node(node, 5)
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node
             if group.with_polygon:
-                loa_node = LoaNode(group.feature_list, 20, group.additional_points, group.points_dict)
+                loa_node = LoaNode(node, 20, group.additional_points, group.points_dict)
                 loa_node.add_child_node(root_node)
                 root_node = loa_node
 
