@@ -3,7 +3,7 @@ from pyproj import Transformer
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Texture import Atlas
-# from .obj_writer import ObjWriter
+from ..Common import ObjWriter
 
 
 class FromGeometryTreeToTileset():
@@ -27,17 +27,20 @@ class FromGeometryTreeToTileset():
         tileset = TileSet()
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         centroid = geometry_tree.get_centroid()
+        obj_writer = ObjWriter()
         for root_node in geometry_tree.root_nodes:
             root_node.set_node_features_geometry(user_arguments)
-            FromGeometryTreeToTileset.__transform_node(root_node, centroid, user_arguments)
+            FromGeometryTreeToTileset.__transform_node(root_node, centroid, user_arguments, obj_writer=obj_writer)
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
+        if user_arguments.obj is not None:
+            obj_writer.write_obj(user_arguments.obj)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
         print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", flush=True)
         return tileset
 
     @staticmethod
-    def __transform_node(node, tree_centroid, user_args):
+    def __transform_node(node, tree_centroid, user_args, obj_writer=None):
         if hasattr(user_args, 'scale') and user_args.scale:
             for objects in node.get_features():
                 objects.scale_features(user_args.scale)
@@ -53,10 +56,9 @@ class FromGeometryTreeToTileset():
                 transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
                 objects.change_crs(transformer)
 
-        # if user_args.obj is not None:
-        #     obj_writer = ObjWriter()
-        #     obj_writer.add_geometries(features.get_features())
-        #     obj_writer.write_obj(user_args.obj)
+        if user_args.obj is not None:
+            for leaf in node.get_leaves():
+                obj_writer.add_geometries(leaf.feature_list)
 
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
