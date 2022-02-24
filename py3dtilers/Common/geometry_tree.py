@@ -51,3 +51,13 @@ class GeometryTree():
         for node in self.root_nodes:
             objects.extend(node.get_features())
         return FeatureList(objects)
+
+    def get_number_of_nodes(self):
+        """
+        Return the number of nodes in the tree.
+        :return: int
+        """
+        n = len(self.root_nodes)
+        for node in self.root_nodes:
+            n += node.get_number_of_children()
+        return n

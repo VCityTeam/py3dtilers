@@ -9,6 +9,9 @@ class FromGeometryTreeToTileset():
     A static class to create a 3DTiles tileset from a GeometryTree.
     """
 
+    tile_index = 1
+    nb_nodes = 0
+
     @staticmethod
     def convert_to_tileset(geometry_tree, extension_name=None):
         """
@@ -19,11 +22,13 @@ class FromGeometryTreeToTileset():
         :return: a Tileset
         """
         tileset = TileSet()
+        FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         centroid = geometry_tree.get_centroid()
         for root_node in geometry_tree.root_nodes:
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        print("\n", "Tileset created")
         return tileset
 
     @staticmethod
@@ -62,6 +67,8 @@ class FromGeometryTreeToTileset():
             parent.add_child(tile)
         node.feature_list.delete_objects_ref()
 
+        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), end='', flush=True)
+        FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 

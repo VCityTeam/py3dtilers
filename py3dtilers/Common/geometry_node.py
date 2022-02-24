@@ -67,3 +67,14 @@ class GeometryNode():
             for node in self.child_nodes:
                 leaves.extend(node.get_leaves())
             return leaves
+
+    def get_number_of_children(self):
+        """
+        Return the number of children of this node.
+        The count is recursive.
+        :return: int
+        """
+        n = len(self.child_nodes)
+        for child in self.child_nodes:
+            n += child.get_number_of_children()
+        return n
