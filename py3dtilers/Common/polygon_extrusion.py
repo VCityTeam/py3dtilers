@@ -16,6 +16,7 @@ class ExtrudedPolygon(Feature):
         super().__init__(id)
         self.polygon = polygon
         self.features = features
+        self.set_geom()
 
     def set_geom(self):
         """

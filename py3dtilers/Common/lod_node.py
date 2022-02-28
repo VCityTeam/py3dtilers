@@ -18,6 +18,6 @@ class LoaNode(GeometryNode):
     The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     """
 
-    def __init__(self, features_node, geometric_error=50, additional_points=list(), points_dict=dict()):
-        feature_list = LoaFeatureList(points_dict=points_dict, additional_points=additional_points, features_node=features_node)
+    def __init__(self, features_node, geometric_error=50, polygons=list()):
+        feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)

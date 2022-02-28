@@ -82,8 +82,10 @@ class CityMCityObject(Feature):
                         associated_data = [uv_as_string]
 
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
-                    cityobject.set_box()
-                    cityobjects_with_geom.append(cityobject)
+                    if len(cityobject.geom.triangles[0]) > 0:
+                        cityobject.set_box()
+                        cityobject.centroid = self.centroid
+                        cityobjects_with_geom.append(cityobject)
             except Exception:
                 continue
         return cityobjects_with_geom

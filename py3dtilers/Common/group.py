@@ -12,11 +12,9 @@ class Group():
     It can also contain additional polygon points (used to create LOA nodes)
     """
 
-    def __init__(self, feature_list, with_polygon=False, additional_points=list(), points_dict=dict()):
+    def __init__(self, feature_list, polygons=list()):
         self.feature_list = feature_list
-        self.with_polygon = with_polygon
-        self.additional_points = additional_points
-        self.points_dict = points_dict
+        self.polygons = polygons
 
     def get_centroid(self):
         """
@@ -40,7 +38,7 @@ class Group():
 
     def add_materials(self, materials):
         """
-        Keep only the materials used by the objects of this group,
+        Keep only the materials used by the features of this group,
         among all the materials created, and add them to the features.
         :param materials: an array of all the materials
         """
@@ -116,7 +114,9 @@ class Groups():
 
     def group_objects_by_polygons(self, feature_list, polygons_path):
         """
-        Load the polygons from the files in the folder
+        Load the polygons from GeoJSON files.
+        Group the features depending in which polygon they are contained.
+        :param feature_list: all the features
         :param polygons_path: the path to the file(s) containing polygons
         """
         polygons = list()
@@ -152,8 +152,8 @@ class Groups():
         :param polygons: a list of Shapely polygons
         """
 
-        objects_to_tile_dict = {}
-        objects_to_tile_without_poly = {}
+        features_dict = {}
+        features_without_poly = list()
 
         # For each feature, find the polygon containing it
         for i, feature in enumerate(feature_list):
@@ -161,34 +161,33 @@ class Groups():
             in_polygon = False
             for index, polygon in enumerate(polygons):
                 if p.within(polygon):
-                    if index in objects_to_tile_dict:
-                        objects_to_tile_dict[index].append(i)
-                    else:
-                        objects_to_tile_dict[index] = [i]
+                    if index not in features_dict:
+                        features_dict[index] = []
+                    features_dict[index].append(i)
                     in_polygon = True
                     break
             if not in_polygon:
-                objects_to_tile_without_poly[i] = [i]
+                features_without_poly.append(i)
 
         # Create a list of Group
         groups = list()
-        for key in objects_to_tile_dict:
-            additional_points = polygons[key].exterior.coords[:-1]
-            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_dict[key]])
-            group = Group(contained_objects, with_polygon=True, additional_points=additional_points)
-            groups.append(group)
-        for key in objects_to_tile_without_poly:
-            contained_objects = FeatureList([feature_list[i] for i in objects_to_tile_without_poly[key]])
-            group = Group(contained_objects)
+
+        for key in features_dict:
+            polygon = polygons[key].exterior.coords[:-1]
+            contained_features = FeatureList([feature_list[i] for i in features_dict[key]])
+            group = Group(contained_features, polygons=[polygon])
             groups.append(group)
 
-        return self.distribute_groups_in_cubes(groups, 300)
+        for feature_index in features_without_poly:
+            group = Group(FeatureList([feature_list[feature_index]]))
+            groups.append(group)
+
+        return self.distribute_groups_in_cubes(groups, 1000)
 
     def distribute_groups_in_cubes(self, groups, cube_size=300):
         """
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
-        To avoid conflicts, the groups with a polygon are not merged with those without polygon.
         :param groups: the groups to distribute into cubes
         :param cube_size: the size of the cubes
 
@@ -199,43 +198,28 @@ class Groups():
         # Create a dictionary key: cubes center (x,y,z), with geometry (boolean); value: list of groups index
         for i in range(0, len(groups)):
             closest_cube = groups[i].round_coordinates(groups[i].get_centroid(), cube_size)
-            with_polygon = groups[i].with_polygon
-            if (tuple(closest_cube), with_polygon) in groups_dict:
-                groups_dict[(tuple(closest_cube), with_polygon)].append(i)
+            if tuple(closest_cube) in groups_dict:
+                groups_dict[tuple(closest_cube)].append(i)
             else:
-                groups_dict[(tuple(closest_cube), with_polygon)] = [i]
+                groups_dict[tuple(closest_cube)] = [i]
 
         # Merge the groups in the same cube and create new groups
         groups_in_cube = list()
         for cube in groups_dict:
-            with_polygon = cube[1]
-            groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube], with_polygon))
-
+            groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube]))
         return groups_in_cube
 
-    def merge_groups_together(self, groups, group_indexes, with_polygon):
+    def merge_groups_together(self, groups, group_indexes):
         """
         Creates a Group from a list of Groups
         :param groups: all the groups
         :param group_indexes: the indexes of the groups to merge together
-        :param Boolean with_polygon: when creating LOA (with_polygon=True), add the polygons to the new group
 
         :return: a new group containing the features of all the groups
         """
-
-        objects = list()
-        additional_points_list = list()
-        additional_points_dict = dict()
-
+        features = list()
+        polygons = list()
         for index in group_indexes:
-            if with_polygon:
-                additional_points_list.append(groups[index].additional_points)
-                points_index = len(additional_points_list) - 1
-                additional_points_dict[points_index] = []
-                for feature in groups[index].feature_list:
-                    objects.append(feature)
-                    additional_points_dict[points_index].append(len(objects) - 1)
-            else:
-                for feature in groups[index].feature_list:
-                    objects.append(feature)
-        return Group(FeatureList(objects), with_polygon=with_polygon, additional_points=additional_points_list, points_dict=additional_points_dict)
+            features.extend(groups[index].feature_list)
+            polygons.extend(groups[index].polygons)
+        return Group(FeatureList(features), polygons=polygons)
