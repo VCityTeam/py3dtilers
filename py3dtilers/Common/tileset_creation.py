@@ -28,7 +28,7 @@ class FromGeometryTreeToTileset():
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-        print("\n", "Tileset created")
+        print("\nTileset created")
         return tileset
 
     @staticmethod
@@ -142,4 +142,4 @@ class FromGeometryTreeToTileset():
 
         # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
-        return B3dm.from_glTF(gltf, bt)
+        return B3dm.from_glTF(gltf, bt=bt)
