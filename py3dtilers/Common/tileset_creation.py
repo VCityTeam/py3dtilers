@@ -9,7 +9,7 @@ class FromGeometryTreeToTileset():
     A static class to create a 3DTiles tileset from a GeometryTree.
     """
 
-    tile_index = 1
+    tile_index = 0
     nb_nodes = 0
 
     @staticmethod
@@ -67,8 +67,8 @@ class FromGeometryTreeToTileset():
             parent.add_child(tile)
         node.feature_list.delete_objects_ref()
 
-        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), end='', flush=True)
         FromGeometryTreeToTileset.tile_index += 1
+        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", end='', flush=True)
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
