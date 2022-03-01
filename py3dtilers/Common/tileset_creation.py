@@ -33,6 +33,7 @@ class FromGeometryTreeToTileset():
 
     @staticmethod
     def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", end='', flush=True)
         objects = node.feature_list
         objects.translate_features(centroid)
 
@@ -68,7 +69,6 @@ class FromGeometryTreeToTileset():
         node.feature_list.delete_objects_ref()
 
         FromGeometryTreeToTileset.tile_index += 1
-        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", end='', flush=True)
         for child_node in node.child_nodes:
             FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
 
