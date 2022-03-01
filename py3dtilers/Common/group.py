@@ -58,13 +58,14 @@ class Groups():
     Contains a list of Group
     """
 
-    def __init__(self, feature_list, polygons_path=None):
+    def __init__(self, feature_list, polygons_path=None, kd_tree_max=500):
         """
         Distribute the features contained in feature_list into different Group
         The way to distribute the features depends on the parameters
         :param feature_list: an instance of FeatureList containing features to distribute into Group
         :param polygons_path: the path to a folder containing polygons as .geojson files.
         When this param is not None, it means we want to group features by polygons
+        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         """
         self.materials = feature_list.materials
         if feature_list.is_list_of_feature_list():
@@ -72,7 +73,7 @@ class Groups():
         elif polygons_path is not None:
             self.group_objects_by_polygons(feature_list, polygons_path)
         else:
-            self.group_objects_with_kdtree(feature_list)
+            self.group_objects_with_kdtree(feature_list, kd_tree_max)
         self.set_materials(self.materials)
 
     def get_groups_as_list(self):
@@ -100,13 +101,15 @@ class Groups():
             groups.append(group)
         self.groups = groups
 
-    def group_objects_with_kdtree(self, feature_list):
+    def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
         """
-        Create groups of features. The features are distributed into groups of (max) 500 objects.
+        Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
         The distribution depends on the centroid of each feature.
+        :param feature_list: a FeatureList
+        :param kd_tree_max: the maximum number of features in each FeatureList
         """
         groups = list()
-        objects = kd_tree(feature_list, 500)
+        objects = kd_tree(feature_list, kd_tree_max)
         for feature_list in objects:
             group = Group(feature_list)
             groups.append(group)

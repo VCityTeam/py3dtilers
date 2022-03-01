@@ -113,10 +113,11 @@ class CityTiler(Tiler):
             raise ValueError(f'The database does not contain any {objects_type} object')
         self.set_features_centroid(cursor, cityobjects, objects_type)
 
+        kd_tree_max = 25 if self.args.with_texture else 500
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name, kd_tree_max=kd_tree_max)
 
 
 def main():
