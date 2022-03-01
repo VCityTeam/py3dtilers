@@ -28,7 +28,7 @@ class FromGeometryTreeToTileset():
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
 
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-        print("\nTileset created")
+        print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", flush=True)
         return tileset
 
     @staticmethod
