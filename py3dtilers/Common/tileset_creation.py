@@ -28,10 +28,12 @@ class FromGeometryTreeToTileset():
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         centroid = geometry_tree.get_centroid()
         obj_writer = ObjWriter()
-        for root_node in geometry_tree.root_nodes:
+        while len(geometry_tree.root_nodes) > 0:
+            root_node = geometry_tree.root_nodes[0]
             root_node.set_node_features_geometry(user_arguments)
             FromGeometryTreeToTileset.__transform_node(root_node, centroid, user_arguments, obj_writer=obj_writer)
             FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+            geometry_tree.root_nodes.remove(root_node)
 
         if user_arguments.obj is not None:
             obj_writer.write_obj(user_arguments.obj)
