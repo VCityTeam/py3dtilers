@@ -159,7 +159,7 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    tileset.write_to_directory(city_tiler.get_output_dir())
+    tileset.write_as_json(city_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

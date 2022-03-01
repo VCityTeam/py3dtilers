@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from pyproj import Transformer
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
@@ -15,7 +16,7 @@ class FromGeometryTreeToTileset():
     nb_nodes = 0
 
     @staticmethod
-    def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None):
+    def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None, output_dir=None):
         """
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
@@ -32,7 +33,7 @@ class FromGeometryTreeToTileset():
             root_node = geometry_tree.root_nodes[0]
             root_node.set_node_features_geometry(user_arguments)
             FromGeometryTreeToTileset.__transform_node(root_node, centroid, user_arguments, obj_writer=obj_writer)
-            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name, output_dir)
             geometry_tree.root_nodes.remove(root_node)
 
         if user_arguments.obj is not None:
@@ -63,7 +64,7 @@ class FromGeometryTreeToTileset():
                 obj_writer.add_geometries(leaf.feature_list)
 
     @staticmethod
-    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None, output_dir=None):
         print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", end='', flush=True)
         objects = node.feature_list
         objects.translate_features(centroid)
@@ -73,6 +74,9 @@ class FromGeometryTreeToTileset():
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
         tile.set_content(content_b3dm)
+        tile.set_content_uri(os.path.join('tiles', f'{FromGeometryTreeToTileset.tile_index}.b3dm'))
+        tile.write_content(output_dir)
+        del tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
 
         # Set the position of the tile. The position is relative to the parent tile's position
         tile.set_transform([1, 0, 0, 0,
@@ -101,7 +105,7 @@ class FromGeometryTreeToTileset():
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
-            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name, output_dir)
 
     @staticmethod
     def __create_tile_content(objects, extension_name=None, with_texture=False):

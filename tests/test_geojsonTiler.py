@@ -17,7 +17,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_properties_with_other_name(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_2/')
@@ -29,7 +29,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_default_height(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_2/')
@@ -41,7 +41,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_z(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_2/')
@@ -53,7 +53,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_no_height(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_2/')
@@ -65,7 +65,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_add_color(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_1/')
@@ -77,7 +77,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True, color_attribute=('HAUTEUR', 'numeric'))
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_create_loa(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_1/')
@@ -88,7 +88,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_create_lod1(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_1/')
@@ -99,7 +99,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_create_lod1_and_loa(self):
         path = Path('tests/geojson_tiler_test_data/buildings/feature_1/')
@@ -110,7 +110,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=None, loa='tests/geojson_tiler_test_data/polygons/', lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_line_string(self):
         path = Path('tests/geojson_tiler_test_data/roads/line_string_road.geojson')
@@ -122,7 +122,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
     def test_multi_line_string(self):
         path = Path('tests/geojson_tiler_test_data/roads/multi_line_string_road.geojson')
@@ -134,7 +134,7 @@ class Test_Tile(unittest.TestCase):
         geojson_tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
         tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=False)
         if(tileset is not None):
-            tileset.write_to_directory(directory)
+            tileset.write_as_json(directory)
 
 
 if __name__ == '__main__':

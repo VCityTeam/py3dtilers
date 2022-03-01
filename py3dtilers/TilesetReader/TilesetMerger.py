@@ -97,7 +97,7 @@ class TilesetMerger():
             Path(target_dir).mkdir(parents=True, exist_ok=True)
 
             self.copy_tileset_texture_images(tileset, tileset_of_root_tiles)
-            tileset.write_to_directory(self.output_path)
+            tileset.write_as_json(self.output_path)
 
 
 def main():

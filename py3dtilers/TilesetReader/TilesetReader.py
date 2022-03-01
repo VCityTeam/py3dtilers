@@ -42,7 +42,7 @@ class TilesetTiler(Tiler):
         Override the parent tileset creation.
         """
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, self.args, extension_name, self.get_output_dir())
 
     def transform_tileset(self, tileset):
         """
@@ -76,7 +76,7 @@ def main():
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory(tiler.get_output_dir())
+    tileset.write_as_json(tiler.get_output_dir())
 
 
 if __name__ == '__main__':

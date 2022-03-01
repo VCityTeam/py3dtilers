@@ -48,7 +48,7 @@ class Test_Tile(unittest.TestCase):
 
         [cursor.close() for cursor in cursors]
 
-        tile_set.write_to_directory(output_dir)
+        tile_set.write_as_json(output_dir)
 
 
 if __name__ == '__main__':

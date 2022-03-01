@@ -75,7 +75,7 @@ def main():
             tileset = obj_tiler.from_obj_directory(path)
             if(tileset is not None):
                 print("tileset in", obj_tiler.get_output_dir())
-                tileset.write_to_directory(obj_tiler.get_output_dir())
+                tileset.write_as_json(obj_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

@@ -66,7 +66,7 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory(ifc_tiler.get_output_dir())
+        tileset.write_as_json(ifc_tiler.get_output_dir())
 
 
 if __name__ == '__main__':
