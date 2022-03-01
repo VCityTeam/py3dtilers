@@ -110,7 +110,7 @@ class CityMCityObjects(FeatureList):
 
     def __init__(self, cityMCityObjects=None):
         if self.color_config is None:
-            config_path = os.path.join(os.path.dirname(__file__), ".." , "Color", "citytiler_config.json")
+            config_path = os.path.join(os.path.dirname(__file__), "..", "Color", "citytiler_config.json")
             self.set_color_config(config_path)
         super().__init__(cityMCityObjects)
 

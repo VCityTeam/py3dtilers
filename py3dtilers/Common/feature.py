@@ -302,9 +302,9 @@ class FeatureList(object):
         """
         Set the ColorConfig from a JSON file.
         The ColorConfig is used to created colored materials.
-        :param config_path: path to the JSON file 
+        :param config_path: path to the JSON file
         """
-        ObjectsToTile.color_config = ColorConfig(config_path)
+        FeatureList.color_config = ColorConfig(config_path)
 
     @classmethod
     def get_color_config(cls):
@@ -312,9 +312,9 @@ class FeatureList(object):
         Return the ColorConfig used to created colored materials.
         :return: a ColorConfig
         """
-        if ObjectsToTile.color_config is None:
-            ObjectsToTile.color_config = ColorConfig()
-        return ObjectsToTile.color_config
+        if FeatureList.color_config is None:
+            FeatureList.color_config = ColorConfig()
+        return FeatureList.color_config
 
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):
