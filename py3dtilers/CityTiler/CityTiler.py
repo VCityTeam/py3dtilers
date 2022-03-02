@@ -100,17 +100,6 @@ class CityTiler(Tiler):
         if not cityobjects:
             raise ValueError(f'The database does not contain any {objects_type.__name__} object')
 
-        if self.args.with_texture:
-            print('Retrieving surface with textures from database...')
-            self.get_surfaces_with_texture(cursor, cityobjects, objects_type)
-        else:
-            if split_surfaces:
-                print('Retrieving split surfaces from database...')
-                self.get_surfaces_split(cursor, cityobjects, objects_type)
-            else:
-                print('Retrieving merged surfaces from database...')
-                self.get_surfaces_merged(cursor, cityobjects, objects_type)
-            raise ValueError(f'The database does not contain any {objects_type} object')
         self.set_features_centroid(cursor, cityobjects, objects_type)
 
         kd_tree_max = 25 if self.args.with_texture else 500
