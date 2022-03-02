@@ -169,9 +169,10 @@ class CityTiler(Tiler):
         """
         print('Retrieving city objects from database...')
         cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
+        print(len(cityobjects), f'city objects of type \'{objects_type.__name__}\' found in the database.')
 
         if not cityobjects:
-            raise ValueError(f'The database does not contain any {objects_type} object')
+            raise ValueError(f'The database does not contain any {objects_type.__name__} object')
 
         if self.args.with_texture:
             print('Retrieving surface with textures from database...')
@@ -187,7 +188,6 @@ class CityTiler(Tiler):
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-        print('Creating tileset from features...')
         return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 

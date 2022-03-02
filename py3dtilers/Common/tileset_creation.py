@@ -21,6 +21,7 @@ class FromGeometryTreeToTileset():
 
         :return: a Tileset
         """
+        print('Creating tileset from features...')
         tileset = TileSet()
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         centroid = geometry_tree.get_centroid()
