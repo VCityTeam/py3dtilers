@@ -98,6 +98,12 @@ class Tiler():
         return lod_tree
 
     def create_tileset_from_geometries(self, feature_list, extension_name=None):
+        """
+        Create the 3DTiles tileset from the features.
+        :param feature_list: a FeatureList
+        :param extension_name: an optional extension to add to the tileset
+        :return: a TileSet
+        """
         create_loa = self.args.loa is not None
         tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
 
@@ -123,6 +129,9 @@ class Tiler():
         return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
 
     def create_output_directory(self):
+        """
+        Create the directory where the tileset will be writen.
+        """
         dir = self.get_output_dir()
         target_dir = Path(dir).expanduser()
         Path(target_dir).mkdir(parents=True, exist_ok=True)
@@ -131,4 +140,8 @@ class Tiler():
         Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):
+        """
+        Return the ColorConfig used to create the colored materials.
+        :return: a ColorConfig
+        """
         return ColorConfig(config_path)
