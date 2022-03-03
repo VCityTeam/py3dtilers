@@ -20,9 +20,11 @@ class FromGeometryTreeToTileset():
         """
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param user_arguments: the Namespace containing the arguments of the command line.
         :param extension_name: the name of an extension to add to the tileset.
+        :param output_dir: the directory where the TileSet is writen.
 
-        :return: a Tileset
+        :return: a TileSet
         """
         print('Creating tileset from features...')
         tileset = TileSet()
@@ -44,6 +46,15 @@ class FromGeometryTreeToTileset():
 
     @staticmethod
     def __transform_node(node, tree_centroid, user_args, obj_writer=None):
+        """
+        Apply transformations on the features contained in a node.
+        Those transformations are based on the arguments of the user.
+        The features can also be writen in an OBJ file.
+        :param node: the GeometryNode to transform.
+        :param tree_centroid: the centroid of the GeometryTree.
+        :param user_args: the Namespace containing the arguments of the command line.
+        :param obj_writer: the writer used to create the OBJ model.
+        """
         if hasattr(user_args, 'scale') and user_args.scale:
             for objects in node.get_features():
                 objects.scale_features(user_args.scale)
