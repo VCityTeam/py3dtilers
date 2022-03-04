@@ -58,6 +58,9 @@ class Groups():
     Contains a list of Group
     """
 
+    # Used to put in a same group the features which are in a same 1000 m^3 cube.
+    DEFAULT_CUBE_SIZE = 1000
+
     def __init__(self, feature_list, polygons_path=None, kd_tree_max=500):
         """
         Distribute the features contained in feature_list into different Group
@@ -185,9 +188,9 @@ class Groups():
             group = Group(FeatureList([feature_list[feature_index]]))
             groups.append(group)
 
-        return self.distribute_groups_in_cubes(groups, 1000)
+        return self.distribute_groups_in_cubes(groups, Groups.DEFAULT_CUBE_SIZE)
 
-    def distribute_groups_in_cubes(self, groups, cube_size=300):
+    def distribute_groups_in_cubes(self, groups, cube_size):
         """
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
