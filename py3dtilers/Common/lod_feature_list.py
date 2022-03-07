@@ -1,4 +1,3 @@
-import numpy as np
 from shapely.geometry import Point, Polygon
 from ..Common import FeatureList, ExtrudedPolygon
 
@@ -9,9 +8,6 @@ class LodFeatureList(FeatureList):
         super().__init__(objects)
         self.features_node = features_node
         self.centroid = features_node.feature_list.get_centroid()
-
-    def get_centroid(self):
-        return self.centroid
 
 
 class Lod1FeatureList(LodFeatureList):
@@ -79,11 +75,6 @@ class LoaFeatureList(LodFeatureList):
         """
         index = LoaFeatureList.loa_index
         LoaFeatureList.loa_index += 1
-
-        centroid = np.array([0, 0, 0], dtype=np.float64)
-        for feature in feature_list:
-            centroid += feature.get_centroid()
-        centroid /= len(feature_list)
 
         extruded_polygon = ExtrudedPolygon("loa_" + str(index), feature_list, polygon=polygon)
         return extruded_polygon
