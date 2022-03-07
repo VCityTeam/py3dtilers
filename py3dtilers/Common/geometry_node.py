@@ -5,16 +5,21 @@ class GeometryNode():
     A node will correspond to a tile of the 3dtiles tileset.
     """
 
-    def __init__(self, feature_list=None, geometric_error=50, with_texture=False):
+    # In 3D Tiles, the geometric error is the metric used to refine a tile.
+    # The leaves of the tileset should have the lower geometric error.
+    # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
+    DEFAULT_GEOMETRIC_ERROR = 0
+
+    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
         """
         :param feature_list: an instance of FeatureList.
-        :param geometric_error: the distance below which this node should be displayed.
+        :param geometric_error: the metric used to refine the node when visualizing the features.
         :param Boolean with_texture: if this node must keep the texture of the features or not.
         """
         self.feature_list = feature_list
         self.child_nodes = list()
         self.with_texture = with_texture
-        self.geometric_error = geometric_error
+        self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
     def set_child_nodes(self, nodes=list()):
         """

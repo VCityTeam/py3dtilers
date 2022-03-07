@@ -7,7 +7,9 @@ class Lod1Node(GeometryNode):
     Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.
     """
 
-    def __init__(self, features_node, geometric_error=50):
+    DEFAULT_GEOMETRIC_ERROR = 5
+
+    def __init__(self, features_node, geometric_error=None):
         feature_list = Lod1FeatureList(features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)
 
@@ -18,6 +20,8 @@ class LoaNode(GeometryNode):
     The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
     """
 
-    def __init__(self, features_node, geometric_error=50, polygons=list()):
+    DEFAULT_GEOMETRIC_ERROR = 20
+
+    def __init__(self, features_node, geometric_error=None, polygons=list()):
         feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)
