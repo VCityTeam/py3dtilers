@@ -84,8 +84,8 @@ class Tiler():
             if not isinstance(val, (int, float)) and val.replace('.', '', 1).isdigit():
                 self.args.offset[i] = float(val)
 
-        for i in range(0, len(self.args.geometric_error)):
-            self.args.geometric_error[i] = int(self.args.geometric_error[i]) if self.args.geometric_error[i].isnumeric() else None
+        for i, val in enumerate(self.args.geometric_error):
+            self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
 
     def get_output_dir(self):
