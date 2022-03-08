@@ -72,7 +72,7 @@ class CityMCityObject(Feature):
                 feature_id = t[0]
                 geom_as_string = t[1]
                 if geom_as_string is not None:
-                    cityobject = self.__class__(feature_id)
+                    cityobject = self.__class__(feature_id, self.get_gml_id())
                     associated_data = []
 
                     if user_arguments.with_texture:
