@@ -22,10 +22,14 @@ class IfcObjectGeom(Feature):
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
 
-    def get_parents(self):
-
+    def get_parents(self,hierarchy,classDict):
         if(self.ifcObject.ContainedInStructure):
             print("parent")
+
+        #Recupérer tous les parents
+        #ajouter a chaque fois dans hierarchy avec addnodestoparent
+        # ajouter class dans classdict si n'exite pas
+        #retourner la liste des parents    
 
 
 
@@ -110,15 +114,31 @@ class IfcObjectsGeom(FeatureList):
     def __init__(self, objs=None):
         super().__init__(objs)
 
+    @staticmethod
     def create_batch_table_extension(extension_name, ids, objects):
-        resulting_bth = BatchTableHierarchy()
-        hierarchy = TreeWithChildrenAndParent()
-        classDict = {}
+        if extension_name == "batch_table_hierarchy":
+            resulting_bth = BatchTableHierarchy()
+            hierarchy = TreeWithChildrenAndParent()
+            classDict = {}
 
-        for obj in objects:
-            obj.get_parents(hierarchy,classDict)
-        
-        print(ids)
+            for obj in objects:
+                ids_parents = obj.get_parents(hierarchy,classDict)
+                # pour id in ids_parent
+                #   si ! (id in ids)
+                #     ids.add(id)
+            
+            #for c in classDict.key:
+            #   bth.add_class(c[0],{id})
+
+            #for id in ids
+            # bth.add_class_instance(
+            # classDict[id],
+            # {
+            #  id : id   
+            # },
+            # [ids.index(id_parent) for id_parent in hierarchy.getParents(object_id)]
+            # )   
+            print(ids)
 
 
     @staticmethod
