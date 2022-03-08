@@ -52,7 +52,8 @@ class TilesetTiler(Tiler):
 
         :return: a TileSet
         """
-        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
+        geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
+        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
         return self.create_tileset_from_geometries(tileset_tree, self.args)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):

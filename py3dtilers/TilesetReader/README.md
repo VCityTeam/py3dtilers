@@ -84,6 +84,28 @@ Read the texture from the OBJ and write it in the produced 3DTiles:
 tileset-reader --paths <tileset_path> --with_texture
 ```
 
+### Geometric error
+
+In 3DTiles, [the geometric error](https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error) is the metric used to refine a tile or not. A tile should always have a lower geometric error than its parent. The root of the tileset should have the highest geometric error and the leaves the lowest geometric error.
+
+The geometric errors of the tiles can be overwrited with the flag `--geometric_error`. The values after the flag will be used (from left to right) for the deeper tiles (leaves), their parents (if existing), etc until the root tiles of the tileset.
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error 5 60 100  # Set leaf tiles GE to 5, their parents GE to 60 and root tiles GE to 100
+```
+
+You can set the geometric error of the basic tiles only with:
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error 5  # Set leaf tiles GE to 5
+```
+
+You can skip basic/LOD1 tiles geometric error by writing a non numeric character as geometric error.
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tiles GE to 100
+```
+
 ## Tileset Merger
 
 The TilesetMerger merges tilesets into a single one. All the texture images are copied.

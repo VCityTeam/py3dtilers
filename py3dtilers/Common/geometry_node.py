@@ -8,7 +8,7 @@ class GeometryNode():
     # In 3D Tiles, the geometric error is the metric used to refine a tile.
     # The leaves of the tileset should have the lower geometric error.
     # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
-    DEFAULT_GEOMETRIC_ERROR = 0
+    DEFAULT_GEOMETRIC_ERROR = 1
 
     def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
         """
