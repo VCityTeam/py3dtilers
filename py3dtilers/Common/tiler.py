@@ -70,10 +70,12 @@ class Tiler():
             self.args.obj = self.args.obj + '.obj'
 
         if(len(self.args.offset) < 3):
-            for i in range(len(self.args.offset), 3):
-                self.args.offset.append(0)
+            [self.args.offset.append(0) for _ in range(len(self.args.offset), 3)]
         elif(len(self.args.offset) > 3):
             self.args.offset = self.args.offset[:3]
+        for i, val in enumerate(self.args.offset):
+            if not isinstance(val, (int, float)) and val.replace('.', '', 1).isdigit():
+                self.args.offset[i] = float(val)
 
     def get_output_dir(self):
         """
