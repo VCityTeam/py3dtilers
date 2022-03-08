@@ -94,13 +94,13 @@ The geometric errors of the tiles can be overwrited with the flag `--geometric_e
 tileset-reader --paths <tileset_path> --geometric_error 5 60 100  # Set leaf tiles GE to 5, their parents GE to 60 and root tiles GE to 100
 ```
 
-You can set the geometric error of the basic tiles only with:
+You can set the geometric error of the leaf tiles only with:
 
 ```bash
 tileset-reader --paths <tileset_path> --geometric_error 5  # Set leaf tiles GE to 5
 ```
 
-You can skip basic/LOD1 tiles geometric error by writing a non numeric character as geometric error.
+You can skip leaf tiles and their parents geometric errors by writing a non numeric character as geometric error.
 
 ```bash
 tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tiles GE to 100
