@@ -36,7 +36,7 @@ class Tiler():
         self.parser.add_argument('--offset',
                                  nargs='*',
                                  default=[0, 0, 0],
-                                 help='Substract an offset to all the vertices.')
+                                 help='Add an offset to all the vertices.')
 
         self.parser.add_argument('--scale',
                                  nargs='?',
@@ -110,6 +110,8 @@ class Tiler():
         for i, val in enumerate(self.args.offset):
             if not isinstance(val, (int, float)) and val.lstrip('-').replace('.', '', 1).isdigit():
                 self.args.offset[i] = float(val)
+        self.args.offset = np.array(self.args.offset,dtype=np.float32)
+        
 
         for i, val in enumerate(self.args.geometric_error):
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None

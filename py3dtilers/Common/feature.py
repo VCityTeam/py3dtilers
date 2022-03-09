@@ -238,7 +238,7 @@ class FeatureList(object):
 
     def translate_features(self, offset):
         """
-        Translate the features by substracting an offset
+        Translate the features by adding an offset
         :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset
@@ -247,7 +247,7 @@ class FeatureList(object):
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    new_position.append(np.array(points - offset))
+                    new_position.append(np.array(points + offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
