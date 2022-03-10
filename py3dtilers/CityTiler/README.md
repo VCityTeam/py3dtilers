@@ -108,7 +108,7 @@ If you want to apply different colors on the surfaces of buildings (roof, wall a
 citygml-tiler --db_config_path <path_to_file>/Config.yml --add_color --split_surfaces
 ```
 
-The default colors are defined by a [JSON file](../Color/citytiler_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md#colordict) for more details__)
+The default colors are defined by a [JSON file](../Color/citytiler_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md#color_dict) for more details__)
 
 ## CityTemporalTiler features
 
