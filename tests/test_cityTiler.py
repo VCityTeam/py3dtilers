@@ -196,6 +196,19 @@ class Test_Tile(unittest.TestCase):
         tileset.write_as_json(directory)
         cursor.close()
 
+    def test_building_color(self):
+
+        directory = Path("tests/city_tiler_test_data/junk/building_color")
+        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        objects_type = CityMBuildings
+        objects_type.set_cursor(cursor)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True, add_color=True)
+
+        tileset.write_to_directory(directory)
+        cursor.close()
+
 
 if __name__ == '__main__':
     unittest.main()
