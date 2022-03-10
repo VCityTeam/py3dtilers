@@ -23,7 +23,7 @@ This command should produce a directory named `obj_tilesets`.
 
 ### Output directory
 
-The flag `--output_dir` allows to choose the output directory of the Tiler.
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
 
 ```bash
 obj-tiler --paths <directory_path> --output_dir <output_directory_path>

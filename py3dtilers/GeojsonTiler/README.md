@@ -100,7 +100,7 @@ geojson-tiler --path <path> --prec NONE
 
 ### Output directory
 
-The flag `--output_dir` allows to choose the output directory of the Tiler.
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
 
 ```bash
 geojson-tiler --path <path> --output_dir <output_directory_path>

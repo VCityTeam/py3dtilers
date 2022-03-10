@@ -120,7 +120,7 @@ If you are using the __CityTemporalTiler__, replace `citygml-tiler` by `citygml-
 
 ### Output directory
 
-The flag `--output_dir` allows to choose the output directory of the Tiler.
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
 
 ```bash
 citygml-tiler --db_config_path <path_to_file>/Config.yml --output_dir <output_directory_path>

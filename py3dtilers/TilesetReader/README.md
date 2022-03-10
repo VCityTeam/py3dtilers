@@ -26,9 +26,17 @@ tileset-reader --paths <path1> <path2> <path3> ...
 
 All the triangles of the tiles will be loaded in memory to be able to transform them. If you don't want to transform the triangles, use the [`tileset-merger`](#tileset-merger) command instead.
 
-The produced 3DTiles tileset will be in a directory named `tileset_reader_output`.
+The produced 3DTiles tileset will (by default) be in a directory named `tileset_reader_output`.
 
 ## Shared Tiler features
+
+### Output directory
+
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
+
+```bash
+tileset-reader --paths <tileset_path> --output_dir <output_directory_path>
+```
 
 ### Obj creation
 
@@ -92,7 +100,7 @@ Where `tileset_path_x` should point to the __root__ directory of a 3DTiles tiles
 
 The produced 3DTiles tileset will be in a directory named `tileset_merger_output`.
 
-Use `--output_dir` followed by the path of a directory to choose the output:
+Use `--output_dir`, `--out` or `-o` followed by the path of a directory to choose the output:
 
 ```bash
 tileset-merger --paths <tileset_path_1> <tileset_path_2> --output_dir ../merged_tileset

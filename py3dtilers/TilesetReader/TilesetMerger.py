@@ -22,6 +22,8 @@ class TilesetMerger():
                             type=str,
                             help='Paths to 3DTiles tilesets')
         parser.add_argument('--output_dir',
+                            '--out',
+                            '-o',
                             nargs='?',
                             type=str,
                             help='Output directory of the tileset.')

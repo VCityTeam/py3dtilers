@@ -50,7 +50,7 @@ ifc-tiler --file_path <path> --originalUnit cm --targetedUnit km
 
 ### Output directory
 
-The flag `--output_dir` allows to choose the output directory of the Tiler.
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
 
 ```bash
 ifc-tiler --file_path <path> --output_dir <output_directory_path>

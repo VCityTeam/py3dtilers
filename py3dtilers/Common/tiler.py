@@ -59,6 +59,8 @@ class Tiler():
                                  help='Adds texture to 3DTiles when defined')
 
         self.parser.add_argument('--output_dir',
+                                 '--out',
+                                 '-o',
                                  nargs='?',
                                  type=str,
                                  help='Output directory of the tileset.')
