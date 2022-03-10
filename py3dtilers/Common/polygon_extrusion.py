@@ -2,6 +2,7 @@ import numpy as np
 from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
+from shapely.geometry import Polygon
 
 
 class ExtrudedPolygon(Feature):
@@ -47,7 +48,11 @@ class ExtrudedPolygon(Feature):
             points = self.polygon
         else:
             hull = alphashape(points, 0.)
-            points = hull.exterior.coords[:-1]
+            try:
+                points = hull.exterior.coords[:-1]
+            except AttributeError:
+                po = hull.parallel_offset(0.1, 'right')
+                points = Polygon([*list(hull.coords), *list(po.coords)[::-1]]).exterior.coords[:-1]
 
         self.points = points
         self.min_height = minZ
