@@ -129,19 +129,6 @@ class CityMCityObjects(FeatureList):
             texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
-    def set_features_geom(self, user_arguments=None):
-        """
-        Set the geometry of the features.
-        Keep only the features with geometry.
-        """
-        features_with_geom = list()
-        material_indexes = dict()
-        if user_arguments.add_color:
-            self.materials = list()
-        for feature in self.objects:
-            features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-        self.objects = features_with_geom
-
     @staticmethod
     def set_cursor(cursor):
         """

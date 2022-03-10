@@ -120,7 +120,7 @@ class Feature(object):
         """
         return self.texture is not None
 
-    def get_geom(self, user_arguments=None):
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
         """
         Get the geometry of the feature.
         :return: a boolean
@@ -293,8 +293,9 @@ class FeatureList(object):
         Keep only the features with geometry.
         """
         features_with_geom = list()
+        material_indexes = dict()
         for feature in self.objects:
-            features_with_geom.extend(feature.get_geom(user_arguments))
+            features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.objects = features_with_geom
 
     @classmethod
