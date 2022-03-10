@@ -82,12 +82,12 @@ class CityMCityObject(Feature):
                         texture_uri = t[3]
                         cityobject.texture_uri = texture_uri
                         associated_data = [uv_as_string]
-
-                    if surface_classname not in material_indexes:
-                        material = feature_list.get_color_config().get_color_by_key(surface_classname)
-                        material_indexes[surface_classname] = len(feature_list.materials)
-                        feature_list.add_materials([material])
-                    cityobject.material_index = material_indexes[surface_classname]
+                    elif user_arguments.add_color:
+                        if surface_classname not in material_indexes:
+                            material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                            material_indexes[surface_classname] = len(feature_list.materials)
+                            feature_list.add_materials([material])
+                        cityobject.material_index = material_indexes[surface_classname]
 
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
                     if len(cityobject.geom.triangles[0]) > 0:

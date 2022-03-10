@@ -43,6 +43,11 @@ class CityTiler(Tiler):
                                  action='store_true',
                                  help='Keeps the surfaces of the cityObjects split when defined')
 
+        self.parser.add_argument('--add_color',
+                                 dest='add_color',
+                                 action='store_true',
+                                 help='When defined, add colors to the features depending on their CityGML objectclass.')
+
     def get_output_dir(self):
         """
         Return the directory name for the tileset.

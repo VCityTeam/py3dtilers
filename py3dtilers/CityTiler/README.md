@@ -94,6 +94,22 @@ To create the BatchTableHierarchy extension:
 citygml-tiler --db_config_path <path_to_file>/Config.yml --with_BTH
 ```
 
+### Color
+
+When present, the `--add_color` flag adds a single colored material to each feature. The color of the material is determined by CityGML `objectclass` of each feature.  
+
+```bash
+citygml-tiler --db_config_path <path_to_file>/Config.yml --add_color
+```
+
+If you want to apply different colors on the surfaces of buildings (roof, wall and floor), use the `--split_surfaces` flag:
+
+```bash
+citygml-tiler --db_config_path <path_to_file>/Config.yml --add_color --split_surfaces
+```
+
+The default colors are defined by a [JSON file](../Color/citytiler_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md#colordict) for more details__)
+
 ## CityTemporalTiler features
 
 The City Temporal Tiler creates tilesets with a __temporal extension__. This extension allows to visualize the evolution of buildings through time.
