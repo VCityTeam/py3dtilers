@@ -112,13 +112,13 @@ tileset_merger_output/
 *.obj
 
 # Tests output
-tests/tiler_test_data/tilesets
-tests/tiler_test_data/junk
+tests/tiler_test_data/generated_tilesets
+tests/tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_objs
 tests/geojson_tiler_test_data/generated_tilesets
-tests/city_tiler_test_data/junk/
+tests/city_tiler_test_data/generated_tilesets/
 tests/city_tiler_test_data/test_config.yml
-tests/city_temporal_tiler_test_data/junk/
+tests/city_temporal_tiler_test_data/generated_tilesets/
 tests/obj_tiler_data/generated_tilesets
 tests/tileset_reader_test_data/generated_tilesets
 tests/tileset_reader_test_data/generated_objs

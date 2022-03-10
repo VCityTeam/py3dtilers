@@ -40,7 +40,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/kd_tree')
+        directory = Path('tests/tiler_test_data/generated_tilesets/kd_tree')
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -54,7 +54,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/lod1')
+        directory = Path('tests/tiler_test_data/generated_tilesets/lod1')
         tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -68,7 +68,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/loa')
+        directory = Path('tests/tiler_test_data/generated_tilesets/loa')
         tiler.args = Namespace(obj=None, loa=Path('tests/tiler_test_data/loa_polygons'), lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -82,7 +82,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/change_crs')
+        directory = Path('tests/tiler_test_data/generated_tilesets/change_crs')
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:4171', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -96,7 +96,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/offset')
+        directory = Path('tests/tiler_test_data/generated_tilesets/offset')
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[100, 100, -200], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -110,7 +110,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/offset_centroid')
+        directory = Path('tests/tiler_test_data/generated_tilesets/offset_centroid')
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=['centroid'], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -124,7 +124,7 @@ class Test_Tile(unittest.TestCase):
         feature_list = FeatureList([feature])
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/scale')
+        directory = Path('tests/tiler_test_data/generated_tilesets/scale')
         tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=10, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
@@ -137,10 +137,10 @@ class Test_Tile(unittest.TestCase):
         feature.set_box()
         feature_list = FeatureList([feature])
 
-        obj_name = Path('tests/tiler_test_data/junk/cube.obj')
+        obj_name = Path('tests/tiler_test_data/generated_objs/cube.obj')
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/tilesets/scale')
+        directory = Path('tests/tiler_test_data/generated_tilesets/scale')
         tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
