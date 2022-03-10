@@ -84,12 +84,6 @@ class Obj(Feature):
 
         return True
 
-    def get_obj_id(self):
-        return super().get_id()
-
-    def set_obj_id(self, id):
-        return super().set_id(id)
-
 
 class Objs(FeatureList):
     """

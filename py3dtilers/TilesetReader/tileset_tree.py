@@ -5,7 +5,6 @@ from .tile_to_feature import TileToFeatureList
 class TilesetTree(GeometryTree):
 
     def __init__(self, tileset, tileset_paths):
-        self.tile_index = 0
         root_tile = tileset.get_root_tile()
 
         root_nodes = list()
