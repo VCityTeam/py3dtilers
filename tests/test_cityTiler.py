@@ -203,10 +203,10 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
-        tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces=True, add_color=True)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=True)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
         cursor.close()
 
 

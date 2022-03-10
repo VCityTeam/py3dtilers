@@ -72,7 +72,6 @@ class CityMCityObject(Feature):
             try:
                 feature_id = t[0]
                 geom_as_string = t[1]
-                surface_classname = t[2]
                 if geom_as_string is not None:
                     cityobject = self.__class__(feature_id, self.get_gml_id())
                     associated_data = []
@@ -83,6 +82,7 @@ class CityMCityObject(Feature):
                         cityobject.texture_uri = texture_uri
                         associated_data = [uv_as_string]
                     elif user_arguments.add_color:
+                        surface_classname = t[2]
                         if surface_classname not in material_indexes:
                             material = feature_list.get_color_config().get_color_by_key(surface_classname)
                             material_indexes[surface_classname] = len(feature_list.materials)
@@ -136,6 +136,8 @@ class CityMCityObjects(FeatureList):
         """
         features_with_geom = list()
         material_indexes = dict()
+        if user_arguments.add_color:
+            self.materials = list()
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.objects = features_with_geom
