@@ -75,12 +75,13 @@ class CityMBridges(CityMCityObjects):
         else:
             query = \
                 "SELECT bridge.bridge_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-                "surface_geometry.geometry) " + \
-                ")) " + \
+                "surface_geometry.geometry))), " + \
+                "objectclass.classname " + \
                 "FROM citydb.surface_geometry JOIN citydb.bridge " + \
                 "ON surface_geometry.root_id=bridge.lod2_multi_surface_id " + \
+                "JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id " + \
                 "WHERE bridge.bridge_root_id IN " + bridges_ids_arg + " " + \
-                "GROUP BY bridge.bridge_root_id "
+                "GROUP BY bridge.bridge_root_id, objectclass.classname"
 
         return query
 

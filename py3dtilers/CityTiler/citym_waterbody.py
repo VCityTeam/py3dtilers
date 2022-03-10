@@ -86,14 +86,16 @@ class CityMWaterBodies(CityMCityObjects):
                 "WHERE waterbody.id IN " + waterbodies_ids
         else:
             query = \
-                "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) " + \
+                "SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), " + \
+                "objectclass.classname " + \
                 "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf " + \
                 "ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id " + \
                 "JOIN citydb.waterboundary_surface " + \
                 "ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id " + \
                 "JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id " + \
+                "JOIN citydb.objectclass ON waterbody.objectclass_id = objectclass.id " + \
                 "WHERE waterbody.id IN " + waterbodies_ids + " " + \
-                "GROUP BY waterbody.id "
+                "GROUP BY waterbody.id, objectclass.classname"
 
         return query
 

@@ -105,13 +105,14 @@ class CityMBuildings(CityMCityObjects):
         else:
             query = \
                 "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
-                "surface_geometry.geometry) " + \
-                ")) " + \
+                "surface_geometry.geometry))), " + \
+                "objectclass.classname " + \
                 "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
                 "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
                 "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
+                "JOIN citydb.objectclass ON building.objectclass_id = objectclass.id " + \
                 "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
-                "GROUP BY building.building_root_id "
+                "GROUP BY building.building_root_id, objectclass.classname"
 
         return query
 
