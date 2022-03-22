@@ -160,7 +160,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
 
 if __name__ == '__main__':
