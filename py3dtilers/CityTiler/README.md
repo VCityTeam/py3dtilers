@@ -96,7 +96,7 @@ citygml-tiler --db_config_path <path_to_file>/Config.yml --with_BTH
 
 ## CityTemporalTiler features
 
-The City Temporal Tiler creates tilesets with a [__temporal extension__](https://github.com/VCityTeam/UD-SV/tree/master/3DTilesTemporalExtention). This extension allows to visualize the evolution of buildings through time.
+The City Temporal Tiler creates tilesets with a [__temporal extension__](https://github.com/VCityTeam/UD-SV/tree/master/3DTilesTemporalExtention). This extension allows to visualize the evolution of buildings through time. For a detailed presentation of the input parameters and respective data formats, how that information gets transformed and represented within a resulting temporal 3DTiles, as well implementation notes [refer to this TemporalTiler design notes](../../docs/Doc/CityTemporalTilerDesignNotes.md).
 
 ### Run the CityTemporalTiler
 
