@@ -45,7 +45,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_lod1(self):
         feature = Feature("lod1")
@@ -59,7 +59,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_loa(self):
         feature = Feature("loa")
@@ -73,7 +73,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_change_crs(self):
         feature = Feature("change_crs")
@@ -87,7 +87,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_offset(self):
         feature = Feature("offset")
@@ -101,7 +101,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_offset_centroid(self):
         feature = Feature("offset_centroid")
@@ -115,7 +115,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_scale(self):
         feature = Feature("scale")
@@ -129,7 +129,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
     def test_obj(self):
         feature = Feature("scale")
@@ -145,7 +145,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
-        tileset.write_to_directory(directory)
+        tileset.write_as_json(directory)
 
 
 if __name__ == '__main__':

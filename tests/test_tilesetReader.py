@@ -16,7 +16,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets(paths)
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_to_directory(output_dir)
+        tileset.write_as_json(output_dir)
 
     def test_merge(self):
         tiler = TilesetTiler()
@@ -26,7 +26,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets(paths)
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_to_directory(output_dir)
+        tileset.write_as_json(output_dir)
 
     def test_transform(self):
         tiler = TilesetTiler()
@@ -36,7 +36,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets(paths)
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_to_directory(output_dir)
+        tileset.write_as_json(output_dir)
 
     def test_obj(self):
         tiler = TilesetTiler()
@@ -47,7 +47,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets(paths)
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_to_directory(output_dir)
+        tileset.write_as_json(output_dir)
 
     def test_merger(self):
         merger = TilesetMerger(output_path="tests/tileset_reader_test_data/generated_tilesets/merger/")

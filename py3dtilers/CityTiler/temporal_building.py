@@ -39,3 +39,13 @@ class TemporalBuilding(CityMBuilding):
     def get_time_stamp(self):
         # This should be of type date and by default is manipulated as string:
         return self.temporal_id.split('::')[0]
+
+    def get_geom(self, user_arguments=None):
+        """
+        Get the geometry of the feature.
+        :return: a boolean
+        """
+        if self.geom is not None and len(self.geom.triangles) > 0 and len(self.get_geom_as_triangles()) > 0:
+            return [self]
+        else:
+            return []

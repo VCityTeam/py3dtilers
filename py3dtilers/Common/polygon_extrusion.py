@@ -2,10 +2,11 @@ import numpy as np
 from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
+from shapely.geometry import Polygon
 
 
-class ExtrudedPolygon():
-    def __init__(self, feature, override_points=False, polygon=None):
+class ExtrudedPolygon(Feature):
+    def __init__(self, id, features, polygon=None):
         """
         Creates a 3D extrusion of the footprint of a Feature
         :param feature: an instance of Feature containing triangles
@@ -13,39 +14,51 @@ class ExtrudedPolygon():
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         """
-        geom_triangles = feature.geom.triangles
+        super().__init__(id)
+        self.polygon = polygon
+        self.features = features
+        self.set_geom()
+
+    def set_geom(self):
+        """
+        Set the geometry of the feature.
+        :return: a boolean
+        """
+        geom_triangles = list()
+        for feature in self.features:
+            geom_triangles.extend(feature.get_geom_as_triangles())
+
         points = list()
         minZ = np.Inf
         average_maxZ = 0
 
         # Compute the footprint of the geometry
-        for triangles in geom_triangles:
+        for triangle in geom_triangles:
             maxZ = np.NINF
-            for triangle in triangles:
-                for point in triangle:
-                    if len(point) >= 3:
-                        points.append([point[0], point[1]])
-                        if point[2] < minZ:
-                            minZ = point[2]
-                        if point[2] > maxZ:
-                            maxZ = point[2]
+            for point in triangle:
+                if len(point) >= 3:
+                    points.append([point[0], point[1]])
+                    if point[2] < minZ:
+                        minZ = point[2]
+                    if point[2] > maxZ:
+                        maxZ = point[2]
             average_maxZ += maxZ
         average_maxZ /= len(geom_triangles)
-        if override_points:
-            points = polygon
+        if self.polygon is not None:
+            points = self.polygon
         else:
             hull = alphashape(points, 0.)
-            points = hull.exterior.coords[:-1]
+            try:
+                points = hull.exterior.coords[:-1]
+            except AttributeError:
+                po = hull.parallel_offset(0.1, 'right')
+                points = Polygon([*list(hull.coords), *list(po.coords)[::-1]]).exterior.coords[:-1]
 
-        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
 
         self.extrude_footprint()
-
-    def get_extruded_object(self):
-        return self.extruded_object
 
     def extrude_footprint(self):
         coordinates = self.points
@@ -74,7 +87,6 @@ class ExtrudedPolygon():
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = Feature(str(self.feature.get_id()) + "_extrude")
-        extruded_object.geom.triangles.append(triangles)
-        extruded_object.set_box()
-        self.extruded_object = extruded_object
+        self.feature_list = None
+        self.geom.triangles.append(triangles)
+        self.set_box()

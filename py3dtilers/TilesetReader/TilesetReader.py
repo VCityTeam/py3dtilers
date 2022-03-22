@@ -41,25 +41,8 @@ class TilesetTiler(Tiler):
         """
         Override the parent tileset creation.
         """
-        if hasattr(self.args, 'scale') and self.args.scale:
-            for objects in tileset_tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
-            if self.args.offset[0] == 'centroid':
-                self.args.offset = tileset_tree.get_centroid()
-            for objects in tileset_tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tileset_tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
-
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, self.args, extension_name, self.get_output_dir())
 
     def transform_tileset(self, tileset):
         """
@@ -70,7 +53,7 @@ class TilesetTiler(Tiler):
         :return: a TileSet
         """
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
-        return self.create_tileset_from_geometries(tileset_tree)
+        return self.create_tileset_from_geometries(tileset_tree, self.args)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         """
@@ -93,7 +76,7 @@ def main():
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory(tiler.get_output_dir())
+    tileset.write_as_json(tiler.get_output_dir())
 
 
 if __name__ == '__main__':

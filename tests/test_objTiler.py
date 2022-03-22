@@ -16,7 +16,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory(path)
         if(tileset is not None):
-            tileset.write_to_directory(Path("tests/obj_tiler_data/generated_tilesets/", obj_tiler.current_path))
+            tileset.write_as_json(Path("tests/obj_tiler_data/generated_tilesets/", obj_tiler.current_path))
 
     def test_texture(self):
         path = Path('tests/obj_tiler_data/TexturedCube')
@@ -28,7 +28,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory(path)
         if(tileset is not None):
-            tileset.write_to_directory(Path("tests/obj_tiler_data/generated_tilesets/", obj_tiler.current_path))
+            tileset.write_as_json(Path("tests/obj_tiler_data/generated_tilesets/", obj_tiler.current_path))
 
 
 if __name__ == '__main__':

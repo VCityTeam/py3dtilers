@@ -337,7 +337,7 @@ def main():
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(city_temp_tiler.get_output_dir())
+    tile_set.write_as_json(city_temp_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

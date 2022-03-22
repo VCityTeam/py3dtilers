@@ -220,7 +220,7 @@ def main():
         tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
         if(tileset is not None):
             print("tileset in", geojson_tiler.get_output_dir())
-            tileset.write_to_directory(geojson_tiler.get_output_dir())
+            tileset.write_as_json(geojson_tiler.get_output_dir())
     else:
         print(path, "is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.")
 

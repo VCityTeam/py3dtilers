@@ -120,6 +120,16 @@ class Feature(object):
         """
         return self.texture is not None
 
+    def get_geom(self, user_arguments=None):
+        """
+        Get the geometry of the feature.
+        :return: a boolean
+        """
+        if self.geom is not None and len(self.geom.triangles) > 0 and len(self.get_geom_as_triangles()) > 0:
+            return [self]
+        else:
+            return []
+
 
 class FeatureList(object):
     """
@@ -274,6 +284,16 @@ class FeatureList(object):
         for feature in self.get_features():
             texture_dict[feature.get_id()] = feature.get_texture()
         return texture_dict
+
+    def set_features_geom(self, user_arguments=None):
+        """
+        Set the geometry of the features.
+        Keep only the features with geometry.
+        """
+        features_with_geom = list()
+        for feature in self.objects:
+            features_with_geom.extend(feature.get_geom(user_arguments))
+        self.objects = features_with_geom
 
     @staticmethod
     def create_batch_table_extension(extension_name, ids=None, objects=None):

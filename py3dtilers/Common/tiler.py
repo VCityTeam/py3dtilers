@@ -1,8 +1,7 @@
 import argparse
-from pyproj import Transformer
 from pathlib import Path
 
-from ..Common import LodTree, ObjWriter, FromGeometryTreeToTileset
+from ..Common import LodTree, FromGeometryTreeToTileset
 from ..Color import ColorConfig
 from ..Texture import Texture
 
@@ -88,49 +87,24 @@ class Tiler():
         else:
             return self.args.output_dir
 
-    def write_geometries_as_obj(self, features, file_name):
-        obj_writer = ObjWriter()
-        obj_writer.add_geometries(features.get_features())
-        obj_writer.write_obj(file_name)
-
-    def change_projection(self, features, crs_in, crs_out):
-        transformer = Transformer.from_crs(crs_in, crs_out)
-        features.change_crs(transformer)
-
-    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
-        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
+    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False, kd_tree_max=500):
+        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture, kd_tree_max)
         return lod_tree
 
-    def create_tileset_from_geometries(self, feature_list, extension_name=None):
+    def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
         """
         Create the 3DTiles tileset from the features.
         :param feature_list: a FeatureList
         :param extension_name: an optional extension to add to the tileset
+        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         :return: a TileSet
         """
         create_loa = self.args.loa is not None
-        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
-
-        if hasattr(self.args, 'scale') and self.args.scale:
-            for objects in tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == 'centroid':
-            if self.args.offset[0] == 'centroid':
-                self.args.offset = tree.get_centroid()
-            for objects in tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
+        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, kd_tree_max)
 
         feature_list.delete_objects_ref()
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
     def create_output_directory(self):
         """
