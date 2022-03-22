@@ -75,7 +75,7 @@ class Tiler():
         elif(len(self.args.offset) > 3):
             self.args.offset = self.args.offset[:3]
         for i, val in enumerate(self.args.offset):
-            if not isinstance(val, (int, float)) and val.replace('.', '', 1).isdigit():
+            if not isinstance(val, (int, float)) and val.lstrip('-').replace('.', '', 1).isdigit():
                 self.args.offset[i] = float(val)
 
     def get_output_dir(self):
