@@ -17,7 +17,8 @@ class Lod1Node(GeometryNode):
 class LoaNode(GeometryNode):
     """
     Creates 3D extrusions of the polygons given as parameter.
-    The LoaNode also takes a dictionary stocking the indexes of the features contained in each polygon.
+    Only the polygons containing at least one feature are extruded.
+    If a feature isn't contained in any polygon, create a 3D extrusion of its footprint.
     """
 
     DEFAULT_GEOMETRIC_ERROR = 20

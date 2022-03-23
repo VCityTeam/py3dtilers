@@ -17,7 +17,10 @@ class TilesetTree(GeometryTree):
 
     def tile_to_node(self, tile, tileset_path, offset, geometric_errors=[None, None, None]):
         """
-        Create a GeometryNode and its children from a tile.
+        Create a GeometryNode and its children from tiles.
+        The geometric error of the nodes depends on their depth in the tileset hierarchy.
+        A node should always have a lower geometric error than its parent.
+        The root of the tree should have the highest geometric error and the leaves the lowest geometric error.
         :param tile: the tile to convert to node
         :param tileset_path: the path of the original tileset of the tile
         :param offset: the offset used to translate the features of this tile
