@@ -6,7 +6,8 @@ from .polygon_extrusion import ExtrudedPolygon
 from .lod_feature_list import LoaFeatureList, Lod1FeatureList
 from .geometry_node import GeometryNode
 from .geometry_tree import GeometryTree
-from .lod_node import Lod1Node, LoaNode
+from .lod1_node import Lod1Node
+from .loa_node import LoaNode
 from .lod_tree import LodTree
 from .obj_writer import ObjWriter
 from .tileset_creation import FromGeometryTreeToTileset
