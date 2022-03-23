@@ -19,7 +19,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -32,7 +32,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMWaterBodies
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -45,7 +45,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -58,7 +58,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -71,7 +71,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -84,7 +84,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa="tests/city_tiler_test_data/polygons", lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -98,7 +98,7 @@ class Test_Tile(unittest.TestCase):
         CityMBuildings.set_bth()
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -112,7 +112,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -125,7 +125,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -138,7 +138,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMWaterBodies
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -151,7 +151,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -164,7 +164,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMReliefs
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -177,7 +177,7 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBridges
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=False, add_color=False)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)
@@ -190,7 +190,20 @@ class Test_Tile(unittest.TestCase):
         objects_type = CityMBridges
         objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
-        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True)
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=False)
+        tileset = city_tiler.from_3dcitydb(cursor, objects_type)
+
+        tileset.write_as_json(directory)
+        cursor.close()
+
+    def test_building_color(self):
+
+        directory = Path("tests/city_tiler_test_data/generated_tilesets/building_color")
+        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        objects_type = CityMBuildings
+        objects_type.set_cursor(cursor)
+        city_tiler = CityTiler()
+        city_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, split_surfaces=True, add_color=True)
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(directory)

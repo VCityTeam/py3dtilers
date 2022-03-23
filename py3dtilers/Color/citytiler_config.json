@@ -1,0 +1,15 @@
+{
+    "default_color": [1, 1, 1],
+
+    "color_dict": {
+        "BuildingRoofSurface": "#da7f20",
+        "BuildingWallSurface": [1, 1, 1],
+        "BuildingGroundSurface": [1, 1, 1],
+        "Building": [1, 1, 1],
+        "WaterSurface": "#3d85c6",
+        "WaterBody": "#3d85c6",
+        "Bridge": [0, 0, 0],
+        "ReliefFeature": "#e2ca86",
+        "default": [1, 1, 1]
+    }
+}

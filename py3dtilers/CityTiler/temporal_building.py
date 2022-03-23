@@ -40,7 +40,7 @@ class TemporalBuilding(CityMBuilding):
         # This should be of type date and by default is manipulated as string:
         return self.temporal_id.split('::')[0]
 
-    def get_geom(self, user_arguments=None):
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict):
         """
         Get the geometry of the feature.
         :return: a boolean

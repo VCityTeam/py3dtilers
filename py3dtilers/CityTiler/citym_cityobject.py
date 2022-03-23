@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
 from py3dtiles import TriangleSoup
+import os
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -55,7 +56,7 @@ class CityMCityObject(Feature):
         """
         return self.texture_uri is not None
 
-    def get_geom(self, user_arguments=None):
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
         """
         Set the geometry of the feature.
         :return: a list of Feature
@@ -80,6 +81,13 @@ class CityMCityObject(Feature):
                         texture_uri = t[3]
                         cityobject.texture_uri = texture_uri
                         associated_data = [uv_as_string]
+                    elif user_arguments.add_color:
+                        surface_classname = t[2]
+                        if surface_classname not in material_indexes:
+                            material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                            material_indexes[surface_classname] = len(feature_list.materials)
+                            feature_list.add_materials([material])
+                        cityobject.material_index = material_indexes[surface_classname]
 
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
                     if len(cityobject.geom.triangles[0]) > 0:
@@ -101,6 +109,9 @@ class CityMCityObjects(FeatureList):
     gml_cursor = None
 
     def __init__(self, cityMCityObjects=None):
+        if self.color_config is None:
+            config_path = os.path.join(os.path.dirname(__file__), "..", "Color", "citytiler_config.json")
+            self.set_color_config(config_path)
         super().__init__(cityMCityObjects)
 
     def get_textures(self):
