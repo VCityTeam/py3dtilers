@@ -198,7 +198,7 @@ class Test_Tile(unittest.TestCase):
 
     def test_building_color(self):
 
-        directory = Path("tests/city_tiler_test_data/junk/building_color")
+        directory = Path("tests/city_tiler_test_data/generated_tilesets/building_color")
         cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
         objects_type = CityMBuildings
         objects_type.set_cursor(cursor)
