@@ -1,12 +1,14 @@
 import unittest
 from argparse import Namespace
 from pathlib import Path
+import psycopg2
+import testing.postgresql
 
+from py3dtilers.CityTiler.citym_cityobject import CityMCityObjects
 from py3dtilers.CityTiler.citym_building import CityMBuildings
 from py3dtilers.CityTiler.citym_relief import CityMReliefs
 from py3dtilers.CityTiler.citym_waterbody import CityMWaterBodies
 from py3dtilers.CityTiler.citym_bridge import CityMBridges
-from py3dtilers.CityTiler.database_accesses import open_data_base
 from py3dtilers.CityTiler.CityTiler import CityTiler
 
 
@@ -19,50 +21,62 @@ def get_default_namespace():
 
 class Test_Tile(unittest.TestCase):
 
+    cursor = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.postgresql = testing.postgresql.Postgresql()
+        cls.db = psycopg2.connect(**cls.postgresql.dsn())
+        cls.cursor = cls.db.cursor()
+        with open('tests/city_tiler_test_data/test_data.sql') as f:
+            data = f.read()
+            cls.cursor.execute(data)
+            cls.cursor.execute("ALTER DATABASE " + cls.postgresql.dsn()['database'] + " SET search_path TO public, citydb;")
+            CityMCityObjects.set_cursor(cls.cursor)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.cursor.close()
+        cls.db.close()
+        cls.postgresql.stop()
+
     def test_building_basic_case(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_basic_case")
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_water_basic_case(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMWaterBodies
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/water_basic_case")
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_relief_basic_case(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMReliefs
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/relief_basic_case")
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_lod1(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMReliefs
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_lod1")
@@ -70,13 +84,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_loa(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_loa")
@@ -84,13 +96,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_loa_lod1(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_loa_lod1")
@@ -99,14 +109,12 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_BTH(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
         CityMBuildings.set_bth()
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_BTH")
@@ -114,13 +122,11 @@ class Test_Tile(unittest.TestCase):
 
         tileset.write_as_json(city_tiler.args.output_dir)
         CityMBuildings.with_bth = False
-        cursor.close()
 
     def test_building_split_surface(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_split_surface")
@@ -128,13 +134,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_relief_split_surface(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMReliefs
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/relief_split_surface")
@@ -142,13 +146,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_water_split_surface(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMWaterBodies
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/water_split_surface")
@@ -156,13 +158,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_texture(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_texture")
@@ -170,13 +170,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_relief_texture(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMReliefs
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/relief_texture")
@@ -184,26 +182,22 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_bridge(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBridges
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/bridge_basic_case")
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_bridge_split_surface(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBridges
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/bridge_split_surface")
@@ -211,13 +205,11 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
     def test_building_color(self):
 
-        cursor = open_data_base(Path("tests/city_tiler_test_data/test_config.yml"))
+        cursor = self.cursor
         objects_type = CityMBuildings
-        objects_type.set_cursor(cursor)
         city_tiler = CityTiler()
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_color")
@@ -225,7 +217,6 @@ class Test_Tile(unittest.TestCase):
         tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)
-        cursor.close()
 
 
 if __name__ == '__main__':

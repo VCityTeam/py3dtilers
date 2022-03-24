@@ -41,7 +41,8 @@ dev_requirements = (
     'pytest-cov',
     'autopep8',
     'pytest-flake8',
-    'pdoc3'
+    'pdoc3',
+    'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
 
 prod_requirements = (
