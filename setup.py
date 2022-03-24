@@ -18,6 +18,7 @@ import urllib.request
 here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
+    'wheel',
     'networkx',
     'numpy <1.21,>=1.17',
     'psycopg2',

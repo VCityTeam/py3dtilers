@@ -21,8 +21,6 @@ def get_default_namespace():
 
 class Test_Tile(unittest.TestCase):
 
-    cursor = None
-
     @classmethod
     def setUpClass(cls):
         cls.postgresql = testing.postgresql.Postgresql()
