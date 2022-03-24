@@ -2,8 +2,11 @@ sudo: required
 dist: bionic
 
 addons:
+  postgresql: "9.4"
   apt:
     update: true
+    packages:
+      - postgresql-9.4-postgis-2.4
 
 jobs:
   include:
