@@ -6,7 +6,7 @@ addons:
   apt:
     update: true
     packages:
-      - postgresql-9.4-postgis-2.4
+      - postgresql-9.4-postgis-2.5
 
 jobs:
   include:
