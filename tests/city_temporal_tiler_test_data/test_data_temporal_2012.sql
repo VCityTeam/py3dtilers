@@ -2,24 +2,23 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.17
--- Dumped by pg_dump version 10.17
+-- Dumped from database version 14.2
+-- Dumped by pg_dump version 14.2
 
--- Started on 2021-09-13 14:10:23
+-- Started on 2022-03-24 16:28:00
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 10 (class 2615 OID 409495)
+-- TOC entry 7 (class 2615 OID 31292)
 -- Name: citydb; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -29,7 +28,7 @@ CREATE SCHEMA citydb;
 ALTER SCHEMA citydb OWNER TO postgres;
 
 --
--- TOC entry 9 (class 2615 OID 412008)
+-- TOC entry 8 (class 2615 OID 31293)
 -- Name: citydb_pkg; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -39,58 +38,23 @@ CREATE SCHEMA citydb_pkg;
 ALTER SCHEMA citydb_pkg OWNER TO postgres;
 
 --
--- TOC entry 1 (class 3079 OID 12924)
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- TOC entry 5613 (class 0 OID 0)
--- Dependencies: 1
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
---
--- TOC entry 3 (class 3079 OID 408015)
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
+-- TOC entry 2 (class 3079 OID 31294)
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- TOC entry 5614 (class 0 OID 0)
--- Dependencies: 3
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
-
-
---
--- TOC entry 2 (class 3079 OID 408943)
--- Name: postgis_raster; Type: EXTENSION; Schema: -; Owner: 
+-- TOC entry 3 (class 3079 OID 32325)
+-- Name: postgis_raster; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS postgis_raster WITH SCHEMA public;
 
 
 --
--- TOC entry 5615 (class 0 OID 0)
--- Dependencies: 2
--- Name: EXTENSION postgis_raster; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION postgis_raster IS 'PostGIS raster types and functions';
-
-
---
--- TOC entry 2306 (class 1247 OID 412011)
+-- TOC entry 2363 (class 1247 OID 32884)
 -- Name: index_obj; Type: TYPE; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -107,7 +71,7 @@ CREATE TYPE citydb_pkg.index_obj AS (
 ALTER TYPE citydb_pkg.index_obj OWNER TO postgres;
 
 --
--- TOC entry 1454 (class 1255 OID 411864)
+-- TOC entry 1512 (class 1255 OID 32885)
 -- Name: box2envelope(public.box3d); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -143,7 +107,7 @@ $$;
 ALTER FUNCTION citydb.box2envelope(box public.box3d) OWNER TO postgres;
 
 --
--- TOC entry 1500 (class 1255 OID 411911)
+-- TOC entry 1513 (class 1255 OID 32886)
 -- Name: cleanup_appearances(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -187,7 +151,7 @@ $$;
 ALTER FUNCTION citydb.cleanup_appearances(only_global integer) OWNER TO postgres;
 
 --
--- TOC entry 1501 (class 1255 OID 411912)
+-- TOC entry 1514 (class 1255 OID 32887)
 -- Name: cleanup_schema(); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -227,7 +191,7 @@ $$;
 ALTER FUNCTION citydb.cleanup_schema() OWNER TO postgres;
 
 --
--- TOC entry 1502 (class 1255 OID 411913)
+-- TOC entry 1515 (class 1255 OID 32888)
 -- Name: cleanup_table(text); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -309,7 +273,7 @@ $$;
 ALTER FUNCTION citydb.cleanup_table(tab_name text) OWNER TO postgres;
 
 --
--- TOC entry 1504 (class 1255 OID 411915)
+-- TOC entry 1516 (class 1255 OID 32889)
 -- Name: del_address(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -328,7 +292,7 @@ $$;
 ALTER FUNCTION citydb.del_address(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1503 (class 1255 OID 411914)
+-- TOC entry 1517 (class 1255 OID 32890)
 -- Name: del_address(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -374,7 +338,7 @@ $_$;
 ALTER FUNCTION citydb.del_address(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1506 (class 1255 OID 411917)
+-- TOC entry 1518 (class 1255 OID 32891)
 -- Name: del_appearance(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -393,7 +357,7 @@ $$;
 ALTER FUNCTION citydb.del_appearance(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1505 (class 1255 OID 411916)
+-- TOC entry 1519 (class 1255 OID 32892)
 -- Name: del_appearance(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -470,7 +434,7 @@ $_$;
 ALTER FUNCTION citydb.del_appearance(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1508 (class 1255 OID 411919)
+-- TOC entry 1520 (class 1255 OID 32893)
 -- Name: del_breakline_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -489,7 +453,7 @@ $$;
 ALTER FUNCTION citydb.del_breakline_relief(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1507 (class 1255 OID 411918)
+-- TOC entry 1521 (class 1255 OID 32894)
 -- Name: del_breakline_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -540,7 +504,7 @@ $_$;
 ALTER FUNCTION citydb.del_breakline_relief(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1510 (class 1255 OID 411921)
+-- TOC entry 1522 (class 1255 OID 32895)
 -- Name: del_bridge(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -559,7 +523,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1509 (class 1255 OID 411920)
+-- TOC entry 1523 (class 1255 OID 32896)
 -- Name: del_bridge(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -735,7 +699,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1512 (class 1255 OID 411923)
+-- TOC entry 1524 (class 1255 OID 32897)
 -- Name: del_bridge_constr_element(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -754,7 +718,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_constr_element(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1511 (class 1255 OID 411922)
+-- TOC entry 1525 (class 1255 OID 32898)
 -- Name: del_bridge_constr_element(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -981,7 +945,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_constr_element(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1514 (class 1255 OID 411925)
+-- TOC entry 1526 (class 1255 OID 32899)
 -- Name: del_bridge_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1000,7 +964,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_furniture(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1513 (class 1255 OID 411924)
+-- TOC entry 1527 (class 1255 OID 32900)
 -- Name: del_bridge_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1215,7 +1179,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1516 (class 1255 OID 411927)
+-- TOC entry 1528 (class 1255 OID 32901)
 -- Name: del_bridge_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1234,7 +1198,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_installation(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1515 (class 1255 OID 411926)
+-- TOC entry 1529 (class 1255 OID 32902)
 -- Name: del_bridge_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1466,7 +1430,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_installation(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1518 (class 1255 OID 411929)
+-- TOC entry 1530 (class 1255 OID 32903)
 -- Name: del_bridge_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1485,7 +1449,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_opening(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1517 (class 1255 OID 411928)
+-- TOC entry 1531 (class 1255 OID 32904)
 -- Name: del_bridge_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1732,7 +1696,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_opening(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1520 (class 1255 OID 411931)
+-- TOC entry 1532 (class 1255 OID 32905)
 -- Name: del_bridge_room(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1751,7 +1715,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_room(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1519 (class 1255 OID 411930)
+-- TOC entry 1533 (class 1255 OID 32906)
 -- Name: del_bridge_room(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1843,7 +1807,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_room(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1522 (class 1255 OID 411933)
+-- TOC entry 1534 (class 1255 OID 32907)
 -- Name: del_bridge_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1862,7 +1826,7 @@ $$;
 ALTER FUNCTION citydb.del_bridge_thematic_surface(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1521 (class 1255 OID 411932)
+-- TOC entry 1535 (class 1255 OID 32908)
 -- Name: del_bridge_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1956,7 +1920,7 @@ $_$;
 ALTER FUNCTION citydb.del_bridge_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1524 (class 1255 OID 411935)
+-- TOC entry 1536 (class 1255 OID 32909)
 -- Name: del_building(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -1975,7 +1939,7 @@ $$;
 ALTER FUNCTION citydb.del_building(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1523 (class 1255 OID 411934)
+-- TOC entry 1537 (class 1255 OID 32910)
 -- Name: del_building(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2146,7 +2110,7 @@ $_$;
 ALTER FUNCTION citydb.del_building(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1526 (class 1255 OID 411937)
+-- TOC entry 1538 (class 1255 OID 32911)
 -- Name: del_building_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2165,7 +2129,7 @@ $$;
 ALTER FUNCTION citydb.del_building_furniture(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1525 (class 1255 OID 411936)
+-- TOC entry 1539 (class 1255 OID 32912)
 -- Name: del_building_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2380,7 +2344,7 @@ $_$;
 ALTER FUNCTION citydb.del_building_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1528 (class 1255 OID 411939)
+-- TOC entry 1540 (class 1255 OID 32913)
 -- Name: del_building_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2399,7 +2363,7 @@ $$;
 ALTER FUNCTION citydb.del_building_installation(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1527 (class 1255 OID 411938)
+-- TOC entry 1541 (class 1255 OID 32914)
 -- Name: del_building_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2631,7 +2595,7 @@ $_$;
 ALTER FUNCTION citydb.del_building_installation(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1530 (class 1255 OID 411941)
+-- TOC entry 1542 (class 1255 OID 32915)
 -- Name: del_city_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2650,7 +2614,7 @@ $$;
 ALTER FUNCTION citydb.del_city_furniture(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1529 (class 1255 OID 411940)
+-- TOC entry 1543 (class 1255 OID 32916)
 -- Name: del_city_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2877,7 +2841,7 @@ $_$;
 ALTER FUNCTION citydb.del_city_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1532 (class 1255 OID 411943)
+-- TOC entry 1544 (class 1255 OID 32917)
 -- Name: del_citymodel(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2896,7 +2860,7 @@ $$;
 ALTER FUNCTION citydb.del_citymodel(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1531 (class 1255 OID 411942)
+-- TOC entry 1545 (class 1255 OID 32918)
 -- Name: del_citymodel(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -2986,7 +2950,7 @@ $_$;
 ALTER FUNCTION citydb.del_citymodel(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1534 (class 1255 OID 411946)
+-- TOC entry 1546 (class 1255 OID 32919)
 -- Name: del_cityobject(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3005,7 +2969,7 @@ $$;
 ALTER FUNCTION citydb.del_cityobject(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1533 (class 1255 OID 411944)
+-- TOC entry 1547 (class 1255 OID 32920)
 -- Name: del_cityobject(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3382,7 +3346,7 @@ $_$;
 ALTER FUNCTION citydb.del_cityobject(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1536 (class 1255 OID 411948)
+-- TOC entry 1548 (class 1255 OID 32922)
 -- Name: del_cityobject_genericattrib(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3401,7 +3365,7 @@ $$;
 ALTER FUNCTION citydb.del_cityobject_genericattrib(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1535 (class 1255 OID 411947)
+-- TOC entry 1549 (class 1255 OID 32923)
 -- Name: del_cityobject_genericattrib(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3479,7 +3443,7 @@ $_$;
 ALTER FUNCTION citydb.del_cityobject_genericattrib(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1538 (class 1255 OID 411950)
+-- TOC entry 1550 (class 1255 OID 32924)
 -- Name: del_cityobjectgroup(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3498,7 +3462,7 @@ $$;
 ALTER FUNCTION citydb.del_cityobjectgroup(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1537 (class 1255 OID 411949)
+-- TOC entry 1551 (class 1255 OID 32925)
 -- Name: del_cityobjectgroup(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3596,7 +3560,7 @@ $_$;
 ALTER FUNCTION citydb.del_cityobjectgroup(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1539 (class 1255 OID 411951)
+-- TOC entry 1552 (class 1255 OID 32926)
 -- Name: del_cityobjects_by_lineage(text, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3636,7 +3600,7 @@ $_$;
 ALTER FUNCTION citydb.del_cityobjects_by_lineage(lineage_value text, objectclass_id integer) OWNER TO postgres;
 
 --
--- TOC entry 1541 (class 1255 OID 411953)
+-- TOC entry 1553 (class 1255 OID 32927)
 -- Name: del_external_reference(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3655,7 +3619,7 @@ $$;
 ALTER FUNCTION citydb.del_external_reference(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1540 (class 1255 OID 411952)
+-- TOC entry 1554 (class 1255 OID 32928)
 -- Name: del_external_reference(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3701,7 +3665,7 @@ $_$;
 ALTER FUNCTION citydb.del_external_reference(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1543 (class 1255 OID 411955)
+-- TOC entry 1555 (class 1255 OID 32929)
 -- Name: del_generic_cityobject(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3720,7 +3684,7 @@ $$;
 ALTER FUNCTION citydb.del_generic_cityobject(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1542 (class 1255 OID 411954)
+-- TOC entry 1556 (class 1255 OID 32930)
 -- Name: del_generic_cityobject(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3951,7 +3915,7 @@ $_$;
 ALTER FUNCTION citydb.del_generic_cityobject(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1545 (class 1255 OID 411957)
+-- TOC entry 1557 (class 1255 OID 32931)
 -- Name: del_grid_coverage(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -3970,7 +3934,7 @@ $$;
 ALTER FUNCTION citydb.del_grid_coverage(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1544 (class 1255 OID 411956)
+-- TOC entry 1558 (class 1255 OID 32932)
 -- Name: del_grid_coverage(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4016,7 +3980,7 @@ $_$;
 ALTER FUNCTION citydb.del_grid_coverage(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1547 (class 1255 OID 411959)
+-- TOC entry 1559 (class 1255 OID 32933)
 -- Name: del_implicit_geometry(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4035,7 +3999,7 @@ $$;
 ALTER FUNCTION citydb.del_implicit_geometry(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1546 (class 1255 OID 411958)
+-- TOC entry 1560 (class 1255 OID 32934)
 -- Name: del_implicit_geometry(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4093,7 +4057,7 @@ $_$;
 ALTER FUNCTION citydb.del_implicit_geometry(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1549 (class 1255 OID 411961)
+-- TOC entry 1561 (class 1255 OID 32935)
 -- Name: del_land_use(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4112,7 +4076,7 @@ $$;
 ALTER FUNCTION citydb.del_land_use(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1548 (class 1255 OID 411960)
+-- TOC entry 1562 (class 1255 OID 32936)
 -- Name: del_land_use(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4183,7 +4147,7 @@ $_$;
 ALTER FUNCTION citydb.del_land_use(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1551 (class 1255 OID 411963)
+-- TOC entry 1563 (class 1255 OID 32937)
 -- Name: del_masspoint_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4202,7 +4166,7 @@ $$;
 ALTER FUNCTION citydb.del_masspoint_relief(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1550 (class 1255 OID 411962)
+-- TOC entry 1564 (class 1255 OID 32938)
 -- Name: del_masspoint_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4253,7 +4217,7 @@ $_$;
 ALTER FUNCTION citydb.del_masspoint_relief(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1553 (class 1255 OID 411965)
+-- TOC entry 1565 (class 1255 OID 32939)
 -- Name: del_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4272,7 +4236,7 @@ $$;
 ALTER FUNCTION citydb.del_opening(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1552 (class 1255 OID 411964)
+-- TOC entry 1566 (class 1255 OID 32940)
 -- Name: del_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4519,7 +4483,7 @@ $_$;
 ALTER FUNCTION citydb.del_opening(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1555 (class 1255 OID 411967)
+-- TOC entry 1567 (class 1255 OID 32941)
 -- Name: del_plant_cover(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4538,7 +4502,7 @@ $$;
 ALTER FUNCTION citydb.del_plant_cover(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1554 (class 1255 OID 411966)
+-- TOC entry 1568 (class 1255 OID 32942)
 -- Name: del_plant_cover(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4615,7 +4579,7 @@ $_$;
 ALTER FUNCTION citydb.del_plant_cover(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1557 (class 1255 OID 411969)
+-- TOC entry 1569 (class 1255 OID 32943)
 -- Name: del_raster_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4634,7 +4598,7 @@ $$;
 ALTER FUNCTION citydb.del_raster_relief(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1556 (class 1255 OID 411968)
+-- TOC entry 1570 (class 1255 OID 32944)
 -- Name: del_raster_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4697,7 +4661,7 @@ $_$;
 ALTER FUNCTION citydb.del_raster_relief(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1559 (class 1255 OID 411971)
+-- TOC entry 1571 (class 1255 OID 32945)
 -- Name: del_relief_component(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4716,7 +4680,7 @@ $$;
 ALTER FUNCTION citydb.del_relief_component(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1558 (class 1255 OID 411970)
+-- TOC entry 1572 (class 1255 OID 32946)
 -- Name: del_relief_component(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4801,7 +4765,7 @@ $_$;
 ALTER FUNCTION citydb.del_relief_component(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1561 (class 1255 OID 411973)
+-- TOC entry 1573 (class 1255 OID 32947)
 -- Name: del_relief_feature(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4820,7 +4784,7 @@ $$;
 ALTER FUNCTION citydb.del_relief_feature(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1560 (class 1255 OID 411972)
+-- TOC entry 1574 (class 1255 OID 32948)
 -- Name: del_relief_feature(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4902,7 +4866,7 @@ $_$;
 ALTER FUNCTION citydb.del_relief_feature(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1563 (class 1255 OID 411975)
+-- TOC entry 1575 (class 1255 OID 32949)
 -- Name: del_room(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -4921,7 +4885,7 @@ $$;
 ALTER FUNCTION citydb.del_room(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1562 (class 1255 OID 411974)
+-- TOC entry 1576 (class 1255 OID 32950)
 -- Name: del_room(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5013,7 +4977,7 @@ $_$;
 ALTER FUNCTION citydb.del_room(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1565 (class 1255 OID 411977)
+-- TOC entry 1577 (class 1255 OID 32951)
 -- Name: del_solitary_vegetat_object(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5032,7 +4996,7 @@ $$;
 ALTER FUNCTION citydb.del_solitary_vegetat_object(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1564 (class 1255 OID 411976)
+-- TOC entry 1578 (class 1255 OID 32952)
 -- Name: del_solitary_vegetat_object(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5259,7 +5223,7 @@ $_$;
 ALTER FUNCTION citydb.del_solitary_vegetat_object(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1567 (class 1255 OID 411979)
+-- TOC entry 1579 (class 1255 OID 32953)
 -- Name: del_surface_data(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5278,7 +5242,7 @@ $$;
 ALTER FUNCTION citydb.del_surface_data(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1566 (class 1255 OID 411978)
+-- TOC entry 1580 (class 1255 OID 32954)
 -- Name: del_surface_data(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5340,7 +5304,7 @@ $_$;
 ALTER FUNCTION citydb.del_surface_data(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1569 (class 1255 OID 411981)
+-- TOC entry 1581 (class 1255 OID 32955)
 -- Name: del_surface_geometry(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5359,7 +5323,7 @@ $$;
 ALTER FUNCTION citydb.del_surface_geometry(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1568 (class 1255 OID 411980)
+-- TOC entry 1582 (class 1255 OID 32956)
 -- Name: del_surface_geometry(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5425,7 +5389,7 @@ $_$;
 ALTER FUNCTION citydb.del_surface_geometry(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1571 (class 1255 OID 411983)
+-- TOC entry 1583 (class 1255 OID 32957)
 -- Name: del_tex_image(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5444,7 +5408,7 @@ $$;
 ALTER FUNCTION citydb.del_tex_image(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1570 (class 1255 OID 411982)
+-- TOC entry 1584 (class 1255 OID 32958)
 -- Name: del_tex_image(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5490,7 +5454,7 @@ $_$;
 ALTER FUNCTION citydb.del_tex_image(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1573 (class 1255 OID 411985)
+-- TOC entry 1585 (class 1255 OID 32959)
 -- Name: del_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5509,7 +5473,7 @@ $$;
 ALTER FUNCTION citydb.del_thematic_surface(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1572 (class 1255 OID 411984)
+-- TOC entry 1586 (class 1255 OID 32960)
 -- Name: del_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5603,7 +5567,7 @@ $_$;
 ALTER FUNCTION citydb.del_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1575 (class 1255 OID 411987)
+-- TOC entry 1587 (class 1255 OID 32961)
 -- Name: del_tin_relief(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5622,7 +5586,7 @@ $$;
 ALTER FUNCTION citydb.del_tin_relief(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1574 (class 1255 OID 411986)
+-- TOC entry 1588 (class 1255 OID 32962)
 -- Name: del_tin_relief(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5685,7 +5649,7 @@ $_$;
 ALTER FUNCTION citydb.del_tin_relief(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1577 (class 1255 OID 411989)
+-- TOC entry 1589 (class 1255 OID 32963)
 -- Name: del_traffic_area(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5704,7 +5668,7 @@ $$;
 ALTER FUNCTION citydb.del_traffic_area(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1576 (class 1255 OID 411988)
+-- TOC entry 1590 (class 1255 OID 32964)
 -- Name: del_traffic_area(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5771,7 +5735,7 @@ $_$;
 ALTER FUNCTION citydb.del_traffic_area(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1579 (class 1255 OID 411991)
+-- TOC entry 1591 (class 1255 OID 32965)
 -- Name: del_transportation_complex(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5790,7 +5754,7 @@ $$;
 ALTER FUNCTION citydb.del_transportation_complex(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1578 (class 1255 OID 411990)
+-- TOC entry 1592 (class 1255 OID 32966)
 -- Name: del_transportation_complex(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5868,7 +5832,7 @@ $_$;
 ALTER FUNCTION citydb.del_transportation_complex(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1581 (class 1255 OID 411993)
+-- TOC entry 1593 (class 1255 OID 32967)
 -- Name: del_tunnel(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -5887,7 +5851,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1580 (class 1255 OID 411992)
+-- TOC entry 1594 (class 1255 OID 32968)
 -- Name: del_tunnel(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6011,7 +5975,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1583 (class 1255 OID 411995)
+-- TOC entry 1595 (class 1255 OID 32969)
 -- Name: del_tunnel_furniture(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6030,7 +5994,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel_furniture(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1582 (class 1255 OID 411994)
+-- TOC entry 1596 (class 1255 OID 32970)
 -- Name: del_tunnel_furniture(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6245,7 +6209,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel_furniture(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1585 (class 1255 OID 411997)
+-- TOC entry 1597 (class 1255 OID 32971)
 -- Name: del_tunnel_hollow_space(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6264,7 +6228,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel_hollow_space(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1584 (class 1255 OID 411996)
+-- TOC entry 1598 (class 1255 OID 32972)
 -- Name: del_tunnel_hollow_space(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6356,7 +6320,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel_hollow_space(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1587 (class 1255 OID 411999)
+-- TOC entry 1599 (class 1255 OID 32973)
 -- Name: del_tunnel_installation(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6375,7 +6339,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel_installation(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1586 (class 1255 OID 411998)
+-- TOC entry 1600 (class 1255 OID 32974)
 -- Name: del_tunnel_installation(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6607,7 +6571,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel_installation(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1589 (class 1255 OID 412001)
+-- TOC entry 1601 (class 1255 OID 32975)
 -- Name: del_tunnel_opening(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6626,7 +6590,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel_opening(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1588 (class 1255 OID 412000)
+-- TOC entry 1602 (class 1255 OID 32976)
 -- Name: del_tunnel_opening(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6845,7 +6809,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel_opening(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1591 (class 1255 OID 412003)
+-- TOC entry 1603 (class 1255 OID 32977)
 -- Name: del_tunnel_thematic_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6864,7 +6828,7 @@ $$;
 ALTER FUNCTION citydb.del_tunnel_thematic_surface(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1590 (class 1255 OID 412002)
+-- TOC entry 1604 (class 1255 OID 32978)
 -- Name: del_tunnel_thematic_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6958,7 +6922,7 @@ $_$;
 ALTER FUNCTION citydb.del_tunnel_thematic_surface(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1593 (class 1255 OID 412005)
+-- TOC entry 1605 (class 1255 OID 32979)
 -- Name: del_waterbody(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -6977,7 +6941,7 @@ $$;
 ALTER FUNCTION citydb.del_waterbody(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1592 (class 1255 OID 412004)
+-- TOC entry 1606 (class 1255 OID 32980)
 -- Name: del_waterbody(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7081,7 +7045,7 @@ $_$;
 ALTER FUNCTION citydb.del_waterbody(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1595 (class 1255 OID 412007)
+-- TOC entry 1607 (class 1255 OID 32981)
 -- Name: del_waterboundary_surface(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7100,7 +7064,7 @@ $$;
 ALTER FUNCTION citydb.del_waterboundary_surface(pid integer) OWNER TO postgres;
 
 --
--- TOC entry 1594 (class 1255 OID 412006)
+-- TOC entry 1608 (class 1255 OID 32982)
 -- Name: del_waterboundary_surface(integer[], integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7167,7 +7131,7 @@ $_$;
 ALTER FUNCTION citydb.del_waterboundary_surface(integer[], caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1455 (class 1255 OID 411865)
+-- TOC entry 1609 (class 1255 OID 32983)
 -- Name: env_address(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7194,7 +7158,7 @@ $$;
 ALTER FUNCTION citydb.env_address(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1456 (class 1255 OID 411866)
+-- TOC entry 1610 (class 1255 OID 32984)
 -- Name: env_appearance(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7221,7 +7185,7 @@ $$;
 ALTER FUNCTION citydb.env_appearance(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1457 (class 1255 OID 411867)
+-- TOC entry 1611 (class 1255 OID 32985)
 -- Name: env_breakline_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7257,7 +7221,7 @@ $$;
 ALTER FUNCTION citydb.env_breakline_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1458 (class 1255 OID 411868)
+-- TOC entry 1612 (class 1255 OID 32986)
 -- Name: env_bridge(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7357,7 +7321,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1459 (class 1255 OID 411869)
+-- TOC entry 1613 (class 1255 OID 32987)
 -- Name: env_bridge_constr_element(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7435,7 +7399,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_constr_element(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1460 (class 1255 OID 411870)
+-- TOC entry 1614 (class 1255 OID 32988)
 -- Name: env_bridge_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7474,7 +7438,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1461 (class 1255 OID 411871)
+-- TOC entry 1615 (class 1255 OID 32989)
 -- Name: env_bridge_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7550,7 +7514,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1462 (class 1255 OID 411872)
+-- TOC entry 1616 (class 1255 OID 32990)
 -- Name: env_bridge_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7599,7 +7563,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1463 (class 1255 OID 411873)
+-- TOC entry 1617 (class 1255 OID 32991)
 -- Name: env_bridge_room(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7648,7 +7612,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1464 (class 1255 OID 411874)
+-- TOC entry 1618 (class 1255 OID 32992)
 -- Name: env_bridge_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7694,7 +7658,7 @@ $$;
 ALTER FUNCTION citydb.env_bridge_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1465 (class 1255 OID 411875)
+-- TOC entry 1619 (class 1255 OID 32993)
 -- Name: env_building(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7797,7 +7761,7 @@ $$;
 ALTER FUNCTION citydb.env_building(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1466 (class 1255 OID 411876)
+-- TOC entry 1620 (class 1255 OID 32994)
 -- Name: env_building_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7836,7 +7800,7 @@ $$;
 ALTER FUNCTION citydb.env_building_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1467 (class 1255 OID 411877)
+-- TOC entry 1621 (class 1255 OID 32995)
 -- Name: env_building_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7912,7 +7876,7 @@ $$;
 ALTER FUNCTION citydb.env_building_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1468 (class 1255 OID 411878)
+-- TOC entry 1622 (class 1255 OID 32996)
 -- Name: env_city_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -7990,7 +7954,7 @@ $$;
 ALTER FUNCTION citydb.env_city_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1469 (class 1255 OID 411879)
+-- TOC entry 1623 (class 1255 OID 32997)
 -- Name: env_citymodel(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8010,7 +7974,7 @@ $$;
 ALTER FUNCTION citydb.env_citymodel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1470 (class 1255 OID 411880)
+-- TOC entry 1624 (class 1255 OID 32998)
 -- Name: env_cityobject(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8340,7 +8304,7 @@ $$;
 ALTER FUNCTION citydb.env_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1471 (class 1255 OID 411882)
+-- TOC entry 1625 (class 1255 OID 33000)
 -- Name: env_cityobjectgroup(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8383,7 +8347,7 @@ $$;
 ALTER FUNCTION citydb.env_cityobjectgroup(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1472 (class 1255 OID 411883)
+-- TOC entry 1626 (class 1255 OID 33001)
 -- Name: env_generic_cityobject(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8473,7 +8437,7 @@ $$;
 ALTER FUNCTION citydb.env_generic_cityobject(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1473 (class 1255 OID 411884)
+-- TOC entry 1627 (class 1255 OID 33002)
 -- Name: env_implicit_geometry(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8493,7 +8457,7 @@ $$;
 ALTER FUNCTION citydb.env_implicit_geometry(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1474 (class 1255 OID 411885)
+-- TOC entry 1628 (class 1255 OID 33003)
 -- Name: env_land_use(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8538,7 +8502,7 @@ $$;
 ALTER FUNCTION citydb.env_land_use(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1475 (class 1255 OID 411886)
+-- TOC entry 1629 (class 1255 OID 33004)
 -- Name: env_masspoint_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8571,7 +8535,7 @@ $$;
 ALTER FUNCTION citydb.env_masspoint_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1476 (class 1255 OID 411887)
+-- TOC entry 1630 (class 1255 OID 33005)
 -- Name: env_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8620,7 +8584,7 @@ $$;
 ALTER FUNCTION citydb.env_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1477 (class 1255 OID 411888)
+-- TOC entry 1631 (class 1255 OID 33006)
 -- Name: env_plant_cover(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8674,7 +8638,7 @@ $$;
 ALTER FUNCTION citydb.env_plant_cover(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1478 (class 1255 OID 411889)
+-- TOC entry 1632 (class 1255 OID 33007)
 -- Name: env_raster_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8700,7 +8664,7 @@ $$;
 ALTER FUNCTION citydb.env_raster_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1479 (class 1255 OID 411890)
+-- TOC entry 1633 (class 1255 OID 33008)
 -- Name: env_relief_component(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8753,7 +8717,7 @@ $$;
 ALTER FUNCTION citydb.env_relief_component(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1480 (class 1255 OID 411891)
+-- TOC entry 1634 (class 1255 OID 33009)
 -- Name: env_relief_feature(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8786,7 +8750,7 @@ $$;
 ALTER FUNCTION citydb.env_relief_feature(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1481 (class 1255 OID 411892)
+-- TOC entry 1635 (class 1255 OID 33010)
 -- Name: env_room(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8835,7 +8799,7 @@ $$;
 ALTER FUNCTION citydb.env_room(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1482 (class 1255 OID 411893)
+-- TOC entry 1636 (class 1255 OID 33011)
 -- Name: env_solitary_vegetat_object(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8901,7 +8865,7 @@ $$;
 ALTER FUNCTION citydb.env_solitary_vegetat_object(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1483 (class 1255 OID 411894)
+-- TOC entry 1637 (class 1255 OID 33012)
 -- Name: env_surface_data(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8928,7 +8892,7 @@ $$;
 ALTER FUNCTION citydb.env_surface_data(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1484 (class 1255 OID 411895)
+-- TOC entry 1638 (class 1255 OID 33013)
 -- Name: env_textureparam(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8948,7 +8912,7 @@ $$;
 ALTER FUNCTION citydb.env_textureparam(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1485 (class 1255 OID 411896)
+-- TOC entry 1639 (class 1255 OID 33014)
 -- Name: env_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -8994,7 +8958,7 @@ $$;
 ALTER FUNCTION citydb.env_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1486 (class 1255 OID 411897)
+-- TOC entry 1640 (class 1255 OID 33015)
 -- Name: env_tin_relief(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9027,7 +8991,7 @@ $$;
 ALTER FUNCTION citydb.env_tin_relief(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1487 (class 1255 OID 411898)
+-- TOC entry 1641 (class 1255 OID 33016)
 -- Name: env_traffic_area(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9075,7 +9039,7 @@ $$;
 ALTER FUNCTION citydb.env_traffic_area(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1488 (class 1255 OID 411899)
+-- TOC entry 1642 (class 1255 OID 33017)
 -- Name: env_transportation_complex(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9130,7 +9094,7 @@ $$;
 ALTER FUNCTION citydb.env_transportation_complex(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1489 (class 1255 OID 411900)
+-- TOC entry 1643 (class 1255 OID 33018)
 -- Name: env_tunnel(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9224,7 +9188,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1490 (class 1255 OID 411901)
+-- TOC entry 1644 (class 1255 OID 33019)
 -- Name: env_tunnel_furniture(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9263,7 +9227,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel_furniture(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1491 (class 1255 OID 411902)
+-- TOC entry 1645 (class 1255 OID 33020)
 -- Name: env_tunnel_hollow_space(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9312,7 +9276,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel_hollow_space(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1492 (class 1255 OID 411903)
+-- TOC entry 1646 (class 1255 OID 33021)
 -- Name: env_tunnel_installation(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9388,7 +9352,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel_installation(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1493 (class 1255 OID 411904)
+-- TOC entry 1647 (class 1255 OID 33022)
 -- Name: env_tunnel_opening(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9430,7 +9394,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel_opening(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1494 (class 1255 OID 411905)
+-- TOC entry 1648 (class 1255 OID 33023)
 -- Name: env_tunnel_thematic_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9476,7 +9440,7 @@ $$;
 ALTER FUNCTION citydb.env_tunnel_thematic_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1495 (class 1255 OID 411906)
+-- TOC entry 1649 (class 1255 OID 33024)
 -- Name: env_waterbody(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9537,7 +9501,7 @@ $$;
 ALTER FUNCTION citydb.env_waterbody(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1496 (class 1255 OID 411907)
+-- TOC entry 1650 (class 1255 OID 33025)
 -- Name: env_waterboundary_surface(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9576,7 +9540,7 @@ $$;
 ALTER FUNCTION citydb.env_waterboundary_surface(co_id integer, set_envelope integer, caller integer) OWNER TO postgres;
 
 --
--- TOC entry 1497 (class 1255 OID 411908)
+-- TOC entry 1651 (class 1255 OID 33026)
 -- Name: get_envelope_cityobjects(integer, integer, integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9616,7 +9580,7 @@ $_$;
 ALTER FUNCTION citydb.get_envelope_cityobjects(objclass_id integer, set_envelope integer, only_if_null integer) OWNER TO postgres;
 
 --
--- TOC entry 1498 (class 1255 OID 411909)
+-- TOC entry 1652 (class 1255 OID 33027)
 -- Name: get_envelope_implicit_geometry(integer, public.geometry, character varying); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9683,7 +9647,7 @@ $$;
 ALTER FUNCTION citydb.get_envelope_implicit_geometry(implicit_rep_id integer, ref_pt public.geometry, transform4x4 character varying) OWNER TO postgres;
 
 --
--- TOC entry 1452 (class 1255 OID 411862)
+-- TOC entry 1653 (class 1255 OID 33028)
 -- Name: objectclass_id_to_table_name(integer); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9702,7 +9666,7 @@ $_$;
 ALTER FUNCTION citydb.objectclass_id_to_table_name(class_id integer) OWNER TO postgres;
 
 --
--- TOC entry 1453 (class 1255 OID 411863)
+-- TOC entry 1654 (class 1255 OID 33029)
 -- Name: table_name_to_objectclass_ids(text); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9737,7 +9701,7 @@ $_$;
 ALTER FUNCTION citydb.table_name_to_objectclass_ids(table_name text) OWNER TO postgres;
 
 --
--- TOC entry 1499 (class 1255 OID 411910)
+-- TOC entry 1655 (class 1255 OID 33030)
 -- Name: update_bounds(public.geometry, public.geometry); Type: FUNCTION; Schema: citydb; Owner: postgres
 --
 
@@ -9769,7 +9733,7 @@ $$;
 ALTER FUNCTION citydb.update_bounds(old_box public.geometry, new_box public.geometry) OWNER TO postgres;
 
 --
--- TOC entry 1629 (class 1255 OID 412045)
+-- TOC entry 1656 (class 1255 OID 33031)
 -- Name: change_column_srid(text, text, integer, integer, integer, text, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9834,7 +9798,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.change_column_srid(table_name text, column_name text, dim integer, schema_srid integer, transform integer, geom_type text, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1630 (class 1255 OID 412046)
+-- TOC entry 1657 (class 1255 OID 33032)
 -- Name: change_schema_srid(integer, text, integer, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9876,7 +9840,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.change_schema_srid(schema_srid integer, schema_gml_srs_name text, transform integer, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1627 (class 1255 OID 412043)
+-- TOC entry 1658 (class 1255 OID 33033)
 -- Name: check_srid(integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9901,7 +9865,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.check_srid(srsno integer) OWNER TO postgres;
 
 --
--- TOC entry 1596 (class 1255 OID 412012)
+-- TOC entry 1659 (class 1255 OID 33034)
 -- Name: citydb_version(); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9919,7 +9883,7 @@ $$;
 ALTER FUNCTION citydb_pkg.citydb_version(OUT version text, OUT major_version integer, OUT minor_version integer, OUT minor_revision integer) OWNER TO postgres;
 
 --
--- TOC entry 1611 (class 1255 OID 412027)
+-- TOC entry 1660 (class 1255 OID 33035)
 -- Name: construct_normal(text, text, text, integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9933,7 +9897,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.construct_normal(ind_name text, tab_name text, att_name text, crs integer) OWNER TO postgres;
 
 --
--- TOC entry 1610 (class 1255 OID 412026)
+-- TOC entry 1661 (class 1255 OID 33036)
 -- Name: construct_spatial_2d(text, text, text, integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9947,7 +9911,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.construct_spatial_2d(ind_name text, tab_name text, att_name text, crs integer) OWNER TO postgres;
 
 --
--- TOC entry 1609 (class 1255 OID 412025)
+-- TOC entry 1662 (class 1255 OID 33037)
 -- Name: construct_spatial_3d(text, text, text, integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -9961,7 +9925,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.construct_spatial_3d(ind_name text, tab_name text, att_name text, crs integer) OWNER TO postgres;
 
 --
--- TOC entry 1614 (class 1255 OID 412030)
+-- TOC entry 1663 (class 1255 OID 33038)
 -- Name: create_index(citydb_pkg.index_obj, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10006,7 +9970,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.create_index(idx citydb_pkg.index_obj, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1616 (class 1255 OID 412032)
+-- TOC entry 1664 (class 1255 OID 33039)
 -- Name: create_indexes(integer, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10041,7 +10005,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.create_indexes(idx_type integer, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1622 (class 1255 OID 412038)
+-- TOC entry 1665 (class 1255 OID 33040)
 -- Name: create_normal_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10055,7 +10019,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.create_normal_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1620 (class 1255 OID 412036)
+-- TOC entry 1666 (class 1255 OID 33041)
 -- Name: create_spatial_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10069,7 +10033,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.create_spatial_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1599 (class 1255 OID 412015)
+-- TOC entry 1667 (class 1255 OID 33042)
 -- Name: db_info(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10091,7 +10055,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.db_info(schema_name text, OUT schema_srid integer, OUT schema_gml_srs_name text, OUT versioning text) OWNER TO postgres;
 
 --
--- TOC entry 1600 (class 1255 OID 412016)
+-- TOC entry 1668 (class 1255 OID 33043)
 -- Name: db_metadata(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10121,7 +10085,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.db_metadata(schema_name text, OUT schema_srid integer, OUT schema_gml_srs_name text, OUT coord_ref_sys_name text, OUT coord_ref_sys_kind text, OUT wktext text, OUT versioning text) OWNER TO postgres;
 
 --
--- TOC entry 1615 (class 1255 OID 412031)
+-- TOC entry 1669 (class 1255 OID 33044)
 -- Name: drop_index(citydb_pkg.index_obj, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10151,7 +10115,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.drop_index(idx citydb_pkg.index_obj, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1617 (class 1255 OID 412033)
+-- TOC entry 1670 (class 1255 OID 33045)
 -- Name: drop_indexes(integer, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10186,7 +10150,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.drop_indexes(idx_type integer, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1623 (class 1255 OID 412039)
+-- TOC entry 1671 (class 1255 OID 33046)
 -- Name: drop_normal_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10200,7 +10164,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.drop_normal_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1621 (class 1255 OID 412037)
+-- TOC entry 1672 (class 1255 OID 33047)
 -- Name: drop_spatial_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10214,7 +10178,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.drop_spatial_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1603 (class 1255 OID 412019)
+-- TOC entry 1673 (class 1255 OID 33048)
 -- Name: drop_tmp_tables(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10234,7 +10198,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.drop_tmp_tables(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1624 (class 1255 OID 412040)
+-- TOC entry 1674 (class 1255 OID 33049)
 -- Name: get_index(text, text, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10275,7 +10239,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.get_index(idx_table_name text, idx_column_name text, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1602 (class 1255 OID 412018)
+-- TOC entry 1675 (class 1255 OID 33050)
 -- Name: get_seq_values(text, integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10289,7 +10253,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.get_seq_values(seq_name text, seq_count integer) OWNER TO postgres;
 
 --
--- TOC entry 1612 (class 1255 OID 412028)
+-- TOC entry 1676 (class 1255 OID 33051)
 -- Name: index_status(citydb_pkg.index_obj, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10336,7 +10300,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.index_status(idx citydb_pkg.index_obj, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1613 (class 1255 OID 412029)
+-- TOC entry 1677 (class 1255 OID 33052)
 -- Name: index_status(text, text, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10380,7 +10344,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.index_status(idx_table_name text, idx_column_name text, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1625 (class 1255 OID 412041)
+-- TOC entry 1678 (class 1255 OID 33053)
 -- Name: is_coord_ref_sys_3d(integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10396,7 +10360,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.is_coord_ref_sys_3d(schema_srid integer) OWNER TO postgres;
 
 --
--- TOC entry 1626 (class 1255 OID 412042)
+-- TOC entry 1679 (class 1255 OID 33054)
 -- Name: is_db_coord_ref_sys_3d(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10419,7 +10383,7 @@ $$;
 ALTER FUNCTION citydb_pkg.is_db_coord_ref_sys_3d(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1601 (class 1255 OID 412017)
+-- TOC entry 1680 (class 1255 OID 33055)
 -- Name: min(numeric, numeric); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10433,7 +10397,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.min(a numeric, b numeric) OWNER TO postgres;
 
 --
--- TOC entry 1606 (class 1255 OID 412022)
+-- TOC entry 1681 (class 1255 OID 33056)
 -- Name: set_enabled_fkey(oid, boolean); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10462,7 +10426,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.set_enabled_fkey(fkey_trigger_oid oid, enable boolean) OWNER TO postgres;
 
 --
--- TOC entry 1607 (class 1255 OID 412023)
+-- TOC entry 1682 (class 1255 OID 33057)
 -- Name: set_enabled_geom_fkeys(boolean, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10489,7 +10453,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.set_enabled_geom_fkeys(enable boolean, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1608 (class 1255 OID 412024)
+-- TOC entry 1683 (class 1255 OID 33058)
 -- Name: set_enabled_schema_fkeys(boolean, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10519,7 +10483,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.set_enabled_schema_fkeys(enable boolean, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1604 (class 1255 OID 412020)
+-- TOC entry 1684 (class 1255 OID 33059)
 -- Name: set_fkey_delete_rule(text, text, text, text, text, character, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10549,7 +10513,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.set_fkey_delete_rule(fkey_name text, table_name text, column_name text, ref_table text, ref_column text, on_delete_param character, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1605 (class 1255 OID 412021)
+-- TOC entry 1685 (class 1255 OID 33060)
 -- Name: set_schema_fkeys_delete_rule(character, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10579,7 +10543,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.set_schema_fkeys_delete_rule(on_delete_param character, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1619 (class 1255 OID 412035)
+-- TOC entry 1686 (class 1255 OID 33061)
 -- Name: status_normal_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10611,7 +10575,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.status_normal_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1618 (class 1255 OID 412034)
+-- TOC entry 1687 (class 1255 OID 33062)
 -- Name: status_spatial_indexes(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10643,7 +10607,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.status_spatial_indexes(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1631 (class 1255 OID 412047)
+-- TOC entry 1688 (class 1255 OID 33063)
 -- Name: table_content(text, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10662,7 +10626,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.table_content(table_name text, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1632 (class 1255 OID 412048)
+-- TOC entry 1689 (class 1255 OID 33064)
 -- Name: table_contents(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10708,7 +10672,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.table_contents(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1628 (class 1255 OID 412044)
+-- TOC entry 1690 (class 1255 OID 33065)
 -- Name: transform_or_null(public.geometry, integer); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10728,7 +10692,7 @@ $_$;
 ALTER FUNCTION citydb_pkg.transform_or_null(geom public.geometry, srid integer) OWNER TO postgres;
 
 --
--- TOC entry 1598 (class 1255 OID 412014)
+-- TOC entry 1691 (class 1255 OID 33066)
 -- Name: versioning_db(text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10742,7 +10706,7 @@ $$;
 ALTER FUNCTION citydb_pkg.versioning_db(schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 1597 (class 1255 OID 412013)
+-- TOC entry 1692 (class 1255 OID 33067)
 -- Name: versioning_table(text, text); Type: FUNCTION; Schema: citydb_pkg; Owner: postgres
 --
 
@@ -10756,7 +10720,7 @@ $$;
 ALTER FUNCTION citydb_pkg.versioning_table(table_name text, schema_name text) OWNER TO postgres;
 
 --
--- TOC entry 229 (class 1259 OID 409563)
+-- TOC entry 229 (class 1259 OID 33068)
 -- Name: address_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -10772,10 +10736,10 @@ ALTER TABLE citydb.address_seq OWNER TO postgres;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
--- TOC entry 279 (class 1259 OID 409906)
+-- TOC entry 230 (class 1259 OID 33069)
 -- Name: address; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10798,7 +10762,7 @@ CREATE TABLE citydb.address (
 ALTER TABLE citydb.address OWNER TO postgres;
 
 --
--- TOC entry 273 (class 1259 OID 409863)
+-- TOC entry 231 (class 1259 OID 33075)
 -- Name: address_to_bridge; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10811,7 +10775,7 @@ CREATE TABLE citydb.address_to_bridge (
 ALTER TABLE citydb.address_to_bridge OWNER TO postgres;
 
 --
--- TOC entry 230 (class 1259 OID 409565)
+-- TOC entry 232 (class 1259 OID 33078)
 -- Name: address_to_building; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10824,7 +10788,7 @@ CREATE TABLE citydb.address_to_building (
 ALTER TABLE citydb.address_to_building OWNER TO postgres;
 
 --
--- TOC entry 287 (class 1259 OID 409971)
+-- TOC entry 233 (class 1259 OID 33081)
 -- Name: ade_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -10839,7 +10803,7 @@ CREATE SEQUENCE citydb.ade_seq
 ALTER TABLE citydb.ade_seq OWNER TO postgres;
 
 --
--- TOC entry 291 (class 1259 OID 410371)
+-- TOC entry 234 (class 1259 OID 33082)
 -- Name: ade; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10860,7 +10824,7 @@ CREATE TABLE citydb.ade (
 ALTER TABLE citydb.ade OWNER TO postgres;
 
 --
--- TOC entry 292 (class 1259 OID 410381)
+-- TOC entry 235 (class 1259 OID 33088)
 -- Name: aggregation_info; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10877,7 +10841,7 @@ CREATE TABLE citydb.aggregation_info (
 ALTER TABLE citydb.aggregation_info OWNER TO postgres;
 
 --
--- TOC entry 241 (class 1259 OID 409632)
+-- TOC entry 236 (class 1259 OID 33093)
 -- Name: appear_to_surface_data; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10890,7 +10854,7 @@ CREATE TABLE citydb.appear_to_surface_data (
 ALTER TABLE citydb.appear_to_surface_data OWNER TO postgres;
 
 --
--- TOC entry 238 (class 1259 OID 409620)
+-- TOC entry 237 (class 1259 OID 33096)
 -- Name: appearance_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -10905,7 +10869,7 @@ CREATE SEQUENCE citydb.appearance_seq
 ALTER TABLE citydb.appearance_seq OWNER TO postgres;
 
 --
--- TOC entry 276 (class 1259 OID 409879)
+-- TOC entry 238 (class 1259 OID 33097)
 -- Name: appearance; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10925,7 +10889,7 @@ CREATE TABLE citydb.appearance (
 ALTER TABLE citydb.appearance OWNER TO postgres;
 
 --
--- TOC entry 242 (class 1259 OID 409637)
+-- TOC entry 239 (class 1259 OID 33105)
 -- Name: breakline_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10940,7 +10904,7 @@ CREATE TABLE citydb.breakline_relief (
 ALTER TABLE citydb.breakline_relief OWNER TO postgres;
 
 --
--- TOC entry 265 (class 1259 OID 409805)
+-- TOC entry 240 (class 1259 OID 33110)
 -- Name: bridge; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -10979,7 +10943,7 @@ CREATE TABLE citydb.bridge (
 ALTER TABLE citydb.bridge OWNER TO postgres;
 
 --
--- TOC entry 272 (class 1259 OID 409855)
+-- TOC entry 241 (class 1259 OID 33115)
 -- Name: bridge_constr_element; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11023,7 +10987,7 @@ CREATE TABLE citydb.bridge_constr_element (
 ALTER TABLE citydb.bridge_constr_element OWNER TO postgres;
 
 --
--- TOC entry 266 (class 1259 OID 409813)
+-- TOC entry 242 (class 1259 OID 33120)
 -- Name: bridge_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11048,7 +11012,7 @@ CREATE TABLE citydb.bridge_furniture (
 ALTER TABLE citydb.bridge_furniture OWNER TO postgres;
 
 --
--- TOC entry 267 (class 1259 OID 409821)
+-- TOC entry 243 (class 1259 OID 33125)
 -- Name: bridge_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11084,7 +11048,7 @@ CREATE TABLE citydb.bridge_installation (
 ALTER TABLE citydb.bridge_installation OWNER TO postgres;
 
 --
--- TOC entry 269 (class 1259 OID 409837)
+-- TOC entry 244 (class 1259 OID 33130)
 -- Name: bridge_open_to_them_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11097,7 +11061,7 @@ CREATE TABLE citydb.bridge_open_to_them_srf (
 ALTER TABLE citydb.bridge_open_to_them_srf OWNER TO postgres;
 
 --
--- TOC entry 268 (class 1259 OID 409829)
+-- TOC entry 245 (class 1259 OID 33133)
 -- Name: bridge_opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11119,7 +11083,7 @@ CREATE TABLE citydb.bridge_opening (
 ALTER TABLE citydb.bridge_opening OWNER TO postgres;
 
 --
--- TOC entry 270 (class 1259 OID 409842)
+-- TOC entry 246 (class 1259 OID 33138)
 -- Name: bridge_room; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11141,7 +11105,7 @@ CREATE TABLE citydb.bridge_room (
 ALTER TABLE citydb.bridge_room OWNER TO postgres;
 
 --
--- TOC entry 271 (class 1259 OID 409850)
+-- TOC entry 247 (class 1259 OID 33143)
 -- Name: bridge_thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11161,7 +11125,7 @@ CREATE TABLE citydb.bridge_thematic_surface (
 ALTER TABLE citydb.bridge_thematic_surface OWNER TO postgres;
 
 --
--- TOC entry 231 (class 1259 OID 409570)
+-- TOC entry 248 (class 1259 OID 33146)
 -- Name: building; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11211,7 +11175,7 @@ CREATE TABLE citydb.building (
 ALTER TABLE citydb.building OWNER TO postgres;
 
 --
--- TOC entry 232 (class 1259 OID 409578)
+-- TOC entry 249 (class 1259 OID 33151)
 -- Name: building_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11236,7 +11200,7 @@ CREATE TABLE citydb.building_furniture (
 ALTER TABLE citydb.building_furniture OWNER TO postgres;
 
 --
--- TOC entry 233 (class 1259 OID 409586)
+-- TOC entry 250 (class 1259 OID 33156)
 -- Name: building_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11272,7 +11236,7 @@ CREATE TABLE citydb.building_installation (
 ALTER TABLE citydb.building_installation OWNER TO postgres;
 
 --
--- TOC entry 226 (class 1259 OID 409545)
+-- TOC entry 251 (class 1259 OID 33161)
 -- Name: city_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11315,7 +11279,7 @@ CREATE TABLE citydb.city_furniture (
 ALTER TABLE citydb.city_furniture OWNER TO postgres;
 
 --
--- TOC entry 215 (class 1259 OID 409496)
+-- TOC entry 252 (class 1259 OID 33166)
 -- Name: citymodel_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11330,7 +11294,7 @@ CREATE SEQUENCE citydb.citymodel_seq
 ALTER TABLE citydb.citymodel_seq OWNER TO postgres;
 
 --
--- TOC entry 281 (class 1259 OID 409924)
+-- TOC entry 253 (class 1259 OID 33167)
 -- Name: citymodel; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11354,7 +11318,7 @@ CREATE TABLE citydb.citymodel (
 ALTER TABLE citydb.citymodel OWNER TO postgres;
 
 --
--- TOC entry 216 (class 1259 OID 409498)
+-- TOC entry 254 (class 1259 OID 33173)
 -- Name: cityobject_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11369,7 +11333,7 @@ CREATE SEQUENCE citydb.cityobject_seq
 ALTER TABLE citydb.cityobject_seq OWNER TO postgres;
 
 --
--- TOC entry 275 (class 1259 OID 409870)
+-- TOC entry 255 (class 1259 OID 33174)
 -- Name: cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11397,7 +11361,7 @@ CREATE TABLE citydb.cityobject (
 ALTER TABLE citydb.cityobject OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1259 OID 409553)
+-- TOC entry 256 (class 1259 OID 33180)
 -- Name: cityobject_genericatt_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11412,7 +11376,7 @@ CREATE SEQUENCE citydb.cityobject_genericatt_seq
 ALTER TABLE citydb.cityobject_genericatt_seq OWNER TO postgres;
 
 --
--- TOC entry 282 (class 1259 OID 409933)
+-- TOC entry 257 (class 1259 OID 33181)
 -- Name: cityobject_genericattrib; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11439,7 +11403,7 @@ CREATE TABLE citydb.cityobject_genericattrib (
 ALTER TABLE citydb.cityobject_genericattrib OWNER TO postgres;
 
 --
--- TOC entry 217 (class 1259 OID 409500)
+-- TOC entry 258 (class 1259 OID 33187)
 -- Name: cityobject_member; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11452,7 +11416,7 @@ CREATE TABLE citydb.cityobject_member (
 ALTER TABLE citydb.cityobject_member OWNER TO postgres;
 
 --
--- TOC entry 221 (class 1259 OID 409514)
+-- TOC entry 259 (class 1259 OID 33190)
 -- Name: cityobjectgroup; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11474,7 +11438,7 @@ CREATE TABLE citydb.cityobjectgroup (
 ALTER TABLE citydb.cityobjectgroup OWNER TO postgres;
 
 --
--- TOC entry 223 (class 1259 OID 409527)
+-- TOC entry 260 (class 1259 OID 33195)
 -- Name: database_srs; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11487,7 +11451,7 @@ CREATE TABLE citydb.database_srs (
 ALTER TABLE citydb.database_srs OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1259 OID 409505)
+-- TOC entry 261 (class 1259 OID 33200)
 -- Name: external_ref_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11502,7 +11466,7 @@ CREATE SEQUENCE citydb.external_ref_seq
 ALTER TABLE citydb.external_ref_seq OWNER TO postgres;
 
 --
--- TOC entry 283 (class 1259 OID 409942)
+-- TOC entry 262 (class 1259 OID 33201)
 -- Name: external_reference; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11518,7 +11482,7 @@ CREATE TABLE citydb.external_reference (
 ALTER TABLE citydb.external_reference OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1259 OID 409507)
+-- TOC entry 263 (class 1259 OID 33207)
 -- Name: generalization; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11531,7 +11495,7 @@ CREATE TABLE citydb.generalization (
 ALTER TABLE citydb.generalization OWNER TO postgres;
 
 --
--- TOC entry 228 (class 1259 OID 409555)
+-- TOC entry 264 (class 1259 OID 33210)
 -- Name: generic_cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11580,7 +11544,7 @@ CREATE TABLE citydb.generic_cityobject (
 ALTER TABLE citydb.generic_cityobject OWNER TO postgres;
 
 --
--- TOC entry 274 (class 1259 OID 409868)
+-- TOC entry 265 (class 1259 OID 33215)
 -- Name: grid_coverage_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11595,7 +11559,7 @@ CREATE SEQUENCE citydb.grid_coverage_seq
 ALTER TABLE citydb.grid_coverage_seq OWNER TO postgres;
 
 --
--- TOC entry 285 (class 1259 OID 409960)
+-- TOC entry 266 (class 1259 OID 33216)
 -- Name: grid_coverage; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11608,7 +11572,7 @@ CREATE TABLE citydb.grid_coverage (
 ALTER TABLE citydb.grid_coverage OWNER TO postgres;
 
 --
--- TOC entry 222 (class 1259 OID 409522)
+-- TOC entry 267 (class 1259 OID 33222)
 -- Name: group_to_cityobject; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11622,7 +11586,7 @@ CREATE TABLE citydb.group_to_cityobject (
 ALTER TABLE citydb.group_to_cityobject OWNER TO postgres;
 
 --
--- TOC entry 225 (class 1259 OID 409543)
+-- TOC entry 268 (class 1259 OID 33225)
 -- Name: implicit_geometry_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11637,7 +11601,7 @@ CREATE SEQUENCE citydb.implicit_geometry_seq
 ALTER TABLE citydb.implicit_geometry_seq OWNER TO postgres;
 
 --
--- TOC entry 277 (class 1259 OID 409888)
+-- TOC entry 269 (class 1259 OID 33226)
 -- Name: implicit_geometry; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11654,7 +11618,7 @@ CREATE TABLE citydb.implicit_geometry (
 ALTER TABLE citydb.implicit_geometry OWNER TO postgres;
 
 --
--- TOC entry 295 (class 1259 OID 412051)
+-- TOC entry 270 (class 1259 OID 33232)
 -- Name: index_table; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11667,12 +11631,11 @@ CREATE TABLE citydb.index_table (
 ALTER TABLE citydb.index_table OWNER TO postgres;
 
 --
--- TOC entry 294 (class 1259 OID 412049)
+-- TOC entry 271 (class 1259 OID 33237)
 -- Name: index_table_id_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
 CREATE SEQUENCE citydb.index_table_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -11683,8 +11646,8 @@ CREATE SEQUENCE citydb.index_table_id_seq
 ALTER TABLE citydb.index_table_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5616 (class 0 OID 0)
--- Dependencies: 294
+-- TOC entry 6124 (class 0 OID 0)
+-- Dependencies: 271
 -- Name: index_table_id_seq; Type: SEQUENCE OWNED BY; Schema: citydb; Owner: postgres
 --
 
@@ -11692,7 +11655,7 @@ ALTER SEQUENCE citydb.index_table_id_seq OWNED BY citydb.index_table.id;
 
 
 --
--- TOC entry 250 (class 1259 OID 409700)
+-- TOC entry 272 (class 1259 OID 33239)
 -- Name: land_use; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11716,7 +11679,7 @@ CREATE TABLE citydb.land_use (
 ALTER TABLE citydb.land_use OWNER TO postgres;
 
 --
--- TOC entry 243 (class 1259 OID 409645)
+-- TOC entry 273 (class 1259 OID 33244)
 -- Name: masspoint_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11730,7 +11693,7 @@ CREATE TABLE citydb.masspoint_relief (
 ALTER TABLE citydb.masspoint_relief OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1259 OID 409535)
+-- TOC entry 274 (class 1259 OID 33249)
 -- Name: objectclass; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11749,7 +11712,7 @@ CREATE TABLE citydb.objectclass (
 ALTER TABLE citydb.objectclass OWNER TO postgres;
 
 --
--- TOC entry 234 (class 1259 OID 409594)
+-- TOC entry 275 (class 1259 OID 33254)
 -- Name: opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11771,7 +11734,7 @@ CREATE TABLE citydb.opening (
 ALTER TABLE citydb.opening OWNER TO postgres;
 
 --
--- TOC entry 235 (class 1259 OID 409602)
+-- TOC entry 276 (class 1259 OID 33259)
 -- Name: opening_to_them_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11784,7 +11747,7 @@ CREATE TABLE citydb.opening_to_them_surface (
 ALTER TABLE citydb.opening_to_them_surface OWNER TO postgres;
 
 --
--- TOC entry 251 (class 1259 OID 409708)
+-- TOC entry 277 (class 1259 OID 33262)
 -- Name: plant_cover; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11813,7 +11776,7 @@ CREATE TABLE citydb.plant_cover (
 ALTER TABLE citydb.plant_cover OWNER TO postgres;
 
 --
--- TOC entry 256 (class 1259 OID 409745)
+-- TOC entry 278 (class 1259 OID 33267)
 -- Name: raster_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11828,7 +11791,7 @@ CREATE TABLE citydb.raster_relief (
 ALTER TABLE citydb.raster_relief OWNER TO postgres;
 
 --
--- TOC entry 244 (class 1259 OID 409653)
+-- TOC entry 279 (class 1259 OID 33272)
 -- Name: relief_component; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11844,7 +11807,7 @@ CREATE TABLE citydb.relief_component (
 ALTER TABLE citydb.relief_component OWNER TO postgres;
 
 --
--- TOC entry 245 (class 1259 OID 409662)
+-- TOC entry 280 (class 1259 OID 33278)
 -- Name: relief_feat_to_rel_comp; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11857,7 +11820,7 @@ CREATE TABLE citydb.relief_feat_to_rel_comp (
 ALTER TABLE citydb.relief_feat_to_rel_comp OWNER TO postgres;
 
 --
--- TOC entry 246 (class 1259 OID 409667)
+-- TOC entry 281 (class 1259 OID 33281)
 -- Name: relief_feature; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11872,7 +11835,7 @@ CREATE TABLE citydb.relief_feature (
 ALTER TABLE citydb.relief_feature OWNER TO postgres;
 
 --
--- TOC entry 236 (class 1259 OID 409607)
+-- TOC entry 282 (class 1259 OID 33287)
 -- Name: room; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11894,7 +11857,7 @@ CREATE TABLE citydb.room (
 ALTER TABLE citydb.room OWNER TO postgres;
 
 --
--- TOC entry 286 (class 1259 OID 409969)
+-- TOC entry 283 (class 1259 OID 33292)
 -- Name: schema_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -11909,7 +11872,7 @@ CREATE SEQUENCE citydb.schema_seq
 ALTER TABLE citydb.schema_seq OWNER TO postgres;
 
 --
--- TOC entry 288 (class 1259 OID 410325)
+-- TOC entry 284 (class 1259 OID 33293)
 -- Name: schema; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11929,7 +11892,7 @@ CREATE TABLE citydb.schema (
 ALTER TABLE citydb.schema OWNER TO postgres;
 
 --
--- TOC entry 290 (class 1259 OID 410342)
+-- TOC entry 285 (class 1259 OID 33299)
 -- Name: schema_referencing; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11942,7 +11905,7 @@ CREATE TABLE citydb.schema_referencing (
 ALTER TABLE citydb.schema_referencing OWNER TO postgres;
 
 --
--- TOC entry 289 (class 1259 OID 410334)
+-- TOC entry 286 (class 1259 OID 33302)
 -- Name: schema_to_objectclass; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -11955,7 +11918,7 @@ CREATE TABLE citydb.schema_to_objectclass (
 ALTER TABLE citydb.schema_to_objectclass OWNER TO postgres;
 
 --
--- TOC entry 252 (class 1259 OID 409716)
+-- TOC entry 287 (class 1259 OID 33305)
 -- Name: solitary_vegetat_object; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12002,7 +11965,7 @@ CREATE TABLE citydb.solitary_vegetat_object (
 ALTER TABLE citydb.solitary_vegetat_object OWNER TO postgres;
 
 --
--- TOC entry 239 (class 1259 OID 409622)
+-- TOC entry 288 (class 1259 OID 33313)
 -- Name: surface_data_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -12017,7 +11980,7 @@ CREATE SEQUENCE citydb.surface_data_seq
 ALTER TABLE citydb.surface_data_seq OWNER TO postgres;
 
 --
--- TOC entry 280 (class 1259 OID 409915)
+-- TOC entry 289 (class 1259 OID 33317)
 -- Name: surface_data; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12050,7 +12013,7 @@ CREATE TABLE citydb.surface_data (
 ALTER TABLE citydb.surface_data OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1259 OID 409512)
+-- TOC entry 290 (class 1259 OID 33323)
 -- Name: surface_geometry_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -12065,7 +12028,7 @@ CREATE SEQUENCE citydb.surface_geometry_seq
 ALTER TABLE citydb.surface_geometry_seq OWNER TO postgres;
 
 --
--- TOC entry 278 (class 1259 OID 409897)
+-- TOC entry 291 (class 1259 OID 33324)
 -- Name: surface_geometry; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12090,7 +12053,7 @@ CREATE TABLE citydb.surface_geometry (
 ALTER TABLE citydb.surface_geometry OWNER TO postgres;
 
 --
--- TOC entry 261 (class 1259 OID 409779)
+-- TOC entry 292 (class 1259 OID 33330)
 -- Name: tex_image_seq; Type: SEQUENCE; Schema: citydb; Owner: postgres
 --
 
@@ -12105,7 +12068,7 @@ CREATE SEQUENCE citydb.tex_image_seq
 ALTER TABLE citydb.tex_image_seq OWNER TO postgres;
 
 --
--- TOC entry 284 (class 1259 OID 409951)
+-- TOC entry 293 (class 1259 OID 33331)
 -- Name: tex_image; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12121,7 +12084,7 @@ CREATE TABLE citydb.tex_image (
 ALTER TABLE citydb.tex_image OWNER TO postgres;
 
 --
--- TOC entry 240 (class 1259 OID 409624)
+-- TOC entry 294 (class 1259 OID 33337)
 -- Name: textureparam; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12137,7 +12100,7 @@ CREATE TABLE citydb.textureparam (
 ALTER TABLE citydb.textureparam OWNER TO postgres;
 
 --
--- TOC entry 237 (class 1259 OID 409615)
+-- TOC entry 295 (class 1259 OID 33342)
 -- Name: thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12156,7 +12119,7 @@ CREATE TABLE citydb.thematic_surface (
 ALTER TABLE citydb.thematic_surface OWNER TO postgres;
 
 --
--- TOC entry 247 (class 1259 OID 409676)
+-- TOC entry 296 (class 1259 OID 33345)
 -- Name: tin_relief; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12175,7 +12138,7 @@ CREATE TABLE citydb.tin_relief (
 ALTER TABLE citydb.tin_relief OWNER TO postgres;
 
 --
--- TOC entry 249 (class 1259 OID 409692)
+-- TOC entry 297 (class 1259 OID 33350)
 -- Name: traffic_area; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12200,7 +12163,7 @@ CREATE TABLE citydb.traffic_area (
 ALTER TABLE citydb.traffic_area OWNER TO postgres;
 
 --
--- TOC entry 248 (class 1259 OID 409684)
+-- TOC entry 298 (class 1259 OID 33355)
 -- Name: transportation_complex; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12224,7 +12187,7 @@ CREATE TABLE citydb.transportation_complex (
 ALTER TABLE citydb.transportation_complex OWNER TO postgres;
 
 --
--- TOC entry 257 (class 1259 OID 409753)
+-- TOC entry 299 (class 1259 OID 33360)
 -- Name: tunnel; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12262,7 +12225,7 @@ CREATE TABLE citydb.tunnel (
 ALTER TABLE citydb.tunnel OWNER TO postgres;
 
 --
--- TOC entry 264 (class 1259 OID 409797)
+-- TOC entry 300 (class 1259 OID 33365)
 -- Name: tunnel_furniture; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12287,7 +12250,7 @@ CREATE TABLE citydb.tunnel_furniture (
 ALTER TABLE citydb.tunnel_furniture OWNER TO postgres;
 
 --
--- TOC entry 259 (class 1259 OID 409766)
+-- TOC entry 301 (class 1259 OID 33370)
 -- Name: tunnel_hollow_space; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12309,7 +12272,7 @@ CREATE TABLE citydb.tunnel_hollow_space (
 ALTER TABLE citydb.tunnel_hollow_space OWNER TO postgres;
 
 --
--- TOC entry 263 (class 1259 OID 409789)
+-- TOC entry 302 (class 1259 OID 33375)
 -- Name: tunnel_installation; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12345,7 +12308,7 @@ CREATE TABLE citydb.tunnel_installation (
 ALTER TABLE citydb.tunnel_installation OWNER TO postgres;
 
 --
--- TOC entry 258 (class 1259 OID 409761)
+-- TOC entry 303 (class 1259 OID 33380)
 -- Name: tunnel_open_to_them_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12358,7 +12321,7 @@ CREATE TABLE citydb.tunnel_open_to_them_srf (
 ALTER TABLE citydb.tunnel_open_to_them_srf OWNER TO postgres;
 
 --
--- TOC entry 262 (class 1259 OID 409781)
+-- TOC entry 304 (class 1259 OID 33383)
 -- Name: tunnel_opening; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12379,7 +12342,7 @@ CREATE TABLE citydb.tunnel_opening (
 ALTER TABLE citydb.tunnel_opening OWNER TO postgres;
 
 --
--- TOC entry 260 (class 1259 OID 409774)
+-- TOC entry 305 (class 1259 OID 33388)
 -- Name: tunnel_thematic_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12398,7 +12361,7 @@ CREATE TABLE citydb.tunnel_thematic_surface (
 ALTER TABLE citydb.tunnel_thematic_surface OWNER TO postgres;
 
 --
--- TOC entry 254 (class 1259 OID 409732)
+-- TOC entry 306 (class 1259 OID 33391)
 -- Name: waterbod_to_waterbnd_srf; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12411,7 +12374,7 @@ CREATE TABLE citydb.waterbod_to_waterbnd_srf (
 ALTER TABLE citydb.waterbod_to_waterbnd_srf OWNER TO postgres;
 
 --
--- TOC entry 253 (class 1259 OID 409724)
+-- TOC entry 307 (class 1259 OID 33394)
 -- Name: waterbody; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12438,7 +12401,7 @@ CREATE TABLE citydb.waterbody (
 ALTER TABLE citydb.waterbody OWNER TO postgres;
 
 --
--- TOC entry 255 (class 1259 OID 409737)
+-- TOC entry 308 (class 1259 OID 33399)
 -- Name: waterboundary_surface; Type: TABLE; Schema: citydb; Owner: postgres
 --
 
@@ -12456,7 +12419,7 @@ CREATE TABLE citydb.waterboundary_surface (
 ALTER TABLE citydb.waterboundary_surface OWNER TO postgres;
 
 --
--- TOC entry 4588 (class 2604 OID 412054)
+-- TOC entry 5075 (class 2604 OID 33404)
 -- Name: index_table id; Type: DEFAULT; Schema: citydb; Owner: postgres
 --
 
@@ -12464,1016 +12427,882 @@ ALTER TABLE ONLY citydb.index_table ALTER COLUMN id SET DEFAULT nextval('citydb.
 
 
 --
--- TOC entry 5590 (class 0 OID 409906)
--- Dependencies: 279
+-- TOC entry 6040 (class 0 OID 33069)
+-- Dependencies: 230
 -- Data for Name: address; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address (id, gmlid, gmlid_codespace, street, house_number, po_box, zip_code, city, state, country, multi_point, xal_source) FROM stdin;
-\.
 
 
 --
--- TOC entry 5584 (class 0 OID 409863)
--- Dependencies: 273
+-- TOC entry 6041 (class 0 OID 33075)
+-- Dependencies: 231
 -- Data for Name: address_to_bridge; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address_to_bridge (bridge_id, address_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5541 (class 0 OID 409565)
--- Dependencies: 230
+-- TOC entry 6042 (class 0 OID 33078)
+-- Dependencies: 232
 -- Data for Name: address_to_building; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.address_to_building (building_id, address_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5602 (class 0 OID 410371)
--- Dependencies: 291
+-- TOC entry 6044 (class 0 OID 33082)
+-- Dependencies: 234
 -- Data for Name: ade; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.ade (id, adeid, name, description, version, db_prefix, xml_schemamapping_file, drop_db_script, creation_date, creation_person) FROM stdin;
-\.
 
 
 --
--- TOC entry 5603 (class 0 OID 410381)
--- Dependencies: 292
+-- TOC entry 6045 (class 0 OID 33088)
+-- Dependencies: 235
 -- Data for Name: aggregation_info; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) FROM stdin;
-3	57	cityobject_member	0	\N	0
-110	3	cityobject_id	0	\N	1
-106	108	root_id	0	\N	1
-106	108	parent_id	0	\N	1
-106	59	relative_brep_id	0	1	1
-50	57	citymodel_id	0	\N	1
-50	3	cityobject_id	0	\N	1
-51	50	appear_to_surface_data	0	\N	0
-109	51	tex_image_id	0	1	0
-3	23	group_to_cityobject	0	\N	0
-106	23	brep_id	0	1	1
-59	21	lod1_implicit_rep_id	0	1	0
-59	21	lod2_implicit_rep_id	0	1	0
-59	21	lod3_implicit_rep_id	0	1	0
-59	21	lod4_implicit_rep_id	0	1	0
-106	21	lod1_brep_id	0	1	1
-106	21	lod2_brep_id	0	1	1
-106	21	lod3_brep_id	0	1	1
-106	21	lod4_brep_id	0	1	1
-112	113	parent_genattrib_id	0	\N	1
-112	113	root_genattrib_id	0	\N	1
-112	3	cityobject_id	0	\N	1
-106	112	surface_geometry_id	0	1	1
-106	5	lod0_brep_id	0	1	1
-106	5	lod1_brep_id	0	1	1
-106	5	lod2_brep_id	0	1	1
-106	5	lod3_brep_id	0	1	1
-106	5	lod4_brep_id	0	1	1
-59	5	lod0_implicit_rep_id	0	1	0
-59	5	lod1_implicit_rep_id	0	1	0
-59	5	lod2_implicit_rep_id	0	1	0
-59	5	lod3_implicit_rep_id	0	1	0
-59	5	lod4_implicit_rep_id	0	1	0
-106	4	lod0_multi_surface_id	0	1	1
-106	4	lod1_multi_surface_id	0	1	1
-106	4	lod2_multi_surface_id	0	1	1
-106	4	lod3_multi_surface_id	0	1	1
-106	4	lod4_multi_surface_id	0	1	1
-15	14	relief_feat_to_rel_comp	0	\N	0
-106	16	surface_geometry_id	0	1	1
-111	19	coverage_id	0	1	1
-47	42	transportation_complex_id	0	\N	1
-106	47	lod2_multi_surface_id	0	1	1
-106	47	lod3_multi_surface_id	0	1	1
-106	47	lod4_multi_surface_id	0	1	1
-106	42	lod1_multi_surface_id	0	1	1
-106	42	lod2_multi_surface_id	0	1	1
-106	42	lod3_multi_surface_id	0	1	1
-106	42	lod4_multi_surface_id	0	1	1
-106	7	lod1_brep_id	0	1	1
-106	7	lod2_brep_id	0	1	1
-106	7	lod3_brep_id	0	1	1
-106	7	lod4_brep_id	0	1	1
-59	7	lod1_implicit_rep_id	0	1	0
-59	7	lod2_implicit_rep_id	0	1	0
-59	7	lod3_implicit_rep_id	0	1	0
-59	7	lod4_implicit_rep_id	0	1	0
-106	8	lod1_multi_surface_id	0	1	1
-106	8	lod2_multi_surface_id	0	1	1
-106	8	lod3_multi_surface_id	0	1	1
-106	8	lod4_multi_surface_id	0	1	1
-106	8	lod1_multi_solid_id	0	1	1
-106	8	lod2_multi_solid_id	0	1	1
-106	8	lod3_multi_solid_id	0	1	1
-106	8	lod4_multi_solid_id	0	1	1
-10	9	waterbod_to_waterbnd_srf	0	\N	0
-106	9	lod0_multi_surface_id	0	1	1
-106	9	lod1_multi_surface_id	0	1	1
-106	9	lod1_solid_id	0	1	1
-106	9	lod2_solid_id	0	1	1
-106	9	lod3_solid_id	0	1	1
-106	9	lod4_solid_id	0	1	1
-106	10	lod2_surface_id	0	1	1
-106	10	lod3_surface_id	0	1	1
-106	10	lod4_surface_id	0	1	1
-58	62	address_to_bridge	0	\N	0
-58	77	address_id	0	1	0
-63	62	bridge_parent_id	0	\N	1
-63	64	bridge_root_id	0	\N	1
-82	62	bridge_id	0	\N	1
-80	81	bridge_room_id	0	\N	1
-66	81	bridge_room_id	0	\N	1
-65	62	bridge_id	0	\N	1
-77	67	bridge_open_to_them_srf	0	\N	1
-81	62	bridge_id	0	\N	1
-67	81	bridge_room_id	0	\N	1
-67	62	bridge_id	0	\N	1
-67	65	bridge_installation_id	0	\N	1
-106	62	lod1_multi_surface_id	0	1	1
-106	62	lod2_multi_surface_id	0	1	1
-106	62	lod3_multi_surface_id	0	1	1
-106	62	lod4_multi_surface_id	0	1	1
-106	62	lod1_solid_id	0	1	1
-106	62	lod2_solid_id	0	1	1
-106	62	lod3_solid_id	0	1	1
-106	62	lod4_solid_id	0	1	1
-106	80	lod4_brep_id	0	1	1
-106	65	lod2_brep_id	0	1	1
-106	65	lod3_brep_id	0	1	1
-106	65	lod4_brep_id	0	1	1
-106	66	lod4_brep_id	0	1	1
-106	77	lod3_multi_surface_id	0	1	1
-106	77	lod4_multi_surface_id	0	1	1
-106	67	lod2_multi_surface_id	0	1	1
-106	67	lod3_multi_surface_id	0	1	1
-106	67	lod4_multi_surface_id	0	1	1
-106	81	lod4_multi_surface_id	0	1	1
-106	81	lod4_solid_id	0	1	1
-106	82	lod1_brep_id	0	1	1
-106	82	lod2_brep_id	0	1	1
-106	82	lod3_brep_id	0	1	1
-106	82	lod4_brep_id	0	1	1
-59	80	lod4_implicit_rep_id	0	1	0
-59	65	lod2_implicit_rep_id	0	1	0
-59	65	lod3_implicit_rep_id	0	1	0
-59	65	lod4_implicit_rep_id	0	1	0
-59	66	lod4_implicit_rep_id	0	1	0
-59	77	lod3_implicit_rep_id	0	1	0
-59	77	lod4_implicit_rep_id	0	1	0
-59	82	lod1_implicit_rep_id	0	1	0
-59	82	lod2_implicit_rep_id	0	1	0
-59	82	lod3_implicit_rep_id	0	1	0
-59	82	lod4_implicit_rep_id	0	1	0
-58	24	address_to_building	0	\N	0
-58	37	address_id	0	1	0
-25	24	building_parent_id	0	\N	1
-25	26	building_root_id	0	\N	1
-40	41	room_id	0	\N	1
-28	41	room_id	0	\N	1
-27	24	building_id	0	\N	1
-37	29	opening_to_them_surface	0	\N	1
-41	24	building_id	0	\N	1
-29	41	room_id	0	\N	1
-29	27	building_installation_id	0	\N	1
-29	24	building_id	0	\N	1
-106	24	lod0_footprint_id	0	1	1
-106	24	lod0_roofprint_id	0	1	1
-106	24	lod1_multi_surface_id	0	1	1
-106	24	lod2_multi_surface_id	0	1	1
-106	24	lod3_multi_surface_id	0	1	1
-106	24	lod4_multi_surface_id	0	1	1
-106	24	lod1_solid_id	0	1	1
-106	24	lod2_solid_id	0	1	1
-106	24	lod3_solid_id	0	1	1
-106	24	lod4_solid_id	0	1	1
-106	40	lod4_brep_id	0	1	1
-106	27	lod2_brep_id	0	1	1
-106	27	lod3_brep_id	0	1	1
-106	27	lod4_brep_id	0	1	1
-106	28	lod4_brep_id	0	1	1
-106	37	lod3_multi_surface_id	0	1	1
-106	37	lod4_multi_surface_id	0	1	1
-106	29	lod2_multi_surface_id	0	1	1
-106	29	lod3_multi_surface_id	0	1	1
-106	29	lod4_multi_surface_id	0	1	1
-106	41	lod4_multi_surface_id	0	1	1
-106	41	lod4_solid_id	0	1	1
-59	40	lod4_implicit_rep_id	0	1	0
-59	27	lod2_implicit_rep_id	0	1	0
-59	27	lod3_implicit_rep_id	0	1	0
-59	27	lod4_implicit_rep_id	0	1	0
-59	28	lod4_implicit_rep_id	0	1	0
-59	37	lod3_implicit_rep_id	0	1	0
-59	37	lod4_implicit_rep_id	0	1	0
-84	83	tunnel_parent_id	0	\N	1
-84	85	tunnel_root_id	0	\N	1
-101	102	tunnel_hollow_space_id	0	\N	1
-87	102	tunnel_hollow_space_id	0	\N	1
-86	83	tunnel_id	0	\N	1
-98	88	tunnel_open_to_them_srf	0	\N	1
-102	83	tunnel_id	0	\N	1
-88	102	tunnel_hollow_space_id	0	\N	1
-88	83	tunnel_id	0	\N	1
-88	86	tunnel_installation_id	0	\N	1
-106	83	lod1_multi_surface_id	0	1	1
-106	83	lod2_multi_surface_id	0	1	1
-106	83	lod3_multi_surface_id	0	1	1
-106	83	lod4_multi_surface_id	0	1	1
-106	83	lod1_solid_id	0	1	1
-106	83	lod2_solid_id	0	1	1
-106	83	lod3_solid_id	0	1	1
-106	83	lod4_solid_id	0	1	1
-106	101	lod4_brep_id	0	1	1
-106	86	lod2_brep_id	0	1	1
-106	86	lod3_brep_id	0	1	1
-106	86	lod4_brep_id	0	1	1
-106	87	lod4_brep_id	0	1	1
-106	98	lod3_multi_surface_id	0	1	1
-106	98	lod4_multi_surface_id	0	1	1
-106	88	lod2_multi_surface_id	0	1	1
-106	88	lod3_multi_surface_id	0	1	1
-106	88	lod4_multi_surface_id	0	1	1
-106	102	lod4_multi_surface_id	0	1	1
-106	102	lod4_solid_id	0	1	1
-59	101	lod4_implicit_rep_id	0	1	0
-59	86	lod2_implicit_rep_id	0	1	0
-59	86	lod3_implicit_rep_id	0	1	0
-59	86	lod4_implicit_rep_id	0	1	0
-59	87	lod4_implicit_rep_id	0	1	0
-59	98	lod3_implicit_rep_id	0	1	0
-59	98	lod4_implicit_rep_id	0	1	0
-\.
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (3, 57, 'cityobject_member', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (110, 3, 'cityobject_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 108, 'root_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 108, 'parent_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 59, 'relative_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (50, 57, 'citymodel_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (50, 3, 'cityobject_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (51, 50, 'appear_to_surface_data', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (109, 51, 'tex_image_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (3, 23, 'group_to_cityobject', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 23, 'brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 21, 'lod1_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 21, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 21, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 21, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 21, 'lod1_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 21, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 21, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 21, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (112, 113, 'parent_genattrib_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (112, 113, 'root_genattrib_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (112, 3, 'cityobject_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 112, 'surface_geometry_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 5, 'lod0_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 5, 'lod1_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 5, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 5, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 5, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 5, 'lod0_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 5, 'lod1_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 5, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 5, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 5, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 4, 'lod0_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 4, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 4, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 4, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 4, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (15, 14, 'relief_feat_to_rel_comp', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 16, 'surface_geometry_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (111, 19, 'coverage_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (47, 42, 'transportation_complex_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 47, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 47, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 47, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 42, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 42, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 42, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 42, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 7, 'lod1_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 7, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 7, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 7, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 7, 'lod1_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 7, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 7, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 7, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod1_multi_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod2_multi_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod3_multi_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 8, 'lod4_multi_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (10, 9, 'waterbod_to_waterbnd_srf', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod0_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod1_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod2_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod3_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 9, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 10, 'lod2_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 10, 'lod3_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 10, 'lod4_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (58, 62, 'address_to_bridge', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (58, 77, 'address_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (63, 62, 'bridge_parent_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (63, 64, 'bridge_root_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (82, 62, 'bridge_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (80, 81, 'bridge_room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (66, 81, 'bridge_room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (65, 62, 'bridge_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (77, 67, 'bridge_open_to_them_srf', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (81, 62, 'bridge_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (67, 81, 'bridge_room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (67, 62, 'bridge_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (67, 65, 'bridge_installation_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod1_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod2_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod3_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 62, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 80, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 65, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 65, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 65, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 66, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 77, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 77, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 67, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 67, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 67, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 81, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 81, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 82, 'lod1_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 82, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 82, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 82, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 80, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 65, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 65, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 65, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 66, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 77, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 77, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 82, 'lod1_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 82, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 82, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 82, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (58, 24, 'address_to_building', 0, NULL, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (58, 37, 'address_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (25, 24, 'building_parent_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (25, 26, 'building_root_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (40, 41, 'room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (28, 41, 'room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (27, 24, 'building_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (37, 29, 'opening_to_them_surface', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (41, 24, 'building_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (29, 41, 'room_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (29, 27, 'building_installation_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (29, 24, 'building_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod0_footprint_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod0_roofprint_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod1_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod2_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod3_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 24, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 40, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 27, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 27, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 27, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 28, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 37, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 37, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 29, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 29, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 29, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 41, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 41, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 40, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 27, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 27, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 27, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 28, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 37, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 37, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (84, 83, 'tunnel_parent_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (84, 85, 'tunnel_root_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (101, 102, 'tunnel_hollow_space_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (87, 102, 'tunnel_hollow_space_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (86, 83, 'tunnel_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (98, 88, 'tunnel_open_to_them_srf', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (102, 83, 'tunnel_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (88, 102, 'tunnel_hollow_space_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (88, 83, 'tunnel_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (88, 86, 'tunnel_installation_id', 0, NULL, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod1_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod1_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod2_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod3_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 83, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 101, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 86, 'lod2_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 86, 'lod3_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 86, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 87, 'lod4_brep_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 98, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 98, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 88, 'lod2_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 88, 'lod3_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 88, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 102, 'lod4_multi_surface_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (106, 102, 'lod4_solid_id', 0, 1, 1);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 101, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 86, 'lod2_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 86, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 86, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 87, 'lod4_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 98, 'lod3_implicit_rep_id', 0, 1, 0);
+INSERT INTO citydb.aggregation_info (child_id, parent_id, join_table_or_column_name, min_occurs, max_occurs, is_composite) VALUES (59, 98, 'lod4_implicit_rep_id', 0, 1, 0);
 
 
 --
--- TOC entry 5552 (class 0 OID 409632)
--- Dependencies: 241
+-- TOC entry 6046 (class 0 OID 33093)
+-- Dependencies: 236
 -- Data for Name: appear_to_surface_data; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.appear_to_surface_data (surface_data_id, appearance_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5587 (class 0 OID 409879)
--- Dependencies: 276
+-- TOC entry 6048 (class 0 OID 33097)
+-- Dependencies: 238
 -- Data for Name: appearance; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.appearance (id, gmlid, gmlid_codespace, name, name_codespace, description, theme, citymodel_id, cityobject_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5553 (class 0 OID 409637)
--- Dependencies: 242
+-- TOC entry 6049 (class 0 OID 33105)
+-- Dependencies: 239
 -- Data for Name: breakline_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.breakline_relief (id, objectclass_id, ridge_or_valley_lines, break_lines) FROM stdin;
-\.
 
 
 --
--- TOC entry 5576 (class 0 OID 409805)
--- Dependencies: 265
+-- TOC entry 6050 (class 0 OID 33110)
+-- Dependencies: 240
 -- Data for Name: bridge; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge (id, objectclass_id, bridge_parent_id, bridge_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, is_movable, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5583 (class 0 OID 409855)
--- Dependencies: 272
+-- TOC entry 6051 (class 0 OID 33115)
+-- Dependencies: 241
 -- Data for Name: bridge_constr_element; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_constr_element (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5577 (class 0 OID 409813)
--- Dependencies: 266
+-- TOC entry 6052 (class 0 OID 33120)
+-- Dependencies: 242
 -- Data for Name: bridge_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5578 (class 0 OID 409821)
--- Dependencies: 267
+-- TOC entry 6053 (class 0 OID 33125)
+-- Dependencies: 243
 -- Data for Name: bridge_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, bridge_room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5580 (class 0 OID 409837)
--- Dependencies: 269
+-- TOC entry 6054 (class 0 OID 33130)
+-- Dependencies: 244
 -- Data for Name: bridge_open_to_them_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_open_to_them_srf (bridge_opening_id, bridge_thematic_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5579 (class 0 OID 409829)
--- Dependencies: 268
+-- TOC entry 6055 (class 0 OID 33133)
+-- Dependencies: 245
 -- Data for Name: bridge_opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5581 (class 0 OID 409842)
--- Dependencies: 270
+-- TOC entry 6056 (class 0 OID 33138)
+-- Dependencies: 246
 -- Data for Name: bridge_room; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, bridge_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5582 (class 0 OID 409850)
--- Dependencies: 271
+-- TOC entry 6057 (class 0 OID 33143)
+-- Dependencies: 247
 -- Data for Name: bridge_thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.bridge_thematic_surface (id, objectclass_id, bridge_id, bridge_room_id, bridge_installation_id, bridge_constr_element_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5542 (class 0 OID 409570)
--- Dependencies: 231
+-- TOC entry 6058 (class 0 OID 33146)
+-- Dependencies: 248
 -- Data for Name: building; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building (id, objectclass_id, building_parent_id, building_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, roof_type, roof_type_codespace, measured_height, measured_height_unit, storeys_above_ground, storeys_below_ground, storey_heights_above_ground, storey_heights_ag_unit, storey_heights_below_ground, storey_heights_bg_unit, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod0_footprint_id, lod0_roofprint_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
-1	26	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-\.
+INSERT INTO citydb.building (id, objectclass_id, building_parent_id, building_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, roof_type, roof_type_codespace, measured_height, measured_height_unit, storeys_above_ground, storeys_below_ground, storey_heights_above_ground, storey_heights_ag_unit, storey_heights_below_ground, storey_heights_bg_unit, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod0_footprint_id, lod0_roofprint_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) VALUES (1, 26, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
 --
--- TOC entry 5543 (class 0 OID 409578)
--- Dependencies: 232
+-- TOC entry 6059 (class 0 OID 33151)
+-- Dependencies: 249
 -- Data for Name: building_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, room_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5544 (class 0 OID 409586)
--- Dependencies: 233
+-- TOC entry 6060 (class 0 OID 33156)
+-- Dependencies: 250
 -- Data for Name: building_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.building_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, room_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5537 (class 0 OID 409545)
--- Dependencies: 226
+-- TOC entry 6061 (class 0 OID 33161)
+-- Dependencies: 251
 -- Data for Name: city_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.city_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5592 (class 0 OID 409924)
--- Dependencies: 281
+-- TOC entry 6063 (class 0 OID 33167)
+-- Dependencies: 253
 -- Data for Name: citymodel; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.citymodel (id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, last_modification_date, updating_person, reason_for_update, lineage) FROM stdin;
-\.
 
 
 --
--- TOC entry 5586 (class 0 OID 409870)
--- Dependencies: 275
+-- TOC entry 6065 (class 0 OID 33174)
+-- Dependencies: 255
 -- Data for Name: cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) FROM stdin;
-1	26	LYON_1ER_00101_0	\N	\N	\N	\N	01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC6740	2021-09-13 13:58:25.318+02	\N	\N	\N	2021-09-13 13:58:25.318+02	postgres	\N	\N	\N
-2	33	LYON_1ER_00101_0_Roof	\N	\N	\N	\N	01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C41D0436D374BBE53418AADA069891B6840973787C37A1E3C41D0436D374BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC6740	2021-09-13 13:58:25.325+02	\N	\N	\N	2021-09-13 13:58:25.325+02	postgres	\N	\N	\N
-3	34	LYON_1ER_00101_0_Wall	\N	\N	\N	\N	01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC1668405B7A34C57A1E3C415B5F24FD4ABE5341DBF97E6ABC1668405B7A34C57A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC166840	2021-09-13 13:58:25.327+02	\N	\N	\N	2021-09-13 13:58:25.327+02	postgres	\N	\N	\N
-\.
+INSERT INTO citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) VALUES (1, 26, 'LYON_1ER_00101_0', NULL, NULL, NULL, NULL, '01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC6740', '2021-09-13 13:58:25.318+02', NULL, NULL, NULL, '2021-09-13 13:58:25.318+02', 'postgres', NULL, NULL, NULL);
+INSERT INTO citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) VALUES (2, 33, 'LYON_1ER_00101_0_Roof', NULL, NULL, NULL, NULL, '01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C415B5F24FD4ABE5341516B9A779CFC67403A77BB167D1E3C41D0436D374BBE53418AADA069891B6840973787C37A1E3C41D0436D374BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341516B9A779CFC6740', '2021-09-13 13:58:25.325+02', NULL, NULL, NULL, '2021-09-13 13:58:25.325+02', 'postgres', NULL, NULL, NULL);
+INSERT INTO citydb.cityobject (id, objectclass_id, gmlid, gmlid_codespace, name, name_codespace, description, envelope, creation_date, termination_date, relative_to_terrain, relative_to_water, last_modification_date, updating_person, reason_for_update, lineage, xml_source) VALUES (3, 34, 'LYON_1ER_00101_0_Wall', NULL, NULL, NULL, NULL, '01030000A06A0F00000100000005000000973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC1668405B7A34C57A1E3C415B5F24FD4ABE5341DBF97E6ABC1668405B7A34C57A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C410EDAAB4B4BBE53418AADA069891B6840973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC166840', '2021-09-13 13:58:25.327+02', NULL, NULL, NULL, '2021-09-13 13:58:25.327+02', 'postgres', NULL, NULL, NULL);
 
 
 --
--- TOC entry 5593 (class 0 OID 409933)
--- Dependencies: 282
+-- TOC entry 6067 (class 0 OID 33181)
+-- Dependencies: 257
 -- Data for Name: cityobject_genericattrib; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject_genericattrib (id, parent_genattrib_id, root_genattrib_id, attrname, datatype, strval, intval, realval, urival, dateval, unit, genattribset_codespace, blobval, geomval, surface_geometry_id, cityobject_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5528 (class 0 OID 409500)
--- Dependencies: 217
+-- TOC entry 6068 (class 0 OID 33187)
+-- Dependencies: 258
 -- Data for Name: cityobject_member; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobject_member (citymodel_id, cityobject_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5532 (class 0 OID 409514)
--- Dependencies: 221
+-- TOC entry 6069 (class 0 OID 33190)
+-- Dependencies: 259
 -- Data for Name: cityobjectgroup; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.cityobjectgroup (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, brep_id, other_geom, parent_cityobject_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5534 (class 0 OID 409527)
--- Dependencies: 223
+-- TOC entry 6070 (class 0 OID 33195)
+-- Dependencies: 260
 -- Data for Name: database_srs; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.database_srs (srid, gml_srs_name) FROM stdin;
-3946	urn:ogc:def:crs:EPSG::3946
-\.
+INSERT INTO citydb.database_srs (srid, gml_srs_name) VALUES (3946, 'urn:ogc:def:crs:EPSG::3946');
 
 
 --
--- TOC entry 5594 (class 0 OID 409942)
--- Dependencies: 283
+-- TOC entry 6072 (class 0 OID 33201)
+-- Dependencies: 262
 -- Data for Name: external_reference; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.external_reference (id, infosys, name, uri, cityobject_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5530 (class 0 OID 409507)
--- Dependencies: 219
+-- TOC entry 6073 (class 0 OID 33207)
+-- Dependencies: 263
 -- Data for Name: generalization; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.generalization (cityobject_id, generalizes_to_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5539 (class 0 OID 409555)
--- Dependencies: 228
+-- TOC entry 6074 (class 0 OID 33210)
+-- Dependencies: 264
 -- Data for Name: generic_cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.generic_cityobject (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_terrain_intersection, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod0_brep_id, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod0_other_geom, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod0_implicit_rep_id, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod0_implicit_ref_point, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod0_implicit_transformation, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5596 (class 0 OID 409960)
--- Dependencies: 285
+-- TOC entry 6076 (class 0 OID 33216)
+-- Dependencies: 266
 -- Data for Name: grid_coverage; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.grid_coverage (id, rasterproperty) FROM stdin;
-\.
 
 
 --
--- TOC entry 5533 (class 0 OID 409522)
--- Dependencies: 222
+-- TOC entry 6077 (class 0 OID 33222)
+-- Dependencies: 267
 -- Data for Name: group_to_cityobject; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.group_to_cityobject (cityobject_id, cityobjectgroup_id, role) FROM stdin;
-\.
 
 
 --
--- TOC entry 5588 (class 0 OID 409888)
--- Dependencies: 277
+-- TOC entry 6079 (class 0 OID 33226)
+-- Dependencies: 269
 -- Data for Name: implicit_geometry; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.implicit_geometry (id, mime_type, reference_to_library, library_object, relative_brep_id, relative_other_geom) FROM stdin;
-\.
 
 
 --
--- TOC entry 5605 (class 0 OID 412051)
--- Dependencies: 295
+-- TOC entry 6080 (class 0 OID 33232)
+-- Dependencies: 270
 -- Data for Name: index_table; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.index_table (id, obj) FROM stdin;
-1	(cityobject_envelope_spx,cityobject,envelope,1,0,0)
-2	(surface_geom_spx,surface_geometry,geometry,1,0,0)
-3	(surface_geom_solid_spx,surface_geometry,solid_geometry,1,0,0)
-4	(cityobject_inx,cityobject,"gmlid, gmlid_codespace",0,0,0)
-5	(cityobject_lineage_inx,cityobject,lineage,0,0,0)
-6	(cityobj_creation_date_inx,cityobject,creation_date,0,0,0)
-7	(cityobj_term_date_inx,cityobject,termination_date,0,0,0)
-8	(cityobj_last_mod_date_inx,cityobject,last_modification_date,0,0,0)
-9	(surface_geom_inx,surface_geometry,"gmlid, gmlid_codespace",0,0,0)
-10	(appearance_inx,appearance,"gmlid, gmlid_codespace",0,0,0)
-11	(appearance_theme_inx,appearance,theme,0,0,0)
-12	(surface_data_inx,surface_data,"gmlid, gmlid_codespace",0,0,0)
-13	(address_inx,address,"gmlid, gmlid_codespace",0,0,0)
-\.
+INSERT INTO citydb.index_table (id, obj) VALUES (1, '(cityobject_envelope_spx,cityobject,envelope,1,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (2, '(surface_geom_spx,surface_geometry,geometry,1,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (3, '(surface_geom_solid_spx,surface_geometry,solid_geometry,1,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (4, '(cityobject_inx,cityobject,"gmlid, gmlid_codespace",0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (5, '(cityobject_lineage_inx,cityobject,lineage,0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (6, '(cityobj_creation_date_inx,cityobject,creation_date,0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (7, '(cityobj_term_date_inx,cityobject,termination_date,0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (8, '(cityobj_last_mod_date_inx,cityobject,last_modification_date,0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (9, '(surface_geom_inx,surface_geometry,"gmlid, gmlid_codespace",0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (10, '(appearance_inx,appearance,"gmlid, gmlid_codespace",0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (11, '(appearance_theme_inx,appearance,theme,0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (12, '(surface_data_inx,surface_data,"gmlid, gmlid_codespace",0,0,0)');
+INSERT INTO citydb.index_table (id, obj) VALUES (13, '(address_inx,address,"gmlid, gmlid_codespace",0,0,0)');
 
 
 --
--- TOC entry 5561 (class 0 OID 409700)
--- Dependencies: 250
+-- TOC entry 6082 (class 0 OID 33239)
+-- Dependencies: 272
 -- Data for Name: land_use; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.land_use (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_surface_id, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5554 (class 0 OID 409645)
--- Dependencies: 243
+-- TOC entry 6083 (class 0 OID 33244)
+-- Dependencies: 273
 -- Data for Name: masspoint_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.masspoint_relief (id, objectclass_id, relief_points) FROM stdin;
-\.
 
 
 --
--- TOC entry 5535 (class 0 OID 409535)
--- Dependencies: 224
+-- TOC entry 6084 (class 0 OID 33249)
+-- Dependencies: 274
 -- Data for Name: objectclass; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) FROM stdin;
-0	0	0	Undefined	\N	\N	\N	\N
-1	0	0	_GML	cityobject	\N	\N	\N
-2	0	0	_Feature	cityobject	1	1	\N
-3	0	0	_CityObject	cityobject	2	2	\N
-4	0	1	LandUse	land_use	3	3	\N
-5	0	1	GenericCityObject	generic_cityobject	3	3	\N
-6	0	0	_VegetationObject	cityobject	3	3	\N
-7	0	1	SolitaryVegetationObject	solitary_vegetat_object	6	3	\N
-8	0	1	PlantCover	plant_cover	6	3	\N
-105	0	0	_WaterObject	cityobject	3	3	\N
-9	0	1	WaterBody	waterbody	105	3	\N
-10	0	0	_WaterBoundarySurface	waterboundary_surface	3	3	\N
-11	0	0	WaterSurface	waterboundary_surface	10	3	\N
-12	0	0	WaterGroundSurface	waterboundary_surface	10	3	\N
-13	0	0	WaterClosureSurface	waterboundary_surface	10	3	\N
-14	0	1	ReliefFeature	relief_feature	3	3	\N
-15	0	0	_ReliefComponent	relief_component	3	3	\N
-16	0	0	TINRelief	tin_relief	15	3	\N
-17	0	0	MassPointRelief	masspoint_relief	15	3	\N
-18	0	0	BreaklineRelief	breakline_relief	15	3	\N
-19	0	0	RasterRelief	raster_relief	15	3	\N
-20	0	0	_Site	cityobject	3	3	\N
-21	0	1	CityFurniture	city_furniture	3	3	\N
-22	0	0	_TransportationObject	cityobject	3	3	\N
-23	0	1	CityObjectGroup	cityobjectgroup	3	3	\N
-24	0	0	_AbstractBuilding	building	20	3	\N
-25	0	0	BuildingPart	building	24	3	\N
-26	0	1	Building	building	24	3	\N
-27	0	0	BuildingInstallation	building_installation	3	3	\N
-28	0	0	IntBuildingInstallation	building_installation	3	3	\N
-29	0	0	_BuildingBoundarySurface	thematic_surface	3	3	\N
-30	0	0	BuildingCeilingSurface	thematic_surface	29	3	\N
-31	0	0	InteriorBuildingWallSurface	thematic_surface	29	3	\N
-32	0	0	BuildingFloorSurface	thematic_surface	29	3	\N
-33	0	0	BuildingRoofSurface	thematic_surface	29	3	\N
-34	0	0	BuildingWallSurface	thematic_surface	29	3	\N
-35	0	0	BuildingGroundSurface	thematic_surface	29	3	\N
-36	0	0	BuildingClosureSurface	thematic_surface	29	3	\N
-37	0	0	_BuildingOpening	opening	3	3	\N
-38	0	0	BuildingWindow	opening	37	3	\N
-39	0	0	BuildingDoor	opening	37	3	\N
-40	0	0	BuildingFurniture	building_furniture	3	3	\N
-41	0	0	BuildingRoom	room	3	3	\N
-42	0	1	TransportationComplex	transportation_complex	22	3	\N
-43	0	1	Track	transportation_complex	42	3	\N
-44	0	1	Railway	transportation_complex	42	3	\N
-45	0	1	Road	transportation_complex	42	3	\N
-46	0	1	Square	transportation_complex	42	3	\N
-47	0	0	TrafficArea	traffic_area	22	3	\N
-48	0	0	AuxiliaryTrafficArea	traffic_area	22	3	\N
-49	0	0	FeatureCollection	cityobject	2	2	\N
-50	0	0	Appearance	appearance	2	2	\N
-51	0	0	_SurfaceData	surface_data	2	2	\N
-52	0	0	_Texture	surface_data	51	2	\N
-53	0	0	X3DMaterial	surface_data	51	2	\N
-54	0	0	ParameterizedTexture	surface_data	52	2	\N
-55	0	0	GeoreferencedTexture	surface_data	52	2	\N
-56	0	0	_TextureParametrization	textureparam	1	1	\N
-57	0	0	CityModel	citymodel	49	2	\N
-58	0	0	Address	address	2	2	\N
-59	0	0	ImplicitGeometry	implicit_geometry	1	1	\N
-60	0	0	OuterBuildingCeilingSurface	thematic_surface	29	3	\N
-61	0	0	OuterBuildingFloorSurface	thematic_surface	29	3	\N
-62	0	0	_AbstractBridge	bridge	20	3	\N
-63	0	0	BridgePart	bridge	62	3	\N
-64	0	1	Bridge	bridge	62	3	\N
-65	0	0	BridgeInstallation	bridge_installation	3	3	\N
-66	0	0	IntBridgeInstallation	bridge_installation	3	3	\N
-67	0	0	_BridgeBoundarySurface	bridge_thematic_surface	3	3	\N
-68	0	0	BridgeCeilingSurface	bridge_thematic_surface	67	3	\N
-69	0	0	InteriorBridgeWallSurface	bridge_thematic_surface	67	3	\N
-70	0	0	BridgeFloorSurface	bridge_thematic_surface	67	3	\N
-71	0	0	BridgeRoofSurface	bridge_thematic_surface	67	3	\N
-72	0	0	BridgeWallSurface	bridge_thematic_surface	67	3	\N
-73	0	0	BridgeGroundSurface	bridge_thematic_surface	67	3	\N
-74	0	0	BridgeClosureSurface	bridge_thematic_surface	67	3	\N
-75	0	0	OuterBridgeCeilingSurface	bridge_thematic_surface	67	3	\N
-76	0	0	OuterBridgeFloorSurface	bridge_thematic_surface	67	3	\N
-77	0	0	_BridgeOpening	bridge_opening	3	3	\N
-78	0	0	BridgeWindow	bridge_opening	77	3	\N
-79	0	0	BridgeDoor	bridge_opening	77	3	\N
-80	0	0	BridgeFurniture	bridge_furniture	3	3	\N
-81	0	0	BridgeRoom	bridge_room	3	3	\N
-82	0	0	BridgeConstructionElement	bridge_constr_element	3	3	\N
-83	0	0	_AbstractTunnel	tunnel	20	3	\N
-84	0	0	TunnelPart	tunnel	83	3	\N
-85	0	1	Tunnel	tunnel	83	3	\N
-86	0	0	TunnelInstallation	tunnel_installation	3	3	\N
-87	0	0	IntTunnelInstallation	tunnel_installation	3	3	\N
-88	0	0	_TunnelBoundarySurface	tunnel_thematic_surface	3	3	\N
-89	0	0	TunnelCeilingSurface	tunnel_thematic_surface	88	3	\N
-90	0	0	InteriorTunnelWallSurface	tunnel_thematic_surface	88	3	\N
-91	0	0	TunnelFloorSurface	tunnel_thematic_surface	88	3	\N
-92	0	0	TunnelRoofSurface	tunnel_thematic_surface	88	3	\N
-93	0	0	TunnelWallSurface	tunnel_thematic_surface	88	3	\N
-94	0	0	TunnelGroundSurface	tunnel_thematic_surface	88	3	\N
-95	0	0	TunnelClosureSurface	tunnel_thematic_surface	88	3	\N
-96	0	0	OuterTunnelCeilingSurface	tunnel_thematic_surface	88	3	\N
-97	0	0	OuterTunnelFloorSurface	tunnel_thematic_surface	88	3	\N
-98	0	0	_TunnelOpening	tunnel_opening	3	3	\N
-99	0	0	TunnelWindow	tunnel_opening	98	3	\N
-100	0	0	TunnelDoor	tunnel_opening	98	3	\N
-101	0	0	TunnelFurniture	tunnel_furniture	3	3	\N
-102	0	0	HollowSpace	tunnel_hollow_space	3	3	\N
-103	0	0	TexCoordList	textureparam	56	1	\N
-104	0	0	TexCoordGen	textureparam	56	1	\N
-106	0	0	_BrepGeometry	surface_geometry	0	1	\N
-107	0	0	Polygon	surface_geometry	106	1	\N
-108	0	0	BrepAggregate	surface_geometry	106	1	\N
-109	0	0	TexImage	tex_image	0	0	\N
-110	0	0	ExternalReference	external_reference	0	0	\N
-111	0	0	GridCoverage	grid_coverage	0	0	\N
-112	0	0	_genericAttribute	cityobject_genericattrib	0	0	\N
-113	0	0	genericAttributeSet	cityobject_genericattrib	112	0	\N
-\.
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (0, 0, 0, 'Undefined', NULL, NULL, NULL, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (1, 0, 0, '_GML', 'cityobject', NULL, NULL, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (2, 0, 0, '_Feature', 'cityobject', 1, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (3, 0, 0, '_CityObject', 'cityobject', 2, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (4, 0, 1, 'LandUse', 'land_use', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (5, 0, 1, 'GenericCityObject', 'generic_cityobject', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (6, 0, 0, '_VegetationObject', 'cityobject', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (7, 0, 1, 'SolitaryVegetationObject', 'solitary_vegetat_object', 6, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (8, 0, 1, 'PlantCover', 'plant_cover', 6, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (105, 0, 0, '_WaterObject', 'cityobject', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (9, 0, 1, 'WaterBody', 'waterbody', 105, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (10, 0, 0, '_WaterBoundarySurface', 'waterboundary_surface', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (11, 0, 0, 'WaterSurface', 'waterboundary_surface', 10, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (12, 0, 0, 'WaterGroundSurface', 'waterboundary_surface', 10, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (13, 0, 0, 'WaterClosureSurface', 'waterboundary_surface', 10, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (14, 0, 1, 'ReliefFeature', 'relief_feature', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (15, 0, 0, '_ReliefComponent', 'relief_component', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (16, 0, 0, 'TINRelief', 'tin_relief', 15, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (17, 0, 0, 'MassPointRelief', 'masspoint_relief', 15, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (18, 0, 0, 'BreaklineRelief', 'breakline_relief', 15, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (19, 0, 0, 'RasterRelief', 'raster_relief', 15, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (20, 0, 0, '_Site', 'cityobject', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (21, 0, 1, 'CityFurniture', 'city_furniture', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (22, 0, 0, '_TransportationObject', 'cityobject', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (23, 0, 1, 'CityObjectGroup', 'cityobjectgroup', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (24, 0, 0, '_AbstractBuilding', 'building', 20, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (25, 0, 0, 'BuildingPart', 'building', 24, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (26, 0, 1, 'Building', 'building', 24, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (27, 0, 0, 'BuildingInstallation', 'building_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (28, 0, 0, 'IntBuildingInstallation', 'building_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (29, 0, 0, '_BuildingBoundarySurface', 'thematic_surface', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (30, 0, 0, 'BuildingCeilingSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (31, 0, 0, 'InteriorBuildingWallSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (32, 0, 0, 'BuildingFloorSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (33, 0, 0, 'BuildingRoofSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (34, 0, 0, 'BuildingWallSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (35, 0, 0, 'BuildingGroundSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (36, 0, 0, 'BuildingClosureSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (37, 0, 0, '_BuildingOpening', 'opening', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (38, 0, 0, 'BuildingWindow', 'opening', 37, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (39, 0, 0, 'BuildingDoor', 'opening', 37, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (40, 0, 0, 'BuildingFurniture', 'building_furniture', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (41, 0, 0, 'BuildingRoom', 'room', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (42, 0, 1, 'TransportationComplex', 'transportation_complex', 22, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (43, 0, 1, 'Track', 'transportation_complex', 42, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (44, 0, 1, 'Railway', 'transportation_complex', 42, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (45, 0, 1, 'Road', 'transportation_complex', 42, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (46, 0, 1, 'Square', 'transportation_complex', 42, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (47, 0, 0, 'TrafficArea', 'traffic_area', 22, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (48, 0, 0, 'AuxiliaryTrafficArea', 'traffic_area', 22, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (49, 0, 0, 'FeatureCollection', 'cityobject', 2, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (50, 0, 0, 'Appearance', 'appearance', 2, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (51, 0, 0, '_SurfaceData', 'surface_data', 2, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (52, 0, 0, '_Texture', 'surface_data', 51, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (53, 0, 0, 'X3DMaterial', 'surface_data', 51, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (54, 0, 0, 'ParameterizedTexture', 'surface_data', 52, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (55, 0, 0, 'GeoreferencedTexture', 'surface_data', 52, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (56, 0, 0, '_TextureParametrization', 'textureparam', 1, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (57, 0, 0, 'CityModel', 'citymodel', 49, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (58, 0, 0, 'Address', 'address', 2, 2, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (59, 0, 0, 'ImplicitGeometry', 'implicit_geometry', 1, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (60, 0, 0, 'OuterBuildingCeilingSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (61, 0, 0, 'OuterBuildingFloorSurface', 'thematic_surface', 29, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (62, 0, 0, '_AbstractBridge', 'bridge', 20, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (63, 0, 0, 'BridgePart', 'bridge', 62, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (64, 0, 1, 'Bridge', 'bridge', 62, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (65, 0, 0, 'BridgeInstallation', 'bridge_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (66, 0, 0, 'IntBridgeInstallation', 'bridge_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (67, 0, 0, '_BridgeBoundarySurface', 'bridge_thematic_surface', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (68, 0, 0, 'BridgeCeilingSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (69, 0, 0, 'InteriorBridgeWallSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (70, 0, 0, 'BridgeFloorSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (71, 0, 0, 'BridgeRoofSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (72, 0, 0, 'BridgeWallSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (73, 0, 0, 'BridgeGroundSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (74, 0, 0, 'BridgeClosureSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (75, 0, 0, 'OuterBridgeCeilingSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (76, 0, 0, 'OuterBridgeFloorSurface', 'bridge_thematic_surface', 67, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (77, 0, 0, '_BridgeOpening', 'bridge_opening', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (78, 0, 0, 'BridgeWindow', 'bridge_opening', 77, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (79, 0, 0, 'BridgeDoor', 'bridge_opening', 77, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (80, 0, 0, 'BridgeFurniture', 'bridge_furniture', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (81, 0, 0, 'BridgeRoom', 'bridge_room', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (82, 0, 0, 'BridgeConstructionElement', 'bridge_constr_element', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (83, 0, 0, '_AbstractTunnel', 'tunnel', 20, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (84, 0, 0, 'TunnelPart', 'tunnel', 83, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (85, 0, 1, 'Tunnel', 'tunnel', 83, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (86, 0, 0, 'TunnelInstallation', 'tunnel_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (87, 0, 0, 'IntTunnelInstallation', 'tunnel_installation', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (88, 0, 0, '_TunnelBoundarySurface', 'tunnel_thematic_surface', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (89, 0, 0, 'TunnelCeilingSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (90, 0, 0, 'InteriorTunnelWallSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (91, 0, 0, 'TunnelFloorSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (92, 0, 0, 'TunnelRoofSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (93, 0, 0, 'TunnelWallSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (94, 0, 0, 'TunnelGroundSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (95, 0, 0, 'TunnelClosureSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (96, 0, 0, 'OuterTunnelCeilingSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (97, 0, 0, 'OuterTunnelFloorSurface', 'tunnel_thematic_surface', 88, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (98, 0, 0, '_TunnelOpening', 'tunnel_opening', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (99, 0, 0, 'TunnelWindow', 'tunnel_opening', 98, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (100, 0, 0, 'TunnelDoor', 'tunnel_opening', 98, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (101, 0, 0, 'TunnelFurniture', 'tunnel_furniture', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (102, 0, 0, 'HollowSpace', 'tunnel_hollow_space', 3, 3, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (103, 0, 0, 'TexCoordList', 'textureparam', 56, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (104, 0, 0, 'TexCoordGen', 'textureparam', 56, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (106, 0, 0, '_BrepGeometry', 'surface_geometry', 0, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (107, 0, 0, 'Polygon', 'surface_geometry', 106, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (108, 0, 0, 'BrepAggregate', 'surface_geometry', 106, 1, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (109, 0, 0, 'TexImage', 'tex_image', 0, 0, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (110, 0, 0, 'ExternalReference', 'external_reference', 0, 0, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (111, 0, 0, 'GridCoverage', 'grid_coverage', 0, 0, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (112, 0, 0, '_genericAttribute', 'cityobject_genericattrib', 0, 0, NULL);
+INSERT INTO citydb.objectclass (id, is_ade_class, is_toplevel, classname, tablename, superclass_id, baseclass_id, ade_id) VALUES (113, 0, 0, 'genericAttributeSet', 'cityobject_genericattrib', 112, 0, NULL);
 
 
 --
--- TOC entry 5545 (class 0 OID 409594)
--- Dependencies: 234
+-- TOC entry 6085 (class 0 OID 33254)
+-- Dependencies: 275
 -- Data for Name: opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.opening (id, objectclass_id, address_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5546 (class 0 OID 409602)
--- Dependencies: 235
+-- TOC entry 6086 (class 0 OID 33259)
+-- Dependencies: 276
 -- Data for Name: opening_to_them_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.opening_to_them_surface (opening_id, thematic_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5562 (class 0 OID 409708)
--- Dependencies: 251
+-- TOC entry 6087 (class 0 OID 33262)
+-- Dependencies: 277
 -- Data for Name: plant_cover; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.plant_cover (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, average_height, average_height_unit, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_multi_solid_id, lod2_multi_solid_id, lod3_multi_solid_id, lod4_multi_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5567 (class 0 OID 409745)
--- Dependencies: 256
+-- TOC entry 6088 (class 0 OID 33267)
+-- Dependencies: 278
 -- Data for Name: raster_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.raster_relief (id, objectclass_id, raster_uri, coverage_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5555 (class 0 OID 409653)
--- Dependencies: 244
+-- TOC entry 6089 (class 0 OID 33272)
+-- Dependencies: 279
 -- Data for Name: relief_component; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_component (id, objectclass_id, lod, extent) FROM stdin;
-\.
 
 
 --
--- TOC entry 5556 (class 0 OID 409662)
--- Dependencies: 245
+-- TOC entry 6090 (class 0 OID 33278)
+-- Dependencies: 280
 -- Data for Name: relief_feat_to_rel_comp; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_feat_to_rel_comp (relief_component_id, relief_feature_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5557 (class 0 OID 409667)
--- Dependencies: 246
+-- TOC entry 6091 (class 0 OID 33281)
+-- Dependencies: 281
 -- Data for Name: relief_feature; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.relief_feature (id, objectclass_id, lod) FROM stdin;
-\.
 
 
 --
--- TOC entry 5547 (class 0 OID 409607)
--- Dependencies: 236
+-- TOC entry 6092 (class 0 OID 33287)
+-- Dependencies: 282
 -- Data for Name: room; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.room (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, building_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5599 (class 0 OID 410325)
--- Dependencies: 288
+-- TOC entry 6094 (class 0 OID 33293)
+-- Dependencies: 284
 -- Data for Name: schema; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema (id, is_ade_root, citygml_version, xml_namespace_uri, xml_namespace_prefix, xml_schema_location, xml_schemafile, xml_schemafile_type, ade_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5601 (class 0 OID 410342)
--- Dependencies: 290
+-- TOC entry 6095 (class 0 OID 33299)
+-- Dependencies: 285
 -- Data for Name: schema_referencing; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema_referencing (referencing_id, referenced_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5600 (class 0 OID 410334)
--- Dependencies: 289
+-- TOC entry 6096 (class 0 OID 33302)
+-- Dependencies: 286
 -- Data for Name: schema_to_objectclass; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.schema_to_objectclass (schema_id, objectclass_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5563 (class 0 OID 409716)
--- Dependencies: 252
+-- TOC entry 6097 (class 0 OID 33305)
+-- Dependencies: 287
 -- Data for Name: solitary_vegetat_object; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.solitary_vegetat_object (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, species, species_codespace, height, height_unit, trunk_diameter, trunk_diameter_unit, crown_diameter, crown_diameter_unit, lod1_brep_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod1_other_geom, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod1_implicit_rep_id, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod1_implicit_ref_point, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod1_implicit_transformation, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5591 (class 0 OID 409915)
--- Dependencies: 280
+-- TOC entry 6099 (class 0 OID 33317)
+-- Dependencies: 289
 -- Data for Name: surface_data; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.surface_data (id, gmlid, gmlid_codespace, name, name_codespace, description, is_front, objectclass_id, x3d_shininess, x3d_transparency, x3d_ambient_intensity, x3d_specular_color, x3d_diffuse_color, x3d_emissive_color, x3d_is_smooth, tex_image_id, tex_texture_type, tex_wrap_mode, tex_border_color, gt_prefer_worldfile, gt_orientation, gt_reference_point) FROM stdin;
-\.
 
 
 --
--- TOC entry 5589 (class 0 OID 409897)
--- Dependencies: 278
+-- TOC entry 6101 (class 0 OID 33324)
+-- Dependencies: 291
 -- Data for Name: surface_geometry; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) FROM stdin;
-1	ID_cb37679d-e0c0-4a3d-8473-3af35c536bff	\N	\N	1	0	0	0	0	0	\N	\N	\N	2
-2	UUID_f724cdb3-97b8-4765-bb6a-d835b69a49f6	\N	1	1	0	0	0	0	0	\N	01030000A06A0F000001000000040000003A77BB167D1E3C41CEC474364BBE5341516B9A779CFC674098141FC77B1E3C41D0436D374BBE534127A089B0E10D6840973787C37A1E3C415B5F24FD4ABE53418AADA069891B68403A77BB167D1E3C41CEC474364BBE5341516B9A779CFC6740	\N	2
-4	ID_d62119e2-3f8f-49d1-8518-cb303ff5699c	\N	\N	4	0	0	0	0	0	\N	\N	\N	3
-5	UUID_72378318-3ae3-4434-b2c2-6b97240a4ff2	\N	4	4	0	0	0	0	0	\N	01030000A06A0F000001000000050000005B7A34C57A1E3C410EDAAB4B4BBE5341DBF97E6ABC166840973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC166840973787C37A1E3C415B5F24FD4ABE53418AADA069891B68405B7A34C57A1E3C410EDAAB4B4BBE53418AADA069891B68405B7A34C57A1E3C410EDAAB4B4BBE5341DBF97E6ABC166840	\N	3
-\.
+INSERT INTO citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) VALUES (1, 'ID_cb37679d-e0c0-4a3d-8473-3af35c536bff', NULL, NULL, 1, 0, 0, 0, 0, 0, NULL, NULL, NULL, 2);
+INSERT INTO citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) VALUES (2, 'UUID_f724cdb3-97b8-4765-bb6a-d835b69a49f6', NULL, 1, 1, 0, 0, 0, 0, 0, NULL, '01030000A06A0F000001000000040000003A77BB167D1E3C41CEC474364BBE5341516B9A779CFC674098141FC77B1E3C41D0436D374BBE534127A089B0E10D6840973787C37A1E3C415B5F24FD4ABE53418AADA069891B68403A77BB167D1E3C41CEC474364BBE5341516B9A779CFC6740', NULL, 2);
+INSERT INTO citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) VALUES (4, 'ID_d62119e2-3f8f-49d1-8518-cb303ff5699c', NULL, NULL, 4, 0, 0, 0, 0, 0, NULL, NULL, NULL, 3);
+INSERT INTO citydb.surface_geometry (id, gmlid, gmlid_codespace, parent_id, root_id, is_solid, is_composite, is_triangulated, is_xlink, is_reverse, solid_geometry, geometry, implicit_geometry, cityobject_id) VALUES (5, 'UUID_72378318-3ae3-4434-b2c2-6b97240a4ff2', NULL, 4, 4, 0, 0, 0, 0, 0, NULL, '01030000A06A0F000001000000050000005B7A34C57A1E3C410EDAAB4B4BBE5341DBF97E6ABC166840973787C37A1E3C415B5F24FD4ABE5341DBF97E6ABC166840973787C37A1E3C415B5F24FD4ABE53418AADA069891B68405B7A34C57A1E3C410EDAAB4B4BBE53418AADA069891B68405B7A34C57A1E3C410EDAAB4B4BBE5341DBF97E6ABC166840', NULL, 3);
 
 
 --
--- TOC entry 5595 (class 0 OID 409951)
--- Dependencies: 284
+-- TOC entry 6103 (class 0 OID 33331)
+-- Dependencies: 293
 -- Data for Name: tex_image; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tex_image (id, tex_image_uri, tex_image_data, tex_mime_type, tex_mime_type_codespace) FROM stdin;
-\.
 
 
 --
--- TOC entry 5551 (class 0 OID 409624)
--- Dependencies: 240
+-- TOC entry 6104 (class 0 OID 33337)
+-- Dependencies: 294
 -- Data for Name: textureparam; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.textureparam (surface_geometry_id, is_texture_parametrization, world_to_texture, texture_coordinates, surface_data_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5548 (class 0 OID 409615)
--- Dependencies: 237
+-- TOC entry 6105 (class 0 OID 33342)
+-- Dependencies: 295
 -- Data for Name: thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.thematic_surface (id, objectclass_id, building_id, room_id, building_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
-2	33	1	\N	\N	1	\N	\N
-3	34	1	\N	\N	4	\N	\N
-\.
+INSERT INTO citydb.thematic_surface (id, objectclass_id, building_id, room_id, building_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) VALUES (2, 33, 1, NULL, NULL, 1, NULL, NULL);
+INSERT INTO citydb.thematic_surface (id, objectclass_id, building_id, room_id, building_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) VALUES (3, 34, 1, NULL, NULL, 4, NULL, NULL);
 
 
 --
--- TOC entry 5558 (class 0 OID 409676)
--- Dependencies: 247
+-- TOC entry 6106 (class 0 OID 33345)
+-- Dependencies: 296
 -- Data for Name: tin_relief; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tin_relief (id, objectclass_id, max_length, max_length_unit, stop_lines, break_lines, control_points, surface_geometry_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5560 (class 0 OID 409692)
--- Dependencies: 249
+-- TOC entry 6107 (class 0 OID 33350)
+-- Dependencies: 297
 -- Data for Name: traffic_area; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.traffic_area (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, surface_material, surface_material_codespace, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, transportation_complex_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5559 (class 0 OID 409684)
--- Dependencies: 248
+-- TOC entry 6108 (class 0 OID 33355)
+-- Dependencies: 298
 -- Data for Name: transportation_complex; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.transportation_complex (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_network, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5568 (class 0 OID 409753)
--- Dependencies: 257
+-- TOC entry 6109 (class 0 OID 33360)
+-- Dependencies: 299
 -- Data for Name: tunnel; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel (id, objectclass_id, tunnel_parent_id, tunnel_root_id, class, class_codespace, function, function_codespace, usage, usage_codespace, year_of_construction, year_of_demolition, lod1_terrain_intersection, lod2_terrain_intersection, lod3_terrain_intersection, lod4_terrain_intersection, lod2_multi_curve, lod3_multi_curve, lod4_multi_curve, lod1_multi_surface_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5575 (class 0 OID 409797)
--- Dependencies: 264
+-- TOC entry 6110 (class 0 OID 33365)
+-- Dependencies: 300
 -- Data for Name: tunnel_furniture; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_furniture (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_hollow_space_id, lod4_brep_id, lod4_other_geom, lod4_implicit_rep_id, lod4_implicit_ref_point, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5570 (class 0 OID 409766)
--- Dependencies: 259
+-- TOC entry 6111 (class 0 OID 33370)
+-- Dependencies: 301
 -- Data for Name: tunnel_hollow_space; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_hollow_space (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, lod4_multi_surface_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5574 (class 0 OID 409789)
--- Dependencies: 263
+-- TOC entry 6112 (class 0 OID 33375)
+-- Dependencies: 302
 -- Data for Name: tunnel_installation; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_installation (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, tunnel_id, tunnel_hollow_space_id, lod2_brep_id, lod3_brep_id, lod4_brep_id, lod2_other_geom, lod3_other_geom, lod4_other_geom, lod2_implicit_rep_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod2_implicit_ref_point, lod3_implicit_ref_point, lod4_implicit_ref_point, lod2_implicit_transformation, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5569 (class 0 OID 409761)
--- Dependencies: 258
+-- TOC entry 6113 (class 0 OID 33380)
+-- Dependencies: 303
 -- Data for Name: tunnel_open_to_them_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_open_to_them_srf (tunnel_opening_id, tunnel_thematic_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5573 (class 0 OID 409781)
--- Dependencies: 262
+-- TOC entry 6114 (class 0 OID 33383)
+-- Dependencies: 304
 -- Data for Name: tunnel_opening; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_opening (id, objectclass_id, lod3_multi_surface_id, lod4_multi_surface_id, lod3_implicit_rep_id, lod4_implicit_rep_id, lod3_implicit_ref_point, lod4_implicit_ref_point, lod3_implicit_transformation, lod4_implicit_transformation) FROM stdin;
-\.
 
 
 --
--- TOC entry 5571 (class 0 OID 409774)
--- Dependencies: 260
+-- TOC entry 6115 (class 0 OID 33388)
+-- Dependencies: 305
 -- Data for Name: tunnel_thematic_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.tunnel_thematic_surface (id, objectclass_id, tunnel_id, tunnel_hollow_space_id, tunnel_installation_id, lod2_multi_surface_id, lod3_multi_surface_id, lod4_multi_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5565 (class 0 OID 409732)
--- Dependencies: 254
+-- TOC entry 6116 (class 0 OID 33391)
+-- Dependencies: 306
 -- Data for Name: waterbod_to_waterbnd_srf; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterbod_to_waterbnd_srf (waterboundary_surface_id, waterbody_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5564 (class 0 OID 409724)
--- Dependencies: 253
+-- TOC entry 6117 (class 0 OID 33394)
+-- Dependencies: 307
 -- Data for Name: waterbody; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterbody (id, objectclass_id, class, class_codespace, function, function_codespace, usage, usage_codespace, lod0_multi_curve, lod1_multi_curve, lod0_multi_surface_id, lod1_multi_surface_id, lod1_solid_id, lod2_solid_id, lod3_solid_id, lod4_solid_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 5566 (class 0 OID 409737)
--- Dependencies: 255
+-- TOC entry 6118 (class 0 OID 33399)
+-- Dependencies: 308
 -- Data for Name: waterboundary_surface; Type: TABLE DATA; Schema: citydb; Owner: postgres
 --
 
-COPY citydb.waterboundary_surface (id, objectclass_id, water_level, water_level_codespace, lod2_surface_id, lod3_surface_id, lod4_surface_id) FROM stdin;
-\.
 
 
 --
--- TOC entry 4571 (class 0 OID 408322)
--- Dependencies: 201
+-- TOC entry 5064 (class 0 OID 31604)
+-- Dependencies: 214
 -- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
-\.
 
 
 --
--- TOC entry 5617 (class 0 OID 0)
+-- TOC entry 6125 (class 0 OID 0)
 -- Dependencies: 229
 -- Name: address_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
@@ -13482,8 +13311,8 @@ SELECT pg_catalog.setval('citydb.address_seq', 1, false);
 
 
 --
--- TOC entry 5618 (class 0 OID 0)
--- Dependencies: 287
+-- TOC entry 6126 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: ade_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13491,8 +13320,8 @@ SELECT pg_catalog.setval('citydb.ade_seq', 1, false);
 
 
 --
--- TOC entry 5619 (class 0 OID 0)
--- Dependencies: 238
+-- TOC entry 6127 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: appearance_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13500,8 +13329,8 @@ SELECT pg_catalog.setval('citydb.appearance_seq', 1, false);
 
 
 --
--- TOC entry 5620 (class 0 OID 0)
--- Dependencies: 215
+-- TOC entry 6128 (class 0 OID 0)
+-- Dependencies: 252
 -- Name: citymodel_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13509,8 +13338,8 @@ SELECT pg_catalog.setval('citydb.citymodel_seq', 1, false);
 
 
 --
--- TOC entry 5621 (class 0 OID 0)
--- Dependencies: 227
+-- TOC entry 6129 (class 0 OID 0)
+-- Dependencies: 256
 -- Name: cityobject_genericatt_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13518,8 +13347,8 @@ SELECT pg_catalog.setval('citydb.cityobject_genericatt_seq', 1, false);
 
 
 --
--- TOC entry 5622 (class 0 OID 0)
--- Dependencies: 216
+-- TOC entry 6130 (class 0 OID 0)
+-- Dependencies: 254
 -- Name: cityobject_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13527,8 +13356,8 @@ SELECT pg_catalog.setval('citydb.cityobject_seq', 3, true);
 
 
 --
--- TOC entry 5623 (class 0 OID 0)
--- Dependencies: 218
+-- TOC entry 6131 (class 0 OID 0)
+-- Dependencies: 261
 -- Name: external_ref_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13536,8 +13365,8 @@ SELECT pg_catalog.setval('citydb.external_ref_seq', 1, false);
 
 
 --
--- TOC entry 5624 (class 0 OID 0)
--- Dependencies: 274
+-- TOC entry 6132 (class 0 OID 0)
+-- Dependencies: 265
 -- Name: grid_coverage_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13545,8 +13374,8 @@ SELECT pg_catalog.setval('citydb.grid_coverage_seq', 1, false);
 
 
 --
--- TOC entry 5625 (class 0 OID 0)
--- Dependencies: 225
+-- TOC entry 6133 (class 0 OID 0)
+-- Dependencies: 268
 -- Name: implicit_geometry_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13554,8 +13383,8 @@ SELECT pg_catalog.setval('citydb.implicit_geometry_seq', 1, false);
 
 
 --
--- TOC entry 5626 (class 0 OID 0)
--- Dependencies: 294
+-- TOC entry 6134 (class 0 OID 0)
+-- Dependencies: 271
 -- Name: index_table_id_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13563,8 +13392,8 @@ SELECT pg_catalog.setval('citydb.index_table_id_seq', 13, true);
 
 
 --
--- TOC entry 5627 (class 0 OID 0)
--- Dependencies: 286
+-- TOC entry 6135 (class 0 OID 0)
+-- Dependencies: 283
 -- Name: schema_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13572,8 +13401,8 @@ SELECT pg_catalog.setval('citydb.schema_seq', 1, false);
 
 
 --
--- TOC entry 5628 (class 0 OID 0)
--- Dependencies: 239
+-- TOC entry 6136 (class 0 OID 0)
+-- Dependencies: 288
 -- Name: surface_data_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13581,8 +13410,8 @@ SELECT pg_catalog.setval('citydb.surface_data_seq', 1, false);
 
 
 --
--- TOC entry 5629 (class 0 OID 0)
--- Dependencies: 220
+-- TOC entry 6137 (class 0 OID 0)
+-- Dependencies: 290
 -- Name: surface_geometry_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13590,8 +13419,8 @@ SELECT pg_catalog.setval('citydb.surface_geometry_seq', 6, true);
 
 
 --
--- TOC entry 5630 (class 0 OID 0)
--- Dependencies: 261
+-- TOC entry 6138 (class 0 OID 0)
+-- Dependencies: 292
 -- Name: tex_image_seq; Type: SEQUENCE SET; Schema: citydb; Owner: postgres
 --
 
@@ -13599,7 +13428,7 @@ SELECT pg_catalog.setval('citydb.tex_image_seq', 1, false);
 
 
 --
--- TOC entry 5062 (class 2606 OID 409914)
+-- TOC entry 5086 (class 2606 OID 33407)
 -- Name: address address_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13608,7 +13437,7 @@ ALTER TABLE ONLY citydb.address
 
 
 --
--- TOC entry 5032 (class 2606 OID 409867)
+-- TOC entry 5091 (class 2606 OID 33409)
 -- Name: address_to_bridge address_to_bridge_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13617,7 +13446,7 @@ ALTER TABLE ONLY citydb.address_to_bridge
 
 
 --
--- TOC entry 4667 (class 2606 OID 409569)
+-- TOC entry 5095 (class 2606 OID 33411)
 -- Name: address_to_building address_to_building_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13626,7 +13455,7 @@ ALTER TABLE ONLY citydb.address_to_building
 
 
 --
--- TOC entry 5099 (class 2606 OID 410379)
+-- TOC entry 5097 (class 2606 OID 33413)
 -- Name: ade ade_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13635,7 +13464,7 @@ ALTER TABLE ONLY citydb.ade
 
 
 --
--- TOC entry 5101 (class 2606 OID 410388)
+-- TOC entry 5099 (class 2606 OID 33415)
 -- Name: aggregation_info aggregation_info_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13644,7 +13473,7 @@ ALTER TABLE ONLY citydb.aggregation_info
 
 
 --
--- TOC entry 4751 (class 2606 OID 409636)
+-- TOC entry 5103 (class 2606 OID 33417)
 -- Name: appear_to_surface_data appear_to_surface_data_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13653,7 +13482,7 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 
 
 --
--- TOC entry 5046 (class 2606 OID 409887)
+-- TOC entry 5108 (class 2606 OID 33419)
 -- Name: appearance appearance_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13662,7 +13491,7 @@ ALTER TABLE ONLY citydb.appearance
 
 
 --
--- TOC entry 4755 (class 2606 OID 409644)
+-- TOC entry 5113 (class 2606 OID 33421)
 -- Name: breakline_relief breakline_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13671,7 +13500,7 @@ ALTER TABLE ONLY citydb.breakline_relief
 
 
 --
--- TOC entry 5015 (class 2606 OID 409862)
+-- TOC entry 5145 (class 2606 OID 33423)
 -- Name: bridge_constr_element bridge_constr_element_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13680,7 +13509,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 4957 (class 2606 OID 409820)
+-- TOC entry 5166 (class 2606 OID 33425)
 -- Name: bridge_furniture bridge_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13689,7 +13518,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 4974 (class 2606 OID 409828)
+-- TOC entry 5183 (class 2606 OID 33427)
 -- Name: bridge_installation bridge_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13698,7 +13527,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 4988 (class 2606 OID 409841)
+-- TOC entry 5187 (class 2606 OID 33429)
 -- Name: bridge_open_to_them_srf bridge_open_to_them_srf_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13707,7 +13536,7 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 
 
 --
--- TOC entry 4984 (class 2606 OID 409836)
+-- TOC entry 5197 (class 2606 OID 33431)
 -- Name: bridge_opening bridge_opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13716,7 +13545,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 4948 (class 2606 OID 409812)
+-- TOC entry 5133 (class 2606 OID 33433)
 -- Name: bridge bridge_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13725,7 +13554,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 4994 (class 2606 OID 409849)
+-- TOC entry 5203 (class 2606 OID 33435)
 -- Name: bridge_room bridge_room_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13734,7 +13563,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5004 (class 2606 OID 409854)
+-- TOC entry 5213 (class 2606 OID 33437)
 -- Name: bridge_thematic_surface bridge_thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13743,7 +13572,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 4697 (class 2606 OID 409585)
+-- TOC entry 5243 (class 2606 OID 33439)
 -- Name: building_furniture building_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13752,7 +13581,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 4714 (class 2606 OID 409593)
+-- TOC entry 5260 (class 2606 OID 33441)
 -- Name: building_installation building_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13761,7 +13590,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 4688 (class 2606 OID 409577)
+-- TOC entry 5234 (class 2606 OID 33443)
 -- Name: building building_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13770,7 +13599,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 4635 (class 2606 OID 409552)
+-- TOC entry 5283 (class 2606 OID 33445)
 -- Name: city_furniture city_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13779,7 +13608,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5073 (class 2606 OID 409932)
+-- TOC entry 5287 (class 2606 OID 33447)
 -- Name: citymodel citymodel_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13788,7 +13617,7 @@ ALTER TABLE ONLY citydb.citymodel
 
 
 --
--- TOC entry 5075 (class 2606 OID 409941)
+-- TOC entry 5298 (class 2606 OID 33449)
 -- Name: cityobject_genericattrib cityobj_genericattrib_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13797,7 +13626,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 
 
 --
--- TOC entry 4592 (class 2606 OID 409504)
+-- TOC entry 5306 (class 2606 OID 33451)
 -- Name: cityobject_member cityobject_member_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13806,7 +13635,7 @@ ALTER TABLE ONLY citydb.cityobject_member
 
 
 --
--- TOC entry 5041 (class 2606 OID 409878)
+-- TOC entry 5296 (class 2606 OID 33453)
 -- Name: cityobject cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13815,7 +13644,7 @@ ALTER TABLE ONLY citydb.cityobject
 
 
 --
--- TOC entry 4598 (class 2606 OID 409521)
+-- TOC entry 5308 (class 2606 OID 33455)
 -- Name: cityobjectgroup cityobjectgroup_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13824,7 +13653,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 
 
 --
--- TOC entry 4608 (class 2606 OID 409534)
+-- TOC entry 5314 (class 2606 OID 33457)
 -- Name: database_srs database_srs_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13833,7 +13662,7 @@ ALTER TABLE ONLY citydb.database_srs
 
 
 --
--- TOC entry 5082 (class 2606 OID 409950)
+-- TOC entry 5317 (class 2606 OID 33459)
 -- Name: external_reference external_reference_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13842,7 +13671,7 @@ ALTER TABLE ONLY citydb.external_reference
 
 
 --
--- TOC entry 4596 (class 2606 OID 409511)
+-- TOC entry 5321 (class 2606 OID 33461)
 -- Name: generalization generalization_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13851,7 +13680,7 @@ ALTER TABLE ONLY citydb.generalization
 
 
 --
--- TOC entry 4663 (class 2606 OID 409562)
+-- TOC entry 5349 (class 2606 OID 33463)
 -- Name: generic_cityobject generic_cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13860,7 +13689,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5086 (class 2606 OID 409968)
+-- TOC entry 5351 (class 2606 OID 33465)
 -- Name: grid_coverage grid_coverage_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13869,7 +13698,7 @@ ALTER TABLE ONLY citydb.grid_coverage
 
 
 --
--- TOC entry 4606 (class 2606 OID 409526)
+-- TOC entry 5356 (class 2606 OID 33467)
 -- Name: group_to_cityobject group_to_cityobject_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13878,7 +13707,7 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 
 
 --
--- TOC entry 5051 (class 2606 OID 409896)
+-- TOC entry 5360 (class 2606 OID 33469)
 -- Name: implicit_geometry implicit_geometry_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13887,7 +13716,7 @@ ALTER TABLE ONLY citydb.implicit_geometry
 
 
 --
--- TOC entry 5103 (class 2606 OID 412059)
+-- TOC entry 5362 (class 2606 OID 33471)
 -- Name: index_table index_table_pkey; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13896,7 +13725,7 @@ ALTER TABLE ONLY citydb.index_table
 
 
 --
--- TOC entry 4801 (class 2606 OID 409707)
+-- TOC entry 5370 (class 2606 OID 33473)
 -- Name: land_use land_use_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13905,7 +13734,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 4759 (class 2606 OID 409652)
+-- TOC entry 5373 (class 2606 OID 33475)
 -- Name: masspoint_relief masspoint_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13914,7 +13743,7 @@ ALTER TABLE ONLY citydb.masspoint_relief
 
 
 --
--- TOC entry 4611 (class 2606 OID 409542)
+-- TOC entry 5377 (class 2606 OID 33477)
 -- Name: objectclass objectclass_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13923,7 +13752,7 @@ ALTER TABLE ONLY citydb.objectclass
 
 
 --
--- TOC entry 4724 (class 2606 OID 409601)
+-- TOC entry 5388 (class 2606 OID 33479)
 -- Name: opening opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13932,7 +13761,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 4728 (class 2606 OID 409606)
+-- TOC entry 5392 (class 2606 OID 33481)
 -- Name: opening_to_them_surface opening_to_them_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13941,7 +13770,7 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 
 
 --
--- TOC entry 4812 (class 2606 OID 409715)
+-- TOC entry 5403 (class 2606 OID 33483)
 -- Name: plant_cover plant_cover_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13950,7 +13779,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 4856 (class 2606 OID 409752)
+-- TOC entry 5407 (class 2606 OID 33485)
 -- Name: raster_relief raster_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13959,7 +13788,7 @@ ALTER TABLE ONLY citydb.raster_relief
 
 
 --
--- TOC entry 4764 (class 2606 OID 409661)
+-- TOC entry 5411 (class 2606 OID 33487)
 -- Name: relief_component relief_component_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13968,7 +13797,7 @@ ALTER TABLE ONLY citydb.relief_component
 
 
 --
--- TOC entry 4768 (class 2606 OID 409666)
+-- TOC entry 5415 (class 2606 OID 33489)
 -- Name: relief_feat_to_rel_comp relief_feat_to_rel_comp_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13977,7 +13806,7 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 
 
 --
--- TOC entry 4771 (class 2606 OID 409675)
+-- TOC entry 5418 (class 2606 OID 33491)
 -- Name: relief_feature relief_feature_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13986,7 +13815,7 @@ ALTER TABLE ONLY citydb.relief_feature
 
 
 --
--- TOC entry 4734 (class 2606 OID 409614)
+-- TOC entry 5424 (class 2606 OID 33493)
 -- Name: room room_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -13995,7 +13824,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5089 (class 2606 OID 410333)
+-- TOC entry 5426 (class 2606 OID 33495)
 -- Name: schema schema_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14004,7 +13833,7 @@ ALTER TABLE ONLY citydb.schema
 
 
 --
--- TOC entry 5097 (class 2606 OID 410346)
+-- TOC entry 5430 (class 2606 OID 33497)
 -- Name: schema_referencing schema_referencing_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14013,7 +13842,7 @@ ALTER TABLE ONLY citydb.schema_referencing
 
 
 --
--- TOC entry 5093 (class 2606 OID 410338)
+-- TOC entry 5434 (class 2606 OID 33499)
 -- Name: schema_to_objectclass schema_to_objectclass_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14022,7 +13851,7 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 
 
 --
--- TOC entry 4831 (class 2606 OID 409723)
+-- TOC entry 5453 (class 2606 OID 33501)
 -- Name: solitary_vegetat_object solitary_veg_object_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14031,7 +13860,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5067 (class 2606 OID 409923)
+-- TOC entry 5457 (class 2606 OID 33503)
 -- Name: surface_data surface_data_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14040,7 +13869,7 @@ ALTER TABLE ONLY citydb.surface_data
 
 
 --
--- TOC entry 5059 (class 2606 OID 409905)
+-- TOC entry 5467 (class 2606 OID 33505)
 -- Name: surface_geometry surface_geometry_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14049,7 +13878,7 @@ ALTER TABLE ONLY citydb.surface_geometry
 
 
 --
--- TOC entry 5084 (class 2606 OID 409959)
+-- TOC entry 5469 (class 2606 OID 33507)
 -- Name: tex_image tex_image_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14058,7 +13887,7 @@ ALTER TABLE ONLY citydb.tex_image
 
 
 --
--- TOC entry 4747 (class 2606 OID 409631)
+-- TOC entry 5473 (class 2606 OID 33509)
 -- Name: textureparam textureparam_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14067,7 +13896,7 @@ ALTER TABLE ONLY citydb.textureparam
 
 
 --
--- TOC entry 4743 (class 2606 OID 409619)
+-- TOC entry 5482 (class 2606 OID 33511)
 -- Name: thematic_surface thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14076,7 +13905,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 4777 (class 2606 OID 409683)
+-- TOC entry 5488 (class 2606 OID 33513)
 -- Name: tin_relief tin_relief_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14085,7 +13914,7 @@ ALTER TABLE ONLY citydb.tin_relief
 
 
 --
--- TOC entry 4792 (class 2606 OID 409699)
+-- TOC entry 5495 (class 2606 OID 33515)
 -- Name: traffic_area traffic_area_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14094,7 +13923,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 4786 (class 2606 OID 409691)
+-- TOC entry 5504 (class 2606 OID 33517)
 -- Name: transportation_complex transportation_complex_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14103,7 +13932,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 4929 (class 2606 OID 409804)
+-- TOC entry 5532 (class 2606 OID 33519)
 -- Name: tunnel_furniture tunnel_furniture_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14112,7 +13941,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 4886 (class 2606 OID 409773)
+-- TOC entry 5538 (class 2606 OID 33521)
 -- Name: tunnel_hollow_space tunnel_hollow_space_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14121,7 +13950,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 4921 (class 2606 OID 409796)
+-- TOC entry 5555 (class 2606 OID 33523)
 -- Name: tunnel_installation tunnel_installation_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14130,7 +13959,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 4880 (class 2606 OID 409765)
+-- TOC entry 5559 (class 2606 OID 33525)
 -- Name: tunnel_open_to_them_srf tunnel_open_to_them_srf_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14139,7 +13968,7 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 
 
 --
--- TOC entry 4904 (class 2606 OID 409788)
+-- TOC entry 5568 (class 2606 OID 33527)
 -- Name: tunnel_opening tunnel_opening_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14148,7 +13977,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 4875 (class 2606 OID 409760)
+-- TOC entry 5523 (class 2606 OID 33529)
 -- Name: tunnel tunnel_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14157,7 +13986,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 4895 (class 2606 OID 409778)
+-- TOC entry 5577 (class 2606 OID 33531)
 -- Name: tunnel_thematic_surface tunnel_thematic_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14166,7 +13995,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 4846 (class 2606 OID 409736)
+-- TOC entry 5581 (class 2606 OID 33533)
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14175,7 +14004,7 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 
 
 --
--- TOC entry 4842 (class 2606 OID 409731)
+-- TOC entry 5592 (class 2606 OID 33535)
 -- Name: waterbody waterbody_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14184,7 +14013,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 4852 (class 2606 OID 409744)
+-- TOC entry 5598 (class 2606 OID 33537)
 -- Name: waterboundary_surface waterboundary_surface_pk; Type: CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -14193,7 +14022,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5060 (class 1259 OID 410323)
+-- TOC entry 5084 (class 1259 OID 33538)
 -- Name: address_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14201,7 +14030,7 @@ CREATE INDEX address_inx ON citydb.address USING btree (gmlid, gmlid_codespace);
 
 
 --
--- TOC entry 5063 (class 1259 OID 413934)
+-- TOC entry 5087 (class 1259 OID 33539)
 -- Name: address_point_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14209,7 +14038,7 @@ CREATE INDEX address_point_spx ON citydb.address USING gist (multi_point);
 
 
 --
--- TOC entry 5029 (class 1259 OID 410294)
+-- TOC entry 5088 (class 1259 OID 33540)
 -- Name: address_to_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14217,7 +14046,7 @@ CREATE INDEX address_to_bridge_fkx ON citydb.address_to_bridge USING btree (addr
 
 
 --
--- TOC entry 5030 (class 1259 OID 410295)
+-- TOC entry 5089 (class 1259 OID 33541)
 -- Name: address_to_bridge_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14225,7 +14054,7 @@ CREATE INDEX address_to_bridge_fkx1 ON citydb.address_to_bridge USING btree (bri
 
 
 --
--- TOC entry 4664 (class 1259 OID 410028)
+-- TOC entry 5092 (class 1259 OID 33542)
 -- Name: address_to_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14233,7 +14062,7 @@ CREATE INDEX address_to_building_fkx ON citydb.address_to_building USING btree (
 
 
 --
--- TOC entry 4665 (class 1259 OID 410029)
+-- TOC entry 5093 (class 1259 OID 33543)
 -- Name: address_to_building_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14241,7 +14070,7 @@ CREATE INDEX address_to_building_fkx1 ON citydb.address_to_building USING btree 
 
 
 --
--- TOC entry 4748 (class 1259 OID 410091)
+-- TOC entry 5100 (class 1259 OID 33544)
 -- Name: app_to_surf_data_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14249,7 +14078,7 @@ CREATE INDEX app_to_surf_data_fkx ON citydb.appear_to_surface_data USING btree (
 
 
 --
--- TOC entry 4749 (class 1259 OID 410092)
+-- TOC entry 5101 (class 1259 OID 33545)
 -- Name: app_to_surf_data_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14257,7 +14086,7 @@ CREATE INDEX app_to_surf_data_fkx1 ON citydb.appear_to_surface_data USING btree 
 
 
 --
--- TOC entry 5042 (class 1259 OID 410301)
+-- TOC entry 5104 (class 1259 OID 33546)
 -- Name: appearance_citymodel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14265,7 +14094,7 @@ CREATE INDEX appearance_citymodel_fkx ON citydb.appearance USING btree (citymode
 
 
 --
--- TOC entry 5043 (class 1259 OID 410302)
+-- TOC entry 5105 (class 1259 OID 33547)
 -- Name: appearance_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14273,7 +14102,7 @@ CREATE INDEX appearance_cityobject_fkx ON citydb.appearance USING btree (cityobj
 
 
 --
--- TOC entry 5044 (class 1259 OID 410299)
+-- TOC entry 5106 (class 1259 OID 33548)
 -- Name: appearance_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14281,7 +14110,7 @@ CREATE INDEX appearance_inx ON citydb.appearance USING btree (gmlid, gmlid_codes
 
 
 --
--- TOC entry 5047 (class 1259 OID 410300)
+-- TOC entry 5109 (class 1259 OID 33549)
 -- Name: appearance_theme_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14289,7 +14118,7 @@ CREATE INDEX appearance_theme_inx ON citydb.appearance USING btree (theme) WITH 
 
 
 --
--- TOC entry 4690 (class 1259 OID 410050)
+-- TOC entry 5236 (class 1259 OID 33550)
 -- Name: bldg_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14297,7 +14126,7 @@ CREATE INDEX bldg_furn_lod4brep_fkx ON citydb.building_furniture USING btree (lo
 
 
 --
--- TOC entry 4691 (class 1259 OID 410052)
+-- TOC entry 5237 (class 1259 OID 33551)
 -- Name: bldg_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14305,7 +14134,7 @@ CREATE INDEX bldg_furn_lod4impl_fkx ON citydb.building_furniture USING btree (lo
 
 
 --
--- TOC entry 4692 (class 1259 OID 414672)
+-- TOC entry 5238 (class 1259 OID 33552)
 -- Name: bldg_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14313,7 +14142,7 @@ CREATE INDEX bldg_furn_lod4refpt_spx ON citydb.building_furniture USING gist (lo
 
 
 --
--- TOC entry 4693 (class 1259 OID 414659)
+-- TOC entry 5239 (class 1259 OID 33553)
 -- Name: bldg_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14321,7 +14150,7 @@ CREATE INDEX bldg_furn_lod4xgeom_spx ON citydb.building_furniture USING gist (lo
 
 
 --
--- TOC entry 4694 (class 1259 OID 410355)
+-- TOC entry 5240 (class 1259 OID 33554)
 -- Name: bldg_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14329,7 +14158,7 @@ CREATE INDEX bldg_furn_objclass_fkx ON citydb.building_furniture USING btree (ob
 
 
 --
--- TOC entry 4695 (class 1259 OID 410049)
+-- TOC entry 5241 (class 1259 OID 33555)
 -- Name: bldg_furn_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14337,7 +14166,7 @@ CREATE INDEX bldg_furn_room_fkx ON citydb.building_furniture USING btree (room_i
 
 
 --
--- TOC entry 4698 (class 1259 OID 410055)
+-- TOC entry 5244 (class 1259 OID 33556)
 -- Name: bldg_inst_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14345,7 +14174,7 @@ CREATE INDEX bldg_inst_building_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4699 (class 1259 OID 410057)
+-- TOC entry 5245 (class 1259 OID 33557)
 -- Name: bldg_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14353,7 +14182,7 @@ CREATE INDEX bldg_inst_lod2brep_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4700 (class 1259 OID 410063)
+-- TOC entry 5246 (class 1259 OID 33558)
 -- Name: bldg_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14361,7 +14190,7 @@ CREATE INDEX bldg_inst_lod2impl_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4701 (class 1259 OID 414252)
+-- TOC entry 5247 (class 1259 OID 33559)
 -- Name: bldg_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14369,7 +14198,7 @@ CREATE INDEX bldg_inst_lod2refpt_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4702 (class 1259 OID 414186)
+-- TOC entry 5248 (class 1259 OID 33560)
 -- Name: bldg_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14377,7 +14206,7 @@ CREATE INDEX bldg_inst_lod2xgeom_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4703 (class 1259 OID 410058)
+-- TOC entry 5249 (class 1259 OID 33561)
 -- Name: bldg_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14385,7 +14214,7 @@ CREATE INDEX bldg_inst_lod3brep_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4704 (class 1259 OID 410064)
+-- TOC entry 5250 (class 1259 OID 33562)
 -- Name: bldg_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14393,7 +14222,7 @@ CREATE INDEX bldg_inst_lod3impl_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4705 (class 1259 OID 414274)
+-- TOC entry 5251 (class 1259 OID 33563)
 -- Name: bldg_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14401,7 +14230,7 @@ CREATE INDEX bldg_inst_lod3refpt_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4706 (class 1259 OID 414208)
+-- TOC entry 5252 (class 1259 OID 33564)
 -- Name: bldg_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14409,7 +14238,7 @@ CREATE INDEX bldg_inst_lod3xgeom_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4707 (class 1259 OID 410059)
+-- TOC entry 5253 (class 1259 OID 33565)
 -- Name: bldg_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14417,7 +14246,7 @@ CREATE INDEX bldg_inst_lod4brep_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4708 (class 1259 OID 410065)
+-- TOC entry 5254 (class 1259 OID 33566)
 -- Name: bldg_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14425,7 +14254,7 @@ CREATE INDEX bldg_inst_lod4impl_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4709 (class 1259 OID 414296)
+-- TOC entry 5255 (class 1259 OID 33567)
 -- Name: bldg_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14433,7 +14262,7 @@ CREATE INDEX bldg_inst_lod4refpt_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4710 (class 1259 OID 414230)
+-- TOC entry 5256 (class 1259 OID 33568)
 -- Name: bldg_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14441,7 +14270,7 @@ CREATE INDEX bldg_inst_lod4xgeom_spx ON citydb.building_installation USING gist 
 
 
 --
--- TOC entry 4711 (class 1259 OID 410054)
+-- TOC entry 5257 (class 1259 OID 33569)
 -- Name: bldg_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14449,7 +14278,7 @@ CREATE INDEX bldg_inst_objclass_fkx ON citydb.building_installation USING btree 
 
 
 --
--- TOC entry 4712 (class 1259 OID 410056)
+-- TOC entry 5258 (class 1259 OID 33570)
 -- Name: bldg_inst_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14457,7 +14286,7 @@ CREATE INDEX bldg_inst_room_fkx ON citydb.building_installation USING btree (roo
 
 
 --
--- TOC entry 4985 (class 1259 OID 410260)
+-- TOC entry 5184 (class 1259 OID 33571)
 -- Name: brd_open_to_them_srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14465,7 +14294,7 @@ CREATE INDEX brd_open_to_them_srf_fkx ON citydb.bridge_open_to_them_srf USING bt
 
 
 --
--- TOC entry 4986 (class 1259 OID 410261)
+-- TOC entry 5185 (class 1259 OID 33572)
 -- Name: brd_open_to_them_srf_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14473,7 +14302,7 @@ CREATE INDEX brd_open_to_them_srf_fkx1 ON citydb.bridge_open_to_them_srf USING b
 
 
 --
--- TOC entry 4995 (class 1259 OID 410269)
+-- TOC entry 5204 (class 1259 OID 33573)
 -- Name: brd_them_srf_brd_const_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14481,7 +14310,7 @@ CREATE INDEX brd_them_srf_brd_const_fkx ON citydb.bridge_thematic_surface USING 
 
 
 --
--- TOC entry 4996 (class 1259 OID 410268)
+-- TOC entry 5205 (class 1259 OID 33574)
 -- Name: brd_them_srf_brd_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14489,7 +14318,7 @@ CREATE INDEX brd_them_srf_brd_inst_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 4997 (class 1259 OID 410267)
+-- TOC entry 5206 (class 1259 OID 33575)
 -- Name: brd_them_srf_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14497,7 +14326,7 @@ CREATE INDEX brd_them_srf_brd_room_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 4998 (class 1259 OID 410266)
+-- TOC entry 5207 (class 1259 OID 33576)
 -- Name: brd_them_srf_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14505,7 +14334,7 @@ CREATE INDEX brd_them_srf_bridge_fkx ON citydb.bridge_thematic_surface USING btr
 
 
 --
--- TOC entry 4999 (class 1259 OID 410270)
+-- TOC entry 5208 (class 1259 OID 33577)
 -- Name: brd_them_srf_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14513,7 +14342,7 @@ CREATE INDEX brd_them_srf_lod2msrf_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 5000 (class 1259 OID 410271)
+-- TOC entry 5209 (class 1259 OID 33578)
 -- Name: brd_them_srf_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14521,7 +14350,7 @@ CREATE INDEX brd_them_srf_lod3msrf_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 5001 (class 1259 OID 410272)
+-- TOC entry 5210 (class 1259 OID 33579)
 -- Name: brd_them_srf_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14529,7 +14358,7 @@ CREATE INDEX brd_them_srf_lod4msrf_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 5002 (class 1259 OID 410265)
+-- TOC entry 5211 (class 1259 OID 33580)
 -- Name: brd_them_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14537,7 +14366,7 @@ CREATE INDEX brd_them_srf_objclass_fkx ON citydb.bridge_thematic_surface USING b
 
 
 --
--- TOC entry 4752 (class 1259 OID 414727)
+-- TOC entry 5110 (class 1259 OID 33581)
 -- Name: breakline_break_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14545,7 +14374,7 @@ CREATE INDEX breakline_break_spx ON citydb.breakline_relief USING gist (break_li
 
 
 --
--- TOC entry 4753 (class 1259 OID 410349)
+-- TOC entry 5111 (class 1259 OID 33582)
 -- Name: breakline_rel_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14553,7 +14382,7 @@ CREATE INDEX breakline_rel_objclass_fkx ON citydb.breakline_relief USING btree (
 
 
 --
--- TOC entry 4756 (class 1259 OID 414717)
+-- TOC entry 5114 (class 1259 OID 33583)
 -- Name: breakline_ridge_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14561,7 +14390,7 @@ CREATE INDEX breakline_ridge_spx ON citydb.breakline_relief USING gist (ridge_or
 
 
 --
--- TOC entry 5005 (class 1259 OID 413649)
+-- TOC entry 5135 (class 1259 OID 33584)
 -- Name: bridge_const_lod1refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14569,7 +14398,7 @@ CREATE INDEX bridge_const_lod1refpt_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5006 (class 1259 OID 413533)
+-- TOC entry 5136 (class 1259 OID 33585)
 -- Name: bridge_const_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14577,7 +14406,7 @@ CREATE INDEX bridge_const_lod1xgeom_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5007 (class 1259 OID 413678)
+-- TOC entry 5137 (class 1259 OID 33586)
 -- Name: bridge_const_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14585,7 +14414,7 @@ CREATE INDEX bridge_const_lod2refpt_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5008 (class 1259 OID 413562)
+-- TOC entry 5138 (class 1259 OID 33587)
 -- Name: bridge_const_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14593,7 +14422,7 @@ CREATE INDEX bridge_const_lod2xgeom_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5009 (class 1259 OID 413707)
+-- TOC entry 5139 (class 1259 OID 33588)
 -- Name: bridge_const_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14601,7 +14430,7 @@ CREATE INDEX bridge_const_lod3refpt_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5010 (class 1259 OID 413591)
+-- TOC entry 5140 (class 1259 OID 33589)
 -- Name: bridge_const_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14609,7 +14438,7 @@ CREATE INDEX bridge_const_lod3xgeom_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5011 (class 1259 OID 413736)
+-- TOC entry 5141 (class 1259 OID 33590)
 -- Name: bridge_const_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14617,7 +14446,7 @@ CREATE INDEX bridge_const_lod4refpt_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5012 (class 1259 OID 413620)
+-- TOC entry 5142 (class 1259 OID 33591)
 -- Name: bridge_const_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14625,7 +14454,7 @@ CREATE INDEX bridge_const_lod4xgeom_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5013 (class 1259 OID 410273)
+-- TOC entry 5143 (class 1259 OID 33592)
 -- Name: bridge_constr_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14633,7 +14462,7 @@ CREATE INDEX bridge_constr_bridge_fkx ON citydb.bridge_constr_element USING btre
 
 
 --
--- TOC entry 5016 (class 1259 OID 410278)
+-- TOC entry 5146 (class 1259 OID 33593)
 -- Name: bridge_constr_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14641,7 +14470,7 @@ CREATE INDEX bridge_constr_lod1brep_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5017 (class 1259 OID 410286)
+-- TOC entry 5147 (class 1259 OID 33594)
 -- Name: bridge_constr_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14649,7 +14478,7 @@ CREATE INDEX bridge_constr_lod1impl_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5018 (class 1259 OID 413417)
+-- TOC entry 5148 (class 1259 OID 33595)
 -- Name: bridge_constr_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14657,7 +14486,7 @@ CREATE INDEX bridge_constr_lod1terr_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5019 (class 1259 OID 410279)
+-- TOC entry 5149 (class 1259 OID 33596)
 -- Name: bridge_constr_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14665,7 +14494,7 @@ CREATE INDEX bridge_constr_lod2brep_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5020 (class 1259 OID 410287)
+-- TOC entry 5150 (class 1259 OID 33597)
 -- Name: bridge_constr_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14673,7 +14502,7 @@ CREATE INDEX bridge_constr_lod2impl_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5021 (class 1259 OID 413446)
+-- TOC entry 5151 (class 1259 OID 33598)
 -- Name: bridge_constr_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14681,7 +14510,7 @@ CREATE INDEX bridge_constr_lod2terr_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5022 (class 1259 OID 410280)
+-- TOC entry 5152 (class 1259 OID 33599)
 -- Name: bridge_constr_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14689,7 +14518,7 @@ CREATE INDEX bridge_constr_lod3brep_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5023 (class 1259 OID 410288)
+-- TOC entry 5153 (class 1259 OID 33600)
 -- Name: bridge_constr_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14697,7 +14526,7 @@ CREATE INDEX bridge_constr_lod3impl_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5024 (class 1259 OID 413475)
+-- TOC entry 5154 (class 1259 OID 33601)
 -- Name: bridge_constr_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14705,7 +14534,7 @@ CREATE INDEX bridge_constr_lod3terr_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5025 (class 1259 OID 410281)
+-- TOC entry 5155 (class 1259 OID 33602)
 -- Name: bridge_constr_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14713,7 +14542,7 @@ CREATE INDEX bridge_constr_lod4brep_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5026 (class 1259 OID 410289)
+-- TOC entry 5156 (class 1259 OID 33603)
 -- Name: bridge_constr_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14721,7 +14550,7 @@ CREATE INDEX bridge_constr_lod4impl_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 5027 (class 1259 OID 413504)
+-- TOC entry 5157 (class 1259 OID 33604)
 -- Name: bridge_constr_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14729,7 +14558,7 @@ CREATE INDEX bridge_constr_lod4terr_spx ON citydb.bridge_constr_element USING gi
 
 
 --
--- TOC entry 5028 (class 1259 OID 410351)
+-- TOC entry 5158 (class 1259 OID 33605)
 -- Name: bridge_constr_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14737,7 +14566,7 @@ CREATE INDEX bridge_constr_objclass_fkx ON citydb.bridge_constr_element USING bt
 
 
 --
--- TOC entry 4950 (class 1259 OID 410232)
+-- TOC entry 5159 (class 1259 OID 33606)
 -- Name: bridge_furn_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14745,7 +14574,7 @@ CREATE INDEX bridge_furn_brd_room_fkx ON citydb.bridge_furniture USING btree (br
 
 
 --
--- TOC entry 4951 (class 1259 OID 410233)
+-- TOC entry 5160 (class 1259 OID 33607)
 -- Name: bridge_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14753,7 +14582,7 @@ CREATE INDEX bridge_furn_lod4brep_fkx ON citydb.bridge_furniture USING btree (lo
 
 
 --
--- TOC entry 4952 (class 1259 OID 410235)
+-- TOC entry 5161 (class 1259 OID 33608)
 -- Name: bridge_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14761,7 +14590,7 @@ CREATE INDEX bridge_furn_lod4impl_fkx ON citydb.bridge_furniture USING btree (lo
 
 
 --
--- TOC entry 4953 (class 1259 OID 414707)
+-- TOC entry 5162 (class 1259 OID 33609)
 -- Name: bridge_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14769,7 +14598,7 @@ CREATE INDEX bridge_furn_lod4refpt_spx ON citydb.bridge_furniture USING gist (lo
 
 
 --
--- TOC entry 4954 (class 1259 OID 414694)
+-- TOC entry 5163 (class 1259 OID 33610)
 -- Name: bridge_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14777,7 +14606,7 @@ CREATE INDEX bridge_furn_lod4xgeom_spx ON citydb.bridge_furniture USING gist (lo
 
 
 --
--- TOC entry 4955 (class 1259 OID 410352)
+-- TOC entry 5164 (class 1259 OID 33611)
 -- Name: bridge_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14785,7 +14614,7 @@ CREATE INDEX bridge_furn_objclass_fkx ON citydb.bridge_furniture USING btree (ob
 
 
 --
--- TOC entry 4958 (class 1259 OID 410239)
+-- TOC entry 5167 (class 1259 OID 33612)
 -- Name: bridge_inst_brd_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14793,7 +14622,7 @@ CREATE INDEX bridge_inst_brd_room_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4959 (class 1259 OID 410238)
+-- TOC entry 5168 (class 1259 OID 33613)
 -- Name: bridge_inst_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14801,7 +14630,7 @@ CREATE INDEX bridge_inst_bridge_fkx ON citydb.bridge_installation USING btree (b
 
 
 --
--- TOC entry 4960 (class 1259 OID 410240)
+-- TOC entry 5169 (class 1259 OID 33614)
 -- Name: bridge_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14809,7 +14638,7 @@ CREATE INDEX bridge_inst_lod2brep_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4961 (class 1259 OID 410246)
+-- TOC entry 5170 (class 1259 OID 33615)
 -- Name: bridge_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14817,7 +14646,7 @@ CREATE INDEX bridge_inst_lod2impl_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4962 (class 1259 OID 413314)
+-- TOC entry 5171 (class 1259 OID 33616)
 -- Name: bridge_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14825,7 +14654,7 @@ CREATE INDEX bridge_inst_lod2refpt_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4963 (class 1259 OID 413248)
+-- TOC entry 5172 (class 1259 OID 33617)
 -- Name: bridge_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14833,7 +14662,7 @@ CREATE INDEX bridge_inst_lod2xgeom_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4964 (class 1259 OID 410241)
+-- TOC entry 5173 (class 1259 OID 33618)
 -- Name: bridge_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14841,7 +14670,7 @@ CREATE INDEX bridge_inst_lod3brep_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4965 (class 1259 OID 410247)
+-- TOC entry 5174 (class 1259 OID 33619)
 -- Name: bridge_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14849,7 +14678,7 @@ CREATE INDEX bridge_inst_lod3impl_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4966 (class 1259 OID 413336)
+-- TOC entry 5175 (class 1259 OID 33620)
 -- Name: bridge_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14857,7 +14686,7 @@ CREATE INDEX bridge_inst_lod3refpt_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4967 (class 1259 OID 413270)
+-- TOC entry 5176 (class 1259 OID 33621)
 -- Name: bridge_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14865,7 +14694,7 @@ CREATE INDEX bridge_inst_lod3xgeom_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4968 (class 1259 OID 410242)
+-- TOC entry 5177 (class 1259 OID 33622)
 -- Name: bridge_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14873,7 +14702,7 @@ CREATE INDEX bridge_inst_lod4brep_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4969 (class 1259 OID 410248)
+-- TOC entry 5178 (class 1259 OID 33623)
 -- Name: bridge_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14881,7 +14710,7 @@ CREATE INDEX bridge_inst_lod4impl_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4970 (class 1259 OID 413358)
+-- TOC entry 5179 (class 1259 OID 33624)
 -- Name: bridge_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14889,7 +14718,7 @@ CREATE INDEX bridge_inst_lod4refpt_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4971 (class 1259 OID 413292)
+-- TOC entry 5180 (class 1259 OID 33625)
 -- Name: bridge_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14897,7 +14726,7 @@ CREATE INDEX bridge_inst_lod4xgeom_spx ON citydb.bridge_installation USING gist 
 
 
 --
--- TOC entry 4972 (class 1259 OID 410237)
+-- TOC entry 5181 (class 1259 OID 33626)
 -- Name: bridge_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14905,7 +14734,7 @@ CREATE INDEX bridge_inst_objclass_fkx ON citydb.bridge_installation USING btree 
 
 
 --
--- TOC entry 4930 (class 1259 OID 410224)
+-- TOC entry 5115 (class 1259 OID 33627)
 -- Name: bridge_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14913,7 +14742,7 @@ CREATE INDEX bridge_lod1msrf_fkx ON citydb.bridge USING btree (lod1_multi_surfac
 
 
 --
--- TOC entry 4931 (class 1259 OID 410228)
+-- TOC entry 5116 (class 1259 OID 33628)
 -- Name: bridge_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14921,7 +14750,7 @@ CREATE INDEX bridge_lod1solid_fkx ON citydb.bridge USING btree (lod1_solid_id) W
 
 
 --
--- TOC entry 4932 (class 1259 OID 414321)
+-- TOC entry 5117 (class 1259 OID 33629)
 -- Name: bridge_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14929,7 +14758,7 @@ CREATE INDEX bridge_lod1terr_spx ON citydb.bridge USING gist (lod1_terrain_inter
 
 
 --
--- TOC entry 4933 (class 1259 OID 414421)
+-- TOC entry 5118 (class 1259 OID 33630)
 -- Name: bridge_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14937,7 +14766,7 @@ CREATE INDEX bridge_lod2curve_spx ON citydb.bridge USING gist (lod2_multi_curve)
 
 
 --
--- TOC entry 4934 (class 1259 OID 410225)
+-- TOC entry 5119 (class 1259 OID 33631)
 -- Name: bridge_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14945,7 +14774,7 @@ CREATE INDEX bridge_lod2msrf_fkx ON citydb.bridge USING btree (lod2_multi_surfac
 
 
 --
--- TOC entry 4935 (class 1259 OID 410229)
+-- TOC entry 5120 (class 1259 OID 33632)
 -- Name: bridge_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14953,7 +14782,7 @@ CREATE INDEX bridge_lod2solid_fkx ON citydb.bridge USING btree (lod2_solid_id) W
 
 
 --
--- TOC entry 4936 (class 1259 OID 414346)
+-- TOC entry 5121 (class 1259 OID 33633)
 -- Name: bridge_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14961,7 +14790,7 @@ CREATE INDEX bridge_lod2terr_spx ON citydb.bridge USING gist (lod2_terrain_inter
 
 
 --
--- TOC entry 4937 (class 1259 OID 414446)
+-- TOC entry 5122 (class 1259 OID 33634)
 -- Name: bridge_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14969,7 +14798,7 @@ CREATE INDEX bridge_lod3curve_spx ON citydb.bridge USING gist (lod3_multi_curve)
 
 
 --
--- TOC entry 4938 (class 1259 OID 410226)
+-- TOC entry 5123 (class 1259 OID 33635)
 -- Name: bridge_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14977,7 +14806,7 @@ CREATE INDEX bridge_lod3msrf_fkx ON citydb.bridge USING btree (lod3_multi_surfac
 
 
 --
--- TOC entry 4939 (class 1259 OID 410230)
+-- TOC entry 5124 (class 1259 OID 33636)
 -- Name: bridge_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14985,7 +14814,7 @@ CREATE INDEX bridge_lod3solid_fkx ON citydb.bridge USING btree (lod3_solid_id) W
 
 
 --
--- TOC entry 4940 (class 1259 OID 414371)
+-- TOC entry 5125 (class 1259 OID 33637)
 -- Name: bridge_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -14993,7 +14822,7 @@ CREATE INDEX bridge_lod3terr_spx ON citydb.bridge USING gist (lod3_terrain_inter
 
 
 --
--- TOC entry 4941 (class 1259 OID 414471)
+-- TOC entry 5126 (class 1259 OID 33638)
 -- Name: bridge_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15001,7 +14830,7 @@ CREATE INDEX bridge_lod4curve_spx ON citydb.bridge USING gist (lod4_multi_curve)
 
 
 --
--- TOC entry 4942 (class 1259 OID 410227)
+-- TOC entry 5127 (class 1259 OID 33639)
 -- Name: bridge_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15009,7 +14838,7 @@ CREATE INDEX bridge_lod4msrf_fkx ON citydb.bridge USING btree (lod4_multi_surfac
 
 
 --
--- TOC entry 4943 (class 1259 OID 410231)
+-- TOC entry 5128 (class 1259 OID 33640)
 -- Name: bridge_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15017,7 +14846,7 @@ CREATE INDEX bridge_lod4solid_fkx ON citydb.bridge USING btree (lod4_solid_id) W
 
 
 --
--- TOC entry 4944 (class 1259 OID 414396)
+-- TOC entry 5129 (class 1259 OID 33641)
 -- Name: bridge_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15025,7 +14854,7 @@ CREATE INDEX bridge_lod4terr_spx ON citydb.bridge USING gist (lod4_terrain_inter
 
 
 --
--- TOC entry 4945 (class 1259 OID 410350)
+-- TOC entry 5130 (class 1259 OID 33642)
 -- Name: bridge_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15033,7 +14862,7 @@ CREATE INDEX bridge_objectclass_fkx ON citydb.bridge USING btree (objectclass_id
 
 
 --
--- TOC entry 4975 (class 1259 OID 410253)
+-- TOC entry 5188 (class 1259 OID 33643)
 -- Name: bridge_open_address_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15041,7 +14870,7 @@ CREATE INDEX bridge_open_address_fkx ON citydb.bridge_opening USING btree (addre
 
 
 --
--- TOC entry 4976 (class 1259 OID 410256)
+-- TOC entry 5189 (class 1259 OID 33644)
 -- Name: bridge_open_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15049,7 +14878,7 @@ CREATE INDEX bridge_open_lod3impl_fkx ON citydb.bridge_opening USING btree (lod3
 
 
 --
--- TOC entry 4977 (class 1259 OID 410254)
+-- TOC entry 5190 (class 1259 OID 33645)
 -- Name: bridge_open_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15057,7 +14886,7 @@ CREATE INDEX bridge_open_lod3msrf_fkx ON citydb.bridge_opening USING btree (lod3
 
 
 --
--- TOC entry 4978 (class 1259 OID 413373)
+-- TOC entry 5191 (class 1259 OID 33646)
 -- Name: bridge_open_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15065,7 +14894,7 @@ CREATE INDEX bridge_open_lod3refpt_spx ON citydb.bridge_opening USING gist (lod3
 
 
 --
--- TOC entry 4979 (class 1259 OID 410257)
+-- TOC entry 5192 (class 1259 OID 33647)
 -- Name: bridge_open_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15073,7 +14902,7 @@ CREATE INDEX bridge_open_lod4impl_fkx ON citydb.bridge_opening USING btree (lod4
 
 
 --
--- TOC entry 4980 (class 1259 OID 410255)
+-- TOC entry 5193 (class 1259 OID 33648)
 -- Name: bridge_open_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15081,7 +14910,7 @@ CREATE INDEX bridge_open_lod4msrf_fkx ON citydb.bridge_opening USING btree (lod4
 
 
 --
--- TOC entry 4981 (class 1259 OID 413388)
+-- TOC entry 5194 (class 1259 OID 33649)
 -- Name: bridge_open_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15089,7 +14918,7 @@ CREATE INDEX bridge_open_lod4refpt_spx ON citydb.bridge_opening USING gist (lod4
 
 
 --
--- TOC entry 4982 (class 1259 OID 410252)
+-- TOC entry 5195 (class 1259 OID 33650)
 -- Name: bridge_open_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15097,7 +14926,7 @@ CREATE INDEX bridge_open_objclass_fkx ON citydb.bridge_opening USING btree (obje
 
 
 --
--- TOC entry 4946 (class 1259 OID 410215)
+-- TOC entry 5131 (class 1259 OID 33651)
 -- Name: bridge_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15105,7 +14934,7 @@ CREATE INDEX bridge_parent_fkx ON citydb.bridge USING btree (bridge_parent_id) W
 
 
 --
--- TOC entry 4989 (class 1259 OID 410262)
+-- TOC entry 5198 (class 1259 OID 33652)
 -- Name: bridge_room_bridge_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15113,7 +14942,7 @@ CREATE INDEX bridge_room_bridge_fkx ON citydb.bridge_room USING btree (bridge_id
 
 
 --
--- TOC entry 4990 (class 1259 OID 410263)
+-- TOC entry 5199 (class 1259 OID 33653)
 -- Name: bridge_room_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15121,7 +14950,7 @@ CREATE INDEX bridge_room_lod4msrf_fkx ON citydb.bridge_room USING btree (lod4_mu
 
 
 --
--- TOC entry 4991 (class 1259 OID 410264)
+-- TOC entry 5200 (class 1259 OID 33654)
 -- Name: bridge_room_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15129,7 +14958,7 @@ CREATE INDEX bridge_room_lod4solid_fkx ON citydb.bridge_room USING btree (lod4_s
 
 
 --
--- TOC entry 4992 (class 1259 OID 410353)
+-- TOC entry 5201 (class 1259 OID 33655)
 -- Name: bridge_room_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15137,7 +14966,7 @@ CREATE INDEX bridge_room_objclass_fkx ON citydb.bridge_room USING btree (objectc
 
 
 --
--- TOC entry 4949 (class 1259 OID 410216)
+-- TOC entry 5134 (class 1259 OID 33656)
 -- Name: bridge_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15145,7 +14974,7 @@ CREATE INDEX bridge_root_fkx ON citydb.bridge USING btree (bridge_root_id) WITH 
 
 
 --
--- TOC entry 4668 (class 1259 OID 410039)
+-- TOC entry 5214 (class 1259 OID 33657)
 -- Name: building_lod0footprint_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15153,7 +14982,7 @@ CREATE INDEX building_lod0footprint_fkx ON citydb.building USING btree (lod0_foo
 
 
 --
--- TOC entry 4669 (class 1259 OID 410040)
+-- TOC entry 5215 (class 1259 OID 33658)
 -- Name: building_lod0roofprint_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15161,7 +14990,7 @@ CREATE INDEX building_lod0roofprint_fkx ON citydb.building USING btree (lod0_roo
 
 
 --
--- TOC entry 4670 (class 1259 OID 410041)
+-- TOC entry 5216 (class 1259 OID 33659)
 -- Name: building_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15169,7 +14998,7 @@ CREATE INDEX building_lod1msrf_fkx ON citydb.building USING btree (lod1_multi_su
 
 
 --
--- TOC entry 4671 (class 1259 OID 410045)
+-- TOC entry 5217 (class 1259 OID 33660)
 -- Name: building_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15177,7 +15006,7 @@ CREATE INDEX building_lod1solid_fkx ON citydb.building USING btree (lod1_solid_i
 
 
 --
--- TOC entry 4672 (class 1259 OID 414002)
+-- TOC entry 5218 (class 1259 OID 33661)
 -- Name: building_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15185,7 +15014,7 @@ CREATE INDEX building_lod1terr_spx ON citydb.building USING gist (lod1_terrain_i
 
 
 --
--- TOC entry 4673 (class 1259 OID 414110)
+-- TOC entry 5219 (class 1259 OID 33662)
 -- Name: building_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15193,7 +15022,7 @@ CREATE INDEX building_lod2curve_spx ON citydb.building USING gist (lod2_multi_cu
 
 
 --
--- TOC entry 4674 (class 1259 OID 410042)
+-- TOC entry 5220 (class 1259 OID 33663)
 -- Name: building_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15201,7 +15030,7 @@ CREATE INDEX building_lod2msrf_fkx ON citydb.building USING btree (lod2_multi_su
 
 
 --
--- TOC entry 4675 (class 1259 OID 410046)
+-- TOC entry 5221 (class 1259 OID 33664)
 -- Name: building_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15209,7 +15038,7 @@ CREATE INDEX building_lod2solid_fkx ON citydb.building USING btree (lod2_solid_i
 
 
 --
--- TOC entry 4676 (class 1259 OID 414029)
+-- TOC entry 5222 (class 1259 OID 33665)
 -- Name: building_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15217,7 +15046,7 @@ CREATE INDEX building_lod2terr_spx ON citydb.building USING gist (lod2_terrain_i
 
 
 --
--- TOC entry 4677 (class 1259 OID 414137)
+-- TOC entry 5223 (class 1259 OID 33666)
 -- Name: building_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15225,7 +15054,7 @@ CREATE INDEX building_lod3curve_spx ON citydb.building USING gist (lod3_multi_cu
 
 
 --
--- TOC entry 4678 (class 1259 OID 410043)
+-- TOC entry 5224 (class 1259 OID 33667)
 -- Name: building_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15233,7 +15062,7 @@ CREATE INDEX building_lod3msrf_fkx ON citydb.building USING btree (lod3_multi_su
 
 
 --
--- TOC entry 4679 (class 1259 OID 410047)
+-- TOC entry 5225 (class 1259 OID 33668)
 -- Name: building_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15241,7 +15070,7 @@ CREATE INDEX building_lod3solid_fkx ON citydb.building USING btree (lod3_solid_i
 
 
 --
--- TOC entry 4680 (class 1259 OID 414056)
+-- TOC entry 5226 (class 1259 OID 33669)
 -- Name: building_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15249,7 +15078,7 @@ CREATE INDEX building_lod3terr_spx ON citydb.building USING gist (lod3_terrain_i
 
 
 --
--- TOC entry 4681 (class 1259 OID 414164)
+-- TOC entry 5227 (class 1259 OID 33670)
 -- Name: building_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15257,7 +15086,7 @@ CREATE INDEX building_lod4curve_spx ON citydb.building USING gist (lod4_multi_cu
 
 
 --
--- TOC entry 4682 (class 1259 OID 410044)
+-- TOC entry 5228 (class 1259 OID 33671)
 -- Name: building_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15265,7 +15094,7 @@ CREATE INDEX building_lod4msrf_fkx ON citydb.building USING btree (lod4_multi_su
 
 
 --
--- TOC entry 4683 (class 1259 OID 410048)
+-- TOC entry 5229 (class 1259 OID 33672)
 -- Name: building_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15273,7 +15102,7 @@ CREATE INDEX building_lod4solid_fkx ON citydb.building USING btree (lod4_solid_i
 
 
 --
--- TOC entry 4684 (class 1259 OID 414083)
+-- TOC entry 5230 (class 1259 OID 33673)
 -- Name: building_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15281,7 +15110,7 @@ CREATE INDEX building_lod4terr_spx ON citydb.building USING gist (lod4_terrain_i
 
 
 --
--- TOC entry 4685 (class 1259 OID 410354)
+-- TOC entry 5231 (class 1259 OID 33674)
 -- Name: building_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15289,7 +15118,7 @@ CREATE INDEX building_objectclass_fkx ON citydb.building USING btree (objectclas
 
 
 --
--- TOC entry 4686 (class 1259 OID 410030)
+-- TOC entry 5232 (class 1259 OID 33675)
 -- Name: building_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15297,7 +15126,7 @@ CREATE INDEX building_parent_fkx ON citydb.building USING btree (building_parent
 
 
 --
--- TOC entry 4689 (class 1259 OID 410031)
+-- TOC entry 5235 (class 1259 OID 33676)
 -- Name: building_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15305,7 +15134,7 @@ CREATE INDEX building_root_fkx ON citydb.building USING btree (building_root_id)
 
 
 --
--- TOC entry 4613 (class 1259 OID 409987)
+-- TOC entry 5261 (class 1259 OID 33677)
 -- Name: city_furn_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15313,7 +15142,7 @@ CREATE INDEX city_furn_lod1brep_fkx ON citydb.city_furniture USING btree (lod1_b
 
 
 --
--- TOC entry 4614 (class 1259 OID 409995)
+-- TOC entry 5262 (class 1259 OID 33678)
 -- Name: city_furn_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15321,7 +15150,7 @@ CREATE INDEX city_furn_lod1impl_fkx ON citydb.city_furniture USING btree (lod1_i
 
 
 --
--- TOC entry 4615 (class 1259 OID 412367)
+-- TOC entry 5263 (class 1259 OID 33679)
 -- Name: city_furn_lod1refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15329,7 +15158,7 @@ CREATE INDEX city_furn_lod1refpnt_spx ON citydb.city_furniture USING gist (lod1_
 
 
 --
--- TOC entry 4616 (class 1259 OID 412143)
+-- TOC entry 5264 (class 1259 OID 33680)
 -- Name: city_furn_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15337,7 +15166,7 @@ CREATE INDEX city_furn_lod1terr_spx ON citydb.city_furniture USING gist (lod1_te
 
 
 --
--- TOC entry 4617 (class 1259 OID 412255)
+-- TOC entry 5265 (class 1259 OID 33681)
 -- Name: city_furn_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15345,7 +15174,7 @@ CREATE INDEX city_furn_lod1xgeom_spx ON citydb.city_furniture USING gist (lod1_o
 
 
 --
--- TOC entry 4618 (class 1259 OID 409988)
+-- TOC entry 5266 (class 1259 OID 33682)
 -- Name: city_furn_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15353,7 +15182,7 @@ CREATE INDEX city_furn_lod2brep_fkx ON citydb.city_furniture USING btree (lod2_b
 
 
 --
--- TOC entry 4619 (class 1259 OID 409996)
+-- TOC entry 5267 (class 1259 OID 33683)
 -- Name: city_furn_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15361,7 +15190,7 @@ CREATE INDEX city_furn_lod2impl_fkx ON citydb.city_furniture USING btree (lod2_i
 
 
 --
--- TOC entry 4620 (class 1259 OID 412395)
+-- TOC entry 5268 (class 1259 OID 33684)
 -- Name: city_furn_lod2refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15369,7 +15198,7 @@ CREATE INDEX city_furn_lod2refpnt_spx ON citydb.city_furniture USING gist (lod2_
 
 
 --
--- TOC entry 4621 (class 1259 OID 412171)
+-- TOC entry 5269 (class 1259 OID 33685)
 -- Name: city_furn_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15377,7 +15206,7 @@ CREATE INDEX city_furn_lod2terr_spx ON citydb.city_furniture USING gist (lod2_te
 
 
 --
--- TOC entry 4622 (class 1259 OID 412283)
+-- TOC entry 5270 (class 1259 OID 33686)
 -- Name: city_furn_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15385,7 +15214,7 @@ CREATE INDEX city_furn_lod2xgeom_spx ON citydb.city_furniture USING gist (lod2_o
 
 
 --
--- TOC entry 4623 (class 1259 OID 409989)
+-- TOC entry 5271 (class 1259 OID 33687)
 -- Name: city_furn_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15393,7 +15222,7 @@ CREATE INDEX city_furn_lod3brep_fkx ON citydb.city_furniture USING btree (lod3_b
 
 
 --
--- TOC entry 4624 (class 1259 OID 409997)
+-- TOC entry 5272 (class 1259 OID 33688)
 -- Name: city_furn_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15401,7 +15230,7 @@ CREATE INDEX city_furn_lod3impl_fkx ON citydb.city_furniture USING btree (lod3_i
 
 
 --
--- TOC entry 4625 (class 1259 OID 412423)
+-- TOC entry 5273 (class 1259 OID 33689)
 -- Name: city_furn_lod3refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15409,7 +15238,7 @@ CREATE INDEX city_furn_lod3refpnt_spx ON citydb.city_furniture USING gist (lod3_
 
 
 --
--- TOC entry 4626 (class 1259 OID 412199)
+-- TOC entry 5274 (class 1259 OID 33690)
 -- Name: city_furn_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15417,7 +15246,7 @@ CREATE INDEX city_furn_lod3terr_spx ON citydb.city_furniture USING gist (lod3_te
 
 
 --
--- TOC entry 4627 (class 1259 OID 412311)
+-- TOC entry 5275 (class 1259 OID 33691)
 -- Name: city_furn_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15425,7 +15254,7 @@ CREATE INDEX city_furn_lod3xgeom_spx ON citydb.city_furniture USING gist (lod3_o
 
 
 --
--- TOC entry 4628 (class 1259 OID 409990)
+-- TOC entry 5276 (class 1259 OID 33692)
 -- Name: city_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15433,7 +15262,7 @@ CREATE INDEX city_furn_lod4brep_fkx ON citydb.city_furniture USING btree (lod4_b
 
 
 --
--- TOC entry 4629 (class 1259 OID 409998)
+-- TOC entry 5277 (class 1259 OID 33693)
 -- Name: city_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15441,7 +15270,7 @@ CREATE INDEX city_furn_lod4impl_fkx ON citydb.city_furniture USING btree (lod4_i
 
 
 --
--- TOC entry 4630 (class 1259 OID 412451)
+-- TOC entry 5278 (class 1259 OID 33694)
 -- Name: city_furn_lod4refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15449,7 +15278,7 @@ CREATE INDEX city_furn_lod4refpnt_spx ON citydb.city_furniture USING gist (lod4_
 
 
 --
--- TOC entry 4631 (class 1259 OID 412227)
+-- TOC entry 5279 (class 1259 OID 33695)
 -- Name: city_furn_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15457,7 +15286,7 @@ CREATE INDEX city_furn_lod4terr_spx ON citydb.city_furniture USING gist (lod4_te
 
 
 --
--- TOC entry 4632 (class 1259 OID 412339)
+-- TOC entry 5280 (class 1259 OID 33696)
 -- Name: city_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15465,7 +15294,7 @@ CREATE INDEX city_furn_lod4xgeom_spx ON citydb.city_furniture USING gist (lod4_o
 
 
 --
--- TOC entry 4633 (class 1259 OID 410356)
+-- TOC entry 5281 (class 1259 OID 33697)
 -- Name: city_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15473,7 +15302,7 @@ CREATE INDEX city_furn_objclass_fkx ON citydb.city_furniture USING btree (object
 
 
 --
--- TOC entry 5070 (class 1259 OID 413888)
+-- TOC entry 5284 (class 1259 OID 33698)
 -- Name: citymodel_envelope_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15481,7 +15310,7 @@ CREATE INDEX citymodel_envelope_spx ON citydb.citymodel USING gist (envelope);
 
 
 --
--- TOC entry 5071 (class 1259 OID 410314)
+-- TOC entry 5285 (class 1259 OID 33699)
 -- Name: citymodel_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15489,7 +15318,7 @@ CREATE INDEX citymodel_inx ON citydb.citymodel USING btree (gmlid, gmlid_codespa
 
 
 --
--- TOC entry 5033 (class 1259 OID 410389)
+-- TOC entry 5288 (class 1259 OID 33700)
 -- Name: cityobj_creation_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15497,7 +15326,7 @@ CREATE INDEX cityobj_creation_date_inx ON citydb.cityobject USING btree (creatio
 
 
 --
--- TOC entry 5034 (class 1259 OID 410391)
+-- TOC entry 5289 (class 1259 OID 33701)
 -- Name: cityobj_last_mod_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15505,7 +15334,7 @@ CREATE INDEX cityobj_last_mod_date_inx ON citydb.cityobject USING btree (last_mo
 
 
 --
--- TOC entry 5035 (class 1259 OID 410390)
+-- TOC entry 5290 (class 1259 OID 33702)
 -- Name: cityobj_term_date_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15513,7 +15342,7 @@ CREATE INDEX cityobj_term_date_inx ON citydb.cityobject USING btree (termination
 
 
 --
--- TOC entry 5036 (class 1259 OID 414741)
+-- TOC entry 5291 (class 1259 OID 33703)
 -- Name: cityobject_envelope_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15521,7 +15350,7 @@ CREATE INDEX cityobject_envelope_spx ON citydb.cityobject USING gist (envelope);
 
 
 --
--- TOC entry 5037 (class 1259 OID 410296)
+-- TOC entry 5292 (class 1259 OID 33704)
 -- Name: cityobject_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15529,7 +15358,7 @@ CREATE INDEX cityobject_inx ON citydb.cityobject USING btree (gmlid, gmlid_codes
 
 
 --
--- TOC entry 5038 (class 1259 OID 410321)
+-- TOC entry 5293 (class 1259 OID 33705)
 -- Name: cityobject_lineage_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15537,7 +15366,7 @@ CREATE INDEX cityobject_lineage_inx ON citydb.cityobject USING btree (lineage);
 
 
 --
--- TOC entry 4589 (class 1259 OID 409973)
+-- TOC entry 5303 (class 1259 OID 33706)
 -- Name: cityobject_member_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15545,7 +15374,7 @@ CREATE INDEX cityobject_member_fkx ON citydb.cityobject_member USING btree (city
 
 
 --
--- TOC entry 4590 (class 1259 OID 409974)
+-- TOC entry 5304 (class 1259 OID 33707)
 -- Name: cityobject_member_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15553,7 +15382,7 @@ CREATE INDEX cityobject_member_fkx1 ON citydb.cityobject_member USING btree (cit
 
 
 --
--- TOC entry 5039 (class 1259 OID 410297)
+-- TOC entry 5294 (class 1259 OID 33708)
 -- Name: cityobject_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15561,7 +15390,7 @@ CREATE INDEX cityobject_objectclass_fkx ON citydb.cityobject USING btree (object
 
 
 --
--- TOC entry 5080 (class 1259 OID 410319)
+-- TOC entry 5315 (class 1259 OID 33709)
 -- Name: ext_ref_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15569,7 +15398,7 @@ CREATE INDEX ext_ref_cityobject_fkx ON citydb.external_reference USING btree (ci
 
 
 --
--- TOC entry 4636 (class 1259 OID 410008)
+-- TOC entry 5322 (class 1259 OID 33710)
 -- Name: gen_object_lod0brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15577,7 +15406,7 @@ CREATE INDEX gen_object_lod0brep_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4637 (class 1259 OID 410018)
+-- TOC entry 5323 (class 1259 OID 33711)
 -- Name: gen_object_lod0impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15585,7 +15414,7 @@ CREATE INDEX gen_object_lod0impl_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4638 (class 1259 OID 412814)
+-- TOC entry 5324 (class 1259 OID 33712)
 -- Name: gen_object_lod0refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15593,7 +15422,7 @@ CREATE INDEX gen_object_lod0refpnt_spx ON citydb.generic_cityobject USING gist (
 
 
 --
--- TOC entry 4639 (class 1259 OID 412484)
+-- TOC entry 5325 (class 1259 OID 33713)
 -- Name: gen_object_lod0terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15601,7 +15430,7 @@ CREATE INDEX gen_object_lod0terr_spx ON citydb.generic_cityobject USING gist (lo
 
 
 --
--- TOC entry 4640 (class 1259 OID 412649)
+-- TOC entry 5326 (class 1259 OID 33714)
 -- Name: gen_object_lod0xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15609,7 +15438,7 @@ CREATE INDEX gen_object_lod0xgeom_spx ON citydb.generic_cityobject USING gist (l
 
 
 --
--- TOC entry 4641 (class 1259 OID 410009)
+-- TOC entry 5327 (class 1259 OID 33715)
 -- Name: gen_object_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15617,7 +15446,7 @@ CREATE INDEX gen_object_lod1brep_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4642 (class 1259 OID 410019)
+-- TOC entry 5328 (class 1259 OID 33716)
 -- Name: gen_object_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15625,7 +15454,7 @@ CREATE INDEX gen_object_lod1impl_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4643 (class 1259 OID 412847)
+-- TOC entry 5329 (class 1259 OID 33717)
 -- Name: gen_object_lod1refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15633,7 +15462,7 @@ CREATE INDEX gen_object_lod1refpnt_spx ON citydb.generic_cityobject USING gist (
 
 
 --
--- TOC entry 4644 (class 1259 OID 412517)
+-- TOC entry 5330 (class 1259 OID 33718)
 -- Name: gen_object_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15641,7 +15470,7 @@ CREATE INDEX gen_object_lod1terr_spx ON citydb.generic_cityobject USING gist (lo
 
 
 --
--- TOC entry 4645 (class 1259 OID 412682)
+-- TOC entry 5331 (class 1259 OID 33719)
 -- Name: gen_object_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15649,7 +15478,7 @@ CREATE INDEX gen_object_lod1xgeom_spx ON citydb.generic_cityobject USING gist (l
 
 
 --
--- TOC entry 4646 (class 1259 OID 410010)
+-- TOC entry 5332 (class 1259 OID 33720)
 -- Name: gen_object_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15657,7 +15486,7 @@ CREATE INDEX gen_object_lod2brep_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4647 (class 1259 OID 410020)
+-- TOC entry 5333 (class 1259 OID 33721)
 -- Name: gen_object_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15665,7 +15494,7 @@ CREATE INDEX gen_object_lod2impl_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4648 (class 1259 OID 412880)
+-- TOC entry 5334 (class 1259 OID 33722)
 -- Name: gen_object_lod2refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15673,7 +15502,7 @@ CREATE INDEX gen_object_lod2refpnt_spx ON citydb.generic_cityobject USING gist (
 
 
 --
--- TOC entry 4649 (class 1259 OID 412550)
+-- TOC entry 5335 (class 1259 OID 33723)
 -- Name: gen_object_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15681,7 +15510,7 @@ CREATE INDEX gen_object_lod2terr_spx ON citydb.generic_cityobject USING gist (lo
 
 
 --
--- TOC entry 4650 (class 1259 OID 412715)
+-- TOC entry 5336 (class 1259 OID 33724)
 -- Name: gen_object_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15689,7 +15518,7 @@ CREATE INDEX gen_object_lod2xgeom_spx ON citydb.generic_cityobject USING gist (l
 
 
 --
--- TOC entry 4651 (class 1259 OID 410011)
+-- TOC entry 5337 (class 1259 OID 33725)
 -- Name: gen_object_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15697,7 +15526,7 @@ CREATE INDEX gen_object_lod3brep_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4652 (class 1259 OID 410021)
+-- TOC entry 5338 (class 1259 OID 33726)
 -- Name: gen_object_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15705,7 +15534,7 @@ CREATE INDEX gen_object_lod3impl_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4653 (class 1259 OID 412913)
+-- TOC entry 5339 (class 1259 OID 33727)
 -- Name: gen_object_lod3refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15713,7 +15542,7 @@ CREATE INDEX gen_object_lod3refpnt_spx ON citydb.generic_cityobject USING gist (
 
 
 --
--- TOC entry 4654 (class 1259 OID 412583)
+-- TOC entry 5340 (class 1259 OID 33728)
 -- Name: gen_object_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15721,7 +15550,7 @@ CREATE INDEX gen_object_lod3terr_spx ON citydb.generic_cityobject USING gist (lo
 
 
 --
--- TOC entry 4655 (class 1259 OID 412748)
+-- TOC entry 5341 (class 1259 OID 33729)
 -- Name: gen_object_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15729,7 +15558,7 @@ CREATE INDEX gen_object_lod3xgeom_spx ON citydb.generic_cityobject USING gist (l
 
 
 --
--- TOC entry 4656 (class 1259 OID 410012)
+-- TOC entry 5342 (class 1259 OID 33730)
 -- Name: gen_object_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15737,7 +15566,7 @@ CREATE INDEX gen_object_lod4brep_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4657 (class 1259 OID 410022)
+-- TOC entry 5343 (class 1259 OID 33731)
 -- Name: gen_object_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15745,7 +15574,7 @@ CREATE INDEX gen_object_lod4impl_fkx ON citydb.generic_cityobject USING btree (l
 
 
 --
--- TOC entry 4658 (class 1259 OID 412946)
+-- TOC entry 5344 (class 1259 OID 33732)
 -- Name: gen_object_lod4refpnt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15753,7 +15582,7 @@ CREATE INDEX gen_object_lod4refpnt_spx ON citydb.generic_cityobject USING gist (
 
 
 --
--- TOC entry 4659 (class 1259 OID 412616)
+-- TOC entry 5345 (class 1259 OID 33733)
 -- Name: gen_object_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15761,7 +15590,7 @@ CREATE INDEX gen_object_lod4terr_spx ON citydb.generic_cityobject USING gist (lo
 
 
 --
--- TOC entry 4660 (class 1259 OID 412781)
+-- TOC entry 5346 (class 1259 OID 33734)
 -- Name: gen_object_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15769,7 +15598,7 @@ CREATE INDEX gen_object_lod4xgeom_spx ON citydb.generic_cityobject USING gist (l
 
 
 --
--- TOC entry 4661 (class 1259 OID 410358)
+-- TOC entry 5347 (class 1259 OID 33735)
 -- Name: gen_object_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15777,7 +15606,7 @@ CREATE INDEX gen_object_objclass_fkx ON citydb.generic_cityobject USING btree (o
 
 
 --
--- TOC entry 4593 (class 1259 OID 409975)
+-- TOC entry 5318 (class 1259 OID 33736)
 -- Name: general_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15785,7 +15614,7 @@ CREATE INDEX general_cityobject_fkx ON citydb.generalization USING btree (cityob
 
 
 --
--- TOC entry 4594 (class 1259 OID 409976)
+-- TOC entry 5319 (class 1259 OID 33737)
 -- Name: general_generalizes_to_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15793,7 +15622,7 @@ CREATE INDEX general_generalizes_to_fkx ON citydb.generalization USING btree (ge
 
 
 --
--- TOC entry 5076 (class 1259 OID 410318)
+-- TOC entry 5299 (class 1259 OID 33738)
 -- Name: genericattrib_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15801,7 +15630,7 @@ CREATE INDEX genericattrib_cityobj_fkx ON citydb.cityobject_genericattrib USING 
 
 
 --
--- TOC entry 5077 (class 1259 OID 410317)
+-- TOC entry 5300 (class 1259 OID 33739)
 -- Name: genericattrib_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15809,7 +15638,7 @@ CREATE INDEX genericattrib_geom_fkx ON citydb.cityobject_genericattrib USING btr
 
 
 --
--- TOC entry 5078 (class 1259 OID 410315)
+-- TOC entry 5301 (class 1259 OID 33740)
 -- Name: genericattrib_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15817,7 +15646,7 @@ CREATE INDEX genericattrib_parent_fkx ON citydb.cityobject_genericattrib USING b
 
 
 --
--- TOC entry 5079 (class 1259 OID 410316)
+-- TOC entry 5302 (class 1259 OID 33741)
 -- Name: genericattrib_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15825,7 +15654,7 @@ CREATE INDEX genericattrib_root_fkx ON citydb.cityobject_genericattrib USING btr
 
 
 --
--- TOC entry 5087 (class 1259 OID 410320)
+-- TOC entry 5352 (class 1259 OID 33742)
 -- Name: grid_coverage_raster_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15833,7 +15662,7 @@ CREATE INDEX grid_coverage_raster_spx ON citydb.grid_coverage USING gist (public
 
 
 --
--- TOC entry 4599 (class 1259 OID 409977)
+-- TOC entry 5309 (class 1259 OID 33743)
 -- Name: group_brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15841,7 +15670,7 @@ CREATE INDEX group_brep_fkx ON citydb.cityobjectgroup USING btree (brep_id) WITH
 
 
 --
--- TOC entry 4600 (class 1259 OID 410357)
+-- TOC entry 5310 (class 1259 OID 33744)
 -- Name: group_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15849,7 +15678,7 @@ CREATE INDEX group_objectclass_fkx ON citydb.cityobjectgroup USING btree (object
 
 
 --
--- TOC entry 4601 (class 1259 OID 409979)
+-- TOC entry 5311 (class 1259 OID 33745)
 -- Name: group_parent_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15857,7 +15686,7 @@ CREATE INDEX group_parent_cityobj_fkx ON citydb.cityobjectgroup USING btree (par
 
 
 --
--- TOC entry 4603 (class 1259 OID 409980)
+-- TOC entry 5353 (class 1259 OID 33746)
 -- Name: group_to_cityobject_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15865,7 +15694,7 @@ CREATE INDEX group_to_cityobject_fkx ON citydb.group_to_cityobject USING btree (
 
 
 --
--- TOC entry 4604 (class 1259 OID 409981)
+-- TOC entry 5354 (class 1259 OID 33747)
 -- Name: group_to_cityobject_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15873,7 +15702,7 @@ CREATE INDEX group_to_cityobject_fkx1 ON citydb.group_to_cityobject USING btree 
 
 
 --
--- TOC entry 4602 (class 1259 OID 412115)
+-- TOC entry 5312 (class 1259 OID 33748)
 -- Name: group_xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15881,7 +15710,7 @@ CREATE INDEX group_xgeom_spx ON citydb.cityobjectgroup USING gist (other_geom);
 
 
 --
--- TOC entry 5048 (class 1259 OID 410304)
+-- TOC entry 5357 (class 1259 OID 33749)
 -- Name: implicit_geom_brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15889,7 +15718,7 @@ CREATE INDEX implicit_geom_brep_fkx ON citydb.implicit_geometry USING btree (rel
 
 
 --
--- TOC entry 5049 (class 1259 OID 410303)
+-- TOC entry 5358 (class 1259 OID 33750)
 -- Name: implicit_geom_ref2lib_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15897,7 +15726,7 @@ CREATE INDEX implicit_geom_ref2lib_inx ON citydb.implicit_geometry USING btree (
 
 
 --
--- TOC entry 4794 (class 1259 OID 410115)
+-- TOC entry 5363 (class 1259 OID 33751)
 -- Name: land_use_lod0msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15905,7 +15734,7 @@ CREATE INDEX land_use_lod0msrf_fkx ON citydb.land_use USING btree (lod0_multi_su
 
 
 --
--- TOC entry 4795 (class 1259 OID 410116)
+-- TOC entry 5364 (class 1259 OID 33752)
 -- Name: land_use_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15913,7 +15742,7 @@ CREATE INDEX land_use_lod1msrf_fkx ON citydb.land_use USING btree (lod1_multi_su
 
 
 --
--- TOC entry 4796 (class 1259 OID 410117)
+-- TOC entry 5365 (class 1259 OID 33753)
 -- Name: land_use_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15921,7 +15750,7 @@ CREATE INDEX land_use_lod2msrf_fkx ON citydb.land_use USING btree (lod2_multi_su
 
 
 --
--- TOC entry 4797 (class 1259 OID 410118)
+-- TOC entry 5366 (class 1259 OID 33754)
 -- Name: land_use_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15929,7 +15758,7 @@ CREATE INDEX land_use_lod3msrf_fkx ON citydb.land_use USING btree (lod3_multi_su
 
 
 --
--- TOC entry 4798 (class 1259 OID 410119)
+-- TOC entry 5367 (class 1259 OID 33755)
 -- Name: land_use_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15937,7 +15766,7 @@ CREATE INDEX land_use_lod4msrf_fkx ON citydb.land_use USING btree (lod4_multi_su
 
 
 --
--- TOC entry 4799 (class 1259 OID 410359)
+-- TOC entry 5368 (class 1259 OID 33756)
 -- Name: land_use_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15945,7 +15774,7 @@ CREATE INDEX land_use_objclass_fkx ON citydb.land_use USING btree (objectclass_i
 
 
 --
--- TOC entry 4757 (class 1259 OID 410360)
+-- TOC entry 5371 (class 1259 OID 33757)
 -- Name: masspoint_rel_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15953,7 +15782,7 @@ CREATE INDEX masspoint_rel_objclass_fkx ON citydb.masspoint_relief USING btree (
 
 
 --
--- TOC entry 4760 (class 1259 OID 412068)
+-- TOC entry 5374 (class 1259 OID 33758)
 -- Name: masspoint_relief_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15961,7 +15790,7 @@ CREATE INDEX masspoint_relief_spx ON citydb.masspoint_relief USING gist (relief_
 
 
 --
--- TOC entry 4609 (class 1259 OID 410341)
+-- TOC entry 5375 (class 1259 OID 33759)
 -- Name: objectclass_baseclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15969,7 +15798,7 @@ CREATE INDEX objectclass_baseclass_fkx ON citydb.objectclass USING btree (basecl
 
 
 --
--- TOC entry 4612 (class 1259 OID 409982)
+-- TOC entry 5378 (class 1259 OID 33760)
 -- Name: objectclass_superclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15977,7 +15806,7 @@ CREATE INDEX objectclass_superclass_fkx ON citydb.objectclass USING btree (super
 
 
 --
--- TOC entry 4725 (class 1259 OID 410077)
+-- TOC entry 5389 (class 1259 OID 33761)
 -- Name: open_to_them_surface_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15985,7 +15814,7 @@ CREATE INDEX open_to_them_surface_fkx ON citydb.opening_to_them_surface USING bt
 
 
 --
--- TOC entry 4726 (class 1259 OID 410078)
+-- TOC entry 5390 (class 1259 OID 33762)
 -- Name: open_to_them_surface_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -15993,7 +15822,7 @@ CREATE INDEX open_to_them_surface_fkx1 ON citydb.opening_to_them_surface USING b
 
 
 --
--- TOC entry 4715 (class 1259 OID 410070)
+-- TOC entry 5379 (class 1259 OID 33763)
 -- Name: opening_address_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16001,7 +15830,7 @@ CREATE INDEX opening_address_fkx ON citydb.opening USING btree (address_id) WITH
 
 
 --
--- TOC entry 4716 (class 1259 OID 410073)
+-- TOC entry 5380 (class 1259 OID 33764)
 -- Name: opening_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16009,7 +15838,7 @@ CREATE INDEX opening_lod3impl_fkx ON citydb.opening USING btree (lod3_implicit_r
 
 
 --
--- TOC entry 4717 (class 1259 OID 410071)
+-- TOC entry 5381 (class 1259 OID 33765)
 -- Name: opening_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16017,7 +15846,7 @@ CREATE INDEX opening_lod3msrf_fkx ON citydb.opening USING btree (lod3_multi_surf
 
 
 --
--- TOC entry 4718 (class 1259 OID 412961)
+-- TOC entry 5382 (class 1259 OID 33766)
 -- Name: opening_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16025,7 +15854,7 @@ CREATE INDEX opening_lod3refpt_spx ON citydb.opening USING gist (lod3_implicit_r
 
 
 --
--- TOC entry 4719 (class 1259 OID 410074)
+-- TOC entry 5383 (class 1259 OID 33767)
 -- Name: opening_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16033,7 +15862,7 @@ CREATE INDEX opening_lod4impl_fkx ON citydb.opening USING btree (lod4_implicit_r
 
 
 --
--- TOC entry 4720 (class 1259 OID 410072)
+-- TOC entry 5384 (class 1259 OID 33768)
 -- Name: opening_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16041,7 +15870,7 @@ CREATE INDEX opening_lod4msrf_fkx ON citydb.opening USING btree (lod4_multi_surf
 
 
 --
--- TOC entry 4721 (class 1259 OID 412976)
+-- TOC entry 5385 (class 1259 OID 33769)
 -- Name: opening_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16049,7 +15878,7 @@ CREATE INDEX opening_lod4refpt_spx ON citydb.opening USING gist (lod4_implicit_r
 
 
 --
--- TOC entry 4722 (class 1259 OID 410069)
+-- TOC entry 5386 (class 1259 OID 33770)
 -- Name: opening_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16057,7 +15886,7 @@ CREATE INDEX opening_objectclass_fkx ON citydb.opening USING btree (objectclass_
 
 
 --
--- TOC entry 4802 (class 1259 OID 410124)
+-- TOC entry 5393 (class 1259 OID 33771)
 -- Name: plant_cover_lod1msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16065,7 +15894,7 @@ CREATE INDEX plant_cover_lod1msolid_fkx ON citydb.plant_cover USING btree (lod1_
 
 
 --
--- TOC entry 4803 (class 1259 OID 410120)
+-- TOC entry 5394 (class 1259 OID 33772)
 -- Name: plant_cover_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16073,7 +15902,7 @@ CREATE INDEX plant_cover_lod1msrf_fkx ON citydb.plant_cover USING btree (lod1_mu
 
 
 --
--- TOC entry 4804 (class 1259 OID 410125)
+-- TOC entry 5395 (class 1259 OID 33773)
 -- Name: plant_cover_lod2msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16081,7 +15910,7 @@ CREATE INDEX plant_cover_lod2msolid_fkx ON citydb.plant_cover USING btree (lod2_
 
 
 --
--- TOC entry 4805 (class 1259 OID 410121)
+-- TOC entry 5396 (class 1259 OID 33774)
 -- Name: plant_cover_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16089,7 +15918,7 @@ CREATE INDEX plant_cover_lod2msrf_fkx ON citydb.plant_cover USING btree (lod2_mu
 
 
 --
--- TOC entry 4806 (class 1259 OID 410126)
+-- TOC entry 5397 (class 1259 OID 33775)
 -- Name: plant_cover_lod3msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16097,7 +15926,7 @@ CREATE INDEX plant_cover_lod3msolid_fkx ON citydb.plant_cover USING btree (lod3_
 
 
 --
--- TOC entry 4807 (class 1259 OID 410122)
+-- TOC entry 5398 (class 1259 OID 33776)
 -- Name: plant_cover_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16105,7 +15934,7 @@ CREATE INDEX plant_cover_lod3msrf_fkx ON citydb.plant_cover USING btree (lod3_mu
 
 
 --
--- TOC entry 4808 (class 1259 OID 410127)
+-- TOC entry 5399 (class 1259 OID 33777)
 -- Name: plant_cover_lod4msolid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16113,7 +15942,7 @@ CREATE INDEX plant_cover_lod4msolid_fkx ON citydb.plant_cover USING btree (lod4_
 
 
 --
--- TOC entry 4809 (class 1259 OID 410123)
+-- TOC entry 5400 (class 1259 OID 33778)
 -- Name: plant_cover_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16121,7 +15950,7 @@ CREATE INDEX plant_cover_lod4msrf_fkx ON citydb.plant_cover USING btree (lod4_mu
 
 
 --
--- TOC entry 4810 (class 1259 OID 410361)
+-- TOC entry 5401 (class 1259 OID 33779)
 -- Name: plant_cover_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16129,7 +15958,7 @@ CREATE INDEX plant_cover_objclass_fkx ON citydb.plant_cover USING btree (objectc
 
 
 --
--- TOC entry 4853 (class 1259 OID 410158)
+-- TOC entry 5404 (class 1259 OID 33780)
 -- Name: raster_relief_coverage_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16137,7 +15966,7 @@ CREATE INDEX raster_relief_coverage_fkx ON citydb.raster_relief USING btree (cov
 
 
 --
--- TOC entry 4854 (class 1259 OID 410362)
+-- TOC entry 5405 (class 1259 OID 33781)
 -- Name: raster_relief_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16145,7 +15974,7 @@ CREATE INDEX raster_relief_objclass_fkx ON citydb.raster_relief USING btree (obj
 
 
 --
--- TOC entry 4765 (class 1259 OID 410098)
+-- TOC entry 5412 (class 1259 OID 33782)
 -- Name: rel_feat_to_rel_comp_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16153,7 +15982,7 @@ CREATE INDEX rel_feat_to_rel_comp_fkx ON citydb.relief_feat_to_rel_comp USING bt
 
 
 --
--- TOC entry 4766 (class 1259 OID 410099)
+-- TOC entry 5413 (class 1259 OID 33783)
 -- Name: rel_feat_to_rel_comp_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16161,7 +15990,7 @@ CREATE INDEX rel_feat_to_rel_comp_fkx1 ON citydb.relief_feat_to_rel_comp USING b
 
 
 --
--- TOC entry 4761 (class 1259 OID 414681)
+-- TOC entry 5408 (class 1259 OID 33784)
 -- Name: relief_comp_extent_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16169,7 +15998,7 @@ CREATE INDEX relief_comp_extent_spx ON citydb.relief_component USING gist (exten
 
 
 --
--- TOC entry 4762 (class 1259 OID 410096)
+-- TOC entry 5409 (class 1259 OID 33785)
 -- Name: relief_comp_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16177,7 +16006,7 @@ CREATE INDEX relief_comp_objclass_fkx ON citydb.relief_component USING btree (ob
 
 
 --
--- TOC entry 4769 (class 1259 OID 410363)
+-- TOC entry 5416 (class 1259 OID 33786)
 -- Name: relief_feat_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16185,7 +16014,7 @@ CREATE INDEX relief_feat_objclass_fkx ON citydb.relief_feature USING btree (obje
 
 
 --
--- TOC entry 4729 (class 1259 OID 410079)
+-- TOC entry 5419 (class 1259 OID 33787)
 -- Name: room_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16193,7 +16022,7 @@ CREATE INDEX room_building_fkx ON citydb.room USING btree (building_id) WITH (fi
 
 
 --
--- TOC entry 4730 (class 1259 OID 410080)
+-- TOC entry 5420 (class 1259 OID 33788)
 -- Name: room_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16201,7 +16030,7 @@ CREATE INDEX room_lod4msrf_fkx ON citydb.room USING btree (lod4_multi_surface_id
 
 
 --
--- TOC entry 4731 (class 1259 OID 410081)
+-- TOC entry 5421 (class 1259 OID 33789)
 -- Name: room_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16209,7 +16038,7 @@ CREATE INDEX room_lod4solid_fkx ON citydb.room USING btree (lod4_solid_id) WITH 
 
 
 --
--- TOC entry 4732 (class 1259 OID 410364)
+-- TOC entry 5422 (class 1259 OID 33790)
 -- Name: room_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16217,7 +16046,7 @@ CREATE INDEX room_objectclass_fkx ON citydb.room USING btree (objectclass_id) WI
 
 
 --
--- TOC entry 5094 (class 1259 OID 410347)
+-- TOC entry 5427 (class 1259 OID 33791)
 -- Name: schema_referencing_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16225,7 +16054,7 @@ CREATE INDEX schema_referencing_fkx1 ON citydb.schema_referencing USING btree (r
 
 
 --
--- TOC entry 5095 (class 1259 OID 410348)
+-- TOC entry 5428 (class 1259 OID 33792)
 -- Name: schema_referencing_fkx2; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16233,7 +16062,7 @@ CREATE INDEX schema_referencing_fkx2 ON citydb.schema_referencing USING btree (r
 
 
 --
--- TOC entry 5090 (class 1259 OID 410339)
+-- TOC entry 5431 (class 1259 OID 33793)
 -- Name: schema_to_objectclass_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16241,7 +16070,7 @@ CREATE INDEX schema_to_objectclass_fkx1 ON citydb.schema_to_objectclass USING bt
 
 
 --
--- TOC entry 5091 (class 1259 OID 410340)
+-- TOC entry 5432 (class 1259 OID 33794)
 -- Name: schema_to_objectclass_fkx2; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16249,7 +16078,7 @@ CREATE INDEX schema_to_objectclass_fkx2 ON citydb.schema_to_objectclass USING bt
 
 
 --
--- TOC entry 4813 (class 1259 OID 410128)
+-- TOC entry 5435 (class 1259 OID 33795)
 -- Name: sol_veg_obj_lod1brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16257,7 +16086,7 @@ CREATE INDEX sol_veg_obj_lod1brep_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4814 (class 1259 OID 410136)
+-- TOC entry 5436 (class 1259 OID 33796)
 -- Name: sol_veg_obj_lod1impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16265,7 +16094,7 @@ CREATE INDEX sol_veg_obj_lod1impl_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4815 (class 1259 OID 413096)
+-- TOC entry 5437 (class 1259 OID 33797)
 -- Name: sol_veg_obj_lod1refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16273,7 +16102,7 @@ CREATE INDEX sol_veg_obj_lod1refpt_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4816 (class 1259 OID 413000)
+-- TOC entry 5438 (class 1259 OID 33798)
 -- Name: sol_veg_obj_lod1xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16281,7 +16110,7 @@ CREATE INDEX sol_veg_obj_lod1xgeom_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4817 (class 1259 OID 410129)
+-- TOC entry 5439 (class 1259 OID 33799)
 -- Name: sol_veg_obj_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16289,7 +16118,7 @@ CREATE INDEX sol_veg_obj_lod2brep_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4818 (class 1259 OID 410137)
+-- TOC entry 5440 (class 1259 OID 33800)
 -- Name: sol_veg_obj_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16297,7 +16126,7 @@ CREATE INDEX sol_veg_obj_lod2impl_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4819 (class 1259 OID 413120)
+-- TOC entry 5441 (class 1259 OID 33801)
 -- Name: sol_veg_obj_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16305,7 +16134,7 @@ CREATE INDEX sol_veg_obj_lod2refpt_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4820 (class 1259 OID 413024)
+-- TOC entry 5442 (class 1259 OID 33802)
 -- Name: sol_veg_obj_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16313,7 +16142,7 @@ CREATE INDEX sol_veg_obj_lod2xgeom_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4821 (class 1259 OID 410130)
+-- TOC entry 5443 (class 1259 OID 33803)
 -- Name: sol_veg_obj_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16321,7 +16150,7 @@ CREATE INDEX sol_veg_obj_lod3brep_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4822 (class 1259 OID 410138)
+-- TOC entry 5444 (class 1259 OID 33804)
 -- Name: sol_veg_obj_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16329,7 +16158,7 @@ CREATE INDEX sol_veg_obj_lod3impl_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4823 (class 1259 OID 413144)
+-- TOC entry 5445 (class 1259 OID 33805)
 -- Name: sol_veg_obj_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16337,7 +16166,7 @@ CREATE INDEX sol_veg_obj_lod3refpt_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4824 (class 1259 OID 413048)
+-- TOC entry 5446 (class 1259 OID 33806)
 -- Name: sol_veg_obj_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16345,7 +16174,7 @@ CREATE INDEX sol_veg_obj_lod3xgeom_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4825 (class 1259 OID 410131)
+-- TOC entry 5447 (class 1259 OID 33807)
 -- Name: sol_veg_obj_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16353,7 +16182,7 @@ CREATE INDEX sol_veg_obj_lod4brep_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4826 (class 1259 OID 410139)
+-- TOC entry 5448 (class 1259 OID 33808)
 -- Name: sol_veg_obj_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16361,7 +16190,7 @@ CREATE INDEX sol_veg_obj_lod4impl_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 4827 (class 1259 OID 413168)
+-- TOC entry 5449 (class 1259 OID 33809)
 -- Name: sol_veg_obj_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16369,7 +16198,7 @@ CREATE INDEX sol_veg_obj_lod4refpt_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4828 (class 1259 OID 413072)
+-- TOC entry 5450 (class 1259 OID 33810)
 -- Name: sol_veg_obj_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16377,7 +16206,7 @@ CREATE INDEX sol_veg_obj_lod4xgeom_spx ON citydb.solitary_vegetat_object USING g
 
 
 --
--- TOC entry 4829 (class 1259 OID 410365)
+-- TOC entry 5451 (class 1259 OID 33811)
 -- Name: sol_veg_obj_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16385,7 +16214,7 @@ CREATE INDEX sol_veg_obj_objclass_fkx ON citydb.solitary_vegetat_object USING bt
 
 
 --
--- TOC entry 5064 (class 1259 OID 410311)
+-- TOC entry 5454 (class 1259 OID 33812)
 -- Name: surface_data_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16393,7 +16222,7 @@ CREATE INDEX surface_data_inx ON citydb.surface_data USING btree (gmlid, gmlid_c
 
 
 --
--- TOC entry 5065 (class 1259 OID 410380)
+-- TOC entry 5455 (class 1259 OID 33813)
 -- Name: surface_data_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16401,7 +16230,7 @@ CREATE INDEX surface_data_objclass_fkx ON citydb.surface_data USING btree (objec
 
 
 --
--- TOC entry 5068 (class 1259 OID 413899)
+-- TOC entry 5458 (class 1259 OID 33814)
 -- Name: surface_data_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16409,7 +16238,7 @@ CREATE INDEX surface_data_spx ON citydb.surface_data USING gist (gt_reference_po
 
 
 --
--- TOC entry 5069 (class 1259 OID 410313)
+-- TOC entry 5459 (class 1259 OID 33815)
 -- Name: surface_data_tex_image_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16417,7 +16246,7 @@ CREATE INDEX surface_data_tex_image_fkx ON citydb.surface_data USING btree (tex_
 
 
 --
--- TOC entry 5052 (class 1259 OID 410310)
+-- TOC entry 5460 (class 1259 OID 33816)
 -- Name: surface_geom_cityobj_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16425,7 +16254,7 @@ CREATE INDEX surface_geom_cityobj_fkx ON citydb.surface_geometry USING btree (ci
 
 
 --
--- TOC entry 5053 (class 1259 OID 410305)
+-- TOC entry 5461 (class 1259 OID 33817)
 -- Name: surface_geom_inx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16433,7 +16262,7 @@ CREATE INDEX surface_geom_inx ON citydb.surface_geometry USING btree (gmlid, gml
 
 
 --
--- TOC entry 5054 (class 1259 OID 410306)
+-- TOC entry 5462 (class 1259 OID 33818)
 -- Name: surface_geom_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16441,7 +16270,7 @@ CREATE INDEX surface_geom_parent_fkx ON citydb.surface_geometry USING btree (par
 
 
 --
--- TOC entry 5055 (class 1259 OID 410307)
+-- TOC entry 5463 (class 1259 OID 33819)
 -- Name: surface_geom_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16449,7 +16278,7 @@ CREATE INDEX surface_geom_root_fkx ON citydb.surface_geometry USING btree (root_
 
 
 --
--- TOC entry 5056 (class 1259 OID 413912)
+-- TOC entry 5464 (class 1259 OID 33820)
 -- Name: surface_geom_solid_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16457,7 +16286,7 @@ CREATE INDEX surface_geom_solid_spx ON citydb.surface_geometry USING gist (solid
 
 
 --
--- TOC entry 5057 (class 1259 OID 413925)
+-- TOC entry 5465 (class 1259 OID 33821)
 -- Name: surface_geom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16465,7 +16294,7 @@ CREATE INDEX surface_geom_spx ON citydb.surface_geometry USING gist (geometry);
 
 
 --
--- TOC entry 4744 (class 1259 OID 410089)
+-- TOC entry 5470 (class 1259 OID 33822)
 -- Name: texparam_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16473,7 +16302,7 @@ CREATE INDEX texparam_geom_fkx ON citydb.textureparam USING btree (surface_geome
 
 
 --
--- TOC entry 4745 (class 1259 OID 410090)
+-- TOC entry 5471 (class 1259 OID 33823)
 -- Name: texparam_surface_data_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16481,7 +16310,7 @@ CREATE INDEX texparam_surface_data_fkx ON citydb.textureparam USING btree (surfa
 
 
 --
--- TOC entry 4735 (class 1259 OID 410085)
+-- TOC entry 5474 (class 1259 OID 33824)
 -- Name: them_surface_bldg_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16489,7 +16318,7 @@ CREATE INDEX them_surface_bldg_inst_fkx ON citydb.thematic_surface USING btree (
 
 
 --
--- TOC entry 4736 (class 1259 OID 410083)
+-- TOC entry 5475 (class 1259 OID 33825)
 -- Name: them_surface_building_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16497,7 +16326,7 @@ CREATE INDEX them_surface_building_fkx ON citydb.thematic_surface USING btree (b
 
 
 --
--- TOC entry 4737 (class 1259 OID 410086)
+-- TOC entry 5476 (class 1259 OID 33826)
 -- Name: them_surface_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16505,7 +16334,7 @@ CREATE INDEX them_surface_lod2msrf_fkx ON citydb.thematic_surface USING btree (l
 
 
 --
--- TOC entry 4738 (class 1259 OID 410087)
+-- TOC entry 5477 (class 1259 OID 33827)
 -- Name: them_surface_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16513,7 +16342,7 @@ CREATE INDEX them_surface_lod3msrf_fkx ON citydb.thematic_surface USING btree (l
 
 
 --
--- TOC entry 4739 (class 1259 OID 410088)
+-- TOC entry 5478 (class 1259 OID 33828)
 -- Name: them_surface_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16521,7 +16350,7 @@ CREATE INDEX them_surface_lod4msrf_fkx ON citydb.thematic_surface USING btree (l
 
 
 --
--- TOC entry 4740 (class 1259 OID 410082)
+-- TOC entry 5479 (class 1259 OID 33829)
 -- Name: them_surface_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16529,7 +16358,7 @@ CREATE INDEX them_surface_objclass_fkx ON citydb.thematic_surface USING btree (o
 
 
 --
--- TOC entry 4741 (class 1259 OID 410084)
+-- TOC entry 5480 (class 1259 OID 33830)
 -- Name: them_surface_room_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16537,7 +16366,7 @@ CREATE INDEX them_surface_room_fkx ON citydb.thematic_surface USING btree (room_
 
 
 --
--- TOC entry 4772 (class 1259 OID 412092)
+-- TOC entry 5483 (class 1259 OID 33831)
 -- Name: tin_relief_break_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16545,7 +16374,7 @@ CREATE INDEX tin_relief_break_spx ON citydb.tin_relief USING gist (break_lines);
 
 
 --
--- TOC entry 4773 (class 1259 OID 412104)
+-- TOC entry 5484 (class 1259 OID 33832)
 -- Name: tin_relief_crtlpts_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16553,7 +16382,7 @@ CREATE INDEX tin_relief_crtlpts_spx ON citydb.tin_relief USING gist (control_poi
 
 
 --
--- TOC entry 4774 (class 1259 OID 410100)
+-- TOC entry 5485 (class 1259 OID 33833)
 -- Name: tin_relief_geom_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16561,7 +16390,7 @@ CREATE INDEX tin_relief_geom_fkx ON citydb.tin_relief USING btree (surface_geome
 
 
 --
--- TOC entry 4775 (class 1259 OID 410366)
+-- TOC entry 5486 (class 1259 OID 33834)
 -- Name: tin_relief_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16569,7 +16398,7 @@ CREATE INDEX tin_relief_objclass_fkx ON citydb.tin_relief USING btree (objectcla
 
 
 --
--- TOC entry 4778 (class 1259 OID 412080)
+-- TOC entry 5489 (class 1259 OID 33835)
 -- Name: tin_relief_stop_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16577,7 +16406,7 @@ CREATE INDEX tin_relief_stop_spx ON citydb.tin_relief USING gist (stop_lines);
 
 
 --
--- TOC entry 4787 (class 1259 OID 410111)
+-- TOC entry 5490 (class 1259 OID 33836)
 -- Name: traffic_area_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16585,7 +16414,7 @@ CREATE INDEX traffic_area_lod2msrf_fkx ON citydb.traffic_area USING btree (lod2_
 
 
 --
--- TOC entry 4788 (class 1259 OID 410112)
+-- TOC entry 5491 (class 1259 OID 33837)
 -- Name: traffic_area_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16593,7 +16422,7 @@ CREATE INDEX traffic_area_lod3msrf_fkx ON citydb.traffic_area USING btree (lod3_
 
 
 --
--- TOC entry 4789 (class 1259 OID 410113)
+-- TOC entry 5492 (class 1259 OID 33838)
 -- Name: traffic_area_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16601,7 +16430,7 @@ CREATE INDEX traffic_area_lod4msrf_fkx ON citydb.traffic_area USING btree (lod4_
 
 
 --
--- TOC entry 4790 (class 1259 OID 410110)
+-- TOC entry 5493 (class 1259 OID 33839)
 -- Name: traffic_area_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16609,7 +16438,7 @@ CREATE INDEX traffic_area_objclass_fkx ON citydb.traffic_area USING btree (objec
 
 
 --
--- TOC entry 4793 (class 1259 OID 410114)
+-- TOC entry 5496 (class 1259 OID 33840)
 -- Name: traffic_area_trancmplx_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16617,7 +16446,7 @@ CREATE INDEX traffic_area_trancmplx_fkx ON citydb.traffic_area USING btree (tran
 
 
 --
--- TOC entry 4779 (class 1259 OID 413975)
+-- TOC entry 5497 (class 1259 OID 33841)
 -- Name: tran_complex_lod0net_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16625,7 +16454,7 @@ CREATE INDEX tran_complex_lod0net_spx ON citydb.transportation_complex USING gis
 
 
 --
--- TOC entry 4780 (class 1259 OID 410106)
+-- TOC entry 5498 (class 1259 OID 33842)
 -- Name: tran_complex_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16633,7 +16462,7 @@ CREATE INDEX tran_complex_lod1msrf_fkx ON citydb.transportation_complex USING bt
 
 
 --
--- TOC entry 4781 (class 1259 OID 410107)
+-- TOC entry 5499 (class 1259 OID 33843)
 -- Name: tran_complex_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16641,7 +16470,7 @@ CREATE INDEX tran_complex_lod2msrf_fkx ON citydb.transportation_complex USING bt
 
 
 --
--- TOC entry 4782 (class 1259 OID 410108)
+-- TOC entry 5500 (class 1259 OID 33844)
 -- Name: tran_complex_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16649,7 +16478,7 @@ CREATE INDEX tran_complex_lod3msrf_fkx ON citydb.transportation_complex USING bt
 
 
 --
--- TOC entry 4783 (class 1259 OID 410109)
+-- TOC entry 5501 (class 1259 OID 33845)
 -- Name: tran_complex_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16657,7 +16486,7 @@ CREATE INDEX tran_complex_lod4msrf_fkx ON citydb.transportation_complex USING bt
 
 
 --
--- TOC entry 4784 (class 1259 OID 410104)
+-- TOC entry 5502 (class 1259 OID 33846)
 -- Name: tran_complex_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16665,7 +16494,7 @@ CREATE INDEX tran_complex_objclass_fkx ON citydb.transportation_complex USING bt
 
 
 --
--- TOC entry 4881 (class 1259 OID 410179)
+-- TOC entry 5533 (class 1259 OID 33847)
 -- Name: tun_hspace_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16673,7 +16502,7 @@ CREATE INDEX tun_hspace_lod4msrf_fkx ON citydb.tunnel_hollow_space USING btree (
 
 
 --
--- TOC entry 4882 (class 1259 OID 410180)
+-- TOC entry 5534 (class 1259 OID 33848)
 -- Name: tun_hspace_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16681,7 +16510,7 @@ CREATE INDEX tun_hspace_lod4solid_fkx ON citydb.tunnel_hollow_space USING btree 
 
 
 --
--- TOC entry 4883 (class 1259 OID 410369)
+-- TOC entry 5535 (class 1259 OID 33849)
 -- Name: tun_hspace_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16689,7 +16518,7 @@ CREATE INDEX tun_hspace_objclass_fkx ON citydb.tunnel_hollow_space USING btree (
 
 
 --
--- TOC entry 4884 (class 1259 OID 410178)
+-- TOC entry 5536 (class 1259 OID 33850)
 -- Name: tun_hspace_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16697,7 +16526,7 @@ CREATE INDEX tun_hspace_tunnel_fkx ON citydb.tunnel_hollow_space USING btree (tu
 
 
 --
--- TOC entry 4877 (class 1259 OID 410176)
+-- TOC entry 5556 (class 1259 OID 33851)
 -- Name: tun_open_to_them_srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16705,7 +16534,7 @@ CREATE INDEX tun_open_to_them_srf_fkx ON citydb.tunnel_open_to_them_srf USING bt
 
 
 --
--- TOC entry 4878 (class 1259 OID 410177)
+-- TOC entry 5557 (class 1259 OID 33852)
 -- Name: tun_open_to_them_srf_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16713,7 +16542,7 @@ CREATE INDEX tun_open_to_them_srf_fkx1 ON citydb.tunnel_open_to_them_srf USING b
 
 
 --
--- TOC entry 4887 (class 1259 OID 410183)
+-- TOC entry 5569 (class 1259 OID 33853)
 -- Name: tun_them_srf_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16721,7 +16550,7 @@ CREATE INDEX tun_them_srf_hspace_fkx ON citydb.tunnel_thematic_surface USING btr
 
 
 --
--- TOC entry 4888 (class 1259 OID 410185)
+-- TOC entry 5570 (class 1259 OID 33854)
 -- Name: tun_them_srf_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16729,7 +16558,7 @@ CREATE INDEX tun_them_srf_lod2msrf_fkx ON citydb.tunnel_thematic_surface USING b
 
 
 --
--- TOC entry 4889 (class 1259 OID 410186)
+-- TOC entry 5571 (class 1259 OID 33855)
 -- Name: tun_them_srf_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16737,7 +16566,7 @@ CREATE INDEX tun_them_srf_lod3msrf_fkx ON citydb.tunnel_thematic_surface USING b
 
 
 --
--- TOC entry 4890 (class 1259 OID 410187)
+-- TOC entry 5572 (class 1259 OID 33856)
 -- Name: tun_them_srf_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16745,7 +16574,7 @@ CREATE INDEX tun_them_srf_lod4msrf_fkx ON citydb.tunnel_thematic_surface USING b
 
 
 --
--- TOC entry 4891 (class 1259 OID 410181)
+-- TOC entry 5573 (class 1259 OID 33857)
 -- Name: tun_them_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16753,7 +16582,7 @@ CREATE INDEX tun_them_srf_objclass_fkx ON citydb.tunnel_thematic_surface USING b
 
 
 --
--- TOC entry 4892 (class 1259 OID 410184)
+-- TOC entry 5574 (class 1259 OID 33858)
 -- Name: tun_them_srf_tun_inst_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16761,7 +16590,7 @@ CREATE INDEX tun_them_srf_tun_inst_fkx ON citydb.tunnel_thematic_surface USING b
 
 
 --
--- TOC entry 4893 (class 1259 OID 410182)
+-- TOC entry 5575 (class 1259 OID 33859)
 -- Name: tun_them_srf_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16769,7 +16598,7 @@ CREATE INDEX tun_them_srf_tunnel_fkx ON citydb.tunnel_thematic_surface USING btr
 
 
 --
--- TOC entry 4922 (class 1259 OID 410210)
+-- TOC entry 5525 (class 1259 OID 33860)
 -- Name: tunnel_furn_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16777,7 +16606,7 @@ CREATE INDEX tunnel_furn_hspace_fkx ON citydb.tunnel_furniture USING btree (tunn
 
 
 --
--- TOC entry 4923 (class 1259 OID 410211)
+-- TOC entry 5526 (class 1259 OID 33861)
 -- Name: tunnel_furn_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16785,7 +16614,7 @@ CREATE INDEX tunnel_furn_lod4brep_fkx ON citydb.tunnel_furniture USING btree (lo
 
 
 --
--- TOC entry 4924 (class 1259 OID 410213)
+-- TOC entry 5527 (class 1259 OID 33862)
 -- Name: tunnel_furn_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16793,7 +16622,7 @@ CREATE INDEX tunnel_furn_lod4impl_fkx ON citydb.tunnel_furniture USING btree (lo
 
 
 --
--- TOC entry 4925 (class 1259 OID 413226)
+-- TOC entry 5528 (class 1259 OID 33863)
 -- Name: tunnel_furn_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16801,7 +16630,7 @@ CREATE INDEX tunnel_furn_lod4refpt_spx ON citydb.tunnel_furniture USING gist (lo
 
 
 --
--- TOC entry 4926 (class 1259 OID 413213)
+-- TOC entry 5529 (class 1259 OID 33864)
 -- Name: tunnel_furn_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16809,7 +16638,7 @@ CREATE INDEX tunnel_furn_lod4xgeom_spx ON citydb.tunnel_furniture USING gist (lo
 
 
 --
--- TOC entry 4927 (class 1259 OID 410368)
+-- TOC entry 5530 (class 1259 OID 33865)
 -- Name: tunnel_furn_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16817,7 +16646,7 @@ CREATE INDEX tunnel_furn_objclass_fkx ON citydb.tunnel_furniture USING btree (ob
 
 
 --
--- TOC entry 4905 (class 1259 OID 410197)
+-- TOC entry 5539 (class 1259 OID 33866)
 -- Name: tunnel_inst_hspace_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16825,7 +16654,7 @@ CREATE INDEX tunnel_inst_hspace_fkx ON citydb.tunnel_installation USING btree (t
 
 
 --
--- TOC entry 4906 (class 1259 OID 410198)
+-- TOC entry 5540 (class 1259 OID 33867)
 -- Name: tunnel_inst_lod2brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16833,7 +16662,7 @@ CREATE INDEX tunnel_inst_lod2brep_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4907 (class 1259 OID 410204)
+-- TOC entry 5541 (class 1259 OID 33868)
 -- Name: tunnel_inst_lod2impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16841,7 +16670,7 @@ CREATE INDEX tunnel_inst_lod2impl_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4908 (class 1259 OID 413824)
+-- TOC entry 5542 (class 1259 OID 33869)
 -- Name: tunnel_inst_lod2refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16849,7 +16678,7 @@ CREATE INDEX tunnel_inst_lod2refpt_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4909 (class 1259 OID 413758)
+-- TOC entry 5543 (class 1259 OID 33870)
 -- Name: tunnel_inst_lod2xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16857,7 +16686,7 @@ CREATE INDEX tunnel_inst_lod2xgeom_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4910 (class 1259 OID 410199)
+-- TOC entry 5544 (class 1259 OID 33871)
 -- Name: tunnel_inst_lod3brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16865,7 +16694,7 @@ CREATE INDEX tunnel_inst_lod3brep_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4911 (class 1259 OID 410205)
+-- TOC entry 5545 (class 1259 OID 33872)
 -- Name: tunnel_inst_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16873,7 +16702,7 @@ CREATE INDEX tunnel_inst_lod3impl_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4912 (class 1259 OID 413846)
+-- TOC entry 5546 (class 1259 OID 33873)
 -- Name: tunnel_inst_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16881,7 +16710,7 @@ CREATE INDEX tunnel_inst_lod3refpt_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4913 (class 1259 OID 413780)
+-- TOC entry 5547 (class 1259 OID 33874)
 -- Name: tunnel_inst_lod3xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16889,7 +16718,7 @@ CREATE INDEX tunnel_inst_lod3xgeom_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4914 (class 1259 OID 410200)
+-- TOC entry 5548 (class 1259 OID 33875)
 -- Name: tunnel_inst_lod4brep_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16897,7 +16726,7 @@ CREATE INDEX tunnel_inst_lod4brep_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4915 (class 1259 OID 410206)
+-- TOC entry 5549 (class 1259 OID 33876)
 -- Name: tunnel_inst_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16905,7 +16734,7 @@ CREATE INDEX tunnel_inst_lod4impl_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4916 (class 1259 OID 413868)
+-- TOC entry 5550 (class 1259 OID 33877)
 -- Name: tunnel_inst_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16913,7 +16742,7 @@ CREATE INDEX tunnel_inst_lod4refpt_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4917 (class 1259 OID 413802)
+-- TOC entry 5551 (class 1259 OID 33878)
 -- Name: tunnel_inst_lod4xgeom_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16921,7 +16750,7 @@ CREATE INDEX tunnel_inst_lod4xgeom_spx ON citydb.tunnel_installation USING gist 
 
 
 --
--- TOC entry 4918 (class 1259 OID 410195)
+-- TOC entry 5552 (class 1259 OID 33879)
 -- Name: tunnel_inst_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16929,7 +16758,7 @@ CREATE INDEX tunnel_inst_objclass_fkx ON citydb.tunnel_installation USING btree 
 
 
 --
--- TOC entry 4919 (class 1259 OID 410196)
+-- TOC entry 5553 (class 1259 OID 33880)
 -- Name: tunnel_inst_tunnel_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16937,7 +16766,7 @@ CREATE INDEX tunnel_inst_tunnel_fkx ON citydb.tunnel_installation USING btree (t
 
 
 --
--- TOC entry 4857 (class 1259 OID 410168)
+-- TOC entry 5505 (class 1259 OID 33881)
 -- Name: tunnel_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16945,7 +16774,7 @@ CREATE INDEX tunnel_lod1msrf_fkx ON citydb.tunnel USING btree (lod1_multi_surfac
 
 
 --
--- TOC entry 4858 (class 1259 OID 410172)
+-- TOC entry 5506 (class 1259 OID 33882)
 -- Name: tunnel_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16953,7 +16782,7 @@ CREATE INDEX tunnel_lod1solid_fkx ON citydb.tunnel USING btree (lod1_solid_id) W
 
 
 --
--- TOC entry 4859 (class 1259 OID 414496)
+-- TOC entry 5507 (class 1259 OID 33883)
 -- Name: tunnel_lod1terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16961,7 +16790,7 @@ CREATE INDEX tunnel_lod1terr_spx ON citydb.tunnel USING gist (lod1_terrain_inter
 
 
 --
--- TOC entry 4860 (class 1259 OID 414596)
+-- TOC entry 5508 (class 1259 OID 33884)
 -- Name: tunnel_lod2curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16969,7 +16798,7 @@ CREATE INDEX tunnel_lod2curve_spx ON citydb.tunnel USING gist (lod2_multi_curve)
 
 
 --
--- TOC entry 4861 (class 1259 OID 410169)
+-- TOC entry 5509 (class 1259 OID 33885)
 -- Name: tunnel_lod2msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16977,7 +16806,7 @@ CREATE INDEX tunnel_lod2msrf_fkx ON citydb.tunnel USING btree (lod2_multi_surfac
 
 
 --
--- TOC entry 4862 (class 1259 OID 410173)
+-- TOC entry 5510 (class 1259 OID 33886)
 -- Name: tunnel_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16985,7 +16814,7 @@ CREATE INDEX tunnel_lod2solid_fkx ON citydb.tunnel USING btree (lod2_solid_id) W
 
 
 --
--- TOC entry 4863 (class 1259 OID 414521)
+-- TOC entry 5511 (class 1259 OID 33887)
 -- Name: tunnel_lod2terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -16993,7 +16822,7 @@ CREATE INDEX tunnel_lod2terr_spx ON citydb.tunnel USING gist (lod2_terrain_inter
 
 
 --
--- TOC entry 4864 (class 1259 OID 414621)
+-- TOC entry 5512 (class 1259 OID 33888)
 -- Name: tunnel_lod3curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17001,7 +16830,7 @@ CREATE INDEX tunnel_lod3curve_spx ON citydb.tunnel USING gist (lod3_multi_curve)
 
 
 --
--- TOC entry 4865 (class 1259 OID 410170)
+-- TOC entry 5513 (class 1259 OID 33889)
 -- Name: tunnel_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17009,7 +16838,7 @@ CREATE INDEX tunnel_lod3msrf_fkx ON citydb.tunnel USING btree (lod3_multi_surfac
 
 
 --
--- TOC entry 4866 (class 1259 OID 410174)
+-- TOC entry 5514 (class 1259 OID 33890)
 -- Name: tunnel_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17017,7 +16846,7 @@ CREATE INDEX tunnel_lod3solid_fkx ON citydb.tunnel USING btree (lod3_solid_id) W
 
 
 --
--- TOC entry 4867 (class 1259 OID 414546)
+-- TOC entry 5515 (class 1259 OID 33891)
 -- Name: tunnel_lod3terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17025,7 +16854,7 @@ CREATE INDEX tunnel_lod3terr_spx ON citydb.tunnel USING gist (lod3_terrain_inter
 
 
 --
--- TOC entry 4868 (class 1259 OID 414646)
+-- TOC entry 5516 (class 1259 OID 33892)
 -- Name: tunnel_lod4curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17033,7 +16862,7 @@ CREATE INDEX tunnel_lod4curve_spx ON citydb.tunnel USING gist (lod4_multi_curve)
 
 
 --
--- TOC entry 4869 (class 1259 OID 410171)
+-- TOC entry 5517 (class 1259 OID 33893)
 -- Name: tunnel_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17041,7 +16870,7 @@ CREATE INDEX tunnel_lod4msrf_fkx ON citydb.tunnel USING btree (lod4_multi_surfac
 
 
 --
--- TOC entry 4870 (class 1259 OID 410175)
+-- TOC entry 5518 (class 1259 OID 33894)
 -- Name: tunnel_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17049,7 +16878,7 @@ CREATE INDEX tunnel_lod4solid_fkx ON citydb.tunnel USING btree (lod4_solid_id) W
 
 
 --
--- TOC entry 4871 (class 1259 OID 414571)
+-- TOC entry 5519 (class 1259 OID 33895)
 -- Name: tunnel_lod4terr_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17057,7 +16886,7 @@ CREATE INDEX tunnel_lod4terr_spx ON citydb.tunnel USING gist (lod4_terrain_inter
 
 
 --
--- TOC entry 4872 (class 1259 OID 410367)
+-- TOC entry 5520 (class 1259 OID 33896)
 -- Name: tunnel_objectclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17065,7 +16894,7 @@ CREATE INDEX tunnel_objectclass_fkx ON citydb.tunnel USING btree (objectclass_id
 
 
 --
--- TOC entry 4896 (class 1259 OID 410191)
+-- TOC entry 5560 (class 1259 OID 33897)
 -- Name: tunnel_open_lod3impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17073,7 +16902,7 @@ CREATE INDEX tunnel_open_lod3impl_fkx ON citydb.tunnel_opening USING btree (lod3
 
 
 --
--- TOC entry 4897 (class 1259 OID 410189)
+-- TOC entry 5561 (class 1259 OID 33898)
 -- Name: tunnel_open_lod3msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17081,7 +16910,7 @@ CREATE INDEX tunnel_open_lod3msrf_fkx ON citydb.tunnel_opening USING btree (lod3
 
 
 --
--- TOC entry 4898 (class 1259 OID 413948)
+-- TOC entry 5562 (class 1259 OID 33899)
 -- Name: tunnel_open_lod3refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17089,7 +16918,7 @@ CREATE INDEX tunnel_open_lod3refpt_spx ON citydb.tunnel_opening USING gist (lod3
 
 
 --
--- TOC entry 4899 (class 1259 OID 410192)
+-- TOC entry 5563 (class 1259 OID 33900)
 -- Name: tunnel_open_lod4impl_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17097,7 +16926,7 @@ CREATE INDEX tunnel_open_lod4impl_fkx ON citydb.tunnel_opening USING btree (lod4
 
 
 --
--- TOC entry 4900 (class 1259 OID 410190)
+-- TOC entry 5564 (class 1259 OID 33901)
 -- Name: tunnel_open_lod4msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17105,7 +16934,7 @@ CREATE INDEX tunnel_open_lod4msrf_fkx ON citydb.tunnel_opening USING btree (lod4
 
 
 --
--- TOC entry 4901 (class 1259 OID 413962)
+-- TOC entry 5565 (class 1259 OID 33902)
 -- Name: tunnel_open_lod4refpt_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17113,7 +16942,7 @@ CREATE INDEX tunnel_open_lod4refpt_spx ON citydb.tunnel_opening USING gist (lod4
 
 
 --
--- TOC entry 4902 (class 1259 OID 410188)
+-- TOC entry 5566 (class 1259 OID 33903)
 -- Name: tunnel_open_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17121,7 +16950,7 @@ CREATE INDEX tunnel_open_objclass_fkx ON citydb.tunnel_opening USING btree (obje
 
 
 --
--- TOC entry 4873 (class 1259 OID 410159)
+-- TOC entry 5521 (class 1259 OID 33904)
 -- Name: tunnel_parent_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17129,7 +16958,7 @@ CREATE INDEX tunnel_parent_fkx ON citydb.tunnel USING btree (tunnel_parent_id) W
 
 
 --
--- TOC entry 4876 (class 1259 OID 410160)
+-- TOC entry 5524 (class 1259 OID 33905)
 -- Name: tunnel_root_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17137,7 +16966,7 @@ CREATE INDEX tunnel_root_fkx ON citydb.tunnel USING btree (tunnel_root_id) WITH 
 
 
 --
--- TOC entry 4847 (class 1259 OID 410155)
+-- TOC entry 5593 (class 1259 OID 33906)
 -- Name: waterbnd_srf_lod2srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17145,7 +16974,7 @@ CREATE INDEX waterbnd_srf_lod2srf_fkx ON citydb.waterboundary_surface USING btre
 
 
 --
--- TOC entry 4848 (class 1259 OID 410156)
+-- TOC entry 5594 (class 1259 OID 33907)
 -- Name: waterbnd_srf_lod3srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17153,7 +16982,7 @@ CREATE INDEX waterbnd_srf_lod3srf_fkx ON citydb.waterboundary_surface USING btre
 
 
 --
--- TOC entry 4849 (class 1259 OID 410157)
+-- TOC entry 5595 (class 1259 OID 33908)
 -- Name: waterbnd_srf_lod4srf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17161,7 +16990,7 @@ CREATE INDEX waterbnd_srf_lod4srf_fkx ON citydb.waterboundary_surface USING btre
 
 
 --
--- TOC entry 4850 (class 1259 OID 410154)
+-- TOC entry 5596 (class 1259 OID 33909)
 -- Name: waterbnd_srf_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17169,7 +16998,7 @@ CREATE INDEX waterbnd_srf_objclass_fkx ON citydb.waterboundary_surface USING btr
 
 
 --
--- TOC entry 4843 (class 1259 OID 410152)
+-- TOC entry 5578 (class 1259 OID 33910)
 -- Name: waterbod_to_waterbnd_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17177,7 +17006,7 @@ CREATE INDEX waterbod_to_waterbnd_fkx ON citydb.waterbod_to_waterbnd_srf USING b
 
 
 --
--- TOC entry 4844 (class 1259 OID 410153)
+-- TOC entry 5579 (class 1259 OID 33911)
 -- Name: waterbod_to_waterbnd_fkx1; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17185,7 +17014,7 @@ CREATE INDEX waterbod_to_waterbnd_fkx1 ON citydb.waterbod_to_waterbnd_srf USING 
 
 
 --
--- TOC entry 4832 (class 1259 OID 413184)
+-- TOC entry 5582 (class 1259 OID 33912)
 -- Name: waterbody_lod0curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17193,7 +17022,7 @@ CREATE INDEX waterbody_lod0curve_spx ON citydb.waterbody USING gist (lod0_multi_
 
 
 --
--- TOC entry 4833 (class 1259 OID 410146)
+-- TOC entry 5583 (class 1259 OID 33913)
 -- Name: waterbody_lod0msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17201,7 +17030,7 @@ CREATE INDEX waterbody_lod0msrf_fkx ON citydb.waterbody USING btree (lod0_multi_
 
 
 --
--- TOC entry 4834 (class 1259 OID 413200)
+-- TOC entry 5584 (class 1259 OID 33914)
 -- Name: waterbody_lod1curve_spx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17209,7 +17038,7 @@ CREATE INDEX waterbody_lod1curve_spx ON citydb.waterbody USING gist (lod1_multi_
 
 
 --
--- TOC entry 4835 (class 1259 OID 410147)
+-- TOC entry 5585 (class 1259 OID 33915)
 -- Name: waterbody_lod1msrf_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17217,7 +17046,7 @@ CREATE INDEX waterbody_lod1msrf_fkx ON citydb.waterbody USING btree (lod1_multi_
 
 
 --
--- TOC entry 4836 (class 1259 OID 410148)
+-- TOC entry 5586 (class 1259 OID 33916)
 -- Name: waterbody_lod1solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17225,7 +17054,7 @@ CREATE INDEX waterbody_lod1solid_fkx ON citydb.waterbody USING btree (lod1_solid
 
 
 --
--- TOC entry 4837 (class 1259 OID 410149)
+-- TOC entry 5587 (class 1259 OID 33917)
 -- Name: waterbody_lod2solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17233,7 +17062,7 @@ CREATE INDEX waterbody_lod2solid_fkx ON citydb.waterbody USING btree (lod2_solid
 
 
 --
--- TOC entry 4838 (class 1259 OID 410150)
+-- TOC entry 5588 (class 1259 OID 33918)
 -- Name: waterbody_lod3solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17241,7 +17070,7 @@ CREATE INDEX waterbody_lod3solid_fkx ON citydb.waterbody USING btree (lod3_solid
 
 
 --
--- TOC entry 4839 (class 1259 OID 410151)
+-- TOC entry 5589 (class 1259 OID 33919)
 -- Name: waterbody_lod4solid_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17249,7 +17078,7 @@ CREATE INDEX waterbody_lod4solid_fkx ON citydb.waterbody USING btree (lod4_solid
 
 
 --
--- TOC entry 4840 (class 1259 OID 410370)
+-- TOC entry 5590 (class 1259 OID 33920)
 -- Name: waterbody_objclass_fkx; Type: INDEX; Schema: citydb; Owner: postgres
 --
 
@@ -17257,7 +17086,7 @@ CREATE INDEX waterbody_objclass_fkx ON citydb.waterbody USING btree (objectclass
 
 
 --
--- TOC entry 5375 (class 2606 OID 411747)
+-- TOC entry 5599 (class 2606 OID 33921)
 -- Name: address_to_bridge address_to_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17266,7 +17095,7 @@ ALTER TABLE ONLY citydb.address_to_bridge
 
 
 --
--- TOC entry 5376 (class 2606 OID 411752)
+-- TOC entry 5600 (class 2606 OID 33926)
 -- Name: address_to_bridge address_to_bridge_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17275,7 +17104,7 @@ ALTER TABLE ONLY citydb.address_to_bridge
 
 
 --
--- TOC entry 5139 (class 2606 OID 410567)
+-- TOC entry 5601 (class 2606 OID 33931)
 -- Name: address_to_building address_to_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17284,7 +17113,7 @@ ALTER TABLE ONLY citydb.address_to_building
 
 
 --
--- TOC entry 5140 (class 2606 OID 410572)
+-- TOC entry 5602 (class 2606 OID 33936)
 -- Name: address_to_building address_to_building_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17293,7 +17122,7 @@ ALTER TABLE ONLY citydb.address_to_building
 
 
 --
--- TOC entry 5396 (class 2606 OID 411852)
+-- TOC entry 5603 (class 2606 OID 33941)
 -- Name: aggregation_info aggregation_info_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17302,7 +17131,7 @@ ALTER TABLE ONLY citydb.aggregation_info
 
 
 --
--- TOC entry 5397 (class 2606 OID 411857)
+-- TOC entry 5604 (class 2606 OID 33946)
 -- Name: aggregation_info aggregation_info_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17311,7 +17140,7 @@ ALTER TABLE ONLY citydb.aggregation_info
 
 
 --
--- TOC entry 5194 (class 2606 OID 410842)
+-- TOC entry 5605 (class 2606 OID 33951)
 -- Name: appear_to_surface_data app_to_surf_data_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17320,7 +17149,7 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 
 
 --
--- TOC entry 5195 (class 2606 OID 410847)
+-- TOC entry 5606 (class 2606 OID 33956)
 -- Name: appear_to_surface_data app_to_surf_data_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17329,7 +17158,7 @@ ALTER TABLE ONLY citydb.appear_to_surface_data
 
 
 --
--- TOC entry 5379 (class 2606 OID 411767)
+-- TOC entry 5607 (class 2606 OID 33961)
 -- Name: appearance appearance_citymodel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17338,7 +17167,7 @@ ALTER TABLE ONLY citydb.appearance
 
 
 --
--- TOC entry 5378 (class 2606 OID 411762)
+-- TOC entry 5608 (class 2606 OID 33966)
 -- Name: appearance appearance_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17347,7 +17176,7 @@ ALTER TABLE ONLY citydb.appearance
 
 
 --
--- TOC entry 5155 (class 2606 OID 410647)
+-- TOC entry 5686 (class 2606 OID 33971)
 -- Name: building_furniture bldg_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17356,7 +17185,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 5157 (class 2606 OID 410657)
+-- TOC entry 5687 (class 2606 OID 33976)
 -- Name: building_furniture bldg_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17365,7 +17194,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 5158 (class 2606 OID 410662)
+-- TOC entry 5688 (class 2606 OID 33981)
 -- Name: building_furniture bldg_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17374,7 +17203,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 5159 (class 2606 OID 410667)
+-- TOC entry 5689 (class 2606 OID 33986)
 -- Name: building_furniture bldg_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17383,7 +17212,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 5156 (class 2606 OID 410652)
+-- TOC entry 5690 (class 2606 OID 33991)
 -- Name: building_furniture bldg_furn_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17392,7 +17221,7 @@ ALTER TABLE ONLY citydb.building_furniture
 
 
 --
--- TOC entry 5162 (class 2606 OID 410682)
+-- TOC entry 5691 (class 2606 OID 33996)
 -- Name: building_installation bldg_inst_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17401,7 +17230,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5160 (class 2606 OID 410672)
+-- TOC entry 5692 (class 2606 OID 34001)
 -- Name: building_installation bldg_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17410,7 +17239,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5164 (class 2606 OID 410692)
+-- TOC entry 5693 (class 2606 OID 34006)
 -- Name: building_installation bldg_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17419,7 +17248,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5167 (class 2606 OID 410707)
+-- TOC entry 5694 (class 2606 OID 34011)
 -- Name: building_installation bldg_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17428,7 +17257,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5165 (class 2606 OID 410697)
+-- TOC entry 5695 (class 2606 OID 34016)
 -- Name: building_installation bldg_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17437,7 +17266,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5168 (class 2606 OID 410712)
+-- TOC entry 5696 (class 2606 OID 34021)
 -- Name: building_installation bldg_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17446,7 +17275,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5166 (class 2606 OID 410702)
+-- TOC entry 5697 (class 2606 OID 34026)
 -- Name: building_installation bldg_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17455,7 +17284,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5169 (class 2606 OID 410717)
+-- TOC entry 5698 (class 2606 OID 34031)
 -- Name: building_installation bldg_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17464,7 +17293,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5161 (class 2606 OID 410677)
+-- TOC entry 5699 (class 2606 OID 34036)
 -- Name: building_installation bldg_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17473,7 +17302,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5163 (class 2606 OID 410687)
+-- TOC entry 5700 (class 2606 OID 34041)
 -- Name: building_installation bldg_inst_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17482,7 +17311,7 @@ ALTER TABLE ONLY citydb.building_installation
 
 
 --
--- TOC entry 5348 (class 2606 OID 411612)
+-- TOC entry 5649 (class 2606 OID 34046)
 -- Name: bridge_open_to_them_srf brd_open_to_them_srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17491,7 +17320,7 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 
 
 --
--- TOC entry 5349 (class 2606 OID 411617)
+-- TOC entry 5650 (class 2606 OID 34051)
 -- Name: bridge_open_to_them_srf brd_open_to_them_srf_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17500,7 +17329,7 @@ ALTER TABLE ONLY citydb.bridge_open_to_them_srf
 
 
 --
--- TOC entry 5360 (class 2606 OID 411672)
+-- TOC entry 5663 (class 2606 OID 34056)
 -- Name: bridge_thematic_surface brd_them_srf_brd_const_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17509,7 +17338,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5359 (class 2606 OID 411667)
+-- TOC entry 5664 (class 2606 OID 34061)
 -- Name: bridge_thematic_surface brd_them_srf_brd_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17518,7 +17347,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5358 (class 2606 OID 411662)
+-- TOC entry 5665 (class 2606 OID 34066)
 -- Name: bridge_thematic_surface brd_them_srf_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17527,7 +17356,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5357 (class 2606 OID 411657)
+-- TOC entry 5666 (class 2606 OID 34071)
 -- Name: bridge_thematic_surface brd_them_srf_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17536,7 +17365,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5355 (class 2606 OID 411647)
+-- TOC entry 5667 (class 2606 OID 34076)
 -- Name: bridge_thematic_surface brd_them_srf_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17545,7 +17374,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5361 (class 2606 OID 411677)
+-- TOC entry 5668 (class 2606 OID 34081)
 -- Name: bridge_thematic_surface brd_them_srf_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17554,7 +17383,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5362 (class 2606 OID 411682)
+-- TOC entry 5669 (class 2606 OID 34086)
 -- Name: bridge_thematic_surface brd_them_srf_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17563,7 +17392,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5363 (class 2606 OID 411687)
+-- TOC entry 5670 (class 2606 OID 34091)
 -- Name: bridge_thematic_surface brd_them_srf_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17572,7 +17401,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5356 (class 2606 OID 411652)
+-- TOC entry 5671 (class 2606 OID 34096)
 -- Name: bridge_thematic_surface brd_them_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17581,7 +17410,7 @@ ALTER TABLE ONLY citydb.bridge_thematic_surface
 
 
 --
--- TOC entry 5197 (class 2606 OID 410857)
+-- TOC entry 5609 (class 2606 OID 34101)
 -- Name: breakline_relief breakline_rel_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17590,7 +17419,7 @@ ALTER TABLE ONLY citydb.breakline_relief
 
 
 --
--- TOC entry 5196 (class 2606 OID 410852)
+-- TOC entry 5610 (class 2606 OID 34106)
 -- Name: breakline_relief breakline_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17599,7 +17428,7 @@ ALTER TABLE ONLY citydb.breakline_relief
 
 
 --
--- TOC entry 5314 (class 2606 OID 411442)
+-- TOC entry 5611 (class 2606 OID 34111)
 -- Name: bridge bridge_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17608,7 +17437,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5365 (class 2606 OID 411697)
+-- TOC entry 5623 (class 2606 OID 34116)
 -- Name: bridge_constr_element bridge_constr_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17617,7 +17446,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5364 (class 2606 OID 411692)
+-- TOC entry 5624 (class 2606 OID 34121)
 -- Name: bridge_constr_element bridge_constr_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17626,7 +17455,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5366 (class 2606 OID 411702)
+-- TOC entry 5625 (class 2606 OID 34126)
 -- Name: bridge_constr_element bridge_constr_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17635,7 +17464,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5370 (class 2606 OID 411722)
+-- TOC entry 5626 (class 2606 OID 34131)
 -- Name: bridge_constr_element bridge_constr_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17644,7 +17473,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5367 (class 2606 OID 411707)
+-- TOC entry 5627 (class 2606 OID 34136)
 -- Name: bridge_constr_element bridge_constr_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17653,7 +17482,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5371 (class 2606 OID 411727)
+-- TOC entry 5628 (class 2606 OID 34141)
 -- Name: bridge_constr_element bridge_constr_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17662,7 +17491,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5368 (class 2606 OID 411712)
+-- TOC entry 5629 (class 2606 OID 34146)
 -- Name: bridge_constr_element bridge_constr_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17671,7 +17500,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5372 (class 2606 OID 411732)
+-- TOC entry 5630 (class 2606 OID 34151)
 -- Name: bridge_constr_element bridge_constr_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17680,7 +17509,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5369 (class 2606 OID 411717)
+-- TOC entry 5631 (class 2606 OID 34156)
 -- Name: bridge_constr_element bridge_constr_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17689,7 +17518,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5373 (class 2606 OID 411737)
+-- TOC entry 5632 (class 2606 OID 34161)
 -- Name: bridge_constr_element bridge_constr_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17698,7 +17527,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5374 (class 2606 OID 411742)
+-- TOC entry 5633 (class 2606 OID 34166)
 -- Name: bridge_constr_element bridge_constr_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17707,7 +17536,7 @@ ALTER TABLE ONLY citydb.bridge_constr_element
 
 
 --
--- TOC entry 5327 (class 2606 OID 411507)
+-- TOC entry 5634 (class 2606 OID 34171)
 -- Name: bridge_furniture bridge_furn_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17716,7 +17545,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 5326 (class 2606 OID 411502)
+-- TOC entry 5635 (class 2606 OID 34176)
 -- Name: bridge_furniture bridge_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17725,7 +17554,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 5328 (class 2606 OID 411512)
+-- TOC entry 5636 (class 2606 OID 34181)
 -- Name: bridge_furniture bridge_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17734,7 +17563,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 5329 (class 2606 OID 411517)
+-- TOC entry 5637 (class 2606 OID 34186)
 -- Name: bridge_furniture bridge_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17743,7 +17572,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 5330 (class 2606 OID 411522)
+-- TOC entry 5638 (class 2606 OID 34191)
 -- Name: bridge_furniture bridge_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17752,7 +17581,7 @@ ALTER TABLE ONLY citydb.bridge_furniture
 
 
 --
--- TOC entry 5334 (class 2606 OID 411542)
+-- TOC entry 5639 (class 2606 OID 34196)
 -- Name: bridge_installation bridge_inst_brd_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17761,7 +17590,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5333 (class 2606 OID 411537)
+-- TOC entry 5640 (class 2606 OID 34201)
 -- Name: bridge_installation bridge_inst_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17770,7 +17599,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5331 (class 2606 OID 411527)
+-- TOC entry 5641 (class 2606 OID 34206)
 -- Name: bridge_installation bridge_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17779,7 +17608,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5335 (class 2606 OID 411547)
+-- TOC entry 5642 (class 2606 OID 34211)
 -- Name: bridge_installation bridge_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17788,7 +17617,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5338 (class 2606 OID 411562)
+-- TOC entry 5643 (class 2606 OID 34216)
 -- Name: bridge_installation bridge_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17797,7 +17626,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5336 (class 2606 OID 411552)
+-- TOC entry 5644 (class 2606 OID 34221)
 -- Name: bridge_installation bridge_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17806,7 +17635,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5339 (class 2606 OID 411567)
+-- TOC entry 5645 (class 2606 OID 34226)
 -- Name: bridge_installation bridge_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17815,7 +17644,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5337 (class 2606 OID 411557)
+-- TOC entry 5646 (class 2606 OID 34231)
 -- Name: bridge_installation bridge_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17824,7 +17653,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5340 (class 2606 OID 411572)
+-- TOC entry 5647 (class 2606 OID 34236)
 -- Name: bridge_installation bridge_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17833,7 +17662,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5332 (class 2606 OID 411532)
+-- TOC entry 5648 (class 2606 OID 34241)
 -- Name: bridge_installation bridge_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17842,7 +17671,7 @@ ALTER TABLE ONLY citydb.bridge_installation
 
 
 --
--- TOC entry 5317 (class 2606 OID 411457)
+-- TOC entry 5612 (class 2606 OID 34246)
 -- Name: bridge bridge_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17851,7 +17680,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5321 (class 2606 OID 411477)
+-- TOC entry 5613 (class 2606 OID 34251)
 -- Name: bridge bridge_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17860,7 +17689,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5318 (class 2606 OID 411462)
+-- TOC entry 5614 (class 2606 OID 34256)
 -- Name: bridge bridge_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17869,7 +17698,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5322 (class 2606 OID 411482)
+-- TOC entry 5615 (class 2606 OID 34261)
 -- Name: bridge bridge_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17878,7 +17707,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5319 (class 2606 OID 411467)
+-- TOC entry 5616 (class 2606 OID 34266)
 -- Name: bridge bridge_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17887,7 +17716,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5323 (class 2606 OID 411487)
+-- TOC entry 5617 (class 2606 OID 34271)
 -- Name: bridge bridge_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17896,7 +17725,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5320 (class 2606 OID 411472)
+-- TOC entry 5618 (class 2606 OID 34276)
 -- Name: bridge bridge_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17905,7 +17734,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5324 (class 2606 OID 411492)
+-- TOC entry 5619 (class 2606 OID 34281)
 -- Name: bridge bridge_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17914,7 +17743,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5325 (class 2606 OID 411497)
+-- TOC entry 5620 (class 2606 OID 34286)
 -- Name: bridge bridge_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17923,7 +17752,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5343 (class 2606 OID 411587)
+-- TOC entry 5651 (class 2606 OID 34291)
 -- Name: bridge_opening bridge_open_address_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17932,7 +17761,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5341 (class 2606 OID 411577)
+-- TOC entry 5652 (class 2606 OID 34296)
 -- Name: bridge_opening bridge_open_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17941,7 +17770,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5346 (class 2606 OID 411602)
+-- TOC entry 5653 (class 2606 OID 34301)
 -- Name: bridge_opening bridge_open_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17950,7 +17779,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5344 (class 2606 OID 411592)
+-- TOC entry 5654 (class 2606 OID 34306)
 -- Name: bridge_opening bridge_open_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17959,7 +17788,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5347 (class 2606 OID 411607)
+-- TOC entry 5655 (class 2606 OID 34311)
 -- Name: bridge_opening bridge_open_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17968,7 +17797,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5345 (class 2606 OID 411597)
+-- TOC entry 5656 (class 2606 OID 34316)
 -- Name: bridge_opening bridge_open_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17977,7 +17806,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5342 (class 2606 OID 411582)
+-- TOC entry 5657 (class 2606 OID 34321)
 -- Name: bridge_opening bridge_open_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17986,7 +17815,7 @@ ALTER TABLE ONLY citydb.bridge_opening
 
 
 --
--- TOC entry 5315 (class 2606 OID 411447)
+-- TOC entry 5621 (class 2606 OID 34326)
 -- Name: bridge bridge_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -17995,7 +17824,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5351 (class 2606 OID 411627)
+-- TOC entry 5658 (class 2606 OID 34331)
 -- Name: bridge_room bridge_room_bridge_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18004,7 +17833,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5350 (class 2606 OID 411622)
+-- TOC entry 5659 (class 2606 OID 34336)
 -- Name: bridge_room bridge_room_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18013,7 +17842,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5352 (class 2606 OID 411632)
+-- TOC entry 5660 (class 2606 OID 34341)
 -- Name: bridge_room bridge_room_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18022,7 +17851,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5353 (class 2606 OID 411637)
+-- TOC entry 5661 (class 2606 OID 34346)
 -- Name: bridge_room bridge_room_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18031,7 +17860,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5354 (class 2606 OID 411642)
+-- TOC entry 5662 (class 2606 OID 34351)
 -- Name: bridge_room bridge_room_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18040,7 +17869,7 @@ ALTER TABLE ONLY citydb.bridge_room
 
 
 --
--- TOC entry 5316 (class 2606 OID 411452)
+-- TOC entry 5622 (class 2606 OID 34356)
 -- Name: bridge bridge_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18049,7 +17878,7 @@ ALTER TABLE ONLY citydb.bridge
 
 
 --
--- TOC entry 5141 (class 2606 OID 410577)
+-- TOC entry 5672 (class 2606 OID 34361)
 -- Name: building building_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18058,7 +17887,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5144 (class 2606 OID 410592)
+-- TOC entry 5673 (class 2606 OID 34366)
 -- Name: building building_lod0footprint_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18067,7 +17896,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5145 (class 2606 OID 410597)
+-- TOC entry 5674 (class 2606 OID 34371)
 -- Name: building building_lod0roofprint_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18076,7 +17905,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5146 (class 2606 OID 410602)
+-- TOC entry 5675 (class 2606 OID 34376)
 -- Name: building building_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18085,7 +17914,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5150 (class 2606 OID 410622)
+-- TOC entry 5676 (class 2606 OID 34381)
 -- Name: building building_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18094,7 +17923,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5147 (class 2606 OID 410607)
+-- TOC entry 5677 (class 2606 OID 34386)
 -- Name: building building_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18103,7 +17932,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5151 (class 2606 OID 410627)
+-- TOC entry 5678 (class 2606 OID 34391)
 -- Name: building building_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18112,7 +17941,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5148 (class 2606 OID 410612)
+-- TOC entry 5679 (class 2606 OID 34396)
 -- Name: building building_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18121,7 +17950,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5152 (class 2606 OID 410632)
+-- TOC entry 5680 (class 2606 OID 34401)
 -- Name: building building_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18130,7 +17959,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5149 (class 2606 OID 410617)
+-- TOC entry 5681 (class 2606 OID 34406)
 -- Name: building building_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18139,7 +17968,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5153 (class 2606 OID 410637)
+-- TOC entry 5682 (class 2606 OID 34411)
 -- Name: building building_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18148,7 +17977,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5154 (class 2606 OID 410642)
+-- TOC entry 5683 (class 2606 OID 34416)
 -- Name: building building_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18157,7 +17986,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5142 (class 2606 OID 410582)
+-- TOC entry 5684 (class 2606 OID 34421)
 -- Name: building building_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18166,7 +17995,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5143 (class 2606 OID 410587)
+-- TOC entry 5685 (class 2606 OID 34426)
 -- Name: building building_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18175,7 +18004,7 @@ ALTER TABLE ONLY citydb.building
 
 
 --
--- TOC entry 5117 (class 2606 OID 410457)
+-- TOC entry 5701 (class 2606 OID 34431)
 -- Name: city_furniture city_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18184,7 +18013,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5118 (class 2606 OID 410462)
+-- TOC entry 5702 (class 2606 OID 34436)
 -- Name: city_furniture city_furn_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18193,7 +18022,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5122 (class 2606 OID 410482)
+-- TOC entry 5703 (class 2606 OID 34441)
 -- Name: city_furniture city_furn_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18202,7 +18031,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5119 (class 2606 OID 410467)
+-- TOC entry 5704 (class 2606 OID 34446)
 -- Name: city_furniture city_furn_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18211,7 +18040,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5123 (class 2606 OID 410487)
+-- TOC entry 5705 (class 2606 OID 34451)
 -- Name: city_furniture city_furn_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18220,7 +18049,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5120 (class 2606 OID 410472)
+-- TOC entry 5706 (class 2606 OID 34456)
 -- Name: city_furniture city_furn_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18229,7 +18058,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5124 (class 2606 OID 410492)
+-- TOC entry 5707 (class 2606 OID 34461)
 -- Name: city_furniture city_furn_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18238,7 +18067,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5121 (class 2606 OID 410477)
+-- TOC entry 5708 (class 2606 OID 34466)
 -- Name: city_furniture city_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18247,7 +18076,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5125 (class 2606 OID 410497)
+-- TOC entry 5709 (class 2606 OID 34471)
 -- Name: city_furniture city_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18256,7 +18085,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5126 (class 2606 OID 410502)
+-- TOC entry 5710 (class 2606 OID 34476)
 -- Name: city_furniture city_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18265,7 +18094,7 @@ ALTER TABLE ONLY citydb.city_furniture
 
 
 --
--- TOC entry 5104 (class 2606 OID 410392)
+-- TOC entry 5716 (class 2606 OID 34481)
 -- Name: cityobject_member cityobject_member_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18274,7 +18103,7 @@ ALTER TABLE ONLY citydb.cityobject_member
 
 
 --
--- TOC entry 5105 (class 2606 OID 410397)
+-- TOC entry 5717 (class 2606 OID 34486)
 -- Name: cityobject_member cityobject_member_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18283,7 +18112,7 @@ ALTER TABLE ONLY citydb.cityobject_member
 
 
 --
--- TOC entry 5377 (class 2606 OID 411757)
+-- TOC entry 5711 (class 2606 OID 34491)
 -- Name: cityobject cityobject_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18292,7 +18121,7 @@ ALTER TABLE ONLY citydb.cityobject
 
 
 --
--- TOC entry 5390 (class 2606 OID 411822)
+-- TOC entry 5722 (class 2606 OID 34496)
 -- Name: external_reference ext_ref_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18301,7 +18130,7 @@ ALTER TABLE ONLY citydb.external_reference
 
 
 --
--- TOC entry 5127 (class 2606 OID 410507)
+-- TOC entry 5725 (class 2606 OID 34501)
 -- Name: generic_cityobject gen_object_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18310,7 +18139,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5128 (class 2606 OID 410512)
+-- TOC entry 5726 (class 2606 OID 34506)
 -- Name: generic_cityobject gen_object_lod0brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18319,7 +18148,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5133 (class 2606 OID 410537)
+-- TOC entry 5727 (class 2606 OID 34511)
 -- Name: generic_cityobject gen_object_lod0impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18328,7 +18157,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5129 (class 2606 OID 410517)
+-- TOC entry 5728 (class 2606 OID 34516)
 -- Name: generic_cityobject gen_object_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18337,7 +18166,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5134 (class 2606 OID 410542)
+-- TOC entry 5729 (class 2606 OID 34521)
 -- Name: generic_cityobject gen_object_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18346,7 +18175,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5130 (class 2606 OID 410522)
+-- TOC entry 5730 (class 2606 OID 34526)
 -- Name: generic_cityobject gen_object_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18355,7 +18184,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5135 (class 2606 OID 410547)
+-- TOC entry 5731 (class 2606 OID 34531)
 -- Name: generic_cityobject gen_object_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18364,7 +18193,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5131 (class 2606 OID 410527)
+-- TOC entry 5732 (class 2606 OID 34536)
 -- Name: generic_cityobject gen_object_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18373,7 +18202,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5136 (class 2606 OID 410552)
+-- TOC entry 5733 (class 2606 OID 34541)
 -- Name: generic_cityobject gen_object_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18382,7 +18211,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5132 (class 2606 OID 410532)
+-- TOC entry 5734 (class 2606 OID 34546)
 -- Name: generic_cityobject gen_object_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18391,7 +18220,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5137 (class 2606 OID 410557)
+-- TOC entry 5735 (class 2606 OID 34551)
 -- Name: generic_cityobject gen_object_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18400,7 +18229,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5138 (class 2606 OID 410562)
+-- TOC entry 5736 (class 2606 OID 34556)
 -- Name: generic_cityobject gen_object_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18409,7 +18238,7 @@ ALTER TABLE ONLY citydb.generic_cityobject
 
 
 --
--- TOC entry 5106 (class 2606 OID 410402)
+-- TOC entry 5723 (class 2606 OID 34561)
 -- Name: generalization general_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18418,7 +18247,7 @@ ALTER TABLE ONLY citydb.generalization
 
 
 --
--- TOC entry 5107 (class 2606 OID 410407)
+-- TOC entry 5724 (class 2606 OID 34566)
 -- Name: generalization general_generalizes_to_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18427,7 +18256,7 @@ ALTER TABLE ONLY citydb.generalization
 
 
 --
--- TOC entry 5389 (class 2606 OID 411817)
+-- TOC entry 5712 (class 2606 OID 34571)
 -- Name: cityobject_genericattrib genericattrib_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18436,7 +18265,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 
 
 --
--- TOC entry 5388 (class 2606 OID 411812)
+-- TOC entry 5713 (class 2606 OID 34576)
 -- Name: cityobject_genericattrib genericattrib_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18445,7 +18274,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 
 
 --
--- TOC entry 5386 (class 2606 OID 411802)
+-- TOC entry 5714 (class 2606 OID 34581)
 -- Name: cityobject_genericattrib genericattrib_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18454,7 +18283,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 
 
 --
--- TOC entry 5387 (class 2606 OID 411807)
+-- TOC entry 5715 (class 2606 OID 34586)
 -- Name: cityobject_genericattrib genericattrib_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18463,7 +18292,7 @@ ALTER TABLE ONLY citydb.cityobject_genericattrib
 
 
 --
--- TOC entry 5109 (class 2606 OID 410417)
+-- TOC entry 5718 (class 2606 OID 34591)
 -- Name: cityobjectgroup group_brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18472,7 +18301,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 
 
 --
--- TOC entry 5108 (class 2606 OID 410412)
+-- TOC entry 5719 (class 2606 OID 34596)
 -- Name: cityobjectgroup group_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18481,7 +18310,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 
 
 --
--- TOC entry 5111 (class 2606 OID 410427)
+-- TOC entry 5720 (class 2606 OID 34601)
 -- Name: cityobjectgroup group_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18490,7 +18319,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 
 
 --
--- TOC entry 5110 (class 2606 OID 410422)
+-- TOC entry 5721 (class 2606 OID 34606)
 -- Name: cityobjectgroup group_parent_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18499,7 +18328,7 @@ ALTER TABLE ONLY citydb.cityobjectgroup
 
 
 --
--- TOC entry 5112 (class 2606 OID 410432)
+-- TOC entry 5737 (class 2606 OID 34611)
 -- Name: group_to_cityobject group_to_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18508,7 +18337,7 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 
 
 --
--- TOC entry 5113 (class 2606 OID 410437)
+-- TOC entry 5738 (class 2606 OID 34616)
 -- Name: group_to_cityobject group_to_cityobject_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18517,7 +18346,7 @@ ALTER TABLE ONLY citydb.group_to_cityobject
 
 
 --
--- TOC entry 5380 (class 2606 OID 411772)
+-- TOC entry 5739 (class 2606 OID 34621)
 -- Name: implicit_geometry implicit_geom_brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18526,7 +18355,7 @@ ALTER TABLE ONLY citydb.implicit_geometry
 
 
 --
--- TOC entry 5221 (class 2606 OID 410977)
+-- TOC entry 5740 (class 2606 OID 34626)
 -- Name: land_use land_use_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18535,7 +18364,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5222 (class 2606 OID 410982)
+-- TOC entry 5741 (class 2606 OID 34631)
 -- Name: land_use land_use_lod0msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18544,7 +18373,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5223 (class 2606 OID 410987)
+-- TOC entry 5742 (class 2606 OID 34636)
 -- Name: land_use land_use_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18553,7 +18382,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5224 (class 2606 OID 410992)
+-- TOC entry 5743 (class 2606 OID 34641)
 -- Name: land_use land_use_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18562,7 +18391,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5225 (class 2606 OID 410997)
+-- TOC entry 5744 (class 2606 OID 34646)
 -- Name: land_use land_use_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18571,7 +18400,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5226 (class 2606 OID 411002)
+-- TOC entry 5745 (class 2606 OID 34651)
 -- Name: land_use land_use_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18580,7 +18409,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5227 (class 2606 OID 411007)
+-- TOC entry 5746 (class 2606 OID 34656)
 -- Name: land_use land_use_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18589,7 +18418,7 @@ ALTER TABLE ONLY citydb.land_use
 
 
 --
--- TOC entry 5199 (class 2606 OID 410867)
+-- TOC entry 5747 (class 2606 OID 34661)
 -- Name: masspoint_relief masspoint_rel_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18598,7 +18427,7 @@ ALTER TABLE ONLY citydb.masspoint_relief
 
 
 --
--- TOC entry 5198 (class 2606 OID 410862)
+-- TOC entry 5748 (class 2606 OID 34666)
 -- Name: masspoint_relief masspoint_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18607,7 +18436,7 @@ ALTER TABLE ONLY citydb.masspoint_relief
 
 
 --
--- TOC entry 5116 (class 2606 OID 410452)
+-- TOC entry 5749 (class 2606 OID 34671)
 -- Name: objectclass objectclass_ade_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18616,7 +18445,7 @@ ALTER TABLE ONLY citydb.objectclass
 
 
 --
--- TOC entry 5115 (class 2606 OID 410447)
+-- TOC entry 5750 (class 2606 OID 34676)
 -- Name: objectclass objectclass_baseclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18625,7 +18454,7 @@ ALTER TABLE ONLY citydb.objectclass
 
 
 --
--- TOC entry 5114 (class 2606 OID 410442)
+-- TOC entry 5751 (class 2606 OID 34681)
 -- Name: objectclass objectclass_superclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18634,7 +18463,7 @@ ALTER TABLE ONLY citydb.objectclass
 
 
 --
--- TOC entry 5177 (class 2606 OID 410757)
+-- TOC entry 5759 (class 2606 OID 34686)
 -- Name: opening_to_them_surface open_to_them_surface_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18643,7 +18472,7 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 
 
 --
--- TOC entry 5178 (class 2606 OID 410762)
+-- TOC entry 5760 (class 2606 OID 34691)
 -- Name: opening_to_them_surface open_to_them_surface_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18652,7 +18481,7 @@ ALTER TABLE ONLY citydb.opening_to_them_surface
 
 
 --
--- TOC entry 5172 (class 2606 OID 410732)
+-- TOC entry 5752 (class 2606 OID 34696)
 -- Name: opening opening_address_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18661,7 +18490,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5170 (class 2606 OID 410722)
+-- TOC entry 5753 (class 2606 OID 34701)
 -- Name: opening opening_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18670,7 +18499,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5175 (class 2606 OID 410747)
+-- TOC entry 5754 (class 2606 OID 34706)
 -- Name: opening opening_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18679,7 +18508,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5173 (class 2606 OID 410737)
+-- TOC entry 5755 (class 2606 OID 34711)
 -- Name: opening opening_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18688,7 +18517,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5176 (class 2606 OID 410752)
+-- TOC entry 5756 (class 2606 OID 34716)
 -- Name: opening opening_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18697,7 +18526,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5174 (class 2606 OID 410742)
+-- TOC entry 5757 (class 2606 OID 34721)
 -- Name: opening opening_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18706,7 +18535,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5171 (class 2606 OID 410727)
+-- TOC entry 5758 (class 2606 OID 34726)
 -- Name: opening opening_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18715,7 +18544,7 @@ ALTER TABLE ONLY citydb.opening
 
 
 --
--- TOC entry 5228 (class 2606 OID 411012)
+-- TOC entry 5761 (class 2606 OID 34731)
 -- Name: plant_cover plant_cover_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18724,7 +18553,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5233 (class 2606 OID 411037)
+-- TOC entry 5762 (class 2606 OID 34736)
 -- Name: plant_cover plant_cover_lod1msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18733,7 +18562,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5229 (class 2606 OID 411017)
+-- TOC entry 5763 (class 2606 OID 34741)
 -- Name: plant_cover plant_cover_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18742,7 +18571,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5234 (class 2606 OID 411042)
+-- TOC entry 5764 (class 2606 OID 34746)
 -- Name: plant_cover plant_cover_lod2msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18751,7 +18580,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5230 (class 2606 OID 411022)
+-- TOC entry 5765 (class 2606 OID 34751)
 -- Name: plant_cover plant_cover_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18760,7 +18589,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5235 (class 2606 OID 411047)
+-- TOC entry 5766 (class 2606 OID 34756)
 -- Name: plant_cover plant_cover_lod3msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18769,7 +18598,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5231 (class 2606 OID 411027)
+-- TOC entry 5767 (class 2606 OID 34761)
 -- Name: plant_cover plant_cover_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18778,7 +18607,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5236 (class 2606 OID 411052)
+-- TOC entry 5768 (class 2606 OID 34766)
 -- Name: plant_cover plant_cover_lod4msolid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18787,7 +18616,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5232 (class 2606 OID 411032)
+-- TOC entry 5769 (class 2606 OID 34771)
 -- Name: plant_cover plant_cover_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18796,7 +18625,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5237 (class 2606 OID 411057)
+-- TOC entry 5770 (class 2606 OID 34776)
 -- Name: plant_cover plant_cover_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18805,7 +18634,7 @@ ALTER TABLE ONLY citydb.plant_cover
 
 
 --
--- TOC entry 5263 (class 2606 OID 411187)
+-- TOC entry 5771 (class 2606 OID 34781)
 -- Name: raster_relief raster_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18814,7 +18643,7 @@ ALTER TABLE ONLY citydb.raster_relief
 
 
 --
--- TOC entry 5264 (class 2606 OID 411192)
+-- TOC entry 5772 (class 2606 OID 34786)
 -- Name: raster_relief raster_relief_coverage_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18823,7 +18652,7 @@ ALTER TABLE ONLY citydb.raster_relief
 
 
 --
--- TOC entry 5265 (class 2606 OID 411197)
+-- TOC entry 5773 (class 2606 OID 34791)
 -- Name: raster_relief raster_relief_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18832,7 +18661,7 @@ ALTER TABLE ONLY citydb.raster_relief
 
 
 --
--- TOC entry 5202 (class 2606 OID 410882)
+-- TOC entry 5776 (class 2606 OID 34796)
 -- Name: relief_feat_to_rel_comp rel_feat_to_rel_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18841,7 +18670,7 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 
 
 --
--- TOC entry 5203 (class 2606 OID 410887)
+-- TOC entry 5777 (class 2606 OID 34801)
 -- Name: relief_feat_to_rel_comp rel_feat_to_rel_comp_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18850,7 +18679,7 @@ ALTER TABLE ONLY citydb.relief_feat_to_rel_comp
 
 
 --
--- TOC entry 5200 (class 2606 OID 410872)
+-- TOC entry 5774 (class 2606 OID 34806)
 -- Name: relief_component relief_comp_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18859,7 +18688,7 @@ ALTER TABLE ONLY citydb.relief_component
 
 
 --
--- TOC entry 5201 (class 2606 OID 410877)
+-- TOC entry 5775 (class 2606 OID 34811)
 -- Name: relief_component relief_comp_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18868,7 +18697,7 @@ ALTER TABLE ONLY citydb.relief_component
 
 
 --
--- TOC entry 5204 (class 2606 OID 410892)
+-- TOC entry 5778 (class 2606 OID 34816)
 -- Name: relief_feature relief_feat_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18877,7 +18706,7 @@ ALTER TABLE ONLY citydb.relief_feature
 
 
 --
--- TOC entry 5205 (class 2606 OID 410897)
+-- TOC entry 5779 (class 2606 OID 34821)
 -- Name: relief_feature relief_feat_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18886,7 +18715,7 @@ ALTER TABLE ONLY citydb.relief_feature
 
 
 --
--- TOC entry 5180 (class 2606 OID 410772)
+-- TOC entry 5780 (class 2606 OID 34826)
 -- Name: room room_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18895,7 +18724,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5179 (class 2606 OID 410767)
+-- TOC entry 5781 (class 2606 OID 34831)
 -- Name: room room_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18904,7 +18733,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5181 (class 2606 OID 410777)
+-- TOC entry 5782 (class 2606 OID 34836)
 -- Name: room room_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18913,7 +18742,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5182 (class 2606 OID 410782)
+-- TOC entry 5783 (class 2606 OID 34841)
 -- Name: room room_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18922,7 +18751,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5183 (class 2606 OID 410787)
+-- TOC entry 5784 (class 2606 OID 34846)
 -- Name: room room_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18931,7 +18760,7 @@ ALTER TABLE ONLY citydb.room
 
 
 --
--- TOC entry 5391 (class 2606 OID 411827)
+-- TOC entry 5785 (class 2606 OID 34851)
 -- Name: schema schema_ade_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18940,7 +18769,7 @@ ALTER TABLE ONLY citydb.schema
 
 
 --
--- TOC entry 5394 (class 2606 OID 411842)
+-- TOC entry 5786 (class 2606 OID 34856)
 -- Name: schema_referencing schema_referencing_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18949,7 +18778,7 @@ ALTER TABLE ONLY citydb.schema_referencing
 
 
 --
--- TOC entry 5395 (class 2606 OID 411847)
+-- TOC entry 5787 (class 2606 OID 34861)
 -- Name: schema_referencing schema_referencing_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18958,7 +18787,7 @@ ALTER TABLE ONLY citydb.schema_referencing
 
 
 --
--- TOC entry 5392 (class 2606 OID 411832)
+-- TOC entry 5788 (class 2606 OID 34866)
 -- Name: schema_to_objectclass schema_to_objectclass_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18967,7 +18796,7 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 
 
 --
--- TOC entry 5393 (class 2606 OID 411837)
+-- TOC entry 5789 (class 2606 OID 34871)
 -- Name: schema_to_objectclass schema_to_objectclass_fk2; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18976,7 +18805,7 @@ ALTER TABLE ONLY citydb.schema_to_objectclass
 
 
 --
--- TOC entry 5238 (class 2606 OID 411062)
+-- TOC entry 5790 (class 2606 OID 34876)
 -- Name: solitary_vegetat_object sol_veg_obj_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18985,7 +18814,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5239 (class 2606 OID 411067)
+-- TOC entry 5791 (class 2606 OID 34881)
 -- Name: solitary_vegetat_object sol_veg_obj_lod1brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -18994,7 +18823,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5243 (class 2606 OID 411087)
+-- TOC entry 5792 (class 2606 OID 34886)
 -- Name: solitary_vegetat_object sol_veg_obj_lod1impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19003,7 +18832,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5240 (class 2606 OID 411072)
+-- TOC entry 5793 (class 2606 OID 34891)
 -- Name: solitary_vegetat_object sol_veg_obj_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19012,7 +18841,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5244 (class 2606 OID 411092)
+-- TOC entry 5794 (class 2606 OID 34896)
 -- Name: solitary_vegetat_object sol_veg_obj_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19021,7 +18850,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5241 (class 2606 OID 411077)
+-- TOC entry 5795 (class 2606 OID 34901)
 -- Name: solitary_vegetat_object sol_veg_obj_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19030,7 +18859,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5245 (class 2606 OID 411097)
+-- TOC entry 5796 (class 2606 OID 34906)
 -- Name: solitary_vegetat_object sol_veg_obj_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19039,7 +18868,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5242 (class 2606 OID 411082)
+-- TOC entry 5797 (class 2606 OID 34911)
 -- Name: solitary_vegetat_object sol_veg_obj_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19048,7 +18877,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5246 (class 2606 OID 411102)
+-- TOC entry 5798 (class 2606 OID 34916)
 -- Name: solitary_vegetat_object sol_veg_obj_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19057,7 +18886,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5247 (class 2606 OID 411107)
+-- TOC entry 5799 (class 2606 OID 34921)
 -- Name: solitary_vegetat_object sol_veg_obj_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19066,7 +18895,7 @@ ALTER TABLE ONLY citydb.solitary_vegetat_object
 
 
 --
--- TOC entry 5385 (class 2606 OID 411797)
+-- TOC entry 5800 (class 2606 OID 34926)
 -- Name: surface_data surface_data_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19075,7 +18904,7 @@ ALTER TABLE ONLY citydb.surface_data
 
 
 --
--- TOC entry 5384 (class 2606 OID 411792)
+-- TOC entry 5801 (class 2606 OID 34931)
 -- Name: surface_data surface_data_tex_image_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19084,7 +18913,7 @@ ALTER TABLE ONLY citydb.surface_data
 
 
 --
--- TOC entry 5383 (class 2606 OID 411787)
+-- TOC entry 5802 (class 2606 OID 34936)
 -- Name: surface_geometry surface_geom_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19093,7 +18922,7 @@ ALTER TABLE ONLY citydb.surface_geometry
 
 
 --
--- TOC entry 5381 (class 2606 OID 411777)
+-- TOC entry 5803 (class 2606 OID 34941)
 -- Name: surface_geometry surface_geom_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19102,7 +18931,7 @@ ALTER TABLE ONLY citydb.surface_geometry
 
 
 --
--- TOC entry 5382 (class 2606 OID 411782)
+-- TOC entry 5804 (class 2606 OID 34946)
 -- Name: surface_geometry surface_geom_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19111,7 +18940,7 @@ ALTER TABLE ONLY citydb.surface_geometry
 
 
 --
--- TOC entry 5192 (class 2606 OID 410832)
+-- TOC entry 5805 (class 2606 OID 34951)
 -- Name: textureparam texparam_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19120,7 +18949,7 @@ ALTER TABLE ONLY citydb.textureparam
 
 
 --
--- TOC entry 5193 (class 2606 OID 410837)
+-- TOC entry 5806 (class 2606 OID 34956)
 -- Name: textureparam texparam_surface_data_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19129,7 +18958,7 @@ ALTER TABLE ONLY citydb.textureparam
 
 
 --
--- TOC entry 5188 (class 2606 OID 410812)
+-- TOC entry 5807 (class 2606 OID 34961)
 -- Name: thematic_surface them_surface_bldg_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19138,7 +18967,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5186 (class 2606 OID 410802)
+-- TOC entry 5808 (class 2606 OID 34966)
 -- Name: thematic_surface them_surface_building_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19147,7 +18976,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5184 (class 2606 OID 410792)
+-- TOC entry 5809 (class 2606 OID 34971)
 -- Name: thematic_surface them_surface_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19156,7 +18985,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5189 (class 2606 OID 410817)
+-- TOC entry 5810 (class 2606 OID 34976)
 -- Name: thematic_surface them_surface_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19165,7 +18994,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5190 (class 2606 OID 410822)
+-- TOC entry 5811 (class 2606 OID 34981)
 -- Name: thematic_surface them_surface_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19174,7 +19003,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5191 (class 2606 OID 410827)
+-- TOC entry 5812 (class 2606 OID 34986)
 -- Name: thematic_surface them_surface_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19183,7 +19012,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5185 (class 2606 OID 410797)
+-- TOC entry 5813 (class 2606 OID 34991)
 -- Name: thematic_surface them_surface_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19192,7 +19021,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5187 (class 2606 OID 410807)
+-- TOC entry 5814 (class 2606 OID 34996)
 -- Name: thematic_surface them_surface_room_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19201,7 +19030,7 @@ ALTER TABLE ONLY citydb.thematic_surface
 
 
 --
--- TOC entry 5206 (class 2606 OID 410902)
+-- TOC entry 5815 (class 2606 OID 35001)
 -- Name: tin_relief tin_relief_comp_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19210,7 +19039,7 @@ ALTER TABLE ONLY citydb.tin_relief
 
 
 --
--- TOC entry 5207 (class 2606 OID 410907)
+-- TOC entry 5816 (class 2606 OID 35006)
 -- Name: tin_relief tin_relief_geom_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19219,7 +19048,7 @@ ALTER TABLE ONLY citydb.tin_relief
 
 
 --
--- TOC entry 5208 (class 2606 OID 410912)
+-- TOC entry 5817 (class 2606 OID 35011)
 -- Name: tin_relief tin_relief_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19228,7 +19057,7 @@ ALTER TABLE ONLY citydb.tin_relief
 
 
 --
--- TOC entry 5215 (class 2606 OID 410947)
+-- TOC entry 5818 (class 2606 OID 35016)
 -- Name: traffic_area traffic_area_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19237,7 +19066,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5217 (class 2606 OID 410957)
+-- TOC entry 5819 (class 2606 OID 35021)
 -- Name: traffic_area traffic_area_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19246,7 +19075,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5218 (class 2606 OID 410962)
+-- TOC entry 5820 (class 2606 OID 35026)
 -- Name: traffic_area traffic_area_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19255,7 +19084,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5219 (class 2606 OID 410967)
+-- TOC entry 5821 (class 2606 OID 35031)
 -- Name: traffic_area traffic_area_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19264,7 +19093,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5216 (class 2606 OID 410952)
+-- TOC entry 5822 (class 2606 OID 35036)
 -- Name: traffic_area traffic_area_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19273,7 +19102,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5220 (class 2606 OID 410972)
+-- TOC entry 5823 (class 2606 OID 35041)
 -- Name: traffic_area traffic_area_trancmplx_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19282,7 +19111,7 @@ ALTER TABLE ONLY citydb.traffic_area
 
 
 --
--- TOC entry 5210 (class 2606 OID 410922)
+-- TOC entry 5824 (class 2606 OID 35046)
 -- Name: transportation_complex tran_complex_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19291,7 +19120,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5211 (class 2606 OID 410927)
+-- TOC entry 5825 (class 2606 OID 35051)
 -- Name: transportation_complex tran_complex_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19300,7 +19129,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5212 (class 2606 OID 410932)
+-- TOC entry 5826 (class 2606 OID 35056)
 -- Name: transportation_complex tran_complex_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19309,7 +19138,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5213 (class 2606 OID 410937)
+-- TOC entry 5827 (class 2606 OID 35061)
 -- Name: transportation_complex tran_complex_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19318,7 +19147,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5214 (class 2606 OID 410942)
+-- TOC entry 5828 (class 2606 OID 35066)
 -- Name: transportation_complex tran_complex_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19327,7 +19156,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5209 (class 2606 OID 410917)
+-- TOC entry 5829 (class 2606 OID 35071)
 -- Name: transportation_complex tran_complex_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19336,7 +19165,7 @@ ALTER TABLE ONLY citydb.transportation_complex
 
 
 --
--- TOC entry 5280 (class 2606 OID 411272)
+-- TOC entry 5847 (class 2606 OID 35076)
 -- Name: tunnel_hollow_space tun_hspace_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19345,7 +19174,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 5282 (class 2606 OID 411282)
+-- TOC entry 5848 (class 2606 OID 35081)
 -- Name: tunnel_hollow_space tun_hspace_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19354,7 +19183,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 5283 (class 2606 OID 411287)
+-- TOC entry 5849 (class 2606 OID 35086)
 -- Name: tunnel_hollow_space tun_hspace_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19363,7 +19192,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 5284 (class 2606 OID 411292)
+-- TOC entry 5850 (class 2606 OID 35091)
 -- Name: tunnel_hollow_space tun_hspace_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19372,7 +19201,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 5281 (class 2606 OID 411277)
+-- TOC entry 5851 (class 2606 OID 35096)
 -- Name: tunnel_hollow_space tun_hspace_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19381,7 +19210,7 @@ ALTER TABLE ONLY citydb.tunnel_hollow_space
 
 
 --
--- TOC entry 5278 (class 2606 OID 411262)
+-- TOC entry 5862 (class 2606 OID 35101)
 -- Name: tunnel_open_to_them_srf tun_open_to_them_srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19390,7 +19219,7 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 
 
 --
--- TOC entry 5279 (class 2606 OID 411267)
+-- TOC entry 5863 (class 2606 OID 35106)
 -- Name: tunnel_open_to_them_srf tun_open_to_them_srf_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19399,7 +19228,7 @@ ALTER TABLE ONLY citydb.tunnel_open_to_them_srf
 
 
 --
--- TOC entry 5285 (class 2606 OID 411297)
+-- TOC entry 5870 (class 2606 OID 35111)
 -- Name: tunnel_thematic_surface tun_them_srf_cityobj_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19408,7 +19237,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5288 (class 2606 OID 411312)
+-- TOC entry 5871 (class 2606 OID 35116)
 -- Name: tunnel_thematic_surface tun_them_srf_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19417,7 +19246,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5290 (class 2606 OID 411322)
+-- TOC entry 5872 (class 2606 OID 35121)
 -- Name: tunnel_thematic_surface tun_them_srf_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19426,7 +19255,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5291 (class 2606 OID 411327)
+-- TOC entry 5873 (class 2606 OID 35126)
 -- Name: tunnel_thematic_surface tun_them_srf_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19435,7 +19264,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5292 (class 2606 OID 411332)
+-- TOC entry 5874 (class 2606 OID 35131)
 -- Name: tunnel_thematic_surface tun_them_srf_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19444,7 +19273,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5286 (class 2606 OID 411302)
+-- TOC entry 5875 (class 2606 OID 35136)
 -- Name: tunnel_thematic_surface tun_them_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19453,7 +19282,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5289 (class 2606 OID 411317)
+-- TOC entry 5876 (class 2606 OID 35141)
 -- Name: tunnel_thematic_surface tun_them_srf_tun_inst_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19462,7 +19291,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5287 (class 2606 OID 411307)
+-- TOC entry 5877 (class 2606 OID 35146)
 -- Name: tunnel_thematic_surface tun_them_srf_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19471,7 +19300,7 @@ ALTER TABLE ONLY citydb.tunnel_thematic_surface
 
 
 --
--- TOC entry 5266 (class 2606 OID 411202)
+-- TOC entry 5830 (class 2606 OID 35151)
 -- Name: tunnel tunnel_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19480,7 +19309,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5309 (class 2606 OID 411417)
+-- TOC entry 5842 (class 2606 OID 35156)
 -- Name: tunnel_furniture tunnel_furn_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19489,7 +19318,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 5310 (class 2606 OID 411422)
+-- TOC entry 5843 (class 2606 OID 35161)
 -- Name: tunnel_furniture tunnel_furn_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19498,7 +19327,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 5311 (class 2606 OID 411427)
+-- TOC entry 5844 (class 2606 OID 35166)
 -- Name: tunnel_furniture tunnel_furn_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19507,7 +19336,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 5312 (class 2606 OID 411432)
+-- TOC entry 5845 (class 2606 OID 35171)
 -- Name: tunnel_furniture tunnel_furn_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19516,7 +19345,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 5313 (class 2606 OID 411437)
+-- TOC entry 5846 (class 2606 OID 35176)
 -- Name: tunnel_furniture tunnel_furn_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19525,7 +19354,7 @@ ALTER TABLE ONLY citydb.tunnel_furniture
 
 
 --
--- TOC entry 5299 (class 2606 OID 411367)
+-- TOC entry 5852 (class 2606 OID 35181)
 -- Name: tunnel_installation tunnel_inst_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19534,7 +19363,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5302 (class 2606 OID 411382)
+-- TOC entry 5853 (class 2606 OID 35186)
 -- Name: tunnel_installation tunnel_inst_hspace_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19543,7 +19372,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5303 (class 2606 OID 411387)
+-- TOC entry 5854 (class 2606 OID 35191)
 -- Name: tunnel_installation tunnel_inst_lod2brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19552,7 +19381,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5306 (class 2606 OID 411402)
+-- TOC entry 5855 (class 2606 OID 35196)
 -- Name: tunnel_installation tunnel_inst_lod2impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19561,7 +19390,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5304 (class 2606 OID 411392)
+-- TOC entry 5856 (class 2606 OID 35201)
 -- Name: tunnel_installation tunnel_inst_lod3brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19570,7 +19399,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5307 (class 2606 OID 411407)
+-- TOC entry 5857 (class 2606 OID 35206)
 -- Name: tunnel_installation tunnel_inst_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19579,7 +19408,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5305 (class 2606 OID 411397)
+-- TOC entry 5858 (class 2606 OID 35211)
 -- Name: tunnel_installation tunnel_inst_lod4brep_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19588,7 +19417,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5308 (class 2606 OID 411412)
+-- TOC entry 5859 (class 2606 OID 35216)
 -- Name: tunnel_installation tunnel_inst_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19597,7 +19426,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5300 (class 2606 OID 411372)
+-- TOC entry 5860 (class 2606 OID 35221)
 -- Name: tunnel_installation tunnel_inst_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19606,7 +19435,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5301 (class 2606 OID 411377)
+-- TOC entry 5861 (class 2606 OID 35226)
 -- Name: tunnel_installation tunnel_inst_tunnel_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19615,7 +19444,7 @@ ALTER TABLE ONLY citydb.tunnel_installation
 
 
 --
--- TOC entry 5269 (class 2606 OID 411217)
+-- TOC entry 5831 (class 2606 OID 35231)
 -- Name: tunnel tunnel_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19624,7 +19453,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5273 (class 2606 OID 411237)
+-- TOC entry 5832 (class 2606 OID 35236)
 -- Name: tunnel tunnel_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19633,7 +19462,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5270 (class 2606 OID 411222)
+-- TOC entry 5833 (class 2606 OID 35241)
 -- Name: tunnel tunnel_lod2msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19642,7 +19471,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5274 (class 2606 OID 411242)
+-- TOC entry 5834 (class 2606 OID 35246)
 -- Name: tunnel tunnel_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19651,7 +19480,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5271 (class 2606 OID 411227)
+-- TOC entry 5835 (class 2606 OID 35251)
 -- Name: tunnel tunnel_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19660,7 +19489,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5275 (class 2606 OID 411247)
+-- TOC entry 5836 (class 2606 OID 35256)
 -- Name: tunnel tunnel_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19669,7 +19498,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5272 (class 2606 OID 411232)
+-- TOC entry 5837 (class 2606 OID 35261)
 -- Name: tunnel tunnel_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19678,7 +19507,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5276 (class 2606 OID 411252)
+-- TOC entry 5838 (class 2606 OID 35266)
 -- Name: tunnel tunnel_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19687,7 +19516,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5277 (class 2606 OID 411257)
+-- TOC entry 5839 (class 2606 OID 35271)
 -- Name: tunnel tunnel_objectclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19696,7 +19525,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5293 (class 2606 OID 411337)
+-- TOC entry 5864 (class 2606 OID 35276)
 -- Name: tunnel_opening tunnel_open_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19705,7 +19534,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5297 (class 2606 OID 411357)
+-- TOC entry 5865 (class 2606 OID 35281)
 -- Name: tunnel_opening tunnel_open_lod3impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19714,7 +19543,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5295 (class 2606 OID 411347)
+-- TOC entry 5866 (class 2606 OID 35286)
 -- Name: tunnel_opening tunnel_open_lod3msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19723,7 +19552,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5298 (class 2606 OID 411362)
+-- TOC entry 5867 (class 2606 OID 35291)
 -- Name: tunnel_opening tunnel_open_lod4impl_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19732,7 +19561,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5296 (class 2606 OID 411352)
+-- TOC entry 5868 (class 2606 OID 35296)
 -- Name: tunnel_opening tunnel_open_lod4msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19741,7 +19570,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5294 (class 2606 OID 411342)
+-- TOC entry 5869 (class 2606 OID 35301)
 -- Name: tunnel_opening tunnel_open_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19750,7 +19579,7 @@ ALTER TABLE ONLY citydb.tunnel_opening
 
 
 --
--- TOC entry 5267 (class 2606 OID 411207)
+-- TOC entry 5840 (class 2606 OID 35306)
 -- Name: tunnel tunnel_parent_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19759,7 +19588,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5268 (class 2606 OID 411212)
+-- TOC entry 5841 (class 2606 OID 35311)
 -- Name: tunnel tunnel_root_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19768,7 +19597,7 @@ ALTER TABLE ONLY citydb.tunnel
 
 
 --
--- TOC entry 5258 (class 2606 OID 411162)
+-- TOC entry 5888 (class 2606 OID 35316)
 -- Name: waterboundary_surface waterbnd_srf_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19777,7 +19606,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5260 (class 2606 OID 411172)
+-- TOC entry 5889 (class 2606 OID 35321)
 -- Name: waterboundary_surface waterbnd_srf_lod2srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19786,7 +19615,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5261 (class 2606 OID 411177)
+-- TOC entry 5890 (class 2606 OID 35326)
 -- Name: waterboundary_surface waterbnd_srf_lod3srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19795,7 +19624,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5262 (class 2606 OID 411182)
+-- TOC entry 5891 (class 2606 OID 35331)
 -- Name: waterboundary_surface waterbnd_srf_lod4srf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19804,7 +19633,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5259 (class 2606 OID 411167)
+-- TOC entry 5892 (class 2606 OID 35336)
 -- Name: waterboundary_surface waterbnd_srf_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19813,7 +19642,7 @@ ALTER TABLE ONLY citydb.waterboundary_surface
 
 
 --
--- TOC entry 5256 (class 2606 OID 411152)
+-- TOC entry 5878 (class 2606 OID 35341)
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19822,7 +19651,7 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 
 
 --
--- TOC entry 5257 (class 2606 OID 411157)
+-- TOC entry 5879 (class 2606 OID 35346)
 -- Name: waterbod_to_waterbnd_srf waterbod_to_waterbnd_fk1; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19831,7 +19660,7 @@ ALTER TABLE ONLY citydb.waterbod_to_waterbnd_srf
 
 
 --
--- TOC entry 5248 (class 2606 OID 411112)
+-- TOC entry 5880 (class 2606 OID 35351)
 -- Name: waterbody waterbody_cityobject_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19840,7 +19669,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5249 (class 2606 OID 411117)
+-- TOC entry 5881 (class 2606 OID 35356)
 -- Name: waterbody waterbody_lod0msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19849,7 +19678,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5250 (class 2606 OID 411122)
+-- TOC entry 5882 (class 2606 OID 35361)
 -- Name: waterbody waterbody_lod1msrf_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19858,7 +19687,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5251 (class 2606 OID 411127)
+-- TOC entry 5883 (class 2606 OID 35366)
 -- Name: waterbody waterbody_lod1solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19867,7 +19696,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5252 (class 2606 OID 411132)
+-- TOC entry 5884 (class 2606 OID 35371)
 -- Name: waterbody waterbody_lod2solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19876,7 +19705,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5253 (class 2606 OID 411137)
+-- TOC entry 5885 (class 2606 OID 35376)
 -- Name: waterbody waterbody_lod3solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19885,7 +19714,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5254 (class 2606 OID 411142)
+-- TOC entry 5886 (class 2606 OID 35381)
 -- Name: waterbody waterbody_lod4solid_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19894,7 +19723,7 @@ ALTER TABLE ONLY citydb.waterbody
 
 
 --
--- TOC entry 5255 (class 2606 OID 411147)
+-- TOC entry 5887 (class 2606 OID 35386)
 -- Name: waterbody waterbody_objclass_fk; Type: FK CONSTRAINT; Schema: citydb; Owner: postgres
 --
 
@@ -19902,7 +19731,7 @@ ALTER TABLE ONLY citydb.waterbody
     ADD CONSTRAINT waterbody_objclass_fk FOREIGN KEY (objectclass_id) REFERENCES citydb.objectclass(id) MATCH FULL ON UPDATE CASCADE;
 
 
--- Completed on 2021-09-13 14:10:24
+-- Completed on 2022-03-24 16:28:01
 
 --
 -- PostgreSQL database dump complete
