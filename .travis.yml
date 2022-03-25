@@ -1,4 +1,4 @@
-sudo: true
+sudo: required
 dist: bionic
 
 addons:
@@ -7,8 +7,6 @@ addons:
     update: true
     packages:
       - postgresql-10-postgis-2.4
-      - postgresql-10-postgis-2.4-scripts
-      - postgresql-client-10
 
 jobs:
   include:
