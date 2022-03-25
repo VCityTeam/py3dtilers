@@ -29,10 +29,10 @@ class Test_Tile(unittest.TestCase):
         with open('tests/city_tiler_test_data/test_data.sql') as f:
             data = f.read()
             cls.cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-            try:
+            cls.cursor.execute("SELECT PostGIS_Lib_Version();")
+            version = float(cls.cursor.fetchall()[0][0][0])
+            if version >= 3:
                 cls.cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_raster WITH SCHEMA public;")
-            except:
-                print("No raster extension")
             cls.cursor.execute(data)
             cls.cursor.execute("ALTER DATABASE " + cls.postgresql.dsn()['database'] + " SET search_path TO public, citydb;")
             CityMCityObjects.set_cursor(cls.cursor)
