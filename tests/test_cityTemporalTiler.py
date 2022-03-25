@@ -7,7 +7,6 @@ import testing.postgresql
 from py3dtiles import TemporalBoundingVolume
 
 from py3dtilers.CityTiler.temporal_graph import TemporalGraph
-from py3dtilers.CityTiler.database_accesses import open_data_bases
 from py3dtilers.CityTiler.CityTemporalTiler import CityTemporalTiler
 
 
