@@ -45,12 +45,6 @@ ALTER SCHEMA citydb_pkg OWNER TO postgres;
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
---
--- TOC entry 3 (class 3079 OID 28228)
--- Name: postgis_raster; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS postgis_raster WITH SCHEMA public;
 
 
 --
@@ -10736,7 +10730,6 @@ ALTER TABLE citydb.address_seq OWNER TO postgres;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
 
 --
 -- TOC entry 230 (class 1259 OID 28979)
