@@ -1,14 +1,14 @@
-sudo: required
+sudo: true
 dist: bionic
 
 addons:
-  postgresql: "9.6"
+  postgresql: "10"
   apt:
     update: true
     packages:
-      - postgis
-      - postgresql-9.6-postgis-2.5
-      - postgresql-9.6-postgis-scripts
+      - postgresql-10-postgis-2.4
+      - postgresql-10-postgis-2.4-scripts
+      - postgresql-client-10
 
 jobs:
   include:
