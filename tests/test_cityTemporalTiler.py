@@ -33,6 +33,11 @@ class Test_Tile(unittest.TestCase):
         cls.cursor_2009 = cls.db_2009.cursor()
         with open('tests/city_temporal_tiler_test_data/test_data_temporal_2009.sql') as f:
             data = f.read()
+            cls.cursor_2009.execute("CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
+            try:
+                cls.cursor_2009.execute("CREATE EXTENSION IF NOT EXISTS postgis_raster WITH SCHEMA public;")
+            except:
+                print("No raster extension")
             cls.cursor_2009.execute(data)
             cls.cursor_2009.execute("ALTER DATABASE " + cls.postgresql_2009.dsn()['database'] + " SET search_path TO public, citydb;")
 
@@ -41,6 +46,11 @@ class Test_Tile(unittest.TestCase):
         cls.cursor_2012 = cls.db_2012.cursor()
         with open('tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql') as f:
             data = f.read()
+            cls.cursor_2012.execute("CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
+            try:
+                cls.cursor_2012.execute("CREATE EXTENSION IF NOT EXISTS postgis_raster WITH SCHEMA public;")
+            except:
+                print("No raster extension")
             cls.cursor_2012.execute(data)
             cls.cursor_2012.execute("ALTER DATABASE " + cls.postgresql_2012.dsn()['database'] + " SET search_path TO public, citydb;")
 
