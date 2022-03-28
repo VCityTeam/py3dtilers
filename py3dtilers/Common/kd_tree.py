@@ -32,7 +32,7 @@ def kd_tree(feature_list, maxNumObjects, depth=0):
     lObjects = feature_list[:median]
     rObjects = feature_list[median:]
     pre_tiles = derived()
-    if len(lObjects) > maxNumObjects:
+    if len(lObjects) > maxNumObjects or len(rObjects) > maxNumObjects:
         pre_tiles.extend(kd_tree(lObjects, maxNumObjects, depth + 1))
         pre_tiles.extend(kd_tree(rObjects, maxNumObjects, depth + 1))
     else:

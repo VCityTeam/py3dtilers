@@ -66,6 +66,17 @@ class CityTiler(Tiler):
         else:
             return self.args.output_dir
 
+    def get_kd_tree_max(self):
+        """
+        The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+        If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+        default value.
+        :return: a int
+        """
+        if self.args.kd_tree_max is not None and self.args.kd_tree_max > 0:
+            return self.args.kd_tree_max
+        return int(self.DEFAULT_KD_TREE_MAX / 20) if self.args.with_texture else self.DEFAULT_KD_TREE_MAX
+
     def set_features_centroid(self, cursor, cityobjects, objects_type):
         """
         Get the surfaces of all the cityobjects and transform them into TriangleSoup.
@@ -107,11 +118,10 @@ class CityTiler(Tiler):
 
         self.set_features_centroid(cursor, cityobjects, objects_type)
 
-        kd_tree_max = 25 if self.args.with_texture else 500
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name, kd_tree_max=kd_tree_max)
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
 
 
 def main():

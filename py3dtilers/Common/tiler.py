@@ -8,6 +8,9 @@ from ..Texture import Texture
 
 class Tiler():
 
+    # The kd_tree_max is the maximum number of features that the kd-tree will put in each tile.
+    DEFAULT_KD_TREE_MAX = 500
+
     def __init__(self):
         text = '''A small utility that build a 3DTiles tileset out of data'''
         self.parser = argparse.ArgumentParser(description=text)
@@ -70,6 +73,12 @@ class Tiler():
                                  help='The geometric errors of the nodes.\
                                      Used (from left ro right) for basic nodes, LOD1 nodes and LOA nodes.')
 
+        self.parser.add_argument('--kd_tree_max',
+                                 nargs='?',
+                                 type=int,
+                                 help='Set the maximum number of features in each tile when the features are distributed by a kd-tree.\
+                                     The value must be an integer.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -97,6 +106,18 @@ class Tiler():
         else:
             return self.args.output_dir
 
+    def get_kd_tree_max(self):
+        """
+        The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+        If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+        default value.
+        :return: a int
+        """
+        ktm_arg = self.args.kd_tree_max
+        kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg > 0 else self.DEFAULT_KD_TREE_MAX
+        print("kd tree max", kd_tree_max)
+        return kd_tree_max
+
     def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
         """
         Create the 3DTiles tileset from the features.
@@ -107,7 +128,7 @@ class Tiler():
         """
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
-        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, kd_tree_max, geometric_errors)
+        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
         feature_list.delete_objects_ref()
         self.create_output_directory()
