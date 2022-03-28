@@ -10,7 +10,7 @@ from py3dtilers.Common.feature import Feature, FeatureList
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
-                     output_dir=None, geometric_error=[None, None, None])
+                     output_dir=None, geometric_error=[None, None, None], kd_tree_max=None)
 
 
 triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
@@ -169,6 +169,24 @@ class Test_Tile(unittest.TestCase):
         tiler.args.geometric_error = [3, None, 200]
         tiler.args.lod1 = True
         tiler.args.loa = Path('tests/tiler_test_data/loa_polygons')
+
+        tileset = tiler.create_tileset_from_geometries(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_kd_tree_max(self):
+        features = list()
+        for i in range(0, 3):
+            feature = Feature("kd_tree_" + str(i))
+            feature.geom.triangles.append(triangles)
+            feature.set_box()
+            features.append(feature)
+        feature_list = FeatureList(features)
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/kd_tree_max')
+        tiler.args.kd_tree_max = 1
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
