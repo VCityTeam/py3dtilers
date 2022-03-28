@@ -197,13 +197,13 @@ class FeatureList(object):
 
     def get_centroid(self):
         """
-        :param objects: an array containing objs
-
-        :return: the centroid of the tileset.
+        Return the centroid of the FeatureList.
+        The centroid is the average of the centroids of all the features.
+        :return: an array
         """
         centroid = [0., 0., 0.]
-        for objectToTile in self:
-            centroid += objectToTile.get_centroid()
+        for feature in self:
+            centroid += feature.get_centroid()
         return np.array([centroid[0] / len(self),
                          centroid[1] / len(self),
                          centroid[2] / len(self)])
