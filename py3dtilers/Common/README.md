@@ -358,16 +358,26 @@ If no level of details is added:
 graph TD;
     Tileset-->Detailled_tile_1;
     Tileset-->Detailled_tile_2;
+    click Tileset "https://github.com/CesiumGS/3d-tiles/tree/main/specification#tileset-json"
+    click Detailled_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
+    click Detailled_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
 ```
 
 If the LOA is created:
 
 ```mermaid
 graph TD;
-    Tileset-->LOA_tile_1;
-    Tileset-->LOA_tile_2;
-    LOA_tile_1-->Detailled_tile_1;
-    LOA_tile_2-->Detailled_tile_2;
+    LOA_tile_1[LOA Tile 1];
+    LOA_tile_2[LOA Tile 2];
+    Detailled_tile_1[Detailled Tile 1];
+    Detailled_tile_2[Detailled Tile 2];
+    Tileset-->LOA_tile_1-->Detailled_tile_1;
+    Tileset-->LOA_tile_2-->Detailled_tile_2;
+    click Tileset "https://github.com/CesiumGS/3d-tiles/tree/main/specification#tileset-json"
+    click LOA_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#loanode"
+    click LOA_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#loanode"
+    click Detailled_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
+    click Detailled_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
 ```
 
 LOD1 (Level Of Details 1) tiles can also be added in the tileset. A LOD1 is a simplified version of a `Feature` instance's geometry.
@@ -384,10 +394,17 @@ Resulting tilesets:
 
 ```mermaid
 graph TD;
-    Tileset-->LOD1_tile_1;
-    Tileset-->LOD1_tile_2;
-    LOD1_tile_1-->Detailled_tile_1;
-    LOD1_tile_2-->Detailled_tile_2;
+    LOD1_tile_1[LOD1 Tile 1];
+    LOD1_tile_2[LOD1 Tile 2];
+    Detailled_tile_1[Detailled Tile 1];
+    Detailled_tile_2[Detailled Tile 2];
+    Tileset-->LOD1_tile_1-->Detailled_tile_1;
+    Tileset-->LOD1_tile_2-->Detailled_tile_2;
+    click Tileset "https://github.com/CesiumGS/3d-tiles/tree/main/specification#tileset-json"
+    click LOD1_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#lod1node"
+    click LOD1_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#lod1node"
+    click Detailled_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
+    click Detailled_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
 ```
 
 A tileset can be created with both LOD1 and LOA with:
@@ -403,10 +420,19 @@ Resulting tilesets:
 
 ```mermaid
 graph TD;
-    Tileset-->LOA_tile_1;
-    Tileset-->LOA_tile_2;
-    LOA_tile_1-->LOD1_tile_1;
-    LOA_tile_2-->LOD1_tile_2;
-    LOD1_tile_1-->Detailled_tile_1;
-    LOD1_tile_2-->Detailled_tile_2;
+    LOA_tile_1[LOA Tile 1];
+    LOA_tile_2[LOA Tile 2];
+    LOD1_tile_1[LOD1 Tile 1];
+    LOD1_tile_2[LOD1 Tile 2];
+    Detailled_tile_1[Detailled Tile 1];
+    Detailled_tile_2[Detailled Tile 2];
+    Tileset-->LOA_tile_1-->LOD1_tile_1-->Detailled_tile_1;
+    Tileset-->LOA_tile_2-->LOD1_tile_2-->Detailled_tile_2;
+    click Tileset "https://github.com/CesiumGS/3d-tiles/tree/main/specification#tileset-json"
+    click LOA_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#loanode"
+    click LOA_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#loanode"
+    click LOD1_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#lod1node"
+    click LOD1_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#lod1node"
+    click Detailled_tile_1 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
+    click Detailled_tile_2 "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/Common/README.md#geometrynode"
 ```
