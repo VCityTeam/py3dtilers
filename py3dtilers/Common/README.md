@@ -1,3 +1,185 @@
+# Common Module
+
+## Common Tiler features
+
+Those features are shared by all the Tilers inheriting from [`Tiler`](tiler.py) class.
+
+Some features may not have been implemented for some Tilers.
+
+### Output directory
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
+
+```bash
+<tiler> <input> --output_dir <output_directory_path>
+```
+
+### LOA
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :x: |
+
+Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA features of those detailed features. The LOA features are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+
+To use the LOA option:
+
+```bash
+<tiler> <input> --loa <path-to-polygons>
+```
+
+\*_LOA (Level Of Abstraction): here, it is simple 3D extrusion of a polygon._
+
+### LOD1
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :x: |
+
+___Warning__: creating LOD1 can be useless if the features are already footprints._
+
+Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 features of those detailed features. The LOD1 features are 3D extrusions of the footprints of the features.
+
+To use the LOD1 option:
+
+```bash
+<tiler> <input> --lod1
+```
+
+### Obj creation
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+An .obj model (without texture) is created if the `--obj` flag is present in command line. To create an obj file, use:
+
+```bash
+<tiler> <input> --obj <obj_file_name>
+```
+
+### Scale
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+Rescale the features by a factor:
+
+```bash
+<tiler> <input> --scale 10
+```
+
+### Offset
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+Translate the features by __substracting__ an offset. :
+
+```bash
+<tiler> <input> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
+```
+
+It is also possible to translate a tileset by its own centroid by using `centroid` as parameter:
+
+```bash
+<tiler> <input> --offset centroid
+```
+
+### CRS in/out
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+Project the features on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the features in another CRS (default output CRS is EPSG:3946).
+
+```bash
+<tiler> <input> --crs_in EPSG:3946 --crs_out EPSG:4171
+```
+
+### With texture
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :x: |
+| IfcTiler | :x: |
+| TilesetTiler | :heavy_check_mark: |
+
+Read the texture from the input and write it in the produced 3DTiles:
+
+```bash
+<tiler> <input> --with_texture
+```
+
+### Geometric error
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+In 3DTiles, [the geometric error](https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error) (__GE__) is the metric used to refine a tile or not. A tile should always have a lower geometric error than its parent. The root of the tileset should have the highest geometric error and the leaves the lowest geometric error.
+
+The geometric errors of the tiles can be overwritten with the flag `--geometric_error`. The values after the flag will be used (from left to right) for the deeper tiles (leaves), their parents (if existing), etc until the root tiles of the tileset.
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error 5 60 100  # Set leaf tiles GE to 5, their parents GE to 60 and root tiles GE to 100
+```
+
+You can set the geometric error of the leaf tiles only with:
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error 5  # Set leaf tiles GE to 5
+```
+
+You can skip leaf tiles and their parents geometric errors by writing a non numeric character as geometric error.
+
+```bash
+tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tiles GE to 100
+```
+
+## __Developper notes__
+
 ## [feature](feature.py)
 ### Feature
 A `Feature` instance contains a geometry, a bounding box, and optionally can contain semantic data.  
