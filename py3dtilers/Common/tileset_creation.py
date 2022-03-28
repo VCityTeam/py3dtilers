@@ -35,7 +35,7 @@ class FromGeometryTreeToTileset():
             root_node.set_node_features_geometry(user_arguments)
             FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
             centroid = root_node.feature_list.get_centroid()
-            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name, output_dir)
+            tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
             geometry_tree.root_nodes.remove(root_node)
 
         if user_arguments.obj is not None:
@@ -74,7 +74,7 @@ class FromGeometryTreeToTileset():
                 obj_writer.add_geometries(leaf.feature_list)
 
     @staticmethod
-    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None, output_dir=None):
+    def __create_tile(node, centroid, transform_offset, extension_name=None, output_dir=None):
         print("\r" + str(FromGeometryTreeToTileset.tile_index), "/", str(FromGeometryTreeToTileset.nb_nodes), "tiles created", end='', flush=True)
         objects = node.feature_list
         objects.translate_features(centroid)
@@ -105,17 +105,13 @@ class FromGeometryTreeToTileset():
 
         tile.set_bounding_volume(bounding_box)
 
-        # If the node is a root of the LodTree, add the created tile to the tileset's root
-        if depth == 0:
-            parent.add_tile(tile)
-        # Else, add the created tile to its parent's children
-        else:
-            parent.add_child(tile)
         node.feature_list.delete_objects_ref()
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
-            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name, output_dir)
+            tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, centroid, [0., 0., 0.], extension_name, output_dir))
+
+        return tile
 
     @staticmethod
     def __create_tile_content(objects, extension_name=None, with_texture=False):
