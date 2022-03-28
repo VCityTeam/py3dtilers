@@ -178,6 +178,22 @@ You can skip leaf tiles and their parents geometric errors by writing a non nume
 tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tiles GE to 100
 ```
 
+### Kd-tree max
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+`--kd_tree_max` allows to choose the maximum number of features in each tile when the features are distributed by a kd-tree. The flag must be followed by an __integer__. By default, each tile contains a maximum of 500 features.
+
+```bash
+<tiler> <input> --kd_tree_max 25
+```
+
 ## __Developper notes__
 
 ## [feature](feature.py)
