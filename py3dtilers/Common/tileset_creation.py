@@ -28,6 +28,7 @@ class FromGeometryTreeToTileset():
         """
         print('Creating tileset from features...')
         tileset = TileSet()
+        FromGeometryTreeToTileset.tile_index = 0
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         obj_writer = ObjWriter()
         while len(geometry_tree.root_nodes) > 0:
