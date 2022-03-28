@@ -49,6 +49,17 @@ class Test_Tile(unittest.TestCase):
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(output_dir)
 
+    def test_geometric_error(self):
+        tiler = TilesetTiler()
+        output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/geometric_error/")
+        geometric_errors = [3, None, 100]
+        tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=True, output_dir=output_dir, geometric_error=geometric_errors)
+        paths = [Path("tests/tileset_reader_test_data/white_buildings_with_lods/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+
+        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.transform_tileset(tileset)
+        tileset.write_as_json(output_dir)
+
     def test_merger(self):
         merger = TilesetMerger(output_path="tests/tileset_reader_test_data/generated_tilesets/merger/")
         paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]

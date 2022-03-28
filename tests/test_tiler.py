@@ -132,7 +132,7 @@ class Test_Tile(unittest.TestCase):
         tileset.write_as_json(directory)
 
     def test_obj(self):
-        feature = Feature("scale")
+        feature = Feature("obj")
         feature.geom.triangles.append(triangles)
         feature.set_box()
         feature_list = FeatureList([feature])
@@ -140,8 +140,23 @@ class Test_Tile(unittest.TestCase):
         obj_name = Path('tests/tiler_test_data/generated_objs/cube.obj')
 
         tiler = Tiler()
-        directory = Path('tests/tiler_test_data/generated_tilesets/scale')
+        directory = Path('tests/tiler_test_data/generated_tilesets/obj')
         tiler.args = Namespace(obj=obj_name, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory)
+
+        tileset = tiler.create_tileset_from_geometries(feature_list)
+
+        tileset.write_as_json(directory)
+
+    def test_geometric_error(self):
+        feature = Feature("scale")
+        feature.geom.triangles.append(triangles)
+        feature.set_box()
+        feature_list = FeatureList([feature])
+
+        tiler = Tiler()
+        directory = Path('tests/tiler_test_data/generated_tilesets/geometric_error')
+        geometric_errors = [3, None, 200]
+        tiler.args = Namespace(obj=None, loa=Path('tests/tiler_test_data/loa_polygons'), lod1=True, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=directory, geometric_error=geometric_errors)
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 

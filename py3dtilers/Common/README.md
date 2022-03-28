@@ -81,22 +81,22 @@ The kd_tree distributes the `Feature` instances contained in a `FeatureList` int
 distributed_objects = kd_tree(feature_list, 100) # Max 100 objects per FeatureList
 ```
 
-## [lod_node](lod_node.py)
-### LodNode
-A _LodNode_ contains features as `FeatureList` and a list of child nodes. It also contains a [geometric error](http://docs.opengeospatial.org/cs/18-053r2/18-053r2.html#27) which is the distance to display the 3D tile created from this node.
+## [geometry_node](geometry_node.py)
+### GeometryNode
+A _GeometryNode_ contains features as `FeatureList` and a list of child nodes. It also contains a [geometric error](http://docs.opengeospatial.org/cs/18-053r2/18-053r2.html#27) which is the distance to display the 3D tile created from this node.
 
-To create a _LodNode_:
+To create a _GeometryNode_:
 ```
 # Takes : features as FeatureList, a geometric error (int)
 # Returns : a node containing the features
-node = LodNode(feature_list, geometric_error=20)
+node = GeometryNode(feature_list, geometric_error=20)
 ```
 To add a child to a node:
 ```
 node.add_child_node(other_node)
 ```
-### Lod1Node
-_Lod1Node_ inherits from _LodNode_. When instanced, a _Lod1Node_ creates a 3D extrusion of the footprint of each `Feature` instance in the `FeatureList` parameter.
+### [Lod1Node](lod1_node.py)
+_Lod1Node_ inherits from _GeometryNode_. When instanced, a _Lod1Node_ creates a 3D extrusion of the footprint of each `Feature` instance in the `FeatureList` parameter.
 
 To create a _Lod1Node_:
 ```
@@ -105,8 +105,8 @@ To create a _Lod1Node_:
 node = Lod1Node(feature_list, geometric_error=20)
 ```
 
-### LoaNode
-_LoaNode_ inherits from _LodNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter. The _LoaNode_ also takes a dictionary stocking the indexes of the `Feature` instances contained in each polygon.
+### [LoaNode](loa_node.py)
+_LoaNode_ inherits from _GeometryNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter.
 
 To create a _LoaNode_:
 ```
@@ -115,7 +115,7 @@ To create a _LoaNode_:
           a list of polygons,
           a dictionary {polygon_index -> [object_index(es)]}
 # Returns : a node containing 3D extrusions of the polygons
-node = LoaNode(feature_list, geometric_error=20, additional_points=polygons, points_dict=dictionary)
+node = LoaNode(feature_list, geometric_error=20, polygons=polygons)
 ```
 
 ## [lod_tree](lod_tree.py)

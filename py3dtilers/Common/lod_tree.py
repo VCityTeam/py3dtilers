@@ -6,7 +6,7 @@ class LodTree(GeometryTree):
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     """
 
-    def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False, kd_tree_max=500):
+    def __init__(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False, kd_tree_max=500, geometric_errors=[None, None, None]):
         """
         LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
         In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
@@ -17,14 +17,14 @@ class LodTree(GeometryTree):
         groups = self.group_features(feature_list, polygons_path, kd_tree_max)
 
         for group in groups:
-            node = GeometryNode(group.feature_list, 1, with_texture)
+            node = GeometryNode(group.feature_list, geometric_errors[0], with_texture)
             root_node = node
             if create_lod1:
-                lod1_node = Lod1Node(node, 5)
+                lod1_node = Lod1Node(node, geometric_errors[1])
                 lod1_node.add_child_node(root_node)
                 root_node = lod1_node
             if create_loa:
-                loa_node = LoaNode(node, 20, group.polygons)
+                loa_node = LoaNode(node, geometric_errors[2], group.polygons)
                 loa_node.add_child_node(root_node)
                 root_node = loa_node
 
