@@ -14,12 +14,12 @@ p3dtilers uses [`py3dtiles` python library](https://gitlab.com/Oslandia/py3dtile
 
 ## Installation from sources
 
-NB: py3dtilers installation requires a Bash shell. If you're using Windows 10, see how use the [Ubuntu Bash shell on Windows](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/).
+### For Unix
 
 In order to install py3dtilers from sources use:
 
 ```bash
-apt install git python3 python3-pip virtualenv
+apt install git python3 python3-pip virtualenv  # Python3 version must be <=3.9
 git clone https://github.com/VCityTeam/py3dtilers
 cd py3dtilers
 ```
@@ -27,21 +27,32 @@ cd py3dtilers
 Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
-apt-get install -y liblas-c3 libopenblas-base # py3dtiles binary dependencies
 apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
 ```
-
-(_Warning_: when using Ubuntu 20.04, replace `liblas-c3` by `liblaszip-dev`)
 
 Proceed with the installation of `py3dtilers` per se
 
 ```bash
-$ virtualenv -p python3 venv
-$ . venv/bin/activate
+virtualenv -p python3 venv
+. venv/bin/activate
 (venv)$ pip install -e .
 ```
 
-(_Note_: On Windows (__without bash shell__), replace `$ . venv/bin/activate` with `$ . venv\Scripts\activate`)
+### For Windows
+
+Install python3 (**<= 3.9**).
+
+In order to install py3dtilers from sources use:
+
+```bash
+git clone https://github.com/VCityTeam/py3dtilers
+cd py3dtilers
+python3 -m venv venv
+. venv/Scripts/activate
+(venv)$ pip install -e .
+```
+
+### About IfcOpenShell dependency
 
 **Caveat emptor**: make sure, that the IfcOpenShell dependency was properly installed with help of the `python -c 'import ifcopenshell'` command. In case
 of failure of the importation try re-installing but this time with the verbose
@@ -182,7 +193,7 @@ When configuring your IDE to run a specific tiler, you must indicate the module 
 
 Python standard module [cProfile](https://docs.python.org/3/library/profile.html) allows to profile Python code.
 
-#### __In code__
+#### **In code**
 
 Import modules:
 
@@ -204,7 +215,7 @@ p = pstats.Stats(cp)
 p.sort_stats('tottime').print_stats()  # Sort stats by time and print them
 ```
 
-#### __In command line__
+#### **In command line**
 
 cProfile can be run in the shell with:
 
