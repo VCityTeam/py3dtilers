@@ -406,7 +406,7 @@ graph TD;
     Tileset-->LOA_tile_1;
     Tileset-->LOA_tile_2;
     LOA_tile_1-->LOD1_tile_1;
-    LOA_tile_2-->LOD1_tile_1;
+    LOA_tile_2-->LOD1_tile_2;
     LOD1_tile_1-->Detailled_tile_1;
     LOD1_tile_2-->Detailled_tile_2;
 ```
