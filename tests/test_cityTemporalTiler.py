@@ -17,12 +17,19 @@ class Args():
         self.time_stamps = ["2009", "2012"]
 
 
+def get_default_namespace():
+    return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
+                     crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
+                     output_dir=None, geometric_error=[None, None, None],
+                     split_surfaces=False, add_color=False)
+
+
 class Test_Tile(unittest.TestCase):
 
     def test_temporal(self):
         city_temp_tiler = CityTemporalTiler()
-        output_dir = Path("tests/city_temporal_tiler_test_data/generated_tilesets/temporal")
-        city_temp_tiler.args = Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946', crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, output_dir=output_dir, split_surfaces=False, add_color=False)
+        city_temp_tiler.args = get_default_namespace()
+        city_temp_tiler.args.output_dir = Path("tests/city_temporal_tiler_test_data/generated_tilesets/temporal")
         cli_args = Args()
         graph = TemporalGraph(cli_args)
         graph.reconstruct_connectivity()
@@ -48,7 +55,7 @@ class Test_Tile(unittest.TestCase):
 
         [cursor.close() for cursor in cursors]
 
-        tile_set.write_as_json(output_dir)
+        tile_set.write_as_json(city_temp_tiler.args.output_dir)
 
 
 if __name__ == '__main__':
