@@ -17,6 +17,8 @@ The [polygons](geojson_tiler_test_data/polygons) were created from [IGN's roads]
 
 ### CityTiler
 
+The .sql files were created with a `pg_dump` of 3DCityDB databases. To dump a database, see [this tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/Dump_psql_postgis_database.md).
+
 The [CityTiler's data](city_tiler_test_data/test_data.sql) contains small parts of a building, a water body and a terrain of CityGML files from [Grand Lyon's 3D models](https://data.grandlyon.com/jeux-de-donnees/maquettes-3d-texturees-2018-communes-metropole-lyon/info). The SQL file was created by doing a backup of a [3dcitydb database](https://www.3dcitydb.org/3dcitydb/).
 
 The [CityTemporalTiler's data](city_temporal_tiler_test_data) contains small parts of buildings of CityGML files from [2009](https://data.grandlyon.com/jeux-de-donnees/maquettes-3d-texturees-2009-communes-metropole-lyon/info) and [2012](https://data.grandlyon.com/jeux-de-donnees/maquettes-3d-texturees-2012-communes-metropole-lyon/info) Grand Lyon's 3D models. The SQL files were created by doing a backup of [3dcitydb databases](https://www.3dcitydb.org/3dcitydb/).  
