@@ -40,7 +40,7 @@ Example:
 
 ### Create the graph from CityGML files
 
-[cityGMLto3DTiles](https://github.com/VCityTeam/cityGMLto3DTiles/tree/master/PythonCallingDocker#running-the-temporal-tiler-workflow)
+You can create the graph for __Lyon's boroughts__ by using [cityGMLto3DTiles](https://github.com/VCityTeam/cityGMLto3DTiles/tree/master/PythonCallingDocker#running-the-temporal-tiler-workflow).
 
 ## Resulting 3DTiles
 
@@ -94,4 +94,8 @@ Example of tileset.json:
 
 ### Tile
 
-// TODO
+Each tile have addtional information written as JSON in its batch table. The extension is named `3DTiles_temporal` and associates attributes to the batched models (with [batchIds](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/Batched3DModel/README.md#batch-table). Those attributes are:
+
+- startDates: the year when the building should be added to the view
+- endDates: the year when the building should be removed from the view
+- featureIds: the ID of the building
