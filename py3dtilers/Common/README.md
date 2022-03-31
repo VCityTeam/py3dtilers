@@ -148,6 +148,8 @@ Read the texture from the input and write it in the produced 3DTiles:
 <tiler> <input> --with_texture
 ```
 
+_Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max)._
+
 ### Geometric error
 
 | Tiler | |
