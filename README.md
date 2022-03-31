@@ -89,7 +89,7 @@ Useful tutorials:
 After the installation, if you additionally wish to run unit tests, use
 
 ```bash
-(venv)$ pip install -e .[dev]
+(venv)$ pip install -e .[dev,prod]
 (venv)$ pytest
 ```
 
@@ -97,23 +97,6 @@ To run CityTiler's tests, you need to install PostgreSQL and Postgis.
 
 To setup PostgreSQL with Postgis on Windows, follow the first step (1. Download PostgreSQL/PostGIS) of [3DCityDB tutorial](https://github.com/VCityTeam/UD-SV/blob/master/ImplementationKnowHow/PostgreSQL_for_cityGML.md#1-download-postgresqlpostgis).  
 For Ubuntu, follow [this tutorial](https://github.com/VCityTeam/UD-SV/blob/master/Install/Setup_PostgreSQL_PostGIS_Ubuntu.md).
-
-Once the setup is over, update the config files (e.g [test_config.yml](tests/city_tiler_test_data/test_config.yml), [test_config_2009.yml](tests/city_temporal_tiler_test_data/test_config_2009.yml) and [test_config_2012.yml](tests/city_temporal_tiler_test_data/test_config_2012.yml)) with the right password. Ignore the config files to avoid commiting them in the repo
-
-```bash
-git update-index --assume-unchanged tests/*/test_config*
-```
-
-Then, in a shell, run:
-
-```bash
-> psql -c 'create database test_city_tiler;' -U postgres
-> psql -U postgres -d test_city_tiler -f tests/city_tiler_test_data/test_data.sql
-> psql -c 'create database test_temporal_2009;' -U postgres
-> psql -U postgres -d test_temporal_2009 -f tests/city_temporal_tiler_test_data/test_data_temporal_2009.sql
-> psql -c 'create database test_temporal_2012;' -U postgres
-> psql -U postgres -d test_temporal_2012 -f tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql
-```
 
 ### Coding style
 

@@ -18,6 +18,7 @@ import urllib.request
 here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
+    'wheel',
     'networkx',
     'numpy <1.21,>=1.17',
     'psycopg2',
@@ -45,6 +46,7 @@ dev_requirements = (
 )
 
 prod_requirements = (
+    'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
 
 # ### Specific for IFCOpenShell whose offered bundles (zip files) do NOT

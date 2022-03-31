@@ -2,11 +2,11 @@ sudo: required
 dist: bionic
 
 addons:
-  postgresql: "9.4"
+  postgresql: "10"
   apt:
     update: true
     packages:
-      - postgresql-9.4-postgis-2.4
+      - postgresql-10-postgis-2.4
 
 jobs:
   include:
@@ -22,13 +22,6 @@ jobs:
           # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
         - pip install -e .[dev]
         - python -c 'import ifcopenshell'  # Just to make sure
-      before_script:
-        - psql -c 'create database test_city_tiler;' -U postgres
-        - psql -U postgres -d test_city_tiler < tests/city_tiler_test_data/test_data.sql
-        - psql -c 'create database test_temporal_2009;' -U postgres
-        - psql -U postgres -d test_temporal_2009 < tests/city_temporal_tiler_test_data/test_data_temporal_2009.sql
-        - psql -c 'create database test_temporal_2012;' -U postgres
-        - psql -U postgres -d test_temporal_2012 < tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql
       script:
       - |
         autopep8 --in-place --recursive py3dtilers/
