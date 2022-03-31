@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 
 
 class ObjWriter():
@@ -8,6 +9,7 @@ class ObjWriter():
 
     def __init__(self):
         self.vertices = list()
+        self.normals = list()
         self.triangles = list()
         self.vertex_indexes = {}
         self.index = 0
@@ -39,11 +41,12 @@ class ObjWriter():
         self.index += 1
         return self.index
 
-    def get_vertex_index(self, vertex):
+    def get_vertex_index(self, vertex, normal):
         """
         Return the index associated to a vertex.
-        If no index is associated to the vertex, create a new index.
+        If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ's vertices/normals.
         :param vertex: the vertex
+        :param normal: the normal of the vertex
 
         :return: the index associated to the vertex
         """
@@ -51,8 +54,21 @@ class ObjWriter():
         if not tuple(vertex) in self.vertex_indexes:
             self.vertex_indexes[tuple(vertex)] = self.get_index()
             self.vertices.append(vertex)
+            self.normals.append(normal)
 
         return self.vertex_indexes[tuple(vertex)]
+
+    def compute_triangle_normal(self, triangle):
+        """
+        Compute the normal of a triangle
+        :param triangle: a triangle
+        :return: the normal vector of the triangle.
+        """
+        U = triangle[1] - triangle[0]
+        V = triangle[2] - triangle[0]
+        N = np.cross(U, V)
+        norm = np.linalg.norm(N)
+        return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm
 
     def add_triangle(self, triangle):
         """
@@ -60,8 +76,9 @@ class ObjWriter():
         :param triangle: the triangle
         """
         indexes = list()
+        normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            indexes.append(self.get_vertex_index(vertex))
+            indexes.append(self.get_vertex_index(vertex, normal))
         self.triangles.append(indexes)
 
     def add_geometries(self, feature_list):
@@ -86,6 +103,9 @@ class ObjWriter():
 
         for vertex in self.vertices:
             f.write("v " + str(vertex[0] - centroid[0]) + " " + str(vertex[1] - centroid[1]) + " " + str(vertex[2] - centroid[2]) + "\n")
+
+        for normal in self.normals:
+            f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")
 
         for triangle in self.triangles:
             f.write("f " + str(int(triangle[0])) + " " + str(int(triangle[1])) + " " + str(int(triangle[2])) + "\n")
