@@ -190,8 +190,10 @@ tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tile
 
 `--kd_tree_max` allows to choose the maximum number of features in each tile when the features are distributed by a kd-tree. The flag must be followed by an __integer__. By default, each tile contains a maximum of 500 features.
 
+When using the CityTiler [with texture](#with-texture), the default maximum of features per tile is divided by __20__ in order to reduce the size of texture atlases. If a tile contains too much textured features, its atlas may be to heavy in memory, so consider choosing a `kd_tree_max` according to the resolution/size of the texture images.
+
 ```bash
-<tiler> <input> --kd_tree_max 25
+<tiler> <input> --kd_tree_max 25  # Each tile will contain a maximum of 25 features 
 ```
 
 ## __Developper notes__
