@@ -89,7 +89,7 @@ Useful tutorials:
 After the installation, if you additionally wish to run unit tests, use
 
 ```bash
-(venv)$ pip install -e .[dev]
+(venv)$ pip install -e .[dev,prod]
 (venv)$ pytest
 ```
 

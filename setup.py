@@ -42,11 +42,11 @@ dev_requirements = (
     'pytest-cov',
     'autopep8',
     'pytest-flake8',
-    'pdoc3',
-    'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
+    'pdoc3'
 )
 
 prod_requirements = (
+    'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
 
 # ### Specific for IFCOpenShell whose offered bundles (zip files) do NOT
