@@ -156,7 +156,7 @@ class CityMCityObjects(FeatureList):
         pass
 
     @staticmethod
-    def retrieve_objects(cursor, objects_type, cityobjects=list()):
+    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=[]):
         """
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -174,7 +174,7 @@ class CityMCityObjects(FeatureList):
             no_input = True
         else:
             no_input = False
-        cursor.execute(objects_type.sql_query_objects(cityobjects))
+        cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
 
         if no_input:
             result_objects = objects_type()

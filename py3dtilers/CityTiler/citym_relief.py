@@ -39,7 +39,7 @@ class CityMReliefs(CityMCityObjects):
         super().__init__(objects)
 
     @staticmethod
-    def sql_query_objects(reliefs):
+    def sql_query_objects(reliefs, citygml_ids=[]):
         """
         :param reliefs: a list of CityMRelief type object that should be sought
                         in the database. When this list is empty all the objects
@@ -47,7 +47,12 @@ class CityMReliefs(CityMCityObjects):
 
         :return: a string containing the right sql query that should be executed.
         """
-        if not reliefs:
+        if len(citygml_ids) > 0:
+            citygml_ids_as_string = "('" + "', '".join(citygml_ids) + "')"
+            query = "SELECT relief_feature.id, cityobject.gmlid " + \
+                    "FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id " + \
+                    "AND cityobject.gmlid IN " + citygml_ids_as_string
+        elif not reliefs:
             # No specific reliefs were sought. We thus retrieve all the ones
             # we can find in the database:
             query = "SELECT relief_feature.id, cityobject.gmlid " + \
