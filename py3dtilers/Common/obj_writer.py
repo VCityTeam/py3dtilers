@@ -11,10 +11,22 @@ class ObjWriter():
         self.vertices = list()
         self.normals = list()
         self.triangles = list()
-        self.vertex_indexes = {}
-        self.index = 0
+        self.vertex_indexes_dict = {}
+        self.normal_indexes_dict = {}
+        self._vertex_index = 0
+        self._normal_index = 0
         self.centroid = [0, 0, 0]
         self.nb_geometries = 0
+
+    @property
+    def vertex_index(self):
+        self._vertex_index += 1
+        return self._vertex_index
+
+    @property
+    def normal_index(self):
+        self._normal_index += 1
+        return self._normal_index
 
     def get_centroid(self):
         """
@@ -33,30 +45,31 @@ class ObjWriter():
         for i, coord in enumerate(geom_centroid):
             self.centroid[i] += coord
 
-    def get_index(self):
-        """
-        Return an index for new vertex.
-        :return: the index
-        """
-        self.index += 1
-        return self.index
-
-    def get_vertex_index(self, vertex, normal):
+    def get_vertex_index(self, vertex):
         """
         Return the index associated to a vertex.
-        If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ's vertices/normals.
+        If no index is associated to the vertex, create a new index and add the vertex to the OBJ's vertices.
         :param vertex: the vertex
-        :param normal: the normal of the vertex
-
         :return: the index associated to the vertex
         """
         vertex = vertex.tolist()
-        if not tuple(vertex) in self.vertex_indexes:
-            self.vertex_indexes[tuple(vertex)] = self.get_index()
+        if not tuple(vertex) in self.vertex_indexes_dict:
+            self.vertex_indexes_dict[tuple(vertex)] = self.vertex_index
             self.vertices.append(vertex)
-            self.normals.append(normal)
+        return self.vertex_indexes_dict[tuple(vertex)]
 
-        return self.vertex_indexes[tuple(vertex)]
+    def get_normal_index(self, normal):
+        """
+        Return the index associated to a normal.
+        If no index is associated to the normal, create a new index and add the normal to the OBJ's normals.
+        :param normal: the normal
+        :return: the index associated to the normal
+        """
+        normal = normal.tolist()
+        if not tuple(normal) in self.normal_indexes_dict:
+            self.normal_indexes_dict[tuple(normal)] = self.normal_index
+            self.normals.append(normal)
+        return self.normal_indexes_dict[tuple(normal)]
 
     def compute_triangle_normal(self, triangle):
         """
@@ -75,11 +88,13 @@ class ObjWriter():
         Add a triangle to the OBJ.
         :param triangle: the triangle
         """
-        indexes = list()
+        vertex_indexes = list()
+        normal_indexes = list()
         normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            indexes.append(self.get_vertex_index(vertex, normal))
-        self.triangles.append(indexes)
+            vertex_indexes.append(self.get_vertex_index(vertex))
+            normal_indexes.append(self.get_normal_index(normal))
+        self.triangles.append([vertex_indexes, normal_indexes])
 
     def add_geometries(self, feature_list):
         """
@@ -108,4 +123,4 @@ class ObjWriter():
             f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")
 
         for triangle in self.triangles:
-            f.write("f " + str(int(triangle[0])) + "/" + str(int(triangle[0])) + " " + str(int(triangle[1])) + "/" + str(int(triangle[1])) + " " + str(int(triangle[2])) + "/" + str(int(triangle[2])) + "\n")
+            f.write("f " + str(int(triangle[0][0])) + "//" + str(int(triangle[1][0])) + " " + str(int(triangle[0][1])) + "//" + str(int(triangle[1][1])) + " " + str(int(triangle[0][2])) + "//" + str(int(triangle[1][2])) + "\n")
