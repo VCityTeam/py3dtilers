@@ -24,7 +24,7 @@ class CityMBridges(CityMCityObjects):
         super().__init__(objects)
 
     @staticmethod
-    def sql_query_objects(bridges):
+    def sql_query_objects(bridges, citygml_ids=[]):
         """
         :param bridges: a list of CityMbridge type object that should be sought
                         in the database. When this list is empty all the objects
@@ -32,6 +32,12 @@ class CityMBridges(CityMCityObjects):
 
         :return: a string containing the right SQL query that should be executed.
         """
+        if len(citygml_ids) > 0:
+            citygml_ids_as_string = "('" + "', '".join(citygml_ids) + "')"
+            query = "SELECT bridge.id, cityobject.gmlid " + \
+                    "FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id " + \
+                    "WHERE bridge.id=bridge.bridge_root_id " + \
+                    "AND cityobject.gmlid IN " + citygml_ids_as_string
         if not bridges:
             # No specific bridges were sought. We thus retrieve all the ones
             # we can find in the database:
