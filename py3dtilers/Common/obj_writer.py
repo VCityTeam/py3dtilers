@@ -108,4 +108,4 @@ class ObjWriter():
             f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")
 
         for triangle in self.triangles:
-            f.write("f " + str(int(triangle[0])) + " " + str(int(triangle[1])) + " " + str(int(triangle[2])) + "\n")
+            f.write("f " + str(int(triangle[0])) + "/" + str(int(triangle[0])) + " " + str(int(triangle[1])) + "/" + str(int(triangle[1])) + " " + str(int(triangle[2])) + "/" + str(int(triangle[2])) + "\n")
