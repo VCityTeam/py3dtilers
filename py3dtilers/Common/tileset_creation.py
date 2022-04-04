@@ -85,7 +85,7 @@ class FromGeometryTreeToTileset():
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
         tile.set_content(content_b3dm)
-        tile.set_content_uri(os.path.join('tiles', f'{FromGeometryTreeToTileset.tile_index}.b3dm'))
+        tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
         tile.write_content(output_dir)
         del tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
 
