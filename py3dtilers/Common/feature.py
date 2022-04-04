@@ -231,7 +231,7 @@ class FeatureList(object):
 
     def translate_features(self, offset):
         """
-        Translate the features by substracting an offset
+        Translate the features by adding an offset
         :param offset: the Vec3 translation offset
         """
         # Translate the position of each object by an offset

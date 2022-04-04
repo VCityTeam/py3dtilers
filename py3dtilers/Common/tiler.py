@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import numpy as np
 
 from ..Common import LodTree, FromGeometryTreeToTileset
 from ..Color import ColorConfig
