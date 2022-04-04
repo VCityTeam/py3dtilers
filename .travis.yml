@@ -20,7 +20,7 @@ jobs:
           ### Proceed with the install of py3dtilers per se.
           # The extra flag installs the dev dependencies, refer to e.g.
           # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
-        - pip install -e .[dev]
+        - pip install -e .[dev,prod]
         - python -c 'import ifcopenshell'  # Just to make sure
       script:
       - |
