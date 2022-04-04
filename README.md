@@ -1,10 +1,12 @@
 # Python 3DTiles Tilers
 
-p3dtilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/)
+p3dtilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/).
 
-p3dtilers uses [`py3dtiles` python library](https://gitlab.com/Oslandia/py3dtiles) for its in memory representation of tilesets
+p3dtilers uses [`py3dtiles` python library](https://github.com/VCityTeam/py3dtiles/tree/Tiler) (forked from [Oslandia's py3dtiles](https://gitlab.com/Oslandia/py3dtiles)) for its in memory representation of tilesets.
 
-**CLI** **Features**
+py3dtilers can only produce [`Batched 3D Models (B3DM)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/Batched3DModel/README.md). If you want to produce [`Point Clouds (PNTS)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/PointCloud/README.md), see [Oslandia's py3dtiles CLI](https://gitlab.com/Oslandia/py3dtiles/-/blob/master/docs/cli.rst).
+
+## CLI Features
 
 * [ObjTiler](./py3dtilers/ObjTiler): converts OBJ files to a 3D Tiles tileset
 * [GeojsonTiler](./py3dtilers/GeojsonTiler): converts GeoJson files to a 3D Tiles tileset
