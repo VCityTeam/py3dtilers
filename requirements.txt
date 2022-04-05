@@ -1,5 +1,0 @@
-# Only used by "pip install -r" command
-pywavefront
-numpy
-pyproj
-jsonschema
