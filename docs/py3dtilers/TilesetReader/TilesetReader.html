@@ -69,25 +69,8 @@ class TilesetTiler(Tiler):
         &#34;&#34;&#34;
         Override the parent tileset creation.
         &#34;&#34;&#34;
-        if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-            for objects in tileset_tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-            if self.args.offset[0] == &#39;centroid&#39;:
-                self.args.offset = tileset_tree.get_centroid()
-            for objects in tileset_tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tileset_tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
-
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, self.args, extension_name, self.get_output_dir())
 
     def transform_tileset(self, tileset):
         &#34;&#34;&#34;
@@ -97,8 +80,9 @@ class TilesetTiler(Tiler):
 
         :return: a TileSet
         &#34;&#34;&#34;
-        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
-        return self.create_tileset_from_geometries(tileset_tree)
+        geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
+        return self.create_tileset_from_geometries(tileset_tree, self.args)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         &#34;&#34;&#34;
@@ -121,7 +105,7 @@ def main():
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory(tiler.get_output_dir())
+    tileset.write_as_json(tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -152,7 +136,7 @@ if __name__ == &#39;__main__&#39;:
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory(tiler.get_output_dir())</code></pre>
+    tileset.write_as_json(tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -204,25 +188,8 @@ if __name__ == &#39;__main__&#39;:
         &#34;&#34;&#34;
         Override the parent tileset creation.
         &#34;&#34;&#34;
-        if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-            for objects in tileset_tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-            if self.args.offset[0] == &#39;centroid&#39;:
-                self.args.offset = tileset_tree.get_centroid()
-            for objects in tileset_tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tileset_tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
-
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, self.args, extension_name, self.get_output_dir())
 
     def transform_tileset(self, tileset):
         &#34;&#34;&#34;
@@ -232,8 +199,9 @@ if __name__ == &#39;__main__&#39;:
 
         :return: a TileSet
         &#34;&#34;&#34;
-        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
-        return self.create_tileset_from_geometries(tileset_tree)
+        geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+        tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
+        return self.create_tileset_from_geometries(tileset_tree, self.args)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         &#34;&#34;&#34;
@@ -266,25 +234,8 @@ if __name__ == &#39;__main__&#39;:
     &#34;&#34;&#34;
     Override the parent tileset creation.
     &#34;&#34;&#34;
-    if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-        for objects in tileset_tree.get_all_objects():
-            objects.scale_features(self.args.scale)
-
-    if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-        if self.args.offset[0] == &#39;centroid&#39;:
-            self.args.offset = tileset_tree.get_centroid()
-        for objects in tileset_tree.get_all_objects():
-            objects.translate_features(self.args.offset)
-
-    if not self.args.crs_in == self.args.crs_out:
-        for objects in tileset_tree.get_all_objects():
-            self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-    if self.args.obj is not None:
-        self.write_geometries_as_obj(tileset_tree.get_leaf_objects(), self.args.obj)
-
     self.create_output_directory()
-    return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, extension_name)</code></pre>
+    return FromGeometryTreeToTileset.convert_to_tileset(tileset_tree, self.args, extension_name, self.get_output_dir())</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.parse_command_line"><code class="name flex">
@@ -350,8 +301,9 @@ Then, apply transformations (reprojection, translation, etc) on the FeatureList.
 
     :return: a TileSet
     &#34;&#34;&#34;
-    tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles)
-    return self.create_tileset_from_geometries(tileset_tree)</code></pre>
+    geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+    tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
+    return self.create_tileset_from_geometries(tileset_tree, self.args)</code></pre>
 </details>
 </dd>
 </dl>
@@ -359,6 +311,9 @@ Then, apply transformations (reprojection, translation, etc) on the FeatureList.
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
 </ul>
 </li>

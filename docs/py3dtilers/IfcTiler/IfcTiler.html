@@ -94,7 +94,7 @@ def main():
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory(ifc_tiler.get_output_dir())
+        tileset.write_as_json(ifc_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -130,7 +130,7 @@ if __name__ == &#39;__main__&#39;:
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_to_directory(ifc_tiler.get_output_dir())</code></pre>
+        tileset.write_as_json(ifc_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -236,6 +236,10 @@ if __name__ == &#39;__main__&#39;:
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
 </ul>
 </li>

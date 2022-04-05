@@ -27,15 +27,17 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import argparse
-from pyproj import Transformer
 from pathlib import Path
 
-from ..Common import LodTree, ObjWriter, FromGeometryTreeToTileset
+from ..Common import LodTree, FromGeometryTreeToTileset
 from ..Color import ColorConfig
 from ..Texture import Texture
 
 
 class Tiler():
+
+    # The kd_tree_max is the maximum number of features that the kd-tree will put in each tile.
+    DEFAULT_KD_TREE_MAX = 500
 
     def __init__(self):
         text = &#39;&#39;&#39;A small utility that build a 3DTiles tileset out of data&#39;&#39;&#39;
@@ -87,9 +89,23 @@ class Tiler():
                                  help=&#39;Adds texture to 3DTiles when defined&#39;)
 
         self.parser.add_argument(&#39;--output_dir&#39;,
+                                 &#39;--out&#39;,
+                                 &#39;-o&#39;,
                                  nargs=&#39;?&#39;,
                                  type=str,
                                  help=&#39;Output directory of the tileset.&#39;)
+
+        self.parser.add_argument(&#39;--geometric_error&#39;,
+                                 nargs=&#39;*&#39;,
+                                 default=[None, None, None],
+                                 help=&#39;The geometric errors of the nodes.\
+                                     Used (from left ro right) for basic nodes, LOD1 nodes and LOA nodes.&#39;)
+
+        self.parser.add_argument(&#39;--kd_tree_max&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the maximum number of features in each tile when the features are distributed by a kd-tree.\
+                                     The value must be an integer.&#39;)
 
     def parse_command_line(self):
         self.args = self.parser.parse_args()
@@ -98,10 +114,16 @@ class Tiler():
             self.args.obj = self.args.obj + &#39;.obj&#39;
 
         if(len(self.args.offset) &lt; 3):
-            for i in range(len(self.args.offset), 3):
-                self.args.offset.append(0)
+            [self.args.offset.append(0) for _ in range(len(self.args.offset), 3)]
         elif(len(self.args.offset) &gt; 3):
             self.args.offset = self.args.offset[:3]
+        for i, val in enumerate(self.args.offset):
+            if not isinstance(val, (int, float)) and val.lstrip(&#39;-&#39;).replace(&#39;.&#39;, &#39;&#39;, 1).isdigit():
+                self.args.offset[i] = float(val)
+
+        for i, val in enumerate(self.args.geometric_error):
+            self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
+        [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -112,45 +134,38 @@ class Tiler():
         else:
             return self.args.output_dir
 
-    def write_geometries_as_obj(self, features, file_name):
-        obj_writer = ObjWriter()
-        obj_writer.add_geometries(features.get_features())
-        obj_writer.write_obj(file_name)
+    def get_kd_tree_max(self):
+        &#34;&#34;&#34;
+        The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+        If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+        default value.
+        :return: a int
+        &#34;&#34;&#34;
+        ktm_arg = self.args.kd_tree_max
+        kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg &gt; 0 else self.DEFAULT_KD_TREE_MAX
+        print(&#34;kd tree max&#34;, kd_tree_max)
+        return kd_tree_max
 
-    def change_projection(self, features, crs_in, crs_out):
-        transformer = Transformer.from_crs(crs_in, crs_out)
-        features.change_crs(transformer)
-
-    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
-        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
-        return lod_tree
-
-    def create_tileset_from_geometries(self, feature_list, extension_name=None):
+    def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
+        &#34;&#34;&#34;
+        Create the 3DTiles tileset from the features.
+        :param feature_list: a FeatureList
+        :param extension_name: an optional extension to add to the tileset
+        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
+        :return: a TileSet
+        &#34;&#34;&#34;
         create_loa = self.args.loa is not None
-        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
-
-        if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-            for objects in tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-            if self.args.offset[0] == &#39;centroid&#39;:
-                self.args.offset = tree.get_centroid()
-            for objects in tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
+        geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
         feature_list.delete_objects_ref()
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
     def create_output_directory(self):
+        &#34;&#34;&#34;
+        Create the directory where the tileset will be writen.
+        &#34;&#34;&#34;
         dir = self.get_output_dir()
         target_dir = Path(dir).expanduser()
         Path(target_dir).mkdir(parents=True, exist_ok=True)
@@ -159,6 +174,10 @@ class Tiler():
         Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):
+        &#34;&#34;&#34;
+        Return the ColorConfig used to create the colored materials.
+        :return: a ColorConfig
+        &#34;&#34;&#34;
         return ColorConfig(config_path)</code></pre>
 </details>
 </section>
@@ -182,6 +201,9 @@ class Tiler():
 </summary>
 <pre><code class="python">class Tiler():
 
+    # The kd_tree_max is the maximum number of features that the kd-tree will put in each tile.
+    DEFAULT_KD_TREE_MAX = 500
+
     def __init__(self):
         text = &#39;&#39;&#39;A small utility that build a 3DTiles tileset out of data&#39;&#39;&#39;
         self.parser = argparse.ArgumentParser(description=text)
@@ -232,9 +254,23 @@ class Tiler():
                                  help=&#39;Adds texture to 3DTiles when defined&#39;)
 
         self.parser.add_argument(&#39;--output_dir&#39;,
+                                 &#39;--out&#39;,
+                                 &#39;-o&#39;,
                                  nargs=&#39;?&#39;,
                                  type=str,
                                  help=&#39;Output directory of the tileset.&#39;)
+
+        self.parser.add_argument(&#39;--geometric_error&#39;,
+                                 nargs=&#39;*&#39;,
+                                 default=[None, None, None],
+                                 help=&#39;The geometric errors of the nodes.\
+                                     Used (from left ro right) for basic nodes, LOD1 nodes and LOA nodes.&#39;)
+
+        self.parser.add_argument(&#39;--kd_tree_max&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the maximum number of features in each tile when the features are distributed by a kd-tree.\
+                                     The value must be an integer.&#39;)
 
     def parse_command_line(self):
         self.args = self.parser.parse_args()
@@ -243,10 +279,16 @@ class Tiler():
             self.args.obj = self.args.obj + &#39;.obj&#39;
 
         if(len(self.args.offset) &lt; 3):
-            for i in range(len(self.args.offset), 3):
-                self.args.offset.append(0)
+            [self.args.offset.append(0) for _ in range(len(self.args.offset), 3)]
         elif(len(self.args.offset) &gt; 3):
             self.args.offset = self.args.offset[:3]
+        for i, val in enumerate(self.args.offset):
+            if not isinstance(val, (int, float)) and val.lstrip(&#39;-&#39;).replace(&#39;.&#39;, &#39;&#39;, 1).isdigit():
+                self.args.offset[i] = float(val)
+
+        for i, val in enumerate(self.args.geometric_error):
+            self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
+        [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -257,45 +299,38 @@ class Tiler():
         else:
             return self.args.output_dir
 
-    def write_geometries_as_obj(self, features, file_name):
-        obj_writer = ObjWriter()
-        obj_writer.add_geometries(features.get_features())
-        obj_writer.write_obj(file_name)
+    def get_kd_tree_max(self):
+        &#34;&#34;&#34;
+        The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+        If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+        default value.
+        :return: a int
+        &#34;&#34;&#34;
+        ktm_arg = self.args.kd_tree_max
+        kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg &gt; 0 else self.DEFAULT_KD_TREE_MAX
+        print(&#34;kd tree max&#34;, kd_tree_max)
+        return kd_tree_max
 
-    def change_projection(self, features, crs_in, crs_out):
-        transformer = Transformer.from_crs(crs_in, crs_out)
-        features.change_crs(transformer)
-
-    def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
-        lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
-        return lod_tree
-
-    def create_tileset_from_geometries(self, feature_list, extension_name=None):
+    def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
+        &#34;&#34;&#34;
+        Create the 3DTiles tileset from the features.
+        :param feature_list: a FeatureList
+        :param extension_name: an optional extension to add to the tileset
+        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
+        :return: a TileSet
+        &#34;&#34;&#34;
         create_loa = self.args.loa is not None
-        tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
-
-        if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-            for objects in tree.get_all_objects():
-                objects.scale_features(self.args.scale)
-
-        if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-            if self.args.offset[0] == &#39;centroid&#39;:
-                self.args.offset = tree.get_centroid()
-            for objects in tree.get_all_objects():
-                objects.translate_features(self.args.offset)
-
-        if not self.args.crs_in == self.args.crs_out:
-            for objects in tree.get_all_objects():
-                self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-        if self.args.obj is not None:
-            self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
+        geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
         feature_list.delete_objects_ref()
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)
+        return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
     def create_output_directory(self):
+        &#34;&#34;&#34;
+        Create the directory where the tileset will be writen.
+        &#34;&#34;&#34;
         dir = self.get_output_dir()
         target_dir = Path(dir).expanduser()
         Path(target_dir).mkdir(parents=True, exist_ok=True)
@@ -304,6 +339,10 @@ class Tiler():
         Texture.set_texture_folder(dir)
 
     def get_color_config(self, config_path):
+        &#34;&#34;&#34;
+        Return the ColorConfig used to create the colored materials.
+        :return: a ColorConfig
+        &#34;&#34;&#34;
         return ColorConfig(config_path)</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -314,32 +353,28 @@ class Tiler():
 <li><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler" href="../ObjTiler/ObjTiler.html#py3dtilers.ObjTiler.ObjTiler.ObjTiler">ObjTiler</a></li>
 <li><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler" href="../TilesetReader/TilesetReader.html#py3dtilers.TilesetReader.TilesetReader.TilesetTiler">TilesetTiler</a></li>
 </ul>
-<h3>Methods</h3>
+<h3>Class variables</h3>
 <dl>
-<dt id="py3dtilers.Common.tiler.Tiler.change_projection"><code class="name flex">
-<span>def <span class="ident">change_projection</span></span>(<span>self, features, crs_in, crs_out)</span>
-</code></dt>
+<dt id="py3dtilers.Common.tiler.Tiler.DEFAULT_KD_TREE_MAX"><code class="name">var <span class="ident">DEFAULT_KD_TREE_MAX</span></code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def change_projection(self, features, crs_in, crs_out):
-    transformer = Transformer.from_crs(crs_in, crs_out)
-    features.change_crs(transformer)</code></pre>
-</details>
 </dd>
+</dl>
+<h3>Methods</h3>
+<dl>
 <dt id="py3dtilers.Common.tiler.Tiler.create_output_directory"><code class="name flex">
 <span>def <span class="ident">create_output_directory</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create the directory where the tileset will be writen.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create_output_directory(self):
+    &#34;&#34;&#34;
+    Create the directory where the tileset will be writen.
+    &#34;&#34;&#34;
     dir = self.get_output_dir()
     target_dir = Path(dir).expanduser()
     Path(target_dir).mkdir(parents=True, exist_ok=True)
@@ -349,65 +384,76 @@ class Tiler():
 </details>
 </dd>
 <dt id="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries"><code class="name flex">
-<span>def <span class="ident">create_tileset_from_geometries</span></span>(<span>self, feature_list, extension_name=None)</span>
+<span>def <span class="ident">create_tileset_from_geometries</span></span>(<span>self, feature_list, extension_name=None, kd_tree_max=500)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create the 3DTiles tileset from the features.
+:param feature_list: a FeatureList
+:param extension_name: an optional extension to add to the tileset
+:param kd_tree_max: the maximum number of features in each list created by the kd_tree
+:return: a TileSet</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_tileset_from_geometries(self, feature_list, extension_name=None):
+<pre><code class="python">def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
+    &#34;&#34;&#34;
+    Create the 3DTiles tileset from the features.
+    :param feature_list: a FeatureList
+    :param extension_name: an optional extension to add to the tileset
+    :param kd_tree_max: the maximum number of features in each list created by the kd_tree
+    :return: a TileSet
+    &#34;&#34;&#34;
     create_loa = self.args.loa is not None
-    tree = self.create_tree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture)
-
-    if hasattr(self.args, &#39;scale&#39;) and self.args.scale:
-        for objects in tree.get_all_objects():
-            objects.scale_features(self.args.scale)
-
-    if not all(v == 0 for v in self.args.offset) or self.args.offset[0] == &#39;centroid&#39;:
-        if self.args.offset[0] == &#39;centroid&#39;:
-            self.args.offset = tree.get_centroid()
-        for objects in tree.get_all_objects():
-            objects.translate_features(self.args.offset)
-
-    if not self.args.crs_in == self.args.crs_out:
-        for objects in tree.get_all_objects():
-            self.change_projection(objects, self.args.crs_in, self.args.crs_out)
-
-    if self.args.obj is not None:
-        self.write_geometries_as_obj(tree.get_leaf_objects(), self.args.obj)
+    geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
+    tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
     feature_list.delete_objects_ref()
     self.create_output_directory()
-    return FromGeometryTreeToTileset.convert_to_tileset(tree, extension_name)</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.tiler.Tiler.create_tree"><code class="name flex">
-<span>def <span class="ident">create_tree</span></span>(<span>self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_tree(self, feature_list, create_lod1=False, create_loa=False, polygons_path=None, with_texture=False):
-    lod_tree = LodTree(feature_list, create_lod1, create_loa, polygons_path, with_texture)
-    return lod_tree</code></pre>
+    return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.tiler.Tiler.get_color_config"><code class="name flex">
 <span>def <span class="ident">get_color_config</span></span>(<span>self, config_path)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return the ColorConfig used to create the colored materials.
+:return: a ColorConfig</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_color_config(self, config_path):
+    &#34;&#34;&#34;
+    Return the ColorConfig used to create the colored materials.
+    :return: a ColorConfig
+    &#34;&#34;&#34;
     return ColorConfig(config_path)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.tiler.Tiler.get_kd_tree_max"><code class="name flex">
+<span>def <span class="ident">get_kd_tree_max</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+default value.
+:return: a int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_kd_tree_max(self):
+    &#34;&#34;&#34;
+    The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+    If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+    default value.
+    :return: a int
+    &#34;&#34;&#34;
+    ktm_arg = self.args.kd_tree_max
+    kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg &gt; 0 else self.DEFAULT_KD_TREE_MAX
+    print(&#34;kd tree max&#34;, kd_tree_max)
+    return kd_tree_max</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.tiler.Tiler.get_output_dir"><code class="name flex">
@@ -445,25 +491,16 @@ class Tiler():
         self.args.obj = self.args.obj + &#39;.obj&#39;
 
     if(len(self.args.offset) &lt; 3):
-        for i in range(len(self.args.offset), 3):
-            self.args.offset.append(0)
+        [self.args.offset.append(0) for _ in range(len(self.args.offset), 3)]
     elif(len(self.args.offset) &gt; 3):
-        self.args.offset = self.args.offset[:3]</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.Common.tiler.Tiler.write_geometries_as_obj"><code class="name flex">
-<span>def <span class="ident">write_geometries_as_obj</span></span>(<span>self, features, file_name)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write_geometries_as_obj(self, features, file_name):
-    obj_writer = ObjWriter()
-    obj_writer.add_geometries(features.get_features())
-    obj_writer.write_obj(file_name)</code></pre>
+        self.args.offset = self.args.offset[:3]
+    for i, val in enumerate(self.args.offset):
+        if not isinstance(val, (int, float)) and val.lstrip(&#39;-&#39;).replace(&#39;.&#39;, &#39;&#39;, 1).isdigit():
+            self.args.offset[i] = float(val)
+
+    for i, val in enumerate(self.args.geometric_error):
+        self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
+    [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]</code></pre>
 </details>
 </dd>
 </dl>
@@ -487,14 +524,13 @@ class Tiler():
 <li>
 <h4><code><a title="py3dtilers.Common.tiler.Tiler" href="#py3dtilers.Common.tiler.Tiler">Tiler</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.Common.tiler.Tiler.change_projection" href="#py3dtilers.Common.tiler.Tiler.change_projection">change_projection</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.DEFAULT_KD_TREE_MAX" href="#py3dtilers.Common.tiler.Tiler.DEFAULT_KD_TREE_MAX">DEFAULT_KD_TREE_MAX</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tree" href="#py3dtilers.Common.tiler.Tiler.create_tree">create_tree</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.parse_command_line" href="#py3dtilers.Common.tiler.Tiler.parse_command_line">parse_command_line</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.write_geometries_as_obj" href="#py3dtilers.Common.tiler.Tiler.write_geometries_as_obj">write_geometries_as_obj</a></code></li>
 </ul>
 </li>
 </ul>

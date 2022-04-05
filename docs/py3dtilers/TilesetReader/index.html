@@ -76,7 +76,7 @@ __all__ = [&#39;main&#39;,
     tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_to_directory(tiler.get_output_dir())</code></pre>
+    tileset.write_as_json(tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.TilesetReader.merger_main"><code class="name flex">

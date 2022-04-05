@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>py3dtilers.GeojsonTiler API documentation</title>
+<title>py3dtilers.Common.loa_node API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,85 +19,96 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>py3dtilers.GeojsonTiler</code></h1>
+<h1 class="title">Module <code>py3dtilers.Common.loa_node</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .GeojsonTiler import main
+<pre><code class="python">from ..Common import GeometryNode
+from ..Common import LoaFeatureList
 
-__all__ = [&#39;main&#39;]</code></pre>
+
+class LoaNode(GeometryNode):
+    &#34;&#34;&#34;
+    Creates 3D extrusions of the polygons given as parameter.
+    Only the polygons containing at least one feature are extruded.
+    If a feature isn&#39;t contained in any polygon, create a 3D extrusion of its footprint.
+    &#34;&#34;&#34;
+
+    DEFAULT_GEOMETRIC_ERROR = 20
+
+    def __init__(self, features_node, geometric_error=None, polygons=list()):
+        feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
+        super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="py3dtilers.GeojsonTiler.GeojsonTiler" href="GeojsonTiler.html">py3dtilers.GeojsonTiler.GeojsonTiler</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.GeojsonTiler.geojson" href="geojson.html">py3dtilers.GeojsonTiler.geojson</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.GeojsonTiler.geojson_line" href="geojson_line.html">py3dtilers.GeojsonTiler.geojson_line</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.GeojsonTiler.geojson_polygon" href="geojson_polygon.html">py3dtilers.GeojsonTiler.geojson_polygon</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.GeojsonTiler.lineBuffer" href="lineBuffer.html">py3dtilers.GeojsonTiler.lineBuffer</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="py3dtilers.GeojsonTiler.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
+<dt id="py3dtilers.Common.loa_node.LoaNode"><code class="flex name class">
+<span>class <span class="ident">LoaNode</span></span>
+<span>(</span><span>features_node, geometric_error=None, polygons=[])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run the GeojsonTiler: create a 3DTiles tileset from GeoJson file(s).
-The tileset is writen in '/geojson_tilesets/'.
-:return: no return value</p></div>
+<div class="desc"><p>Creates 3D extrusions of the polygons given as parameter.
+Only the polygons containing at least one feature are extruded.
+If a feature isn't contained in any polygon, create a 3D extrusion of its footprint.</p>
+<p>:param feature_list: an instance of FeatureList.
+:param geometric_error: the metric used to refine the node when visualizing the features.
+:param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def main():
+<pre><code class="python">class LoaNode(GeometryNode):
     &#34;&#34;&#34;
-    Run the GeojsonTiler: create a 3DTiles tileset from GeoJson file(s).
-    The tileset is writen in &#39;/geojson_tilesets/&#39;.
-    :return: no return value
+    Creates 3D extrusions of the polygons given as parameter.
+    Only the polygons containing at least one feature are extruded.
+    If a feature isn&#39;t contained in any polygon, create a 3D extrusion of its footprint.
     &#34;&#34;&#34;
-    geojson_tiler = GeojsonTiler()
-    geojson_tiler.parse_command_line()
-    path = geojson_tiler.args.path[0]
-    properties = [&#39;height&#39;, geojson_tiler.args.height,
-                  &#39;width&#39;, geojson_tiler.args.width,
-                  &#39;prec&#39;, geojson_tiler.args.prec,
-                  &#39;z&#39;, geojson_tiler.args.z]
 
-    if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
-        if(tileset is not None):
-            print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
-            tileset.write_as_json(geojson_tiler.get_output_dir())
-    else:
-        print(path, &#34;is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.&#34;)</code></pre>
+    DEFAULT_GEOMETRIC_ERROR = 20
+
+    def __init__(self, features_node, geometric_error=None, polygons=list()):
+        feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
+        super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.Common.loa_node.LoaNode.DEFAULT_GEOMETRIC_ERROR"><code class="name">var <span class="ident">DEFAULT_GEOMETRIC_ERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 </dl>
-</section>
-<section>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_number_of_children" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.get_number_of_children">get_number_of_children</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_node_features_geometry" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode.set_node_features_geometry">set_node_features_geometry</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -108,21 +119,17 @@ The tileset is writen in '/geojson_tilesets/'.
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="py3dtilers" href="../index.html">py3dtilers</a></code></li>
+<li><code><a title="py3dtilers.Common" href="index.html">py3dtilers.Common</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="py3dtilers.GeojsonTiler.GeojsonTiler" href="GeojsonTiler.html">py3dtilers.GeojsonTiler.GeojsonTiler</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.geojson" href="geojson.html">py3dtilers.GeojsonTiler.geojson</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.geojson_line" href="geojson_line.html">py3dtilers.GeojsonTiler.geojson_line</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.geojson_polygon" href="geojson_polygon.html">py3dtilers.GeojsonTiler.geojson_polygon</a></code></li>
-<li><code><a title="py3dtilers.GeojsonTiler.lineBuffer" href="lineBuffer.html">py3dtilers.GeojsonTiler.lineBuffer</a></code></li>
+<li>
+<h4><code><a title="py3dtilers.Common.loa_node.LoaNode" href="#py3dtilers.Common.loa_node.LoaNode">LoaNode</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.Common.loa_node.LoaNode.DEFAULT_GEOMETRIC_ERROR" href="#py3dtilers.Common.loa_node.LoaNode.DEFAULT_GEOMETRIC_ERROR">DEFAULT_GEOMETRIC_ERROR</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="py3dtilers.GeojsonTiler.main" href="#py3dtilers.GeojsonTiler.main">main</a></code></li>
 </ul>
 </li>
 </ul>

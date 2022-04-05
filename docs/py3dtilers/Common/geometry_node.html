@@ -33,16 +33,21 @@
     A node will correspond to a tile of the 3dtiles tileset.
     &#34;&#34;&#34;
 
-    def __init__(self, feature_list=None, geometric_error=50, with_texture=False):
+    # In 3D Tiles, the geometric error is the metric used to refine a tile.
+    # The leaves of the tileset should have the lower geometric error.
+    # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
+    DEFAULT_GEOMETRIC_ERROR = 1
+
+    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
         &#34;&#34;&#34;
         :param feature_list: an instance of FeatureList.
-        :param geometric_error: the distance below which this node should be displayed.
+        :param geometric_error: the metric used to refine the node when visualizing the features.
         :param Boolean with_texture: if this node must keep the texture of the features or not.
         &#34;&#34;&#34;
         self.feature_list = feature_list
         self.child_nodes = list()
-        self.with_texture = with_texture and self.geometries_have_texture()
-        self.geometric_error = geometric_error
+        self.with_texture = with_texture
+        self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
     def set_child_nodes(self, nodes=list()):
         &#34;&#34;&#34;
@@ -63,7 +68,7 @@
         Return True if this node must keep the texture of its features.
         :return: boolean
         &#34;&#34;&#34;
-        return self.with_texture
+        return self.with_texture and self.geometries_have_texture()
 
     def geometries_have_texture(self):
         &#34;&#34;&#34;
@@ -75,12 +80,19 @@
     def get_features(self):
         &#34;&#34;&#34;
         Return the features in this node and the features in the child nodes (recursively).
-        :return: a FeatureList
+        :return: a list of Feature
         &#34;&#34;&#34;
         objects = [self.feature_list]
         for child in self.child_nodes:
             objects.extend(child.get_features())
         return objects
+
+    def set_node_features_geometry(self, user_arguments=None):
+        &#34;&#34;&#34;
+        Set the geometry of the features in this node and the features in the child nodes (recursively).
+        &#34;&#34;&#34;
+        for features in reversed(self.get_features()):
+            features.set_features_geom(user_arguments)
 
     def get_leaves(self):
         &#34;&#34;&#34;
@@ -94,7 +106,18 @@
             leaves = list()
             for node in self.child_nodes:
                 leaves.extend(node.get_leaves())
-            return leaves</code></pre>
+            return leaves
+
+    def get_number_of_children(self):
+        &#34;&#34;&#34;
+        Return the number of children of this node.
+        The count is recursive.
+        :return: int
+        &#34;&#34;&#34;
+        n = len(self.child_nodes)
+        for child in self.child_nodes:
+            n += child.get_number_of_children()
+        return n</code></pre>
 </details>
 </section>
 <section>
@@ -108,14 +131,14 @@
 <dl>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode"><code class="flex name class">
 <span>class <span class="ident">GeometryNode</span></span>
-<span>(</span><span>feature_list=None, geometric_error=50, with_texture=False)</span>
+<span>(</span><span>feature_list=None, geometric_error=None, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Each node contains an instance of FeatureList
 and a list of child nodes.
 A node will correspond to a tile of the 3dtiles tileset.</p>
 <p>:param feature_list: an instance of FeatureList.
-:param geometric_error: the distance below which this node should be displayed.
+:param geometric_error: the metric used to refine the node when visualizing the features.
 :param Boolean with_texture: if this node must keep the texture of the features or not.</p></div>
 <details class="source">
 <summary>
@@ -128,16 +151,21 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
     A node will correspond to a tile of the 3dtiles tileset.
     &#34;&#34;&#34;
 
-    def __init__(self, feature_list=None, geometric_error=50, with_texture=False):
+    # In 3D Tiles, the geometric error is the metric used to refine a tile.
+    # The leaves of the tileset should have the lower geometric error.
+    # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
+    DEFAULT_GEOMETRIC_ERROR = 1
+
+    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
         &#34;&#34;&#34;
         :param feature_list: an instance of FeatureList.
-        :param geometric_error: the distance below which this node should be displayed.
+        :param geometric_error: the metric used to refine the node when visualizing the features.
         :param Boolean with_texture: if this node must keep the texture of the features or not.
         &#34;&#34;&#34;
         self.feature_list = feature_list
         self.child_nodes = list()
-        self.with_texture = with_texture and self.geometries_have_texture()
-        self.geometric_error = geometric_error
+        self.with_texture = with_texture
+        self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
     def set_child_nodes(self, nodes=list()):
         &#34;&#34;&#34;
@@ -158,7 +186,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
         Return True if this node must keep the texture of its features.
         :return: boolean
         &#34;&#34;&#34;
-        return self.with_texture
+        return self.with_texture and self.geometries_have_texture()
 
     def geometries_have_texture(self):
         &#34;&#34;&#34;
@@ -170,12 +198,19 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
     def get_features(self):
         &#34;&#34;&#34;
         Return the features in this node and the features in the child nodes (recursively).
-        :return: a FeatureList
+        :return: a list of Feature
         &#34;&#34;&#34;
         objects = [self.feature_list]
         for child in self.child_nodes:
             objects.extend(child.get_features())
         return objects
+
+    def set_node_features_geometry(self, user_arguments=None):
+        &#34;&#34;&#34;
+        Set the geometry of the features in this node and the features in the child nodes (recursively).
+        &#34;&#34;&#34;
+        for features in reversed(self.get_features()):
+            features.set_features_geom(user_arguments)
 
     def get_leaves(self):
         &#34;&#34;&#34;
@@ -189,13 +224,31 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
             leaves = list()
             for node in self.child_nodes:
                 leaves.extend(node.get_leaves())
-            return leaves</code></pre>
+            return leaves
+
+    def get_number_of_children(self):
+        &#34;&#34;&#34;
+        Return the number of children of this node.
+        The count is recursive.
+        :return: int
+        &#34;&#34;&#34;
+        n = len(self.child_nodes)
+        for child in self.child_nodes:
+            n += child.get_number_of_children()
+        return n</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.Common.lod_node.LoaNode" href="lod_node.html#py3dtilers.Common.lod_node.LoaNode">LoaNode</a></li>
-<li><a title="py3dtilers.Common.lod_node.Lod1Node" href="lod_node.html#py3dtilers.Common.lod_node.Lod1Node">Lod1Node</a></li>
+<li><a title="py3dtilers.Common.loa_node.LoaNode" href="loa_node.html#py3dtilers.Common.loa_node.LoaNode">LoaNode</a></li>
+<li><a title="py3dtilers.Common.lod1_node.Lod1Node" href="lod1_node.html#py3dtilers.Common.lod1_node.Lod1Node">Lod1Node</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.Common.geometry_node.GeometryNode.DEFAULT_GEOMETRIC_ERROR"><code class="name">var <span class="ident">DEFAULT_GEOMETRIC_ERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.add_child_node"><code class="name flex">
@@ -239,7 +292,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Return the features in this node and the features in the child nodes (recursively).
-:return: a FeatureList</p></div>
+:return: a list of Feature</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -247,7 +300,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
 <pre><code class="python">def get_features(self):
     &#34;&#34;&#34;
     Return the features in this node and the features in the child nodes (recursively).
-    :return: a FeatureList
+    :return: a list of Feature
     &#34;&#34;&#34;
     objects = [self.feature_list]
     for child in self.child_nodes:
@@ -281,6 +334,29 @@ If the node has no child, return this node.
         return leaves</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.Common.geometry_node.GeometryNode.get_number_of_children"><code class="name flex">
+<span>def <span class="ident">get_number_of_children</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the number of children of this node.
+The count is recursive.
+:return: int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_number_of_children(self):
+    &#34;&#34;&#34;
+    Return the number of children of this node.
+    The count is recursive.
+    :return: int
+    &#34;&#34;&#34;
+    n = len(self.child_nodes)
+    for child in self.child_nodes:
+        n += child.get_number_of_children()
+    return n</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.has_texture"><code class="name flex">
 <span>def <span class="ident">has_texture</span></span>(<span>self)</span>
 </code></dt>
@@ -296,7 +372,7 @@ If the node has no child, return this node.
     Return True if this node must keep the texture of its features.
     :return: boolean
     &#34;&#34;&#34;
-    return self.with_texture</code></pre>
+    return self.with_texture and self.geometries_have_texture()</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes"><code class="name flex">
@@ -315,6 +391,23 @@ If the node has no child, return this node.
     :param nodes: list of nodes
     &#34;&#34;&#34;
     self.child_nodes = nodes</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.geometry_node.GeometryNode.set_node_features_geometry"><code class="name flex">
+<span>def <span class="ident">set_node_features_geometry</span></span>(<span>self, user_arguments=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the geometry of the features in this node and the features in the child nodes (recursively).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_node_features_geometry(self, user_arguments=None):
+    &#34;&#34;&#34;
+    Set the geometry of the features in this node and the features in the child nodes (recursively).
+    &#34;&#34;&#34;
+    for features in reversed(self.get_features()):
+        features.set_features_geom(user_arguments)</code></pre>
 </details>
 </dd>
 </dl>
@@ -338,12 +431,15 @@ If the node has no child, return this node.
 <li>
 <h4><code><a title="py3dtilers.Common.geometry_node.GeometryNode" href="#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a></code></h4>
 <ul class="">
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.DEFAULT_GEOMETRIC_ERROR" href="#py3dtilers.Common.geometry_node.GeometryNode.DEFAULT_GEOMETRIC_ERROR">DEFAULT_GEOMETRIC_ERROR</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.add_child_node" href="#py3dtilers.Common.geometry_node.GeometryNode.add_child_node">add_child_node</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture" href="#py3dtilers.Common.geometry_node.GeometryNode.geometries_have_texture">geometries_have_texture</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_features" href="#py3dtilers.Common.geometry_node.GeometryNode.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_leaves" href="#py3dtilers.Common.geometry_node.GeometryNode.get_leaves">get_leaves</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.get_number_of_children" href="#py3dtilers.Common.geometry_node.GeometryNode.get_number_of_children">get_number_of_children</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.has_texture" href="#py3dtilers.Common.geometry_node.GeometryNode.has_texture">has_texture</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes" href="#py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes">set_child_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_node.GeometryNode.set_node_features_geometry" href="#py3dtilers.Common.geometry_node.GeometryNode.set_node_features_geometry">set_node_features_geometry</a></code></li>
 </ul>
 </li>
 </ul>

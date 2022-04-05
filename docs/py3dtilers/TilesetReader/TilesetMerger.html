@@ -50,6 +50,8 @@ class TilesetMerger():
                             type=str,
                             help=&#39;Paths to 3DTiles tilesets&#39;)
         parser.add_argument(&#39;--output_dir&#39;,
+                            &#39;--out&#39;,
+                            &#39;-o&#39;,
                             nargs=&#39;?&#39;,
                             type=str,
                             help=&#39;Output directory of the tileset.&#39;)
@@ -92,11 +94,12 @@ class TilesetMerger():
         header = tile.get_content().body.glTF.header
         if &#39;images&#39; in header:
             for image in header[&#39;images&#39;]:
-                path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
-                new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
-                image[&#39;uri&#39;] = new_uri
-                new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
-                shutil.copyfile(path, new_file_path)
+                if &#39;uri&#39; in image:  # copy only external images (i.e. the one that have a uri)
+                    path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
+                    new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
+                    image[&#39;uri&#39;] = new_uri
+                    new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
+                    shutil.copyfile(path, new_file_path)
 
     def copy_tileset_texture_images(self, tileset, tileset_of_root_tiles):
         &#34;&#34;&#34;
@@ -122,7 +125,7 @@ class TilesetMerger():
             Path(target_dir).mkdir(parents=True, exist_ok=True)
 
             self.copy_tileset_texture_images(tileset, tileset_of_root_tiles)
-            tileset.write_to_directory(self.output_path)
+            tileset.write_as_json(self.output_path)
 
 
 def main():
@@ -193,6 +196,8 @@ if __name__ == &#39;__main__&#39;:
                             type=str,
                             help=&#39;Paths to 3DTiles tilesets&#39;)
         parser.add_argument(&#39;--output_dir&#39;,
+                            &#39;--out&#39;,
+                            &#39;-o&#39;,
                             nargs=&#39;?&#39;,
                             type=str,
                             help=&#39;Output directory of the tileset.&#39;)
@@ -235,11 +240,12 @@ if __name__ == &#39;__main__&#39;:
         header = tile.get_content().body.glTF.header
         if &#39;images&#39; in header:
             for image in header[&#39;images&#39;]:
-                path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
-                new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
-                image[&#39;uri&#39;] = new_uri
-                new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
-                shutil.copyfile(path, new_file_path)
+                if &#39;uri&#39; in image:  # copy only external images (i.e. the one that have a uri)
+                    path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
+                    new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
+                    image[&#39;uri&#39;] = new_uri
+                    new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
+                    shutil.copyfile(path, new_file_path)
 
     def copy_tileset_texture_images(self, tileset, tileset_of_root_tiles):
         &#34;&#34;&#34;
@@ -265,7 +271,7 @@ if __name__ == &#39;__main__&#39;:
             Path(target_dir).mkdir(parents=True, exist_ok=True)
 
             self.copy_tileset_texture_images(tileset, tileset_of_root_tiles)
-            tileset.write_to_directory(self.output_path)</code></pre>
+            tileset.write_as_json(self.output_path)</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -333,11 +339,12 @@ The images are renamed to avoid name conflicts between images of different tiles
     header = tile.get_content().body.glTF.header
     if &#39;images&#39; in header:
         for image in header[&#39;images&#39;]:
-            path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
-            new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
-            image[&#39;uri&#39;] = new_uri
-            new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
-            shutil.copyfile(path, new_file_path)</code></pre>
+            if &#39;uri&#39; in image:  # copy only external images (i.e. the one that have a uri)
+                path = Path(os.path.join(tileset_path, &#34;tiles&#34;, image[&#39;uri&#39;]))
+                new_uri = f&#34;{path.stem}_{index}_{path.suffix}&#34;
+                image[&#39;uri&#39;] = new_uri
+                new_file_path = Path(os.path.join(self.output_path, &#34;tiles&#34;), new_uri)
+                shutil.copyfile(path, new_file_path)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.TilesetReader.TilesetMerger.TilesetMerger.copy_tileset_texture_images"><code class="name flex">
@@ -385,6 +392,8 @@ The paths of the tilesets of the root tiles allow to find the images on the disk
                         type=str,
                         help=&#39;Paths to 3DTiles tilesets&#39;)
     parser.add_argument(&#39;--output_dir&#39;,
+                        &#39;--out&#39;,
+                        &#39;-o&#39;,
                         nargs=&#39;?&#39;,
                         type=str,
                         help=&#39;Output directory of the tileset.&#39;)
@@ -418,7 +427,7 @@ The paths of the tilesets of the root tiles allow to find the images on the disk
         Path(target_dir).mkdir(parents=True, exist_ok=True)
 
         self.copy_tileset_texture_images(tileset, tileset_of_root_tiles)
-        tileset.write_to_directory(self.output_path)</code></pre>
+        tileset.write_as_json(self.output_path)</code></pre>
 </details>
 </dd>
 </dl>

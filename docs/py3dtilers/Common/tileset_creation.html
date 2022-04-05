@@ -27,9 +27,12 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import numpy as np
+import os
+from pyproj import Transformer
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Texture import Atlas
+from ..Common import ObjWriter
 
 
 class FromGeometryTreeToTileset():
@@ -37,25 +40,71 @@ class FromGeometryTreeToTileset():
     A static class to create a 3DTiles tileset from a GeometryTree.
     &#34;&#34;&#34;
 
+    tile_index = 0
+    nb_nodes = 0
+
     @staticmethod
-    def convert_to_tileset(geometry_tree, extension_name=None):
+    def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None, output_dir=None):
         &#34;&#34;&#34;
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param user_arguments: the Namespace containing the arguments of the command line.
         :param extension_name: the name of an extension to add to the tileset.
+        :param output_dir: the directory where the TileSet is writen.
 
-        :return: a Tileset
+        :return: a TileSet
         &#34;&#34;&#34;
+        print(&#39;Creating tileset from features...&#39;)
         tileset = TileSet()
-        centroid = geometry_tree.get_centroid()
-        for root_node in geometry_tree.root_nodes:
-            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+        FromGeometryTreeToTileset.tile_index = 0
+        FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
+        obj_writer = ObjWriter()
+        while len(geometry_tree.root_nodes) &gt; 0:
+            root_node = geometry_tree.root_nodes[0]
+            root_node.set_node_features_geometry(user_arguments)
+            FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
+            centroid = root_node.feature_list.get_centroid()
+            tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
+            geometry_tree.root_nodes.remove(root_node)
 
+        if user_arguments.obj is not None:
+            obj_writer.write_obj(user_arguments.obj)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, flush=True)
         return tileset
 
     @staticmethod
-    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+    def __transform_node(node, user_args, obj_writer=None):
+        &#34;&#34;&#34;
+        Apply transformations on the features contained in a node.
+        Those transformations are based on the arguments of the user.
+        The features can also be writen in an OBJ file.
+        :param node: the GeometryNode to transform.
+        :param user_args: the Namespace containing the arguments of the command line.
+        :param obj_writer: the writer used to create the OBJ model.
+        &#34;&#34;&#34;
+        if hasattr(user_args, &#39;scale&#39;) and user_args.scale:
+            for objects in node.get_features():
+                objects.scale_features(user_args.scale)
+
+        if not all(v == 0 for v in user_args.offset) or user_args.offset[0] == &#39;centroid&#39;:
+            if user_args.offset[0] == &#39;centroid&#39;:
+                user_args.offset = node.feature_list.get_centroid()
+            for objects in node.get_features():
+                objects.translate_features(user_args.offset)
+
+        if not user_args.crs_in == user_args.crs_out:
+            transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
+            for objects in node.get_features():
+                objects.change_crs(transformer)
+
+        if user_args.obj is not None:
+            for leaf in node.get_leaves():
+                obj_writer.add_geometries(leaf.feature_list)
+
+    @staticmethod
+    def __create_tile(node, centroid, transform_offset, extension_name=None, output_dir=None):
+        print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, end=&#39;&#39;, flush=True)
         objects = node.feature_list
         objects.translate_features(centroid)
 
@@ -64,6 +113,9 @@ class FromGeometryTreeToTileset():
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
         tile.set_content(content_b3dm)
+        tile.set_content_uri(&#39;tiles/&#39; + f&#39;{FromGeometryTreeToTileset.tile_index}.b3dm&#39;)
+        tile.write_content(output_dir)
+        del tile.attributes[&#34;content&#34;].body  # Delete the binary body of the tile once writen on disk to free the memory
 
         # Set the position of the tile. The position is relative to the parent tile&#39;s position
         tile.set_transform([1, 0, 0, 0,
@@ -82,16 +134,13 @@ class FromGeometryTreeToTileset():
 
         tile.set_bounding_volume(bounding_box)
 
-        # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
-        if depth == 0:
-            parent.add_tile(tile)
-        # Else, add the created tile to its parent&#39;s children
-        else:
-            parent.add_child(tile)
         node.feature_list.delete_objects_ref()
 
+        FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
-            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+            tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, centroid, [0., 0., 0.], extension_name, output_dir))
+
+        return tile
 
     @staticmethod
     def __create_tile_content(objects, extension_name=None, with_texture=False):
@@ -103,20 +152,20 @@ class FromGeometryTreeToTileset():
         # create B3DM content
         arrays = []
         materials = []
-        seen_mat_indexes = []
+        seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
             objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
         for feature in objects:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:
-                seen_mat_indexes.append(mat_index)
+                seen_mat_indexes[mat_index] = len(materials)
                 materials.append(objects.get_material(mat_index))
             content = {
                 &#39;position&#39;: feature.geom.getPositionArray(),
                 &#39;normal&#39;: feature.geom.getNormalArray(),
                 &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-                &#39;matIndex&#39;: mat_index
+                &#39;matIndex&#39;: seen_mat_indexes[mat_index]
             }
             if with_texture:
                 content[&#39;uv&#39;] = feature.geom.getDataArray(0)
@@ -136,8 +185,7 @@ class FromGeometryTreeToTileset():
                               0, 1, 0, 0,
                               0, 0, 0, 1])
 
-        batched = len(materials) &lt;= 1
-        gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
+        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
 
         # Create a batch table and add the ID of each feature to it
         ids = [feature.get_id() for feature in objects]
@@ -163,7 +211,7 @@ class FromGeometryTreeToTileset():
 
         # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
-        return B3dm.from_glTF(gltf, bt)</code></pre>
+        return B3dm.from_glTF(gltf, bt=bt)</code></pre>
 </details>
 </section>
 <section>
@@ -189,25 +237,71 @@ class FromGeometryTreeToTileset():
     A static class to create a 3DTiles tileset from a GeometryTree.
     &#34;&#34;&#34;
 
+    tile_index = 0
+    nb_nodes = 0
+
     @staticmethod
-    def convert_to_tileset(geometry_tree, extension_name=None):
+    def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None, output_dir=None):
         &#34;&#34;&#34;
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+        :param user_arguments: the Namespace containing the arguments of the command line.
         :param extension_name: the name of an extension to add to the tileset.
+        :param output_dir: the directory where the TileSet is writen.
 
-        :return: a Tileset
+        :return: a TileSet
         &#34;&#34;&#34;
+        print(&#39;Creating tileset from features...&#39;)
         tileset = TileSet()
-        centroid = geometry_tree.get_centroid()
-        for root_node in geometry_tree.root_nodes:
-            FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+        FromGeometryTreeToTileset.tile_index = 0
+        FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
+        obj_writer = ObjWriter()
+        while len(geometry_tree.root_nodes) &gt; 0:
+            root_node = geometry_tree.root_nodes[0]
+            root_node.set_node_features_geometry(user_arguments)
+            FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
+            centroid = root_node.feature_list.get_centroid()
+            tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
+            geometry_tree.root_nodes.remove(root_node)
 
+        if user_arguments.obj is not None:
+            obj_writer.write_obj(user_arguments.obj)
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+        print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, flush=True)
         return tileset
 
     @staticmethod
-    def __create_tile(node, parent, centroid, transform_offset, depth, extension_name=None):
+    def __transform_node(node, user_args, obj_writer=None):
+        &#34;&#34;&#34;
+        Apply transformations on the features contained in a node.
+        Those transformations are based on the arguments of the user.
+        The features can also be writen in an OBJ file.
+        :param node: the GeometryNode to transform.
+        :param user_args: the Namespace containing the arguments of the command line.
+        :param obj_writer: the writer used to create the OBJ model.
+        &#34;&#34;&#34;
+        if hasattr(user_args, &#39;scale&#39;) and user_args.scale:
+            for objects in node.get_features():
+                objects.scale_features(user_args.scale)
+
+        if not all(v == 0 for v in user_args.offset) or user_args.offset[0] == &#39;centroid&#39;:
+            if user_args.offset[0] == &#39;centroid&#39;:
+                user_args.offset = node.feature_list.get_centroid()
+            for objects in node.get_features():
+                objects.translate_features(user_args.offset)
+
+        if not user_args.crs_in == user_args.crs_out:
+            transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
+            for objects in node.get_features():
+                objects.change_crs(transformer)
+
+        if user_args.obj is not None:
+            for leaf in node.get_leaves():
+                obj_writer.add_geometries(leaf.feature_list)
+
+    @staticmethod
+    def __create_tile(node, centroid, transform_offset, extension_name=None, output_dir=None):
+        print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, end=&#39;&#39;, flush=True)
         objects = node.feature_list
         objects.translate_features(centroid)
 
@@ -216,6 +310,9 @@ class FromGeometryTreeToTileset():
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
         tile.set_content(content_b3dm)
+        tile.set_content_uri(&#39;tiles/&#39; + f&#39;{FromGeometryTreeToTileset.tile_index}.b3dm&#39;)
+        tile.write_content(output_dir)
+        del tile.attributes[&#34;content&#34;].body  # Delete the binary body of the tile once writen on disk to free the memory
 
         # Set the position of the tile. The position is relative to the parent tile&#39;s position
         tile.set_transform([1, 0, 0, 0,
@@ -234,16 +331,13 @@ class FromGeometryTreeToTileset():
 
         tile.set_bounding_volume(bounding_box)
 
-        # If the node is a root of the LodTree, add the created tile to the tileset&#39;s root
-        if depth == 0:
-            parent.add_tile(tile)
-        # Else, add the created tile to its parent&#39;s children
-        else:
-            parent.add_child(tile)
         node.feature_list.delete_objects_ref()
 
+        FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
-            FromGeometryTreeToTileset.__create_tile(child_node, tile, centroid, [0., 0., 0.], depth + 1, extension_name)
+            tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, centroid, [0., 0., 0.], extension_name, output_dir))
+
+        return tile
 
     @staticmethod
     def __create_tile_content(objects, extension_name=None, with_texture=False):
@@ -255,20 +349,20 @@ class FromGeometryTreeToTileset():
         # create B3DM content
         arrays = []
         materials = []
-        seen_mat_indexes = []
+        seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
             objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
         for feature in objects:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:
-                seen_mat_indexes.append(mat_index)
+                seen_mat_indexes[mat_index] = len(materials)
                 materials.append(objects.get_material(mat_index))
             content = {
                 &#39;position&#39;: feature.geom.getPositionArray(),
                 &#39;normal&#39;: feature.geom.getNormalArray(),
                 &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-                &#39;matIndex&#39;: mat_index
+                &#39;matIndex&#39;: seen_mat_indexes[mat_index]
             }
             if with_texture:
                 content[&#39;uv&#39;] = feature.geom.getDataArray(0)
@@ -288,8 +382,7 @@ class FromGeometryTreeToTileset():
                               0, 1, 0, 0,
                               0, 0, 0, 1])
 
-        batched = len(materials) &lt;= 1
-        gltf = GlTF.from_binary_arrays(arrays, transform, batched=batched, materials=materials)
+        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
 
         # Create a batch table and add the ID of each feature to it
         ids = [feature.get_id() for feature in objects]
@@ -315,37 +408,63 @@ class FromGeometryTreeToTileset():
 
         # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
-        return B3dm.from_glTF(gltf, bt)</code></pre>
+        return B3dm.from_glTF(gltf, bt=bt)</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.nb_nodes"><code class="name">var <span class="ident">nb_nodes</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.tile_index"><code class="name">var <span class="ident">tile_index</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Static methods</h3>
 <dl>
 <dt id="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset"><code class="name flex">
-<span>def <span class="ident">convert_to_tileset</span></span>(<span>geometry_tree, extension_name=None)</span>
+<span>def <span class="ident">convert_to_tileset</span></span>(<span>geometry_tree, user_arguments=None, extension_name=None, output_dir=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Recursively creates a tileset from the nodes of a GeometryTree
 :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
-:param extension_name: the name of an extension to add to the tileset.</p>
-<p>:return: a Tileset</p></div>
+:param user_arguments: the Namespace containing the arguments of the command line.
+:param extension_name: the name of an extension to add to the tileset.
+:param output_dir: the directory where the TileSet is writen.</p>
+<p>:return: a TileSet</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def convert_to_tileset(geometry_tree, extension_name=None):
+def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None, output_dir=None):
     &#34;&#34;&#34;
     Recursively creates a tileset from the nodes of a GeometryTree
     :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
+    :param user_arguments: the Namespace containing the arguments of the command line.
     :param extension_name: the name of an extension to add to the tileset.
+    :param output_dir: the directory where the TileSet is writen.
 
-    :return: a Tileset
+    :return: a TileSet
     &#34;&#34;&#34;
+    print(&#39;Creating tileset from features...&#39;)
     tileset = TileSet()
-    centroid = geometry_tree.get_centroid()
-    for root_node in geometry_tree.root_nodes:
-        FromGeometryTreeToTileset.__create_tile(root_node, tileset, centroid, centroid, 0, extension_name)
+    FromGeometryTreeToTileset.tile_index = 0
+    FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
+    obj_writer = ObjWriter()
+    while len(geometry_tree.root_nodes) &gt; 0:
+        root_node = geometry_tree.root_nodes[0]
+        root_node.set_node_features_geometry(user_arguments)
+        FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
+        centroid = root_node.feature_list.get_centroid()
+        tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
+        geometry_tree.root_nodes.remove(root_node)
 
+    if user_arguments.obj is not None:
+        obj_writer.write_obj(user_arguments.obj)
     tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
+    print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, flush=True)
     return tileset</code></pre>
 </details>
 </dd>
@@ -371,6 +490,8 @@ def convert_to_tileset(geometry_tree, extension_name=None):
 <h4><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset">FromGeometryTreeToTileset</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.convert_to_tileset">convert_to_tileset</a></code></li>
+<li><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.nb_nodes" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.nb_nodes">nb_nodes</a></code></li>
+<li><code><a title="py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.tile_index" href="#py3dtilers.Common.tileset_creation.FromGeometryTreeToTileset.tile_index">tile_index</a></code></li>
 </ul>
 </li>
 </ul>

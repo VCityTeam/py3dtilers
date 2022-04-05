@@ -127,9 +127,7 @@ The tileset is writen in 'junk_<object_type>/' by default.
 
     objects_type.set_cursor(cursor)
 
-    split_surfaces = args.split_surfaces or args.with_texture
-
-    tileset = city_tiler.from_3dcitydb(cursor, objects_type, split_surfaces)
+    tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:
@@ -143,7 +141,7 @@ The tileset is writen in 'junk_<object_type>/' by default.
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    tileset.write_to_directory(city_tiler.get_output_dir())</code></pre>
+    tileset.write_as_json(city_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.main_temporal"><code class="name flex">
@@ -214,7 +212,7 @@ The tileset is writen in 'junk_<object_type>/' by default.
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(city_temp_tiler.get_output_dir())</code></pre>
+    tile_set.write_as_json(city_temp_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>

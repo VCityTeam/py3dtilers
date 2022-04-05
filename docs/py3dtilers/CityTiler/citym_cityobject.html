@@ -28,6 +28,8 @@
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 from io import BytesIO
+from py3dtiles import TriangleSoup
+import os
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -82,6 +84,48 @@ class CityMCityObject(Feature):
         &#34;&#34;&#34;
         return self.texture_uri is not None
 
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
+        &#34;&#34;&#34;
+        Set the geometry of the feature.
+        :return: a list of Feature
+        &#34;&#34;&#34;
+        id = &#39;(&#39; + str(self.get_database_id()) + &#39;)&#39;
+        cursor = self.objects_type.get_cursor()
+        cityobjects_with_geom = list()
+        if user_arguments.with_texture:
+            cursor.execute(self.objects_type.sql_query_geometries_with_texture_coordinates(id))
+        else:
+            cursor.execute(self.objects_type.sql_query_geometries(id, user_arguments.split_surfaces))
+        for t in cursor.fetchall():
+            try:
+                feature_id = t[0]
+                geom_as_string = t[1]
+                if geom_as_string is not None:
+                    cityobject = self.__class__(feature_id, self.get_gml_id())
+                    associated_data = []
+
+                    if user_arguments.with_texture:
+                        uv_as_string = t[2]
+                        texture_uri = t[3]
+                        cityobject.texture_uri = texture_uri
+                        associated_data = [uv_as_string]
+                    elif user_arguments.add_color:
+                        surface_classname = t[2]
+                        if surface_classname not in material_indexes:
+                            material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                            material_indexes[surface_classname] = len(feature_list.materials)
+                            feature_list.add_materials([material])
+                        cityobject.material_index = material_indexes[surface_classname]
+
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
+                    if len(cityobject.geom.triangles[0]) &gt; 0:
+                        cityobject.set_box()
+                        cityobject.centroid = self.centroid
+                        cityobjects_with_geom.append(cityobject)
+            except Exception:
+                continue
+        return cityobjects_with_geom
+
 
 class CityMCityObjects(FeatureList):
     &#34;&#34;&#34;
@@ -93,6 +137,9 @@ class CityMCityObjects(FeatureList):
     gml_cursor = None
 
     def __init__(self, cityMCityObjects=None):
+        if self.color_config is None:
+            config_path = os.path.join(os.path.dirname(__file__), &#34;..&#34;, &#34;Color&#34;, &#34;citytiler_config.json&#34;)
+            self.set_color_config(config_path)
         super().__init__(cityMCityObjects)
 
     def get_textures(self):
@@ -324,7 +371,49 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
         Return True if the feature has a texture URI.
         :return: a boolean
         &#34;&#34;&#34;
-        return self.texture_uri is not None</code></pre>
+        return self.texture_uri is not None
+
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
+        &#34;&#34;&#34;
+        Set the geometry of the feature.
+        :return: a list of Feature
+        &#34;&#34;&#34;
+        id = &#39;(&#39; + str(self.get_database_id()) + &#39;)&#39;
+        cursor = self.objects_type.get_cursor()
+        cityobjects_with_geom = list()
+        if user_arguments.with_texture:
+            cursor.execute(self.objects_type.sql_query_geometries_with_texture_coordinates(id))
+        else:
+            cursor.execute(self.objects_type.sql_query_geometries(id, user_arguments.split_surfaces))
+        for t in cursor.fetchall():
+            try:
+                feature_id = t[0]
+                geom_as_string = t[1]
+                if geom_as_string is not None:
+                    cityobject = self.__class__(feature_id, self.get_gml_id())
+                    associated_data = []
+
+                    if user_arguments.with_texture:
+                        uv_as_string = t[2]
+                        texture_uri = t[3]
+                        cityobject.texture_uri = texture_uri
+                        associated_data = [uv_as_string]
+                    elif user_arguments.add_color:
+                        surface_classname = t[2]
+                        if surface_classname not in material_indexes:
+                            material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                            material_indexes[surface_classname] = len(feature_list.materials)
+                            feature_list.add_materials([material])
+                        cityobject.material_index = material_indexes[surface_classname]
+
+                    cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
+                    if len(cityobject.geom.triangles[0]) &gt; 0:
+                        cityobject.set_box()
+                        cityobject.centroid = self.centroid
+                        cityobjects_with_geom.append(cityobject)
+            except Exception:
+                continue
+        return cityobjects_with_geom</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -355,6 +444,59 @@ _CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p>
     :return: the id of the object
     &#34;&#34;&#34;
     return super().get_id()</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom"><code class="name flex">
+<span>def <span class="ident">get_geom</span></span>(<span>self, user_arguments=None, feature_list=None, material_indexes={})</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the geometry of the feature.
+:return: a list of Feature</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict()):
+    &#34;&#34;&#34;
+    Set the geometry of the feature.
+    :return: a list of Feature
+    &#34;&#34;&#34;
+    id = &#39;(&#39; + str(self.get_database_id()) + &#39;)&#39;
+    cursor = self.objects_type.get_cursor()
+    cityobjects_with_geom = list()
+    if user_arguments.with_texture:
+        cursor.execute(self.objects_type.sql_query_geometries_with_texture_coordinates(id))
+    else:
+        cursor.execute(self.objects_type.sql_query_geometries(id, user_arguments.split_surfaces))
+    for t in cursor.fetchall():
+        try:
+            feature_id = t[0]
+            geom_as_string = t[1]
+            if geom_as_string is not None:
+                cityobject = self.__class__(feature_id, self.get_gml_id())
+                associated_data = []
+
+                if user_arguments.with_texture:
+                    uv_as_string = t[2]
+                    texture_uri = t[3]
+                    cityobject.texture_uri = texture_uri
+                    associated_data = [uv_as_string]
+                elif user_arguments.add_color:
+                    surface_classname = t[2]
+                    if surface_classname not in material_indexes:
+                        material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                        material_indexes[surface_classname] = len(feature_list.materials)
+                        feature_list.add_materials([material])
+                    cityobject.material_index = material_indexes[surface_classname]
+
+                cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
+                if len(cityobject.geom.triangles[0]) &gt; 0:
+                    cityobject.set_box()
+                    cityobject.centroid = self.centroid
+                    cityobjects_with_geom.append(cityobject)
+        except Exception:
+            continue
+    return cityobjects_with_geom</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id"><code class="name flex">
@@ -472,6 +614,9 @@ in the database.</p></div>
     gml_cursor = None
 
     def __init__(self, cityMCityObjects=None):
+        if self.color_config is None:
+            config_path = os.path.join(os.path.dirname(__file__), &#34;..&#34;, &#34;Color&#34;, &#34;citytiler_config.json&#34;)
+            self.set_color_config(config_path)
         super().__init__(cityMCityObjects)
 
     def get_textures(self):
@@ -942,11 +1087,14 @@ def sql_query_textures(image_uri):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
 </ul>
@@ -971,8 +1119,9 @@ def sql_query_textures(image_uri):
 <ul>
 <li>
 <h4><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject">CityMCityObject</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id">get_database_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom">get_geom</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id">get_gml_id</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.has_texture">has_texture</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id" href="#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.set_database_id">set_database_id</a></code></li>

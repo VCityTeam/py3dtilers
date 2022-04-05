@@ -66,7 +66,17 @@ class TemporalBuilding(CityMBuilding):
 
     def get_time_stamp(self):
         # This should be of type date and by default is manipulated as string:
-        return self.temporal_id.split(&#39;::&#39;)[0]</code></pre>
+        return self.temporal_id.split(&#39;::&#39;)[0]
+
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict):
+        &#34;&#34;&#34;
+        Get the geometry of the feature.
+        :return: a boolean
+        &#34;&#34;&#34;
+        if self.geom is not None and len(self.geom.triangles) &gt; 0 and len(self.get_geom_as_triangles()) &gt; 0:
+            return [self]
+        else:
+            return []</code></pre>
 </details>
 </section>
 <section>
@@ -128,7 +138,17 @@ the respective values of its creation and deletion dates.</p></div>
 
     def get_time_stamp(self):
         # This should be of type date and by default is manipulated as string:
-        return self.temporal_id.split(&#39;::&#39;)[0]</code></pre>
+        return self.temporal_id.split(&#39;::&#39;)[0]
+
+    def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict):
+        &#34;&#34;&#34;
+        Get the geometry of the feature.
+        :return: a boolean
+        &#34;&#34;&#34;
+        if self.geom is not None and len(self.geom.triangles) &gt; 0 and len(self.get_geom_as_triangles()) &gt; 0:
+            return [self]
+        else:
+            return []</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -149,6 +169,27 @@ the respective values of its creation and deletion dates.</p></div>
 </summary>
 <pre><code class="python">def get_end_date(self):
     return self.end_date</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_geom"><code class="name flex">
+<span>def <span class="ident">get_geom</span></span>(<span>self, user_arguments=None, feature_list=None, material_indexes=builtins.dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the geometry of the feature.
+:return: a boolean</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_geom(self, user_arguments=None, feature_list=None, material_indexes=dict):
+    &#34;&#34;&#34;
+    Get the geometry of the feature.
+    :return: a boolean
+    &#34;&#34;&#34;
+    if self.geom is not None and len(self.geom.triangles) &gt; 0 and len(self.get_geom_as_triangles()) &gt; 0:
+        return [self]
+    else:
+        return []</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_start_date"><code class="name flex">
@@ -275,6 +316,7 @@ the respective values of its creation and deletion dates.</p></div>
 <h4><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding">TemporalBuilding</a></code></h4>
 <ul class="two-column">
 <li><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_end_date" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_end_date">get_end_date</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_geom" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_geom">get_geom</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_start_date" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_start_date">get_start_date</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_temporal_id" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_temporal_id">get_temporal_id</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_time_stamp" href="#py3dtilers.CityTiler.temporal_building.TemporalBuilding.get_time_stamp">get_time_stamp</a></code></li>

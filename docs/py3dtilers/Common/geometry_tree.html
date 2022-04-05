@@ -78,7 +78,17 @@ class GeometryTree():
         objects = list()
         for node in self.root_nodes:
             objects.extend(node.get_features())
-        return FeatureList(objects)</code></pre>
+        return FeatureList(objects)
+
+    def get_number_of_nodes(self):
+        &#34;&#34;&#34;
+        Return the number of nodes in the tree.
+        :return: int
+        &#34;&#34;&#34;
+        n = len(self.root_nodes)
+        for node in self.root_nodes:
+            n += node.get_number_of_children()
+        return n</code></pre>
 </details>
 </section>
 <section>
@@ -151,7 +161,17 @@ The GeometryTree also contains the centroid of the root nodes.</p></div>
         objects = list()
         for node in self.root_nodes:
             objects.extend(node.get_features())
-        return FeatureList(objects)</code></pre>
+        return FeatureList(objects)
+
+    def get_number_of_nodes(self):
+        &#34;&#34;&#34;
+        Return the number of nodes in the tree.
+        :return: int
+        &#34;&#34;&#34;
+        n = len(self.root_nodes)
+        for node in self.root_nodes:
+            n += node.get_number_of_children()
+        return n</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -238,6 +258,27 @@ The centroid of the tree is the centroid of the root nodes features.</p></div>
     return FeatureList([node.feature_list for node in self.get_leaf_nodes()])</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.Common.geometry_tree.GeometryTree.get_number_of_nodes"><code class="name flex">
+<span>def <span class="ident">get_number_of_nodes</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the number of nodes in the tree.
+:return: int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_number_of_nodes(self):
+    &#34;&#34;&#34;
+    Return the number of nodes in the tree.
+    :return: int
+    &#34;&#34;&#34;
+    n = len(self.root_nodes)
+    for node in self.root_nodes:
+        n += node.get_number_of_children()
+    return n</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects"><code class="name flex">
 <span>def <span class="ident">get_root_objects</span></span>(<span>self)</span>
 </code></dt>
@@ -276,11 +317,12 @@ The centroid of the tree is the centroid of the root nodes features.</p></div>
 <ul>
 <li>
 <h4><code><a title="py3dtilers.Common.geometry_tree.GeometryTree" href="#py3dtilers.Common.geometry_tree.GeometryTree">GeometryTree</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_all_objects">get_all_objects</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_centroid" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes">get_leaf_nodes</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_objects">get_leaf_objects</a></code></li>
+<li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_number_of_nodes" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_number_of_nodes">get_number_of_nodes</a></code></li>
 <li><code><a title="py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects" href="#py3dtilers.Common.geometry_tree.GeometryTree.get_root_objects">get_root_objects</a></code></li>
 </ul>
 </li>

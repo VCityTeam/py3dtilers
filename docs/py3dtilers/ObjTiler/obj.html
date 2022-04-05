@@ -112,12 +112,6 @@ class Obj(Feature):
 
         return True
 
-    def get_obj_id(self):
-        return super().get_id()
-
-    def set_obj_id(self, id):
-        return super().set_id(id)
-
 
 class Objs(FeatureList):
     &#34;&#34;&#34;
@@ -237,13 +231,7 @@ class Objs(FeatureList):
                 self.set_texture(texture.get_cropped_texture_image(self.geom.triangles[1]))
         self.set_box()
 
-        return True
-
-    def get_obj_id(self):
-        return super().get_id()
-
-    def set_obj_id(self, id):
-        return super().set_id(id)</code></pre>
+        return True</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -251,19 +239,6 @@ class Objs(FeatureList):
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="py3dtilers.ObjTiler.obj.Obj.get_obj_id"><code class="name flex">
-<span>def <span class="ident">get_obj_id</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_obj_id(self):
-    return super().get_id()</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.ObjTiler.obj.Obj.parse_geom"><code class="name flex">
 <span>def <span class="ident">parse_geom</span></span>(<span>self, mesh)</span>
 </code></dt>
@@ -332,19 +307,6 @@ class Objs(FeatureList):
     return True</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.ObjTiler.obj.Obj.set_obj_id"><code class="name flex">
-<span>def <span class="ident">set_obj_id</span></span>(<span>self, id)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_obj_id(self, id):
-    return super().set_id(id)</code></pre>
-</details>
-</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -353,6 +315,7 @@ class Objs(FeatureList):
 <li><code><a title="py3dtilers.Common.feature.Feature.get_batchtable_data" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.Feature.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.Feature.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_geom" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom">get_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.Feature.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.Feature.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.Feature.get_texture" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
@@ -467,11 +430,14 @@ def retrieve_objs(path):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
 </ul>
@@ -497,9 +463,7 @@ def retrieve_objs(path):
 <li>
 <h4><code><a title="py3dtilers.ObjTiler.obj.Obj" href="#py3dtilers.ObjTiler.obj.Obj">Obj</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.ObjTiler.obj.Obj.get_obj_id" href="#py3dtilers.ObjTiler.obj.Obj.get_obj_id">get_obj_id</a></code></li>
 <li><code><a title="py3dtilers.ObjTiler.obj.Obj.parse_geom" href="#py3dtilers.ObjTiler.obj.Obj.parse_geom">parse_geom</a></code></li>
-<li><code><a title="py3dtilers.ObjTiler.obj.Obj.set_obj_id" href="#py3dtilers.ObjTiler.obj.Obj.set_obj_id">set_obj_id</a></code></li>
 </ul>
 </li>
 <li>

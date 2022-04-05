@@ -30,10 +30,11 @@
 from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
+from shapely.geometry import Polygon
 
 
-class ExtrudedPolygon():
-    def __init__(self, feature, override_points=False, polygon=None):
+class ExtrudedPolygon(Feature):
+    def __init__(self, id, features, polygon=None):
         &#34;&#34;&#34;
         Creates a 3D extrusion of the footprint of a Feature
         :param feature: an instance of Feature containing triangles
@@ -41,39 +42,51 @@ class ExtrudedPolygon():
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         &#34;&#34;&#34;
-        geom_triangles = feature.geom.triangles
+        super().__init__(id)
+        self.polygon = polygon
+        self.features = features
+        self.set_geom()
+
+    def set_geom(self):
+        &#34;&#34;&#34;
+        Set the geometry of the feature.
+        :return: a boolean
+        &#34;&#34;&#34;
+        geom_triangles = list()
+        for feature in self.features:
+            geom_triangles.extend(feature.get_geom_as_triangles())
+
         points = list()
         minZ = np.Inf
         average_maxZ = 0
 
         # Compute the footprint of the geometry
-        for triangles in geom_triangles:
+        for triangle in geom_triangles:
             maxZ = np.NINF
-            for triangle in triangles:
-                for point in triangle:
-                    if len(point) &gt;= 3:
-                        points.append([point[0], point[1]])
-                        if point[2] &lt; minZ:
-                            minZ = point[2]
-                        if point[2] &gt; maxZ:
-                            maxZ = point[2]
+            for point in triangle:
+                if len(point) &gt;= 3:
+                    points.append([point[0], point[1]])
+                    if point[2] &lt; minZ:
+                        minZ = point[2]
+                    if point[2] &gt; maxZ:
+                        maxZ = point[2]
             average_maxZ += maxZ
         average_maxZ /= len(geom_triangles)
-        if override_points:
-            points = polygon
+        if self.polygon is not None:
+            points = self.polygon
         else:
             hull = alphashape(points, 0.)
-            points = hull.exterior.coords[:-1]
+            try:
+                points = hull.exterior.coords[:-1]
+            except AttributeError:
+                po = hull.parallel_offset(0.1, &#39;right&#39;)
+                points = Polygon([*list(hull.coords), *list(po.coords)[::-1]]).exterior.coords[:-1]
 
-        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
 
         self.extrude_footprint()
-
-    def get_extruded_object(self):
-        return self.extruded_object
 
     def extrude_footprint(self):
         coordinates = self.points
@@ -102,10 +115,9 @@ class ExtrudedPolygon():
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
-        extruded_object.geom.triangles.append(triangles)
-        extruded_object.set_box()
-        self.extruded_object = extruded_object</code></pre>
+        self.feature_list = None
+        self.geom.triangles.append(triangles)
+        self.set_box()</code></pre>
 </details>
 </section>
 <section>
@@ -119,10 +131,12 @@ class ExtrudedPolygon():
 <dl>
 <dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon"><code class="flex name class">
 <span>class <span class="ident">ExtrudedPolygon</span></span>
-<span>(</span><span>feature, override_points=False, polygon=None)</span>
+<span>(</span><span>id, features, polygon=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates a 3D extrusion of the footprint of a Feature
+<div class="desc"><p>The base class of all object that need to be tiled, in order to be
+used with the corresponding tiler.</p>
+<p>Creates a 3D extrusion of the footprint of a Feature
 :param feature: an instance of Feature containing triangles
 :param override_points: when true, the polygon extruded won't be the footprint
 but another polygon
@@ -131,8 +145,8 @@ but another polygon
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ExtrudedPolygon():
-    def __init__(self, feature, override_points=False, polygon=None):
+<pre><code class="python">class ExtrudedPolygon(Feature):
+    def __init__(self, id, features, polygon=None):
         &#34;&#34;&#34;
         Creates a 3D extrusion of the footprint of a Feature
         :param feature: an instance of Feature containing triangles
@@ -140,39 +154,51 @@ but another polygon
         but another polygon
         :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
         &#34;&#34;&#34;
-        geom_triangles = feature.geom.triangles
+        super().__init__(id)
+        self.polygon = polygon
+        self.features = features
+        self.set_geom()
+
+    def set_geom(self):
+        &#34;&#34;&#34;
+        Set the geometry of the feature.
+        :return: a boolean
+        &#34;&#34;&#34;
+        geom_triangles = list()
+        for feature in self.features:
+            geom_triangles.extend(feature.get_geom_as_triangles())
+
         points = list()
         minZ = np.Inf
         average_maxZ = 0
 
         # Compute the footprint of the geometry
-        for triangles in geom_triangles:
+        for triangle in geom_triangles:
             maxZ = np.NINF
-            for triangle in triangles:
-                for point in triangle:
-                    if len(point) &gt;= 3:
-                        points.append([point[0], point[1]])
-                        if point[2] &lt; minZ:
-                            minZ = point[2]
-                        if point[2] &gt; maxZ:
-                            maxZ = point[2]
+            for point in triangle:
+                if len(point) &gt;= 3:
+                    points.append([point[0], point[1]])
+                    if point[2] &lt; minZ:
+                        minZ = point[2]
+                    if point[2] &gt; maxZ:
+                        maxZ = point[2]
             average_maxZ += maxZ
         average_maxZ /= len(geom_triangles)
-        if override_points:
-            points = polygon
+        if self.polygon is not None:
+            points = self.polygon
         else:
             hull = alphashape(points, 0.)
-            points = hull.exterior.coords[:-1]
+            try:
+                points = hull.exterior.coords[:-1]
+            except AttributeError:
+                po = hull.parallel_offset(0.1, &#39;right&#39;)
+                points = Polygon([*list(hull.coords), *list(po.coords)[::-1]]).exterior.coords[:-1]
 
-        self.feature = feature
         self.points = points
         self.min_height = minZ
         self.max_height = average_maxZ
 
         self.extrude_footprint()
-
-    def get_extruded_object(self):
-        return self.extruded_object
 
     def extrude_footprint(self):
         coordinates = self.points
@@ -201,11 +227,14 @@ but another polygon
             triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
             triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-        extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
-        extruded_object.geom.triangles.append(triangles)
-        extruded_object.set_box()
-        self.extruded_object = extruded_object</code></pre>
+        self.feature_list = None
+        self.geom.triangles.append(triangles)
+        self.set_box()</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.feature.Feature" href="feature.html#py3dtilers.Common.feature.Feature">Feature</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.extrude_footprint"><code class="name flex">
@@ -244,26 +273,84 @@ but another polygon
         triangles.append([vertices[i], vertices[length + i], vertices[length + ((i + 1) % length)]])
         triangles.append([vertices[i], vertices[length + ((i + 1) % length)], vertices[((i + 1) % length)]])
 
-    extruded_object = Feature(str(self.feature.get_id()) + &#34;_extrude&#34;)
-    extruded_object.geom.triangles.append(triangles)
-    extruded_object.set_box()
-    self.extruded_object = extruded_object</code></pre>
+    self.feature_list = None
+    self.geom.triangles.append(triangles)
+    self.set_box()</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.get_extruded_object"><code class="name flex">
-<span>def <span class="ident">get_extruded_object</span></span>(<span>self)</span>
+<dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.set_geom"><code class="name flex">
+<span>def <span class="ident">set_geom</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Set the geometry of the feature.
+:return: a boolean</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_extruded_object(self):
-    return self.extruded_object</code></pre>
+<pre><code class="python">def set_geom(self):
+    &#34;&#34;&#34;
+    Set the geometry of the feature.
+    :return: a boolean
+    &#34;&#34;&#34;
+    geom_triangles = list()
+    for feature in self.features:
+        geom_triangles.extend(feature.get_geom_as_triangles())
+
+    points = list()
+    minZ = np.Inf
+    average_maxZ = 0
+
+    # Compute the footprint of the geometry
+    for triangle in geom_triangles:
+        maxZ = np.NINF
+        for point in triangle:
+            if len(point) &gt;= 3:
+                points.append([point[0], point[1]])
+                if point[2] &lt; minZ:
+                    minZ = point[2]
+                if point[2] &gt; maxZ:
+                    maxZ = point[2]
+        average_maxZ += maxZ
+    average_maxZ /= len(geom_triangles)
+    if self.polygon is not None:
+        points = self.polygon
+    else:
+        hull = alphashape(points, 0.)
+        try:
+            points = hull.exterior.coords[:-1]
+        except AttributeError:
+            po = hull.parallel_offset(0.1, &#39;right&#39;)
+            points = Polygon([*list(hull.coords), *list(po.coords)[::-1]]).exterior.coords[:-1]
+
+    self.points = points
+    self.min_height = minZ
+    self.max_height = average_maxZ
+
+    self.extrude_footprint()</code></pre>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.feature.Feature" href="feature.html#py3dtilers.Common.feature.Feature">Feature</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.feature.Feature.get_batchtable_data" href="feature.html#py3dtilers.Common.feature.Feature.get_batchtable_data">get_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_bounding_volume_box" href="feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_centroid" href="feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_geom" href="feature.html#py3dtilers.Common.feature.Feature.get_geom">get_geom</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_geom_as_triangles" href="feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_id" href="feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.get_texture" href="feature.html#py3dtilers.Common.feature.Feature.get_texture">get_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.has_texture" href="feature.html#py3dtilers.Common.feature.Feature.has_texture">has_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_batchtable_data" href="feature.html#py3dtilers.Common.feature.Feature.set_batchtable_data">set_batchtable_data</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_box" href="feature.html#py3dtilers.Common.feature.Feature.set_box">set_box</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_id" href="feature.html#py3dtilers.Common.feature.Feature.set_id">set_id</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_texture" href="feature.html#py3dtilers.Common.feature.Feature.set_texture">set_texture</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.Feature.set_triangles" href="feature.html#py3dtilers.Common.feature.Feature.set_triangles">set_triangles</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -285,7 +372,7 @@ but another polygon
 <h4><code><a title="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon" href="#py3dtilers.Common.polygon_extrusion.ExtrudedPolygon">ExtrudedPolygon</a></code></h4>
 <ul class="">
 <li><code><a title="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.extrude_footprint" href="#py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.extrude_footprint">extrude_footprint</a></code></li>
-<li><code><a title="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.get_extruded_object" href="#py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.get_extruded_object">get_extruded_object</a></code></li>
+<li><code><a title="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.set_geom" href="#py3dtilers.Common.polygon_extrusion.ExtrudedPolygon.set_geom">set_geom</a></code></li>
 </ul>
 </li>
 </ul>

@@ -118,23 +118,27 @@ class CityMReliefs(CityMCityObjects):
         # cityobjects_ids contains ids of reliefs
         if split_surfaces:
             query = \
-                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) &#34; + \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
                 &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
                 &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
                 &#34;JOIN citydb.tin_relief &#34; + \
                 &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
                 &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
                 &#34;WHERE relief_feature.id IN &#34; + reliefs_ids
         else:
             query = \
-                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) &#34; + \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
                 &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
                 &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
                 &#34;JOIN citydb.tin_relief &#34; + \
                 &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
                 &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
                 &#34;WHERE relief_feature.id IN &#34; + reliefs_ids + &#34; &#34; + \
-                &#34;GROUP BY relief_feature.id &#34;
+                &#34;GROUP BY relief_feature.id, objectclass.classname&#34;
 
         return query
 
@@ -234,6 +238,7 @@ class CityMReliefs(CityMCityObjects):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_bounding_volume_box" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_bounding_volume_box">get_bounding_volume_box</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_database_id">get_database_id</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom">get_geom</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_geom_as_triangles" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_geom_as_triangles">get_geom_as_triangles</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_gml_id">get_gml_id</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObject.get_id" href="../Common/feature.html#py3dtilers.Common.feature.Feature.get_id">get_id</a></code></li>
@@ -307,23 +312,27 @@ class CityMReliefs(CityMCityObjects):
         # cityobjects_ids contains ids of reliefs
         if split_surfaces:
             query = \
-                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) &#34; + \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
                 &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
                 &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
                 &#34;JOIN citydb.tin_relief &#34; + \
                 &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
                 &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
                 &#34;WHERE relief_feature.id IN &#34; + reliefs_ids
         else:
             query = \
-                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) &#34; + \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
                 &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
                 &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
                 &#34;JOIN citydb.tin_relief &#34; + \
                 &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
                 &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
                 &#34;WHERE relief_feature.id IN &#34; + reliefs_ids + &#34; &#34; + \
-                &#34;GROUP BY relief_feature.id &#34;
+                &#34;GROUP BY relief_feature.id, objectclass.classname&#34;
 
         return query
 
@@ -449,23 +458,27 @@ def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
     # cityobjects_ids contains ids of reliefs
     if split_surfaces:
         query = \
-            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)) &#34; + \
+            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+            &#34;objectclass.classname &#34; + \
             &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
             &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
             &#34;JOIN citydb.tin_relief &#34; + \
             &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
             &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+            &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
             &#34;WHERE relief_feature.id IN &#34; + reliefs_ids
     else:
         query = \
-            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))) &#34; + \
+            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+            &#34;objectclass.classname &#34; + \
             &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
             &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
             &#34;JOIN citydb.tin_relief &#34; + \
             &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
             &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+            &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
             &#34;WHERE relief_feature.id IN &#34; + reliefs_ids + &#34; &#34; + \
-            &#34;GROUP BY relief_feature.id &#34;
+            &#34;GROUP BY relief_feature.id, objectclass.classname&#34;
 
     return query</code></pre>
 </details>
@@ -558,6 +571,7 @@ def sql_query_objects(reliefs):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
@@ -568,7 +582,9 @@ def sql_query_objects(reliefs):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>

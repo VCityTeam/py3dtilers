@@ -27,6 +27,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from pathlib import Path
+import numpy as np
 
 
 class ObjWriter():
@@ -36,6 +37,7 @@ class ObjWriter():
 
     def __init__(self):
         self.vertices = list()
+        self.normals = list()
         self.triangles = list()
         self.vertex_indexes = {}
         self.index = 0
@@ -67,11 +69,12 @@ class ObjWriter():
         self.index += 1
         return self.index
 
-    def get_vertex_index(self, vertex):
+    def get_vertex_index(self, vertex, normal):
         &#34;&#34;&#34;
         Return the index associated to a vertex.
-        If no index is associated to the vertex, create a new index.
+        If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ&#39;s vertices/normals.
         :param vertex: the vertex
+        :param normal: the normal of the vertex
 
         :return: the index associated to the vertex
         &#34;&#34;&#34;
@@ -79,8 +82,21 @@ class ObjWriter():
         if not tuple(vertex) in self.vertex_indexes:
             self.vertex_indexes[tuple(vertex)] = self.get_index()
             self.vertices.append(vertex)
+            self.normals.append(normal)
 
         return self.vertex_indexes[tuple(vertex)]
+
+    def compute_triangle_normal(self, triangle):
+        &#34;&#34;&#34;
+        Compute the normal of a triangle
+        :param triangle: a triangle
+        :return: the normal vector of the triangle.
+        &#34;&#34;&#34;
+        U = triangle[1] - triangle[0]
+        V = triangle[2] - triangle[0]
+        N = np.cross(U, V)
+        norm = np.linalg.norm(N)
+        return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm
 
     def add_triangle(self, triangle):
         &#34;&#34;&#34;
@@ -88,8 +104,9 @@ class ObjWriter():
         :param triangle: the triangle
         &#34;&#34;&#34;
         indexes = list()
+        normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            indexes.append(self.get_vertex_index(vertex))
+            indexes.append(self.get_vertex_index(vertex, normal))
         self.triangles.append(indexes)
 
     def add_geometries(self, feature_list):
@@ -115,8 +132,11 @@ class ObjWriter():
         for vertex in self.vertices:
             f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
 
+        for normal in self.normals:
+            f.write(&#34;vn &#34; + str(normal[0]) + &#34; &#34; + str(normal[1]) + &#34; &#34; + str(normal[2]) + &#34;\n&#34;)
+
         for triangle in self.triangles:
-            f.write(&#34;f &#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
+            f.write(&#34;f &#34; + str(int(triangle[0])) + &#34;/&#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34;/&#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;/&#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -144,6 +164,7 @@ class ObjWriter():
 
     def __init__(self):
         self.vertices = list()
+        self.normals = list()
         self.triangles = list()
         self.vertex_indexes = {}
         self.index = 0
@@ -175,11 +196,12 @@ class ObjWriter():
         self.index += 1
         return self.index
 
-    def get_vertex_index(self, vertex):
+    def get_vertex_index(self, vertex, normal):
         &#34;&#34;&#34;
         Return the index associated to a vertex.
-        If no index is associated to the vertex, create a new index.
+        If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ&#39;s vertices/normals.
         :param vertex: the vertex
+        :param normal: the normal of the vertex
 
         :return: the index associated to the vertex
         &#34;&#34;&#34;
@@ -187,8 +209,21 @@ class ObjWriter():
         if not tuple(vertex) in self.vertex_indexes:
             self.vertex_indexes[tuple(vertex)] = self.get_index()
             self.vertices.append(vertex)
+            self.normals.append(normal)
 
         return self.vertex_indexes[tuple(vertex)]
+
+    def compute_triangle_normal(self, triangle):
+        &#34;&#34;&#34;
+        Compute the normal of a triangle
+        :param triangle: a triangle
+        :return: the normal vector of the triangle.
+        &#34;&#34;&#34;
+        U = triangle[1] - triangle[0]
+        V = triangle[2] - triangle[0]
+        N = np.cross(U, V)
+        norm = np.linalg.norm(N)
+        return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm
 
     def add_triangle(self, triangle):
         &#34;&#34;&#34;
@@ -196,8 +231,9 @@ class ObjWriter():
         :param triangle: the triangle
         &#34;&#34;&#34;
         indexes = list()
+        normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            indexes.append(self.get_vertex_index(vertex))
+            indexes.append(self.get_vertex_index(vertex, normal))
         self.triangles.append(indexes)
 
     def add_geometries(self, feature_list):
@@ -223,8 +259,11 @@ class ObjWriter():
         for vertex in self.vertices:
             f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
 
+        for normal in self.normals:
+            f.write(&#34;vn &#34; + str(normal[0]) + &#34; &#34; + str(normal[1]) + &#34; &#34; + str(normal[2]) + &#34;\n&#34;)
+
         for triangle in self.triangles:
-            f.write(&#34;f &#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
+            f.write(&#34;f &#34; + str(int(triangle[0])) + &#34;/&#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34;/&#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;/&#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -285,9 +324,34 @@ class ObjWriter():
     :param triangle: the triangle
     &#34;&#34;&#34;
     indexes = list()
+    normal = self.compute_triangle_normal(triangle)
     for vertex in triangle:
-        indexes.append(self.get_vertex_index(vertex))
+        indexes.append(self.get_vertex_index(vertex, normal))
     self.triangles.append(indexes)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.obj_writer.ObjWriter.compute_triangle_normal"><code class="name flex">
+<span>def <span class="ident">compute_triangle_normal</span></span>(<span>self, triangle)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Compute the normal of a triangle
+:param triangle: a triangle
+:return: the normal vector of the triangle.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def compute_triangle_normal(self, triangle):
+    &#34;&#34;&#34;
+    Compute the normal of a triangle
+    :param triangle: a triangle
+    :return: the normal vector of the triangle.
+    &#34;&#34;&#34;
+    U = triangle[1] - triangle[0]
+    V = triangle[2] - triangle[0]
+    N = np.cross(U, V)
+    norm = np.linalg.norm(N)
+    return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.obj_writer.ObjWriter.get_centroid"><code class="name flex">
@@ -329,22 +393,24 @@ class ObjWriter():
 </details>
 </dd>
 <dt id="py3dtilers.Common.obj_writer.ObjWriter.get_vertex_index"><code class="name flex">
-<span>def <span class="ident">get_vertex_index</span></span>(<span>self, vertex)</span>
+<span>def <span class="ident">get_vertex_index</span></span>(<span>self, vertex, normal)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return the index associated to a vertex.
-If no index is associated to the vertex, create a new index.
-:param vertex: the vertex</p>
+If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ's vertices/normals.
+:param vertex: the vertex
+:param normal: the normal of the vertex</p>
 <p>:return: the index associated to the vertex</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_vertex_index(self, vertex):
+<pre><code class="python">def get_vertex_index(self, vertex, normal):
     &#34;&#34;&#34;
     Return the index associated to a vertex.
-    If no index is associated to the vertex, create a new index.
+    If no index is associated to the vertex, create a new index and add the vertex and its normal to the OBJ&#39;s vertices/normals.
     :param vertex: the vertex
+    :param normal: the normal of the vertex
 
     :return: the index associated to the vertex
     &#34;&#34;&#34;
@@ -352,6 +418,7 @@ If no index is associated to the vertex, create a new index.
     if not tuple(vertex) in self.vertex_indexes:
         self.vertex_indexes[tuple(vertex)] = self.get_index()
         self.vertices.append(vertex)
+        self.normals.append(normal)
 
     return self.vertex_indexes[tuple(vertex)]</code></pre>
 </details>
@@ -379,8 +446,11 @@ If no index is associated to the vertex, create a new index.
     for vertex in self.vertices:
         f.write(&#34;v &#34; + str(vertex[0] - centroid[0]) + &#34; &#34; + str(vertex[1] - centroid[1]) + &#34; &#34; + str(vertex[2] - centroid[2]) + &#34;\n&#34;)
 
+    for normal in self.normals:
+        f.write(&#34;vn &#34; + str(normal[0]) + &#34; &#34; + str(normal[1]) + &#34; &#34; + str(normal[2]) + &#34;\n&#34;)
+
     for triangle in self.triangles:
-        f.write(&#34;f &#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
+        f.write(&#34;f &#34; + str(int(triangle[0])) + &#34;/&#34; + str(int(triangle[0])) + &#34; &#34; + str(int(triangle[1])) + &#34;/&#34; + str(int(triangle[1])) + &#34; &#34; + str(int(triangle[2])) + &#34;/&#34; + str(int(triangle[2])) + &#34;\n&#34;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -403,10 +473,11 @@ If no index is associated to the vertex, create a new index.
 <ul>
 <li>
 <h4><code><a title="py3dtilers.Common.obj_writer.ObjWriter" href="#py3dtilers.Common.obj_writer.ObjWriter">ObjWriter</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.add_geometries" href="#py3dtilers.Common.obj_writer.ObjWriter.add_geometries">add_geometries</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.add_to_centroid" href="#py3dtilers.Common.obj_writer.ObjWriter.add_to_centroid">add_to_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.add_triangle" href="#py3dtilers.Common.obj_writer.ObjWriter.add_triangle">add_triangle</a></code></li>
+<li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.compute_triangle_normal" href="#py3dtilers.Common.obj_writer.ObjWriter.compute_triangle_normal">compute_triangle_normal</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.get_centroid" href="#py3dtilers.Common.obj_writer.ObjWriter.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.get_index" href="#py3dtilers.Common.obj_writer.ObjWriter.get_index">get_index</a></code></li>
 <li><code><a title="py3dtilers.Common.obj_writer.ObjWriter.get_vertex_index" href="#py3dtilers.Common.obj_writer.ObjWriter.get_vertex_index">get_vertex_index</a></code></li>

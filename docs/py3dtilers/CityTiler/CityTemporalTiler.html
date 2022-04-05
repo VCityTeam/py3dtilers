@@ -365,7 +365,7 @@ def main():
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(city_temp_tiler.get_output_dir())
+    tile_set.write_as_json(city_temp_tiler.get_output_dir())
 
 
 if __name__ == &#39;__main__&#39;:
@@ -447,7 +447,7 @@ if __name__ == &#39;__main__&#39;:
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_to_directory(city_temp_tiler.get_output_dir())</code></pre>
+    tile_set.write_as_json(city_temp_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
 </dl>
@@ -1036,9 +1036,12 @@ Surfaces of the same cityObject are merged into one geometry</p></div>
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_split">get_surfaces_split</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_with_texture" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.get_surfaces_with_texture">get_surfaces_with_texture</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.CityTiler.set_features_centroid" href="CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler.set_features_centroid">set_features_centroid</a></code></li>
 </ul>
 </li>
 </ul>
