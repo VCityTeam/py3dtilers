@@ -148,6 +148,8 @@ Read the texture from the input and write it in the produced 3DTiles:
 <tiler> <input> --with_texture
 ```
 
+_Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max)._
+
 ### Geometric error
 
 | Tiler | |
@@ -176,6 +178,24 @@ You can skip leaf tiles and their parents geometric errors by writing a non nume
 
 ```bash
 tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tiles GE to 100
+```
+
+### Kd-tree max
+
+| Tiler | |
+| --- | --- |
+| CityTiler | :heavy_check_mark: |
+| ObjTiler | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+`--kd_tree_max` allows to choose the maximum number of features in each tile when the features are distributed by a kd-tree. The flag must be followed by an __integer__. By default, each tile contains a maximum of 500 features.
+
+When using the CityTiler [with texture](#with-texture), the default maximum of features per tile is divided by __20__ in order to reduce the size of texture atlases. If a tile contains too much textured features, its atlas may be to heavy in memory, so consider choosing a `kd_tree_max` according to the resolution/size of the texture images.
+
+```bash
+<tiler> <input> --kd_tree_max 25  # Each tile will contain a maximum of 25 features 
 ```
 
 ## __Developper notes__

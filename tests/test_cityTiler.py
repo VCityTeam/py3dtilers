@@ -16,7 +16,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None],
-                     split_surfaces=False, add_color=False)
+                     split_surfaces=False, add_color=False, kd_tree_max=None)
 
 
 class Test_Tile(unittest.TestCase):
