@@ -115,7 +115,6 @@ class Tiler():
         """
         ktm_arg = self.args.kd_tree_max
         kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg > 0 else self.DEFAULT_KD_TREE_MAX
-        print("kd tree max", kd_tree_max)
         return kd_tree_max
 
     def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
