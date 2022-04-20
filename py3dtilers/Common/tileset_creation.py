@@ -126,7 +126,7 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.png')])
+            objects.set_materials([GlTFMaterial(textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.jpeg')])
         for feature in objects:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:
