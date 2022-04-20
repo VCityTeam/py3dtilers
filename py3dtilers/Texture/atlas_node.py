@@ -123,7 +123,7 @@ class Node(object):
             color='black')
 
         self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-        atlasImg.save(Path(Texture.folder, 'tiles', 'ATLAS_' + str(tile_number) + '.jpeg'))
+        atlasImg.save(Path(Texture.folder, 'tiles', 'ATLAS_' + str(tile_number) + '.jpeg'), quality=Texture.quality, compress_level=Texture.compress_level)
 
     def fillAtlasImage(self, atlasImg, city_objects_with_gmlid_key):
         """

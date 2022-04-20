@@ -60,6 +60,16 @@ class Tiler():
                                  action='store_true',
                                  help='Adds texture to 3DTiles when defined')
 
+        self.parser.add_argument('--quality',
+                                 nargs='?',
+                                 type=int,
+                                 help='Set the quality of the atlas images. The minimum value is 1 and the maximum 100.')
+
+        self.parser.add_argument('--compress_level',
+                                 nargs='?',
+                                 type=int,
+                                 help='Set the compression level of the atlas images. The minimum value is 0 and the maximum 9.')
+
         self.parser.add_argument('--output_dir',
                                  '--out',
                                  '-o',
@@ -96,6 +106,11 @@ class Tiler():
         for i, val in enumerate(self.args.geometric_error):
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
+
+        if(self.args.quality is not None):
+            Texture.set_texture_quality(self.args.quality)
+        if(self.args.compress_level is not None):
+            Texture.set_texture_compress_level(self.args.compress_level)
 
     def get_output_dir(self):
         """
