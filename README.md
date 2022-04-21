@@ -21,27 +21,38 @@ py3dtilers can only produce [`Batched 3D Models (B3DM)`](https://github.com/Cesi
 
 ### For Unix
 
-In order to install py3dtilers from sources use:
-
-```bash
-apt install git python3 python3-pip virtualenv  # Python3 version must be <=3.9
-git clone https://github.com/VCityTeam/py3dtilers
-cd py3dtilers
-```
-
 Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
-apt-get install -y libpq-dev                  # required usage of psycopg2 within py3dtilers
+apt-get install -y libpq-dev       # required usage of psycopg2 within py3dtilers
+apt install python3 python3-pip    # Python3 version must be <=3.9
 ```
 
-Proceed with the installation of `py3dtilers` per se
+First create a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html)
+(not mandatory yet quite recommended)
 
 ```bash
+apt install virtualenv
 virtualenv -p python3 venv
 . venv/bin/activate
-(venv)$ pip install -e .
+(venv)$
 ```
+
+Then, depending on your use case, proceed with the installation of `py3dtilers` per se
+
+* **py3dtilers usage use case**:  
+  Point pip directly to github (sources) repository with
+  ```bash
+  (venv)$ pip install git+https://github.com/VCityTeam/py3dtilers.git
+  ```
+* **py3dtilers developers use case**:  
+  Download py3dtilers sources on your host and install them with pip:
+  ```bash
+  apt install git
+  git clone https://github.com/VCityTeam/py3dtilers
+  cd py3dtilers
+  (venv)$ pip install -e .
+  ```
 
 ### For Windows
 
