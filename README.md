@@ -82,7 +82,7 @@ and look for the lines concerning `IfcOpenShell.`
 
 ## Usage
 
-To use the a tiler, check the corresponding readme to know the usage and the features of the tiler.
+In order to access to the different flavors of tilers, refer to the corresponding readmes to discover their respective usage and features:
 
 * CityTiler [readme](py3dtilers/CityTiler/README.md)
 * GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
