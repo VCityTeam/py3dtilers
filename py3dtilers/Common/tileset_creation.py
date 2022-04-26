@@ -79,21 +79,6 @@ class FromGeometryTreeToTileset():
         objects = node.feature_list
         objects.translate_features(centroid)
 
-        tile = Tile()
-        tile.set_geometric_error(node.geometric_error)
-
-        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, node.has_texture())
-        tile.set_content(content_b3dm)
-        tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
-        tile.write_content(output_dir)
-        del tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
-
-        # Set the position of the tile. The position is relative to the parent tile's position
-        tile.set_transform([1, 0, 0, 0,
-                            0, 1, 0, 0,
-                            0, 0, 1, 0,
-                            transform_offset[0], transform_offset[1], transform_offset[2], 1])
-        tile.set_refine_mode('REPLACE')
         bounding_box = BoundingVolumeBox()
         for feature in objects:
             bounding_box.add(feature.get_bounding_volume_box())
@@ -103,11 +88,39 @@ class FromGeometryTreeToTileset():
             if extension is not None:
                 bounding_box.add_extension(extension)
 
+        transform = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform_offset[0], transform_offset[1], transform_offset[2], 1]
+
+        tile = Tile()
+
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, False)
+        tile.set_content(content_b3dm)
+        tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
+        tile.write_content(output_dir)
+        del tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
+
+        tile.set_transform(transform)  # Set the position of the tile. The position is relative to the parent tile's position
+        tile.set_refine_mode('REPLACE')
+        tile.set_geometric_error(node.geometric_error)
         tile.set_bounding_volume(bounding_box)
+        FromGeometryTreeToTileset.tile_index += 1
+
+        if node.has_texture():
+            textured_tile = Tile()
+            content_b3dm = FromGeometryTreeToTileset.__create_tile_content(objects, extension_name, True)
+            textured_tile.set_content(content_b3dm)
+            textured_tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
+            textured_tile.write_content(output_dir)
+            del textured_tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
+
+            textured_tile.set_transform([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])  # Set the position of the tile. The position is relative to the parent tile's position
+            textured_tile.set_refine_mode('REPLACE')
+            textured_tile.set_geometric_error(node.geometric_error)
+            textured_tile.set_bounding_volume(bounding_box)
+            FromGeometryTreeToTileset.tile_index += 1
+            tile.add_child(textured_tile)
 
         del node.feature_list
 
-        FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
             tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, centroid, [0., 0., 0.], extension_name, output_dir))
 
