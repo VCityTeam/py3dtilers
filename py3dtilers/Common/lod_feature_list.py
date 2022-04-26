@@ -20,7 +20,7 @@ class Lod1FeatureList(LodFeatureList):
         for i, feature in enumerate(self.features_node.feature_list):
             extruded_polygon = ExtrudedPolygon("lod1_" + str(i), [feature])
             extruded_polygon.set_geom()
-            self.objects.append(extruded_polygon)
+            self.append(extruded_polygon)
         self.features_node = None
 
 
@@ -43,10 +43,10 @@ class LoaFeatureList(LodFeatureList):
             feature_list = FeatureList(self.find_features_in_polygon(features, Polygon(polygon)))
             if len(feature_list) > 0:
                 [features.remove(feature) for feature in feature_list]
-                self.objects.append(self.create_loa(feature_list, polygon))
+                self.append(self.create_loa(feature_list, polygon))
 
         for feature in features:
-            self.objects.append(self.create_loa(FeatureList([feature])))
+            self.append(self.create_loa(FeatureList([feature])))
 
         self.features_node = None
 
