@@ -105,7 +105,7 @@ class FromGeometryTreeToTileset():
 
         tile.set_bounding_volume(bounding_box)
 
-        node.feature_list.delete_objects_ref()
+        del node.feature_list
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:

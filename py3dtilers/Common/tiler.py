@@ -129,7 +129,7 @@ class Tiler():
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
         tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-        feature_list.delete_objects_ref()
+        feature_list.delete_features_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
