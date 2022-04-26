@@ -115,6 +115,7 @@ class CityMReliefs(CityMCityObjects):
         query = \
             ("SELECT surface_geometry.id, "
              "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
+             "objectclass.classname, "
              "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
              "tex_image_uri AS uri "
              "FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp "
@@ -129,6 +130,7 @@ class CityMReliefs(CityMCityObjects):
              "ON textureparam.surface_data_id=surface_data.id "
              "JOIN citydb.tex_image "
              "ON surface_data.tex_image_id=tex_image.id "
+             "JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id "
              "WHERE relief_feature.id IN " + reliefs_ids)
         return query
 

@@ -125,6 +125,7 @@ class CityMBridges(CityMCityObjects):
         # a.k.a. parts) we must first collect all the bridges and their parts:
         query = ("SELECT surface_geometry.id, "
                  "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , "
+                 "objectclass.classname, "
                  "ST_AsBinary(ST_Multi(ST_Translate("
                  "ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
                  "tex_image_uri AS uri FROM citydb.bridge JOIN "
@@ -133,5 +134,6 @@ class CityMBridges(CityMCityObjects):
                  "textureparam.surface_geometry_id=surface_geometry.id "
                  "JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id "
                  "JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id "
+                 "JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id "
                  "WHERE bridge.bridge_root_id IN " + bridges_ids_arg)
         return query

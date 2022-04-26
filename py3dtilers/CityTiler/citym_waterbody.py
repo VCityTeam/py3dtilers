@@ -114,6 +114,7 @@ class CityMWaterBodies(CityMCityObjects):
         query = \
             ("SELECT surface_geometry.id, "
              "ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, "
+             "objectclass.classname, "
              "ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, "
              "tex_image_uri AS uri "
              "FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf "
@@ -128,6 +129,7 @@ class CityMWaterBodies(CityMCityObjects):
              "ON textureparam.surface_data_id=surface_data.id "
              "JOIN citydb.tex_image "
              "ON surface_data.tex_image_id=tex_image.id "
+             "JOIN citydb.objectclass ON waterbody.objectclass_id = objectclass.id "
              "WHERE waterbody.id IN " + water_bodies_ids)
         return query
 
