@@ -9,7 +9,7 @@ class Texture():
     """
 
     folder = None
-    quality = 100
+    quality = 95
     compress_level = 6
 
     def __init__(self, image_path):

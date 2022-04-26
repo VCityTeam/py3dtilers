@@ -29,7 +29,7 @@ class Atlas():
 
         self.tile_number = atlasTree.get_tile_number()
 
-        atlasTree.createAtlasImage(objects_with_id_key, self.tile_number)
+        self.id = atlasTree.createAtlasImage(objects_with_id_key, self.tile_number)
 
     def computeArea(self, size):
         """
