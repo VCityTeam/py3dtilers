@@ -37,7 +37,7 @@ class LoaFeatureList(LodFeatureList):
         Set the geometry of the features.
         Keep only the features with geometry.
         """
-        features = self.features_node.feature_list.objects.copy()
+        features = self.features_node.feature_list.get_features().copy()
 
         for polygon in self.polygons:
             feature_list = FeatureList(self.find_features_in_polygon(features, Polygon(polygon)))

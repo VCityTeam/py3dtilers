@@ -26,8 +26,7 @@ def kd_tree(feature_list, maxNumObjects, depth=0):
     # bounding boxes of the city objects. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
 
-    feature_list.objects = sorted(feature_list,
-                                  key=lambda obj: obj.get_centroid()[axis])
+    feature_list.set_features(sorted(feature_list, key=lambda obj: obj.get_centroid()[axis]))
     median = len(feature_list) // 2
     lObjects = feature_list[:median]
     rObjects = feature_list[median:]
