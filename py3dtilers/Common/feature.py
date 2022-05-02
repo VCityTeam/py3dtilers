@@ -184,9 +184,16 @@ class FeatureList(object):
                 objects.extend(objs.get_features())
             return objects
 
-    def delete_objects_ref(self):
+    def set_features(self, features):
+        """
+        Set the list of features.
+        :param features: a list of Feature
+        """
+        self.objects = features
+
+    def delete_features_ref(self):
         """Delete the reference to the objects contained by this instance, so the objects are destroyed when unused."""
-        self.objects = list()
+        del self.objects
 
     def __len__(self):
         return len(self.objects)
@@ -296,7 +303,7 @@ class FeatureList(object):
         material_indexes = dict()
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-        self.objects = features_with_geom
+        self.set_features(features_with_geom)
 
     @classmethod
     def set_color_config(cls, config_path):

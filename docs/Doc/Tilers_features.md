@@ -10,6 +10,8 @@ The Tilers allow to create 3DTiles tilesets from geospatial and urban data. They
 
 ## Merge tilesets
 
+TODO
+
 ## Temporal 3DTiles
 
 ![city_tiler_temporal](https://user-images.githubusercontent.com/32875283/153201741-0538abfd-b352-4964-ac6d-6e7ac2ae6245.gif)
@@ -46,7 +48,7 @@ Example: `citygml-tiler --db_config_path config.yml --with_texture`
 | ObjTiler | :heavy_check_mark: |
 | GeojsonTiler | :x: |
 | IfcTiler | :x: |
-| TilesetTiler | :x: |
+| TilesetTiler | :heavy_check_mark: |
 
 ![image](https://user-images.githubusercontent.com/32875283/152002003-921dd838-8b51-4901-bcf0-d5819777bb9c.png)
 
@@ -60,7 +62,7 @@ Example: `geojson-tiler --path buildings.geojson --add_color HEIGHT numeric`
 
 | Tiler | |
 | --- | --- |
-| CityTiler | :x: |
+| CityTiler | :heavy_check_mark: |
 | ObjTiler | :x: |
 | GeojsonTiler | :heavy_check_mark: |
 | IfcTiler | :x: |

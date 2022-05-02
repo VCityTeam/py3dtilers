@@ -1,5 +1,4 @@
 import numpy as np
-import os
 from pyproj import Transformer
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
@@ -106,7 +105,7 @@ class FromGeometryTreeToTileset():
 
         tile.set_bounding_volume(bounding_box)
 
-        node.feature_list.delete_objects_ref()
+        del node.feature_list
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
@@ -127,7 +126,7 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.png')])
+            objects.set_materials([GlTFMaterial(textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.jpeg')])
         for feature in objects:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:

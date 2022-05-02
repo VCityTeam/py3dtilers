@@ -104,7 +104,7 @@ class CityTiler(Tiler):
                 continue
             except ValueError:
                 continue
-        cityobjects.objects = cityobjects_with_centroid
+        cityobjects.set_features(cityobjects_with_centroid)
 
     def from_3dcitydb(self, cursor, objects_type):
         """
