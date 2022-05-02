@@ -52,7 +52,7 @@ class CityTiler(Tiler):
                                  nargs='*',
                                  default=[],
                                  type=str,
-                                 help='')
+                                 help='If present, keep only the CityObjects which have their CityGML in the list.')
 
     def get_output_dir(self):
         """
