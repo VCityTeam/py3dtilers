@@ -79,8 +79,7 @@ class CityTiler(Tiler):
 
     def set_features_centroid(self, cursor, cityobjects, objects_type):
         """
-        Get the surfaces of all the cityobjects and transform them into TriangleSoup.
-        Surfaces of the same cityObject are merged into one geometry.
+        Set the centroid of each CityObject. Only the CityObjects with a centroid (and a geometry) are kept.
         :param cursor: a database access cursor.
         :param cityobjects: the CityGML objects found in the database.
         :param objects_type: a class name among CityMCityObject derived classes.
