@@ -156,7 +156,7 @@ class CityMCityObjects(FeatureList):
         pass
 
     @staticmethod
-    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=[]):
+    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
         """
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -165,6 +165,9 @@ class CityMCityObjects(FeatureList):
         :param cityobjects: a list of objects_type type object that should be
                         sought in the database. When this list is empty all
                         the objects encountered in the database are returned.
+
+        :param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep only
+                        the city objects of the list
 
         :return: an objects_type type object containing the objects that were retrieved
                 in the 3DCityDB database, each object being decorated with its database
