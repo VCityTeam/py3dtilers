@@ -48,6 +48,12 @@ class CityTiler(Tiler):
                                  action='store_true',
                                  help='When defined, add colors to the features depending on their CityGML objectclass.')
 
+        self.parser.add_argument('--ids',
+                                 nargs='*',
+                                 default=[],
+                                 type=str,
+                                 help='If present, keep only the CityObjects which have their CityGML in the list.')
+
     def get_output_dir(self):
         """
         Return the directory name for the tileset.
@@ -109,7 +115,7 @@ class CityTiler(Tiler):
         :return: a tileset.
         """
         print('Retrieving city objects from database...')
-        cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type)
+        cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type, citygml_ids=self.args.ids)
         print(len(cityobjects), f'city objects of type \'{objects_type.__name__}\' found in the database.')
 
         if not cityobjects:

@@ -16,7 +16,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None],
-                     split_surfaces=False, add_color=False, kd_tree_max=None)
+                     split_surfaces=False, add_color=False, kd_tree_max=None, ids=[])
 
 
 class Test_Tile(unittest.TestCase):
@@ -202,6 +202,50 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_color")
         city_tiler.args.add_color = True
+        tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
+
+        tileset.write_as_json(city_tiler.args.output_dir)
+
+    def test_building_filter_id(self):
+
+        objects_type = CityMBuildings
+        city_tiler = CityTiler()
+        city_tiler.args = get_default_namespace()
+        city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_filter_id")
+        city_tiler.args.ids = ["BU_69381AS107"]
+        tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
+
+        tileset.write_as_json(city_tiler.args.output_dir)
+
+    def test_relief_filter_id(self):
+
+        objects_type = CityMReliefs
+        city_tiler = CityTiler()
+        city_tiler.args = get_default_namespace()
+        city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/relief_filter_id")
+        city_tiler.args.ids = ["TIN_8184c814-97b6-4d26-a6f2-03ef4bd6e65d"]
+        tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
+
+        tileset.write_as_json(city_tiler.args.output_dir)
+
+    def test_waterbody_filter_id(self):
+
+        objects_type = CityMWaterBodies
+        city_tiler = CityTiler()
+        city_tiler.args = get_default_namespace()
+        city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/waterbody_filter_id")
+        city_tiler.args.ids = ["a47bd1e2-f63a-450f-b0d4-4ce25798966d"]
+        tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
+
+        tileset.write_as_json(city_tiler.args.output_dir)
+
+    def test_bridge_filter_id(self):
+
+        objects_type = CityMBridges
+        city_tiler = CityTiler()
+        city_tiler.args = get_default_namespace()
+        city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/bridge_filter_id")
+        city_tiler.args.ids = ["ID_58ee6b1f-48eb-4907-9c7a-679354adc73f"]
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)

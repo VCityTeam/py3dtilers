@@ -39,11 +39,13 @@ class CityMWaterBodies(CityMCityObjects):
         super().__init__(objects)
 
     @staticmethod
-    def sql_query_objects(waterbodies):
+    def sql_query_objects(waterbodies, citygml_ids=list()):
         """
         :param waterbodies: a list of CityMWaterBody type object that should be sought
                         in the database. When this list is empty all the objects
                         encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+                        only the objects of the list
 
         :return: a string containing the right sql query that should be executed.
         """
@@ -52,7 +54,9 @@ class CityMWaterBodies(CityMCityObjects):
             # we can find in the database:
             query = "SELECT waterbody.id, cityobject.gmlid " + \
                     "FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id"
-
+            if len(citygml_ids) > 0:
+                citygml_ids_as_string = "('" + "', '".join(citygml_ids) + "')"
+                query += " AND cityobject.gmlid IN " + citygml_ids_as_string
         else:
             waterbody_gmlids = [n.get_gml_id() for n in waterbodies]
             waterbody_gmlids_as_string = "('" + "', '".join(waterbody_gmlids) + "')"

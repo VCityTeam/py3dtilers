@@ -53,11 +53,13 @@ class CityMBuildings(CityMCityObjects):
         return cls.with_bth
 
     @staticmethod
-    def sql_query_objects(buildings):
+    def sql_query_objects(buildings, citygml_ids=list()):
         """
         :param buildings: a list of CityMBuilding type object that should be sought
                         in the database. When this list is empty all the objects
                         encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+                        only the objects of the list
 
         :return: a string containing the right SQL query that should be executed.
         """
@@ -67,6 +69,9 @@ class CityMBuildings(CityMCityObjects):
             query = "SELECT building.id, cityobject.gmlid " + \
                     "FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id " + \
                     "WHERE building.id=building.building_root_id"
+            if len(citygml_ids) > 0:
+                citygml_ids_as_string = "('" + "', '".join(citygml_ids) + "')"
+                query += " AND cityobject.gmlid IN " + citygml_ids_as_string
         else:
             building_gmlids = [n.get_gml_id() for n in buildings]
             building_gmlids_as_string = "('" + "', '".join(building_gmlids) + "')"
