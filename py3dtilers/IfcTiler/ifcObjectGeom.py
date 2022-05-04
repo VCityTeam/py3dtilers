@@ -23,18 +23,13 @@ def unitConversion(originalUnit, targetedUnit):
 class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
-
-        self.ifcObject = ifcObject
-        self.setIfcClasse(ifcObject.is_a(), ifcGroup)
+        self.setIfcClasse(ifcObject, ifcGroup)
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         # self.material = None
-        self.has_geom = self.parse_geom()
+        self.has_geom = self.parse_geom(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
-
-    def get_geom_as_triangles(self):
-        return self.geom.triangles[0]
 
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
@@ -45,10 +40,10 @@ class IfcObjectGeom(Feature):
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcClasse, ifcGroup):
-        self.ifcClasse = ifcClasse
+    def setIfcClasse(self,ifcObject, ifcGroup):
+        self.ifcClasse = ifcObject.is_a()
         properties = list()
-        for prop in self.ifcObject.IsDefinedBy:
+        for prop in ifcObject.IsDefinedBy:
             if(hasattr(prop,'RelatingPropertyDefinition')):
                 if(prop.RelatingPropertyDefinition.is_a('IfcPropertySet')):
                     props = list()
@@ -59,9 +54,9 @@ class IfcObjectGeom(Feature):
                                 props.append([propSet.Name,propSet.NominalValue.wrappedValue])
                     properties.append(props)
         batch_table_data = {
-            'classe': ifcClasse,
+            'classe': self.ifcClasse,
             'group': ifcGroup,
-            'name': self.ifcObject.Name,
+            'name': ifcObject.Name,
             'properties' : properties
         }
         super().set_batchtable_data(batch_table_data)
@@ -69,15 +64,15 @@ class IfcObjectGeom(Feature):
     def getIfcClasse(self):
         return self.ifcClasse
 
-    def parse_geom(self):
-        if (not(self.ifcObject.Representation)):
+    def parse_geom(self,ifcObject):
+        if (not(ifcObject.Representation)):
             return False
 
         try :
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True) #Translates and rotates the points to their world coordinates
             settings.set(settings.SEW_SHELLS,True)
-            shape = geom.create_shape(settings,self.ifcObject)
+            shape = geom.create_shape(settings,ifcObject)
         except RuntimeError:
             logging.error("Error while creating geom with IfcOpenShell")
             return False
@@ -138,13 +133,14 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing "+element.GlobalId+", "+element.is_a())
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
-            if(obj.hasGeom()):
-                if not(element.is_a() in dictObjByType):
-                    dictObjByType[element.is_a()] = IfcObjectsGeom()
-                # if(obj.material):
-                #     obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
-                dictObjByType[element.is_a()].append(obj)
+            if(element.is_a("IfcWall")):
+                obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+                if(obj.hasGeom()):
+                    if not(element.is_a() in dictObjByType):
+                        dictObjByType[element.is_a()] = IfcObjectsGeom()
+                    # if(obj.material):
+                    #     obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                    dictObjByType[element.is_a()].append(obj)
             logging.info("--- %s seconds ---" % (time.time() - start_time))            
             i = i + 1
         return dictObjByType

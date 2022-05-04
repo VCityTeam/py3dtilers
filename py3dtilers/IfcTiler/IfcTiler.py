@@ -77,7 +77,7 @@ def main():
 
     if(tileset is not None):
         tileset.get_root_tile().set_bounding_volume(BoundingVolumeBox())
-        tileset.write_to_directory(ifc_tiler.get_output_dir())
+        tileset.write_as_json(ifc_tiler.get_output_dir())
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == '__main__':
