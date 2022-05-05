@@ -43,7 +43,7 @@ class ObjTiler(Tiler):
         :return: a tileset.
         """
 
-        objects = Objs.retrieve_objs(path)
+        objects = Objs.retrieve_objs(path, self.args.with_texture)
 
         if(len(objects) == 0):
             print("No .obj found in " + path)

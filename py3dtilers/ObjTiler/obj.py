@@ -28,10 +28,11 @@ class Obj(Feature):
     def __init__(self, id=None):
         super().__init__(id)
 
-    def parse_geom(self, mesh):
+    def parse_geom(self, mesh, with_texture=False):
         """
         Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
         :param mesh: an OBJ mesh
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: True if the parsing is complete, False if the format wasn't supported
         """
@@ -74,7 +75,7 @@ class Obj(Feature):
             return False
 
         self.geom.triangles.append(triangles)
-        if len(uvs) > 0:
+        if len(uvs) > 0 and with_texture:
             self.geom.triangles.append(uvs)
             if mesh.materials[0].texture is not None:
                 path = str(mesh.materials[0].texture._path).replace('\\', '/')
@@ -94,10 +95,11 @@ class Objs(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path):
+    def retrieve_objs(path, with_texture=False):
         """
         Create Obj instance from OBJ file(s).
         :param path: a path to a directory
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: a list of Obj.
         """
@@ -115,7 +117,7 @@ class Objs(FeatureList):
                         id = mesh.name
                         obj = Obj(id)
                         # Create geometry as expected from GLTF from an obj file
-                        if(obj.parse_geom(mesh)):
+                        if(obj.parse_geom(mesh, with_texture)):
                             objects.append(obj)
 
         return Objs(objects)
