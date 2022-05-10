@@ -1,3 +1,8 @@
+import logging
+from statistics import mode
+import time
+from py3dtiles import BoundingVolumeBox
+import numpy as np
 from ..Common import Tiler
 from .ifcObjectGeom import IfcObjectsGeom
 
@@ -44,9 +49,9 @@ class IfcTiler(Tiler):
         :return: a tileset.
         """
         if(grouped_by == 'IfcTypeObject'):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
         elif(grouped_by == 'IfcGroup'):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         feature_list = IfcObjectsGeom(objects)
@@ -60,13 +65,18 @@ def main():
 
     this function creates an ifc tileset handling one ifc classe per tiles
     """
+    logging.basicConfig(filename='ifctiler.log', level=logging.INFO, filemode="w")
+    start_time = time.time()
+    logging.info('Started')
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
+
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
 if __name__ == '__main__':
