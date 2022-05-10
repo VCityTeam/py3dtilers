@@ -247,9 +247,7 @@ class FeatureList(object):
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
+                    new_position.append(np.array(points - offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -265,7 +263,7 @@ class FeatureList(object):
                 new_position = []
                 for point in triangle:
                     new_point = transformer.transform(point[0], point[1], point[2])
-                    new_position.append(np.array(new_point, dtype=np.float32))
+                    new_position.append(np.array(new_point))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
