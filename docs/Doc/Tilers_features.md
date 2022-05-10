@@ -6,13 +6,53 @@ This document recaps the main features of the Tilers. For more detail about the 
 
 The Tilers allow to create 3DTiles tilesets from geospatial and urban data. They share common methods and a common structure.
 
-![image](https://user-images.githubusercontent.com/32875283/153424408-b228670b-9790-45cc-b158-f79491f1289f.png)
+![process](./UML/tiler_activity_smaller.drawio.png)
 
 ## Merge tilesets
 
-TODO
+To merge tilesets together, refer to the [TilesetReader notes](../../py3dtilers/TilesetReader/README.md).
+
+The [TilesetReader](../../py3dtilers/TilesetReader/README.md#run-the-tilesetreader) also allows to transform the merged tilesets, but can have a heavy cost in time/memory.
+
+```bash
+tileset-reader --paths <path1> <path2>
+```
+
+The [TilesetMerger](../../py3dtilers/TilesetReader/README.md#run-the-tilesetmerger) can only merge the tilesets, but is faster and lighter than the `TilesetReader`.
+
+```bash
+tileset-merger --paths <path1> <path2>
+```
+
+Example of input tilesets:
+
+```mermaid
+graph TD;
+    tileset_1[Tileset];
+    tileset_2[Tileset];
+    LOD1_tile_1[LOD1 Tile 1];
+    LOD1_tile_2[LOD1 Tile 2];
+    Detailled_tile_1[Detailled Tile 1];
+    Detailled_tile_2[Detailled Tile 2];
+    tileset_1-->LOD1_tile_1-->Detailled_tile_1;
+    tileset_2-->LOD1_tile_2-->Detailled_tile_2;
+```
+
+Result after merge:
+
+```mermaid
+graph TD;
+    LOD1_tile_1[LOD1 Tile 1];
+    LOD1_tile_2[LOD1 Tile 2];
+    Detailled_tile_1[Detailled Tile 1];
+    Detailled_tile_2[Detailled Tile 2];
+    Tileset-->LOD1_tile_1-->Detailled_tile_1;
+    Tileset-->LOD1_tile_2-->Detailled_tile_2;
+```
 
 ## Temporal 3DTiles
+
+To create temporal 3DTiles, refer to the [CityTemporalTiler notes](../../py3dtilers/CityTiler/README.md#citytemporaltiler-features).
 
 ![city_tiler_temporal](https://user-images.githubusercontent.com/32875283/153201741-0538abfd-b352-4964-ac6d-6e7ac2ae6245.gif)
 

@@ -4,6 +4,21 @@
 
 Those features are shared by all the Tilers inheriting from [`Tiler`](tiler.py) class.
 
+```mermaid
+graph TD;
+    Tiler-->CityTiler-->CityTemporalTiler;
+    Tiler-->ObjTiler;
+    Tiler-->IfcTiler;
+    Tiler-->GeojsonTiler;
+    Tiler-->TilesetTiler;
+    click CityTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/CityTiler/";
+    click CityTemporalTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/CityTiler/";
+    click ObjTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/ObjTiler/";
+    click IfcTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/IfcTiler/";
+    click GeojsonTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/GeojsonTiler/";
+    click TilesetTiler "https://github.com/VCityTeam/py3dtilers/blob/master/py3dtilers/TilesetReader/";
+```
+
 Some features may not have been implemented for some Tilers.
 
 ### Output directory
@@ -245,6 +260,8 @@ for object in feature_list:
     print(object.get_id())
 ```
 
+![base_archi](../../docs/Doc/UML/base_architecture.drawio.png)
+
 ## [obj_writer](obj_writer.py)
 
 This class allows to write `FeatureList` as an OBJ model. To write features in a file, use:
@@ -334,6 +351,8 @@ To create a _Lod1Node_:
 node = Lod1Node(feature_list, geometric_error=20)
 ```
 
+![lod1](../../docs/Doc/UML/Lod1.drawio.png)
+
 ### [LoaNode](loa_node.py)
 
 _LoaNode_ inherits from _GeometryNode_. When instanced, a _LoaNode_ creates a 3D extrusion of the polygons (list of points, where a point is a list of float) given as parameter.
@@ -348,6 +367,8 @@ To create a _LoaNode_:
 # Returns : a node containing 3D extrusions of the polygons
 node = LoaNode(feature_list, geometric_error=20, polygons=polygons)
 ```
+
+![loa](../../docs/Doc/UML/Loa.drawio.png)
 
 ## [lod_tree](lod_tree.py)
 
