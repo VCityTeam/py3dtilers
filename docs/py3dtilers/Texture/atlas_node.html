@@ -151,7 +151,7 @@ class Node(object):
             color=&#39;black&#39;)
 
         self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.png&#39;))
+        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.jpeg&#39;))
 
     def fillAtlasImage(self, atlasImg, city_objects_with_gmlid_key):
         &#34;&#34;&#34;
@@ -201,7 +201,7 @@ class Node(object):
                 new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
                 # warning : in order to be written correctly, the GLTF writter
                 # expects data to be in float32
-                uvs[i][y] = np.array([new_u, new_v], dtype=np.float32)</code></pre>
+                uvs[i][y] = np.array([new_u, new_v])</code></pre>
 </details>
 </section>
 <section>
@@ -343,7 +343,7 @@ It should be associate with at least a rectangle.</p></div>
             color=&#39;black&#39;)
 
         self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.png&#39;))
+        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.jpeg&#39;))
 
     def fillAtlasImage(self, atlasImg, city_objects_with_gmlid_key):
         &#34;&#34;&#34;
@@ -393,7 +393,7 @@ It should be associate with at least a rectangle.</p></div>
                 new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
                 # warning : in order to be written correctly, the GLTF writter
                 # expects data to be in float32
-                uvs[i][y] = np.array([new_u, new_v], dtype=np.float32)</code></pre>
+                uvs[i][y] = np.array([new_u, new_v])</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -435,7 +435,7 @@ triangles[1]
         color=&#39;black&#39;)
 
     self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-    atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.png&#39;))</code></pre>
+    atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.jpeg&#39;))</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Texture.atlas_node.Node.fillAtlasImage"><code class="name flex">
@@ -648,7 +648,7 @@ associated to the uvs
             new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
             # warning : in order to be written correctly, the GLTF writter
             # expects data to be in float32
-            uvs[i][y] = np.array([new_u, new_v], dtype=np.float32)</code></pre>
+            uvs[i][y] = np.array([new_u, new_v])</code></pre>
 </details>
 </dd>
 </dl>

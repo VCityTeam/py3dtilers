@@ -71,7 +71,7 @@ class ObjTiler(Tiler):
         :return: a tileset.
         &#34;&#34;&#34;
 
-        objects = Objs.retrieve_objs(path)
+        objects = Objs.retrieve_objs(path, self.args.with_texture)
 
         if(len(objects) == 0):
             print(&#34;No .obj found in &#34; + path)
@@ -207,7 +207,7 @@ and a classes.txt that contains the name of all tilesets
         :return: a tileset.
         &#34;&#34;&#34;
 
-        objects = Objs.retrieve_objs(path)
+        objects = Objs.retrieve_objs(path, self.args.with_texture)
 
         if(len(objects) == 0):
             print(&#34;No .obj found in &#34; + path)
@@ -242,7 +242,7 @@ and a classes.txt that contains the name of all tilesets
     :return: a tileset.
     &#34;&#34;&#34;
 
-    objects = Objs.retrieve_objs(path)
+    objects = Objs.retrieve_objs(path, self.args.with_texture)
 
     if(len(objects) == 0):
         print(&#34;No .obj found in &#34; + path)

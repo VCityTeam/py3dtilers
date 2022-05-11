@@ -65,13 +65,18 @@ __all__ = [&#39;main&#39;]</code></pre>
 
     this function creates an ifc tileset handling one ifc classe per tiles
     &#34;&#34;&#34;
+    logging.basicConfig(filename=&#39;ifctiler.log&#39;, level=logging.INFO, filemode=&#34;w&#34;)
+    start_time = time.time()
+    logging.info(&#39;Started&#39;)
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
+
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_as_json(ifc_tiler.get_output_dir())</code></pre>
+        tileset.write_as_json(ifc_tiler.get_output_dir())
+    logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))</code></pre>
 </details>
 </dd>
 </dl>

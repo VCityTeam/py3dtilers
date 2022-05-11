@@ -161,8 +161,8 @@ class Geojson(Feature):
         vertices = [None] * (2 * length)
 
         for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
+            vertices[i] = np.array([coord[0], coord[1], coord[2]])
+            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height])
 
         # Triangulate the feature footprint
         if self.custom_triangulation:
@@ -172,7 +172,7 @@ class Geojson(Feature):
 
         # Create upper face triangles
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
+            upper_tri = [np.array([coord[0], coord[1], coord[2] + height]) for coord in tri]
             triangles.append(upper_tri)
 
         # Create side triangles
@@ -363,8 +363,8 @@ A Geojson instance has a geometry and properties.</p>
         vertices = [None] * (2 * length)
 
         for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
+            vertices[i] = np.array([coord[0], coord[1], coord[2]])
+            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height])
 
         # Triangulate the feature footprint
         if self.custom_triangulation:
@@ -374,7 +374,7 @@ A Geojson instance has a geometry and properties.</p>
 
         # Create upper face triangles
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
+            upper_tri = [np.array([coord[0], coord[1], coord[2] + height]) for coord in tri]
             triangles.append(upper_tri)
 
         # Create side triangles
@@ -550,8 +550,8 @@ A Geojson instance has a geometry and properties.</p>
     vertices = [None] * (2 * length)
 
     for i, coord in enumerate(coordinates):
-        vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
-        vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
+        vertices[i] = np.array([coord[0], coord[1], coord[2]])
+        vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height])
 
     # Triangulate the feature footprint
     if self.custom_triangulation:
@@ -561,7 +561,7 @@ A Geojson instance has a geometry and properties.</p>
 
     # Create upper face triangles
     for tri in poly_triangles:
-        upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
+        upper_tri = [np.array([coord[0], coord[1], coord[2] + height]) for coord in tri]
         triangles.append(upper_tri)
 
     # Create side triangles
@@ -734,7 +734,7 @@ def parse_geojsons(features, properties, is_roof=False, color_attribute=(&#39;NO
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -743,6 +743,7 @@ def parse_geojsons(features, properties, is_roof=False, color_attribute=(&#39;NO
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>

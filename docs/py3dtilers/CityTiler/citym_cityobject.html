@@ -184,7 +184,7 @@ class CityMCityObjects(FeatureList):
         pass
 
     @staticmethod
-    def retrieve_objects(cursor, objects_type, cityobjects=list()):
+    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
         &#34;&#34;&#34;
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -194,6 +194,9 @@ class CityMCityObjects(FeatureList):
                         sought in the database. When this list is empty all
                         the objects encountered in the database are returned.
 
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep only
+                        the city objects of the list
+
         :return: an objects_type type object containing the objects that were retrieved
                 in the 3DCityDB database, each object being decorated with its database
                 identifier as well as its 3D bounding box (as retrieved in the database).
@@ -202,7 +205,7 @@ class CityMCityObjects(FeatureList):
             no_input = True
         else:
             no_input = False
-        cursor.execute(objects_type.sql_query_objects(cityobjects))
+        cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
 
         if no_input:
             result_objects = objects_type()
@@ -661,7 +664,7 @@ in the database.</p></div>
         pass
 
     @staticmethod
-    def retrieve_objects(cursor, objects_type, cityobjects=list()):
+    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
         &#34;&#34;&#34;
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -671,6 +674,9 @@ in the database.</p></div>
                         sought in the database. When this list is empty all
                         the objects encountered in the database are returned.
 
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep only
+                        the city objects of the list
+
         :return: an objects_type type object containing the objects that were retrieved
                 in the 3DCityDB database, each object being decorated with its database
                 identifier as well as its 3D bounding box (as retrieved in the database).
@@ -679,7 +685,7 @@ in the database.</p></div>
             no_input = True
         else:
             no_input = False
-        cursor.execute(objects_type.sql_query_objects(cityobjects))
+        cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
 
         if no_input:
             result_objects = objects_type()
@@ -855,7 +861,7 @@ def get_image_from_binary(textureUri, objects_type, cursor):
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects"><code class="name flex">
-<span>def <span class="ident">retrieve_objects</span></span>(<span>cursor, objects_type, cityobjects=[])</span>
+<span>def <span class="ident">retrieve_objects</span></span>(<span>cursor, objects_type, cityobjects=[], citygml_ids=[])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param cursor: a database access cursor.
@@ -864,6 +870,8 @@ For example, objects_type can be "CityMBuilding".</p>
 <p>:param cityobjects: a list of objects_type type object that should be
 sought in the database. When this list is empty all
 the objects encountered in the database are returned.</p>
+<p>:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep only
+the city objects of the list</p>
 <p>:return: an objects_type type object containing the objects that were retrieved
 in the 3DCityDB database, each object being decorated with its database
 identifier as well as its 3D bounding box (as retrieved in the database).</p></div>
@@ -872,7 +880,7 @@ identifier as well as its 3D bounding box (as retrieved in the database).</p></d
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def retrieve_objects(cursor, objects_type, cityobjects=list()):
+def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
     &#34;&#34;&#34;
     :param cursor: a database access cursor.
     :param objects_type: a class name among CityMCityObject derived classes.
@@ -882,6 +890,9 @@ def retrieve_objects(cursor, objects_type, cityobjects=list()):
                     sought in the database. When this list is empty all
                     the objects encountered in the database are returned.
 
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep only
+                    the city objects of the list
+
     :return: an objects_type type object containing the objects that were retrieved
             in the 3DCityDB database, each object being decorated with its database
             identifier as well as its 3D bounding box (as retrieved in the database).
@@ -890,7 +901,7 @@ def retrieve_objects(cursor, objects_type, cityobjects=list()):
         no_input = True
     else:
         no_input = False
-    cursor.execute(objects_type.sql_query_objects(cityobjects))
+    cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
 
     if no_input:
         result_objects = objects_type()
@@ -1085,7 +1096,7 @@ def sql_query_textures(image_uri):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -1094,6 +1105,7 @@ def sql_query_textures(image_uri):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>

@@ -26,20 +26,26 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .CityTiler import main
+<pre><code class="python">from .citym_cityobject import CityMCityObjects
+from .citym_building import CityMBuildings
+from .citym_relief import CityMReliefs
+from .citym_waterbody import CityMWaterBodies
+from .citym_bridge import CityMBridges
+from .CityTiler import main
+from .CityTiler import CityTiler
 from .CityTemporalTiler import main as main_temporal
+from .database_accesses import open_data_base
 
-__all__ = [&#39;main&#39;, &#39;main_temporal&#39;]</code></pre>
+__all__ = [&#39;CityMCityObjects&#39;, &#39;CityMBuildings&#39;, &#39;CityMReliefs&#39;,
+           &#39;CityMWaterBodies&#39;, &#39;CityMBridges&#39;,
+           &#39;main&#39;, &#39;CityTiler&#39;, &#39;main_temporal&#39;,
+           &#39;open_data_base&#39;]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
 <dt><code class="name"><a title="py3dtilers.CityTiler.CityTemporalTiler" href="CityTemporalTiler.html">py3dtilers.CityTiler.CityTemporalTiler</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="py3dtilers.CityTiler.CityTiler" href="CityTiler.html">py3dtilers.CityTiler.CityTiler</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -215,9 +221,2281 @@ The tileset is writen in 'junk_<object_type>/' by default.
     tile_set.write_as_json(city_temp_tiler.get_output_dir())</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.CityTiler.open_data_base"><code class="name flex">
+<span>def <span class="ident">open_data_base</span></span>(<span>db_config_file_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def open_data_base(db_config_file_path):
+    with open(db_config_file_path, &#39;r&#39;) as db_config_file:
+        try:
+            db_config = yaml.load(db_config_file, Loader=yaml.FullLoader)
+            db_config_file.close()
+        except FileNotFoundError:
+            print(&#39;ERROR: &#39;, sys.exec_info()[0])
+            db_config_file.close()
+            sys.exit()
+
+    # Check that db configuration is well defined
+    if ((&#34;PG_HOST&#34; not in db_config) or (&#34;PG_USER&#34; not in db_config) or (&#34;PG_NAME&#34; not in db_config) or (&#34;PG_PORT&#34; not in db_config) or (&#34;PG_PASSWORD&#34; not in db_config)):
+        print((&#34;ERROR: Database is not properly defined in &#39;{0}&#39;, please refer to README.md&#34;
+               .format(db_config_file_path)))
+        sys.exit()
+
+    # Connect to database
+    db = psycopg2.connect(
+        &#34;postgresql://{0}:{1}@{2}:{3}/{4}&#34;
+        .format(db_config[&#39;PG_USER&#39;],
+                db_config[&#39;PG_PASSWORD&#39;],
+                db_config[&#39;PG_HOST&#39;],
+                db_config[&#39;PG_PORT&#39;],
+                db_config[&#39;PG_NAME&#39;]),
+        # fetch method will return named tuples instead of regular tuples
+        cursor_factory=psycopg2.extras.NamedTupleCursor,
+        # Refer to note standing after this fuction call on why those
+        # keepalives parameters are here required.
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5
+    )
+    # Why using the keepalives flags in the above psycopg2 constructor ?
+    # In the context of having to tile cities, such a connection can be
+    # used for bulk querries (think of retrieving the geometries of all the
+    # buildings of a large city). And it seems that dealing with bulk
+    # querries in a dockerized context tends to (randomly) produce the
+    # following error:
+    #    psycopg2.OperationalError: server closed the connection unexpectedly
+    #    This probably means the server terminated abnormally
+    #    before or while processing the request.
+    # For documented reports on this refer to
+    #   - https://stackoverflow.com/questions/55457069/how-to-fix-operationalerror-psycopg2-operationalerror-server-closed-the-conn
+    #   - https://stackoverflow.com/questions/53188306/python-sqlalchemy-connection-pattern-disconnected-from-the-remote-server
+    # The keepalives solution is provided by this StackOverflow:
+    # https://stackoverflow.com/questions/56289874/postgres-closes-connection-during-query-after-a-few-hundred-seconds-when-using-p
+    #
+    # Concerning the keepalives connect parameters, refer to
+    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+
+    try:
+        # Open a cursor to perform database operations
+        cursor = db.cursor()
+        cursor.execute(&#39;SELECT 1&#39;)
+    except psycopg2.OperationalError:
+        print(&#39;ERROR: unable to connect to database&#39;)
+        sys.exit()
+
+    return cursor</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMBridges"><code class="flex name class">
+<span>class <span class="ident">CityMBridges</span></span>
+<span>(</span><span>objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of CityMBridge type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityMBridges(CityMCityObjects):
+    &#34;&#34;&#34;
+    A decorated list of CityMBridge type objects.
+    &#34;&#34;&#34;
+
+    object_type = CityMBridge
+
+    def __init__(self, objects=None):
+        super().__init__(objects)
+
+    @staticmethod
+    def sql_query_objects(bridges, citygml_ids=list()):
+        &#34;&#34;&#34;
+        :param bridges: a list of CityMbridge type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
+
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        if not bridges:
+            # No specific bridges were sought. We thus retrieve all the ones
+            # we can find in the database:
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
+                    &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+        else:
+            bridge_gmlids = [n.get_gml_id() for n in bridges]
+            bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
+            query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
+                    &#34;WHERE cityobject.gmlid IN &#34; + bridge_gmlids_as_string + &#34; &#34; + \
+                    &#34;AND bridge.id=bridge.bridge_root_id&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries(bridges_ids_arg, split_surfaces=False):
+        &#34;&#34;&#34;
+        :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each bridge will stay
+                            splitted or be merged into one geometry
+
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        # Because the 3DCityDB&#39;s bridge table regroups both the bridges mixed
+        # with their bridge&#39;s sub-divisions (bridge is an &#34;abstraction&#34;
+        # from which inherits concrete bridge class as well bridge-subdivisions
+        # a.k.a. parts) we must first collect all the bridges and their parts:
+
+        if split_surfaces:
+            query = \
+                &#34;SELECT surface_geometry.id, ST_AsBinary(ST_Multi( &#34; + \
+                &#34;surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+                &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+                &#34;JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg
+        else:
+            query = \
+                &#34;SELECT bridge.bridge_root_id, ST_AsBinary(ST_Multi(ST_Collect( &#34; + \
+                &#34;surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+                &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+                &#34;JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg + &#34; &#34; + \
+                &#34;GROUP BY bridge.bridge_root_id, objectclass.classname&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        &#34;&#34;&#34;
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        &#34;&#34;&#34;
+
+        query = \
+            &#34;SELECT &#34; + \
+            &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+            &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+            &#34;WHERE bridge.bridge_root_id = &#34; + str(id) + \
+            &#34; GROUP BY bridge.bridge_root_id&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(bridges_ids_arg):
+        &#34;&#34;&#34;
+        :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        # Because the 3DCityDB&#39;s bridge table regroups both the bridges mixed
+        # with their bridge&#39;s sub-divisions (bridge is an &#34;abstraction&#34;
+        # from which inherits concrete bridge class as well bridge-subdivisions
+        # a.k.a. parts) we must first collect all the bridges and their parts:
+        query = (&#34;SELECT surface_geometry.id, &#34;
+                 &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , &#34;
+                 &#34;ST_AsBinary(ST_Multi(ST_Translate(&#34;
+                 &#34;ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+                 &#34;tex_image_uri AS uri FROM citydb.bridge JOIN &#34;
+                 &#34;citydb.surface_geometry ON surface_geometry.root_id=&#34;
+                 &#34;bridge.lod2_multi_surface_id JOIN citydb.textureparam ON &#34;
+                 &#34;textureparam.surface_geometry_id=surface_geometry.id &#34;
+                 &#34;JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id &#34;
+                 &#34;JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id &#34;
+                 &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg)
+        return query</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMBridges.sql_query_centroid"><code class="name flex">
+<span>def <span class="ident">sql_query_centroid</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param id: the ID of the cityGML object
+return: the [x, y, z] coordinates of the centroid of the cityGML object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_centroid(id):
+    &#34;&#34;&#34;
+    param id: the ID of the cityGML object
+    return: the [x, y, z] coordinates of the centroid of the cityGML object
+    &#34;&#34;&#34;
+
+    query = \
+        &#34;SELECT &#34; + \
+        &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+        &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+        &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+        &#34;WHERE bridge.bridge_root_id = &#34; + str(id) + \
+        &#34; GROUP BY bridge.bridge_root_id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBridges.sql_query_geometries"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries</span></span>(<span>bridges_ids_arg, split_surfaces=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:param split_surfaces: a boolean specifying if the surfaces of each bridge will stay
+splitted or be merged into one geometry</p>
+<p>:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries(bridges_ids_arg, split_surfaces=False):
+    &#34;&#34;&#34;
+    :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :param split_surfaces: a boolean specifying if the surfaces of each bridge will stay
+                        splitted or be merged into one geometry
+
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    # Because the 3DCityDB&#39;s bridge table regroups both the bridges mixed
+    # with their bridge&#39;s sub-divisions (bridge is an &#34;abstraction&#34;
+    # from which inherits concrete bridge class as well bridge-subdivisions
+    # a.k.a. parts) we must first collect all the bridges and their parts:
+
+    if split_surfaces:
+        query = \
+            &#34;SELECT surface_geometry.id, ST_AsBinary(ST_Multi( &#34; + \
+            &#34;surface_geometry.geometry)), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+            &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+            &#34;JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg
+    else:
+        query = \
+            &#34;SELECT bridge.bridge_root_id, ST_AsBinary(ST_Multi(ST_Collect( &#34; + \
+            &#34;surface_geometry.geometry))), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.bridge &#34; + \
+            &#34;ON surface_geometry.root_id=bridge.lod2_multi_surface_id &#34; + \
+            &#34;JOIN citydb.objectclass ON bridge.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg + &#34; &#34; + \
+            &#34;GROUP BY bridge.bridge_root_id, objectclass.classname&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBridges.sql_query_geometries_with_texture_coordinates"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries_with_texture_coordinates</span></span>(<span>bridges_ids_arg)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries_with_texture_coordinates(bridges_ids_arg):
+    &#34;&#34;&#34;
+    :param bridges_ids_arg: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    # Because the 3DCityDB&#39;s bridge table regroups both the bridges mixed
+    # with their bridge&#39;s sub-divisions (bridge is an &#34;abstraction&#34;
+    # from which inherits concrete bridge class as well bridge-subdivisions
+    # a.k.a. parts) we must first collect all the bridges and their parts:
+    query = (&#34;SELECT surface_geometry.id, &#34;
+             &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , &#34;
+             &#34;ST_AsBinary(ST_Multi(ST_Translate(&#34;
+             &#34;ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+             &#34;tex_image_uri AS uri FROM citydb.bridge JOIN &#34;
+             &#34;citydb.surface_geometry ON surface_geometry.root_id=&#34;
+             &#34;bridge.lod2_multi_surface_id JOIN citydb.textureparam ON &#34;
+             &#34;textureparam.surface_geometry_id=surface_geometry.id &#34;
+             &#34;JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id &#34;
+             &#34;JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id &#34;
+             &#34;WHERE bridge.bridge_root_id IN &#34; + bridges_ids_arg)
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBridges.sql_query_objects"><code class="name flex">
+<span>def <span class="ident">sql_query_objects</span></span>(<span>bridges, citygml_ids=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param bridges: a list of CityMbridge type object that should be sought
+in the database. When this list is empty all the objects
+encountered in the database are returned.
+:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+only the objects of the list</p>
+<p>:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_objects(bridges, citygml_ids=list()):
+    &#34;&#34;&#34;
+    :param bridges: a list of CityMbridge type object that should be sought
+                    in the database. When this list is empty all the objects
+                    encountered in the database are returned.
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                    only the objects of the list
+
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    if not bridges:
+        # No specific bridges were sought. We thus retrieve all the ones
+        # we can find in the database:
+        query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
+                &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
+        if len(citygml_ids) &gt; 0:
+            citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+            query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+    else:
+        bridge_gmlids = [n.get_gml_id() for n in bridges]
+        bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
+        query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
+                &#34;WHERE cityobject.gmlid IN &#34; + bridge_gmlids_as_string + &#34; &#34; + \
+                &#34;AND bridge.id=bridge.bridge_root_id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings"><code class="flex name class">
+<span>class <span class="ident">CityMBuildings</span></span>
+<span>(</span><span>objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of CityMBuilding type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityMBuildings(CityMCityObjects):
+    &#34;&#34;&#34;
+    A decorated list of CityMBuilding type objects.
+    &#34;&#34;&#34;
+
+    object_type = CityMBuilding
+
+    # with_bth value is set to False by default. the value of this variable
+    # depends on the command line optional argument &#34;--With_BTH&#34; of CityTiler.
+    with_bth = False
+
+    def __init__(self, objects=None):
+        super().__init__(objects)
+
+    @classmethod
+    def set_bth(cls):
+        cls.with_bth = True
+
+    @classmethod
+    def is_bth_set(cls):
+        return cls.with_bth
+
+    @staticmethod
+    def sql_query_objects(buildings, citygml_ids=list()):
+        &#34;&#34;&#34;
+        :param buildings: a list of CityMBuilding type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
+
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        if not buildings:
+            # No specific buildings were sought. We thus retrieve all the ones
+            # we can find in the database:
+            query = &#34;SELECT building.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id &#34; + \
+                    &#34;WHERE building.id=building.building_root_id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+        else:
+            building_gmlids = [n.get_gml_id() for n in buildings]
+            building_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(building_gmlids) + &#34;&#39;)&#34;
+            query = &#34;SELECT building.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id &#34; + \
+                    &#34;WHERE cityobject.gmlid IN &#34; + building_gmlids_as_string + &#34; &#34; + \
+                    &#34;AND building.id=building.building_root_id&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries(buildings_ids_arg, split_surfaces=False):
+        &#34;&#34;&#34;
+        :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each building will stay
+                            splitted or be merged into one geometry
+
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        # Because the 3DCityDB&#39;s Building table regroups both the buildings mixed
+        # with their building&#39;s sub-divisions (Building is an &#34;abstraction&#34;
+        # from which inherits concrete building class as well building-subdivisions
+        # a.k.a. parts) we must first collect all the buildings and their parts:
+
+        if split_surfaces:
+            query = \
+                &#34;SELECT surface_geometry.id, ST_AsBinary(ST_Multi( &#34; + \
+                &#34;surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+                &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+                &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+                &#34;JOIN citydb.objectclass ON thematic_surface.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg
+        else:
+            query = \
+                &#34;SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( &#34; + \
+                &#34;surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+                &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+                &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+                &#34;JOIN citydb.objectclass ON building.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg + &#34; &#34; + \
+                &#34;GROUP BY building.building_root_id, objectclass.classname&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(buildings_ids_arg):
+        &#34;&#34;&#34;
+        :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+        # Because the 3DCityDB&#39;s Building table regroups both the buildings mixed
+        # with their building&#39;s sub-divisions (Building is an &#34;abstraction&#34;
+        # from which inherits concrete building class as well building-subdivisions
+        # a.k.a. parts) we must first collect all the buildings and their parts:
+        query = (&#34;SELECT surface_geometry.id, &#34;
+                 &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , &#34;
+                 &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+                 &#34;tex_image_uri AS uri FROM citydb.building JOIN &#34;
+                 &#34;citydb.thematic_surface ON building.id=thematic_surface.building_id JOIN &#34;
+                 &#34;citydb.surface_geometry ON surface_geometry.root_id=&#34;
+                 &#34;thematic_surface.lod2_multi_surface_id JOIN citydb.textureparam ON &#34;
+                 &#34;textureparam.surface_geometry_id=surface_geometry.id &#34;
+                 &#34;JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id &#34;
+                 &#34;JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id &#34;
+                 &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg)
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        &#34;&#34;&#34;
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        &#34;&#34;&#34;
+
+        query = \
+            &#34;SELECT &#34; + \
+            &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+            &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+            &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+            &#34;WHERE building.building_root_id = &#34; + str(id) + \
+            &#34; GROUP BY building.building_root_id&#34;
+
+        return query
+
+    @staticmethod
+    def create_batch_table_extension(extension_name, ids=None, objects=None):
+        if CityMBuildings.is_bth_set() and extension_name == &#34;batch_table_hierarchy&#34;:
+            cityobjects_ids = &#34;(&#34;
+            for i in range(0, len(ids) - 1):
+                cityobjects_ids += str(ids[i]) + &#39;,&#39;
+            cityobjects_ids += str(ids[-1]) + &#39;)&#39;
+            return create_batch_table_hierarchy(CityMCityObjects.get_cursor(), cityobjects_ids)
+
+        if extension_name == &#34;temporal&#34;:
+            temporal_bt = TemporalBatchTable()
+
+            for building in objects:
+                temporal_bt.append_feature_id(building.get_temporal_id())
+                temporal_bt.append_start_date(building.get_start_date())
+                temporal_bt.append_end_date(building.get_end_date())
+            return temporal_bt
+
+        return None
+
+    @staticmethod
+    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+        if extension_name == &#34;temporal&#34;:
+            temporal_bv = TemporalBoundingVolume()
+            bounding_dates = temporal_extract_bounding_dates(objects)
+            temporal_bv.set_start_date(bounding_dates[&#39;start_date&#39;])
+            temporal_bv.set_end_date(bounding_dates[&#39;end_date&#39;])
+            return temporal_bv
+        return None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMBuildings.with_bth"><code class="name">var <span class="ident">with_bth</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMBuildings.is_bth_set"><code class="name flex">
+<span>def <span class="ident">is_bth_set</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def is_bth_set(cls):
+    return cls.with_bth</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings.set_bth"><code class="name flex">
+<span>def <span class="ident">set_bth</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def set_bth(cls):
+    cls.with_bth = True</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings.sql_query_centroid"><code class="name flex">
+<span>def <span class="ident">sql_query_centroid</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param id: the ID of the cityGML object
+return: the [x, y, z] coordinates of the centroid of the cityGML object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_centroid(id):
+    &#34;&#34;&#34;
+    param id: the ID of the cityGML object
+    return: the [x, y, z] coordinates of the centroid of the cityGML object
+    &#34;&#34;&#34;
+
+    query = \
+        &#34;SELECT &#34; + \
+        &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+        &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+        &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+        &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+        &#34;WHERE building.building_root_id = &#34; + str(id) + \
+        &#34; GROUP BY building.building_root_id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings.sql_query_geometries"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries</span></span>(<span>buildings_ids_arg, split_surfaces=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:param split_surfaces: a boolean specifying if the surfaces of each building will stay
+splitted or be merged into one geometry</p>
+<p>:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries(buildings_ids_arg, split_surfaces=False):
+    &#34;&#34;&#34;
+    :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :param split_surfaces: a boolean specifying if the surfaces of each building will stay
+                        splitted or be merged into one geometry
+
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    # Because the 3DCityDB&#39;s Building table regroups both the buildings mixed
+    # with their building&#39;s sub-divisions (Building is an &#34;abstraction&#34;
+    # from which inherits concrete building class as well building-subdivisions
+    # a.k.a. parts) we must first collect all the buildings and their parts:
+
+    if split_surfaces:
+        query = \
+            &#34;SELECT surface_geometry.id, ST_AsBinary(ST_Multi( &#34; + \
+            &#34;surface_geometry.geometry)), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+            &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+            &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+            &#34;JOIN citydb.objectclass ON thematic_surface.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg
+    else:
+        query = \
+            &#34;SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( &#34; + \
+            &#34;surface_geometry.geometry))), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.surface_geometry JOIN citydb.thematic_surface &#34; + \
+            &#34;ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id &#34; + \
+            &#34;JOIN citydb.building ON thematic_surface.building_id = building.id &#34; + \
+            &#34;JOIN citydb.objectclass ON building.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg + &#34; &#34; + \
+            &#34;GROUP BY building.building_root_id, objectclass.classname&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings.sql_query_geometries_with_texture_coordinates"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries_with_texture_coordinates</span></span>(<span>buildings_ids_arg)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries_with_texture_coordinates(buildings_ids_arg):
+    &#34;&#34;&#34;
+    :param buildings_ids_arg: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    # Because the 3DCityDB&#39;s Building table regroups both the buildings mixed
+    # with their building&#39;s sub-divisions (Building is an &#34;abstraction&#34;
+    # from which inherits concrete building class as well building-subdivisions
+    # a.k.a. parts) we must first collect all the buildings and their parts:
+    query = (&#34;SELECT surface_geometry.id, &#34;
+             &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom , &#34;
+             &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+             &#34;tex_image_uri AS uri FROM citydb.building JOIN &#34;
+             &#34;citydb.thematic_surface ON building.id=thematic_surface.building_id JOIN &#34;
+             &#34;citydb.surface_geometry ON surface_geometry.root_id=&#34;
+             &#34;thematic_surface.lod2_multi_surface_id JOIN citydb.textureparam ON &#34;
+             &#34;textureparam.surface_geometry_id=surface_geometry.id &#34;
+             &#34;JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id &#34;
+             &#34;JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id &#34;
+             &#34;WHERE building.building_root_id IN &#34; + buildings_ids_arg)
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMBuildings.sql_query_objects"><code class="name flex">
+<span>def <span class="ident">sql_query_objects</span></span>(<span>buildings, citygml_ids=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param buildings: a list of CityMBuilding type object that should be sought
+in the database. When this list is empty all the objects
+encountered in the database are returned.
+:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+only the objects of the list</p>
+<p>:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_objects(buildings, citygml_ids=list()):
+    &#34;&#34;&#34;
+    :param buildings: a list of CityMBuilding type object that should be sought
+                    in the database. When this list is empty all the objects
+                    encountered in the database are returned.
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                    only the objects of the list
+
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+    if not buildings:
+        # No specific buildings were sought. We thus retrieve all the ones
+        # we can find in the database:
+        query = &#34;SELECT building.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id &#34; + \
+                &#34;WHERE building.id=building.building_root_id&#34;
+        if len(citygml_ids) &gt; 0:
+            citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+            query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+    else:
+        building_gmlids = [n.get_gml_id() for n in buildings]
+        building_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(building_gmlids) + &#34;&#39;)&#34;
+        query = &#34;SELECT building.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.building JOIN citydb.cityobject ON building.id=cityobject.id &#34; + \
+                &#34;WHERE cityobject.gmlid IN &#34; + building_gmlids_as_string + &#34; &#34; + \
+                &#34;AND building.id=building.building_root_id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects"><code class="flex name class">
+<span>class <span class="ident">CityMCityObjects</span></span>
+<span>(</span><span>cityMCityObjects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of CityMCityObject type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityMCityObjects(FeatureList):
+    &#34;&#34;&#34;
+    A decorated list of CityMCityObject type objects.
+    &#34;&#34;&#34;
+
+    object_type = CityMCityObject
+
+    gml_cursor = None
+
+    def __init__(self, cityMCityObjects=None):
+        if self.color_config is None:
+            config_path = os.path.join(os.path.dirname(__file__), &#34;..&#34;, &#34;Color&#34;, &#34;citytiler_config.json&#34;)
+            self.set_color_config(config_path)
+        super().__init__(cityMCityObjects)
+
+    def get_textures(self):
+        &#34;&#34;&#34;
+        Return a dictionary of all the textures where the keys are the IDs of the features.
+        :return: a dictionary of textures
+        &#34;&#34;&#34;
+        texture_dict = dict()
+        uri_dict = dict()
+        for feature in self.get_features():
+            uri = feature.texture_uri
+            if uri not in uri_dict:
+                stream = self.get_image_from_binary(uri, self.__class__, CityMCityObjects.gml_cursor)
+                uri_dict[uri] = Texture(stream)
+            texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
+        return texture_dict
+
+    @staticmethod
+    def set_cursor(cursor):
+        &#34;&#34;&#34;
+        Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+        :param cursor: the cursor of the current database
+        &#34;&#34;&#34;
+        CityMCityObjects.gml_cursor = cursor
+
+    @staticmethod
+    def get_cursor():
+        &#34;&#34;&#34;
+        Return the current cursor to be able to execute queries in the database.
+        :return: the cursor of the current database
+        &#34;&#34;&#34;
+        return CityMCityObjects.gml_cursor
+
+    @staticmethod
+    def sql_query_objects():
+        &#34;&#34;&#34;
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        &#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
+        &#34;&#34;&#34;
+        :param cursor: a database access cursor.
+        :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be &#34;CityMBuilding&#34;.
+
+        :param cityobjects: a list of objects_type type object that should be
+                        sought in the database. When this list is empty all
+                        the objects encountered in the database are returned.
+
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep only
+                        the city objects of the list
+
+        :return: an objects_type type object containing the objects that were retrieved
+                in the 3DCityDB database, each object being decorated with its database
+                identifier as well as its 3D bounding box (as retrieved in the database).
+        &#34;&#34;&#34;
+        if not cityobjects:
+            no_input = True
+        else:
+            no_input = False
+        cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
+
+        if no_input:
+            result_objects = objects_type()
+            object_type = objects_type.object_type
+        else:
+            # We need to deal with the fact that the answer will (generically)
+            # not preserve the order of the objects that was given to the query
+            objects_with_gmlid_key = dict()
+            for cityobject in cityobjects:
+                objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
+
+        for obj in cursor.fetchall():
+            object_id = obj[0]
+            gml_id = obj[1]
+            if no_input:
+                new_object = object_type(object_id, gml_id)
+                result_objects.append(new_object)
+            else:
+                cityobject = objects_with_gmlid_key[gml_id]
+                cityobject.set_database_id(object_id)
+                cityobject.set_gml_id(gml_id)
+        if no_input:
+            return result_objects
+        else:
+            return cityobjects
+
+    @staticmethod
+    def sql_query_geometries():
+        &#34;&#34;&#34;
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        &#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def sql_query_textures(image_uri):
+        &#34;&#34;&#34;
+        :param image_uri: a string which is the uri of the texture to select in the database
+        :return: a string containing the right SQL query that should be executed.
+        &#34;&#34;&#34;
+
+        query = \
+            &#34;SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = &#39;&#34; + image_uri + &#34;&#39; &#34;
+        return query
+
+    @staticmethod
+    def retrieve_textures(cursor, image_uri, objects_type):
+        &#34;&#34;&#34;
+        :param cursor: a database access cursor
+        :param image_uri: the uri (as string) of the texture to select in the database
+        :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be &#34;CityMBuilding&#34;.
+        :rtype List: the binary data of the texture image
+        &#34;&#34;&#34;
+        res = []
+        cursor.execute(objects_type.sql_query_textures(image_uri))
+        for t in cursor.fetchall():
+            res.append(t)
+        return(res)
+
+    @staticmethod
+    def get_image_from_binary(textureUri, objects_type, cursor):
+        &#34;&#34;&#34;
+        Return the texture image as a byte stream.
+        :param textureUri: the URI of the texture image.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        :param cursor: a database access cursor
+        :return: an image as bytes
+        &#34;&#34;&#34;
+        imageBinaryData = objects_type.retrieve_textures(
+            cursor,
+            textureUri,
+            objects_type)
+        LEFT_THUMB = imageBinaryData[0][0]
+        stream = BytesIO(LEFT_THUMB)
+        return stream
+
+    @staticmethod
+    def sql_query_centroid():
+        &#34;&#34;&#34;
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        &#34;&#34;&#34;
+        pass
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates():
+        &#34;&#34;&#34;
+        Virtual method: all CityMCityObjects and childs classes instances should
+        implement this method.
+
+        :return: no return value.
+        &#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_bridge.CityMBridges" href="citym_bridge.html#py3dtilers.CityTiler.citym_bridge.CityMBridges">CityMBridges</a></li>
+<li><a title="py3dtilers.CityTiler.citym_building.CityMBuildings" href="citym_building.html#py3dtilers.CityTiler.citym_building.CityMBuildings">CityMBuildings</a></li>
+<li><a title="py3dtilers.CityTiler.citym_relief.CityMReliefs" href="citym_relief.html#py3dtilers.CityTiler.citym_relief.CityMReliefs">CityMReliefs</a></li>
+<li><a title="py3dtilers.CityTiler.citym_waterbody.CityMWaterBodies" href="citym_waterbody.html#py3dtilers.CityTiler.citym_waterbody.CityMWaterBodies">CityMWaterBodies</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.gml_cursor"><code class="name">var <span class="ident">gml_cursor</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.object_type"><code class="name">var <span class="ident">object_type</span></code></dt>
+<dd>
+<div class="desc"><p>The base class of all thematic classes within CityGML’s data model is the abstract class
+_CityObject. (cf 3DCityDB Version 3.3.0 Documentation).</p></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.get_cursor"><code class="name flex">
+<span>def <span class="ident">get_cursor</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the current cursor to be able to execute queries in the database.
+:return: the cursor of the current database</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_cursor():
+    &#34;&#34;&#34;
+    Return the current cursor to be able to execute queries in the database.
+    :return: the cursor of the current database
+    &#34;&#34;&#34;
+    return CityMCityObjects.gml_cursor</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.get_image_from_binary"><code class="name flex">
+<span>def <span class="ident">get_image_from_binary</span></span>(<span>textureUri, objects_type, cursor)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the texture image as a byte stream.
+:param textureUri: the URI of the texture image.
+:param objects_type: a class name among CityMCityObject derived classes.
+:param cursor: a database access cursor
+:return: an image as bytes</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_image_from_binary(textureUri, objects_type, cursor):
+    &#34;&#34;&#34;
+    Return the texture image as a byte stream.
+    :param textureUri: the URI of the texture image.
+    :param objects_type: a class name among CityMCityObject derived classes.
+    :param cursor: a database access cursor
+    :return: an image as bytes
+    &#34;&#34;&#34;
+    imageBinaryData = objects_type.retrieve_textures(
+        cursor,
+        textureUri,
+        objects_type)
+    LEFT_THUMB = imageBinaryData[0][0]
+    stream = BytesIO(LEFT_THUMB)
+    return stream</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.retrieve_objects"><code class="name flex">
+<span>def <span class="ident">retrieve_objects</span></span>(<span>cursor, objects_type, cityobjects=[], citygml_ids=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param cursor: a database access cursor.
+:param objects_type: a class name among CityMCityObject derived classes.
+For example, objects_type can be "CityMBuilding".</p>
+<p>:param cityobjects: a list of objects_type type object that should be
+sought in the database. When this list is empty all
+the objects encountered in the database are returned.</p>
+<p>:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep only
+the city objects of the list</p>
+<p>:return: an objects_type type object containing the objects that were retrieved
+in the 3DCityDB database, each object being decorated with its database
+identifier as well as its 3D bounding box (as retrieved in the database).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
+    &#34;&#34;&#34;
+    :param cursor: a database access cursor.
+    :param objects_type: a class name among CityMCityObject derived classes.
+                    For example, objects_type can be &#34;CityMBuilding&#34;.
+
+    :param cityobjects: a list of objects_type type object that should be
+                    sought in the database. When this list is empty all
+                    the objects encountered in the database are returned.
+
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep only
+                    the city objects of the list
+
+    :return: an objects_type type object containing the objects that were retrieved
+            in the 3DCityDB database, each object being decorated with its database
+            identifier as well as its 3D bounding box (as retrieved in the database).
+    &#34;&#34;&#34;
+    if not cityobjects:
+        no_input = True
+    else:
+        no_input = False
+    cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
+
+    if no_input:
+        result_objects = objects_type()
+        object_type = objects_type.object_type
+    else:
+        # We need to deal with the fact that the answer will (generically)
+        # not preserve the order of the objects that was given to the query
+        objects_with_gmlid_key = dict()
+        for cityobject in cityobjects:
+            objects_with_gmlid_key[cityobject.get_gml_id()] = cityobject
+
+    for obj in cursor.fetchall():
+        object_id = obj[0]
+        gml_id = obj[1]
+        if no_input:
+            new_object = object_type(object_id, gml_id)
+            result_objects.append(new_object)
+        else:
+            cityobject = objects_with_gmlid_key[gml_id]
+            cityobject.set_database_id(object_id)
+            cityobject.set_gml_id(gml_id)
+    if no_input:
+        return result_objects
+    else:
+        return cityobjects</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.retrieve_textures"><code class="name flex">
+<span>def <span class="ident">retrieve_textures</span></span>(<span>cursor, image_uri, objects_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param cursor: a database access cursor
+:param image_uri: the uri (as string) of the texture to select in the database
+:param objects_type: a class name among CityMCityObject derived classes.
+For example, objects_type can be "CityMBuilding".
+:rtype List: the binary data of the texture image</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def retrieve_textures(cursor, image_uri, objects_type):
+    &#34;&#34;&#34;
+    :param cursor: a database access cursor
+    :param image_uri: the uri (as string) of the texture to select in the database
+    :param objects_type: a class name among CityMCityObject derived classes.
+                    For example, objects_type can be &#34;CityMBuilding&#34;.
+    :rtype List: the binary data of the texture image
+    &#34;&#34;&#34;
+    res = []
+    cursor.execute(objects_type.sql_query_textures(image_uri))
+    for t in cursor.fetchall():
+        res.append(t)
+    return(res)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.set_cursor"><code class="name flex">
+<span>def <span class="ident">set_cursor</span></span>(<span>cursor)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+:param cursor: the cursor of the current database</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def set_cursor(cursor):
+    &#34;&#34;&#34;
+    Set the CityMCityObjects cursor to the current cursor to be able to execute queries in the database.
+    :param cursor: the cursor of the current database
+    &#34;&#34;&#34;
+    CityMCityObjects.gml_cursor = cursor</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.sql_query_centroid"><code class="name flex">
+<span>def <span class="ident">sql_query_centroid</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method: all CityMCityObjects and childs classes instances should
+implement this method.</p>
+<p>:return: no return value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_centroid():
+    &#34;&#34;&#34;
+    Virtual method: all CityMCityObjects and childs classes instances should
+    implement this method.
+
+    :return: no return value.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method: all CityMCityObjects and childs classes instances should
+implement this method.</p>
+<p>:return: no return value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries():
+    &#34;&#34;&#34;
+    Virtual method: all CityMCityObjects and childs classes instances should
+    implement this method.
+
+    :return: no return value.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries_with_texture_coordinates"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries_with_texture_coordinates</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method: all CityMCityObjects and childs classes instances should
+implement this method.</p>
+<p>:return: no return value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries_with_texture_coordinates():
+    &#34;&#34;&#34;
+    Virtual method: all CityMCityObjects and childs classes instances should
+    implement this method.
+
+    :return: no return value.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.sql_query_objects"><code class="name flex">
+<span>def <span class="ident">sql_query_objects</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Virtual method: all CityMCityObjects and childs classes instances should
+implement this method.</p>
+<p>:return: no return value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_objects():
+    &#34;&#34;&#34;
+    Virtual method: all CityMCityObjects and childs classes instances should
+    implement this method.
+
+    :return: no return value.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMCityObjects.sql_query_textures"><code class="name flex">
+<span>def <span class="ident">sql_query_textures</span></span>(<span>image_uri)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param image_uri: a string which is the uri of the texture to select in the database
+:return: a string containing the right SQL query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_textures(image_uri):
+    &#34;&#34;&#34;
+    :param image_uri: a string which is the uri of the texture to select in the database
+    :return: a string containing the right SQL query that should be executed.
+    &#34;&#34;&#34;
+
+    query = \
+        &#34;SELECT tex_image_data FROM citydb.tex_image WHERE tex_image_uri = &#39;&#34; + image_uri + &#34;&#39; &#34;
+    return query</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMReliefs"><code class="flex name class">
+<span>class <span class="ident">CityMReliefs</span></span>
+<span>(</span><span>objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of CityMRelief type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityMReliefs(CityMCityObjects):
+    &#34;&#34;&#34;
+    A decorated list of CityMRelief type objects.
+    &#34;&#34;&#34;
+
+    object_type = CityMRelief
+
+    def __init__(self, objects=None):
+        super().__init__(objects)
+
+    @staticmethod
+    def sql_query_objects(reliefs, citygml_ids=list()):
+        &#34;&#34;&#34;
+        :param reliefs: a list of CityMRelief type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
+
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        if not reliefs:
+            # No specific reliefs were sought. We thus retrieve all the ones
+            # we can find in the database:
+            query = &#34;SELECT relief_feature.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+
+        else:
+            relief_gmlids = [n.get_gml_id() for n in reliefs]
+            relief_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(relief_gmlids) + &#34;&#39;)&#34;
+            query = &#34;SELECT relief_feature.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id&#34; + \
+                    &#34;WHERE cityobject.gmlid IN &#34; + relief_gmlids_as_string
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
+        &#34;&#34;&#34;
+        :param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+                            splitted or be merged into one geometry
+
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        # cityobjects_ids contains ids of reliefs
+        if split_surfaces:
+            query = \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+                &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+                &#34;JOIN citydb.tin_relief &#34; + \
+                &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+                &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE relief_feature.id IN &#34; + reliefs_ids
+        else:
+            query = \
+                &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+                &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+                &#34;JOIN citydb.tin_relief &#34; + \
+                &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+                &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+                &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE relief_feature.id IN &#34; + reliefs_ids + &#34; &#34; + \
+                &#34;GROUP BY relief_feature.id, objectclass.classname&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
+        &#34;&#34;&#34;
+        param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        # cityobjects_ids contains ids of reliefs
+        query = \
+            (&#34;SELECT surface_geometry.id, &#34;
+             &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, &#34;
+             &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+             &#34;tex_image_uri AS uri &#34;
+             &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34;
+             &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34;
+             &#34;JOIN citydb.tin_relief &#34;
+             &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34;
+             &#34;JOIN citydb.surface_geometry &#34;
+             &#34;ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34;
+             &#34;JOIN citydb.textureparam &#34;
+             &#34;ON textureparam.surface_geometry_id=surface_geometry.id &#34;
+             &#34;JOIN citydb.surface_data &#34;
+             &#34;ON textureparam.surface_data_id=surface_data.id &#34;
+             &#34;JOIN citydb.tex_image &#34;
+             &#34;ON surface_data.tex_image_id=tex_image.id &#34;
+             &#34;WHERE relief_feature.id IN &#34; + reliefs_ids)
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        &#34;&#34;&#34;
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        &#34;&#34;&#34;
+
+        query = \
+            &#34;SELECT &#34; + \
+            &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+            &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+            &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+            &#34;JOIN citydb.tin_relief &#34; + \
+            &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+            &#34;WHERE relief_feature.id = &#34; + str(id) + \
+            &#34; GROUP BY relief_feature.id&#34;
+
+        return query</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMReliefs.sql_query_centroid"><code class="name flex">
+<span>def <span class="ident">sql_query_centroid</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param id: the ID of the cityGML object
+return: the [x, y, z] coordinates of the centroid of the cityGML object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_centroid(id):
+    &#34;&#34;&#34;
+    param id: the ID of the cityGML object
+    return: the [x, y, z] coordinates of the centroid of the cityGML object
+    &#34;&#34;&#34;
+
+    query = \
+        &#34;SELECT &#34; + \
+        &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+        &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+        &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+        &#34;JOIN citydb.tin_relief &#34; + \
+        &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+        &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+        &#34;WHERE relief_feature.id = &#34; + str(id) + \
+        &#34; GROUP BY relief_feature.id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMReliefs.sql_query_geometries"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries</span></span>(<span>reliefs_ids=None, split_surfaces=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+splitted or be merged into one geometry</p>
+<p>:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries(reliefs_ids=None, split_surfaces=False):
+    &#34;&#34;&#34;
+    :param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :param split_surfaces: a boolean specifying if the surfaces of each relief tile will stay
+                        splitted or be merged into one geometry
+
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    # cityobjects_ids contains ids of reliefs
+    if split_surfaces:
+        query = \
+            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+            &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+            &#34;JOIN citydb.tin_relief &#34; + \
+            &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+            &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE relief_feature.id IN &#34; + reliefs_ids
+    else:
+        query = \
+            &#34;SELECT relief_feature.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34; + \
+            &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34; + \
+            &#34;JOIN citydb.tin_relief &#34; + \
+            &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34; + \
+            &#34;JOIN citydb.objectclass ON relief_feature.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE relief_feature.id IN &#34; + reliefs_ids + &#34; &#34; + \
+            &#34;GROUP BY relief_feature.id, objectclass.classname&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMReliefs.sql_query_geometries_with_texture_coordinates"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries_with_texture_coordinates</span></span>(<span>reliefs_ids=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries_with_texture_coordinates(reliefs_ids=None):
+    &#34;&#34;&#34;
+    param reliefs_ids: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    # cityobjects_ids contains ids of reliefs
+    query = \
+        (&#34;SELECT surface_geometry.id, &#34;
+         &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, &#34;
+         &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+         &#34;tex_image_uri AS uri &#34;
+         &#34;FROM citydb.relief_feature JOIN citydb.relief_feat_to_rel_comp &#34;
+         &#34;ON relief_feature.id=relief_feat_to_rel_comp.relief_feature_id &#34;
+         &#34;JOIN citydb.tin_relief &#34;
+         &#34;ON relief_feat_to_rel_comp.relief_component_id=tin_relief.id &#34;
+         &#34;JOIN citydb.surface_geometry &#34;
+         &#34;ON surface_geometry.root_id=tin_relief.surface_geometry_id &#34;
+         &#34;JOIN citydb.textureparam &#34;
+         &#34;ON textureparam.surface_geometry_id=surface_geometry.id &#34;
+         &#34;JOIN citydb.surface_data &#34;
+         &#34;ON textureparam.surface_data_id=surface_data.id &#34;
+         &#34;JOIN citydb.tex_image &#34;
+         &#34;ON surface_data.tex_image_id=tex_image.id &#34;
+         &#34;WHERE relief_feature.id IN &#34; + reliefs_ids)
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMReliefs.sql_query_objects"><code class="name flex">
+<span>def <span class="ident">sql_query_objects</span></span>(<span>reliefs, citygml_ids=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param reliefs: a list of CityMRelief type object that should be sought
+in the database. When this list is empty all the objects
+encountered in the database are returned.
+:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+only the objects of the list</p>
+<p>:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_objects(reliefs, citygml_ids=list()):
+    &#34;&#34;&#34;
+    :param reliefs: a list of CityMRelief type object that should be sought
+                    in the database. When this list is empty all the objects
+                    encountered in the database are returned.
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                    only the objects of the list
+
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    if not reliefs:
+        # No specific reliefs were sought. We thus retrieve all the ones
+        # we can find in the database:
+        query = &#34;SELECT relief_feature.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id&#34;
+        if len(citygml_ids) &gt; 0:
+            citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+            query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+
+    else:
+        relief_gmlids = [n.get_gml_id() for n in reliefs]
+        relief_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(relief_gmlids) + &#34;&#39;)&#34;
+        query = &#34;SELECT relief_feature.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.relief_feature JOIN citydb.cityobject ON relief_feature.id=cityobject.id&#34; + \
+                &#34;WHERE cityobject.gmlid IN &#34; + relief_gmlids_as_string
+
+    return query</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMWaterBodies"><code class="flex name class">
+<span>class <span class="ident">CityMWaterBodies</span></span>
+<span>(</span><span>objects=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A decorated list of CityMWaterBody type objects.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityMWaterBodies(CityMCityObjects):
+    &#34;&#34;&#34;
+    A decorated list of CityMWaterBody type objects.
+    &#34;&#34;&#34;
+
+    object_type = CityMWaterBody
+
+    def __init__(self, objects=None):
+        super().__init__(objects)
+
+    @staticmethod
+    def sql_query_objects(waterbodies, citygml_ids=list()):
+        &#34;&#34;&#34;
+        :param waterbodies: a list of CityMWaterBody type object that should be sought
+                        in the database. When this list is empty all the objects
+                        encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
+
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        if not waterbodies:
+            # No specific waterbodies were sought. We thus retrieve all the ones
+            # we can find in the database:
+            query = &#34;SELECT waterbody.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+        else:
+            waterbody_gmlids = [n.get_gml_id() for n in waterbodies]
+            waterbody_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(waterbody_gmlids) + &#34;&#39;)&#34;
+            query = &#34;SELECT waterbody.id, cityobject.gmlid &#34; + \
+                    &#34;FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id&#34; + \
+                    &#34;WHERE cityobject.gmlid IN &#34; + waterbody_gmlids_as_string
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries(waterbodies_ids=None, split_surfaces=False):
+        &#34;&#34;&#34;
+        :param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :param split_surfaces: a boolean specifying if the surfaces of each water body tile will stay
+                            splitted or be merged into one geometry
+
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        # cityobjects_ids contains ids of waterbodies
+        if split_surfaces:
+            query = \
+                &#34;SELECT waterbody.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+                &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+                &#34;JOIN citydb.waterboundary_surface &#34; + \
+                &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+                &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+                &#34;JOIN citydb.objectclass ON waterboundary_surface.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE waterbody.id IN &#34; + waterbodies_ids
+        else:
+            query = \
+                &#34;SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+                &#34;objectclass.classname &#34; + \
+                &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+                &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+                &#34;JOIN citydb.waterboundary_surface &#34; + \
+                &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+                &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+                &#34;JOIN citydb.objectclass ON waterbody.objectclass_id = objectclass.id &#34; + \
+                &#34;WHERE waterbody.id IN &#34; + waterbodies_ids + &#34; &#34; + \
+                &#34;GROUP BY waterbody.id, objectclass.classname&#34;
+
+        return query
+
+    @staticmethod
+    def sql_query_geometries_with_texture_coordinates(water_bodies_ids=None):
+        &#34;&#34;&#34;
+        param water_bodies_ids: a formatted list of (city)gml identifier corresponding to
+                            objects_type type objects whose geometries are sought.
+        :return: a string containing the right sql query that should be executed.
+        &#34;&#34;&#34;
+        # cityobjects_ids contains ids of water_bodies
+        query = \
+            (&#34;SELECT surface_geometry.id, &#34;
+             &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, &#34;
+             &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+             &#34;tex_image_uri AS uri &#34;
+             &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34;
+             &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34;
+             &#34;JOIN citydb.waterboundary_surface &#34;
+             &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34;
+             &#34;JOIN citydb.surface_geometry &#34;
+             &#34;ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34;
+             &#34;JOIN citydb.textureparam &#34;
+             &#34;ON textureparam.surface_geometry_id=surface_geometry.id &#34;
+             &#34;JOIN citydb.surface_data &#34;
+             &#34;ON textureparam.surface_data_id=surface_data.id &#34;
+             &#34;JOIN citydb.tex_image &#34;
+             &#34;ON surface_data.tex_image_id=tex_image.id &#34;
+             &#34;WHERE waterbody.id IN &#34; + water_bodies_ids)
+        return query
+
+    @staticmethod
+    def sql_query_centroid(id):
+        &#34;&#34;&#34;
+        param id: the ID of the cityGML object
+        return: the [x, y, z] coordinates of the centroid of the cityGML object
+        &#34;&#34;&#34;
+
+        query = \
+            &#34;SELECT &#34; + \
+            &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+            &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+            &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+            &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+            &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+            &#34;JOIN citydb.waterboundary_surface &#34; + \
+            &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+            &#34;WHERE waterbody.id = &#34; + str(id) + \
+            &#34; GROUP BY waterbody.id&#34;
+
+        return query</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></li>
+<li><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityMWaterBodies.sql_query_centroid"><code class="name flex">
+<span>def <span class="ident">sql_query_centroid</span></span>(<span>id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param id: the ID of the cityGML object
+return: the [x, y, z] coordinates of the centroid of the cityGML object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_centroid(id):
+    &#34;&#34;&#34;
+    param id: the ID of the cityGML object
+    return: the [x, y, z] coordinates of the centroid of the cityGML object
+    &#34;&#34;&#34;
+
+    query = \
+        &#34;SELECT &#34; + \
+        &#34;ST_X(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Y(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))), &#34; + \
+        &#34;ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) &#34; + \
+        &#34;,ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) &#34; + \
+        &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+        &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+        &#34;JOIN citydb.waterboundary_surface &#34; + \
+        &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+        &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+        &#34;WHERE waterbody.id = &#34; + str(id) + \
+        &#34; GROUP BY waterbody.id&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries</span></span>(<span>waterbodies_ids=None, split_surfaces=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:param split_surfaces: a boolean specifying if the surfaces of each water body tile will stay
+splitted or be merged into one geometry</p>
+<p>:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries(waterbodies_ids=None, split_surfaces=False):
+    &#34;&#34;&#34;
+    :param waterbodies_ids: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :param split_surfaces: a boolean specifying if the surfaces of each water body tile will stay
+                        splitted or be merged into one geometry
+
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    # cityobjects_ids contains ids of waterbodies
+    if split_surfaces:
+        query = \
+            &#34;SELECT waterbody.id, ST_AsBinary(ST_Multi(surface_geometry.geometry)), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+            &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+            &#34;JOIN citydb.waterboundary_surface &#34; + \
+            &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+            &#34;JOIN citydb.objectclass ON waterboundary_surface.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE waterbody.id IN &#34; + waterbodies_ids
+    else:
+        query = \
+            &#34;SELECT waterbody.id, ST_AsBinary(ST_Multi(ST_Collect(surface_geometry.geometry))), &#34; + \
+            &#34;objectclass.classname &#34; + \
+            &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34; + \
+            &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34; + \
+            &#34;JOIN citydb.waterboundary_surface &#34; + \
+            &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34; + \
+            &#34;JOIN citydb.surface_geometry ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34; + \
+            &#34;JOIN citydb.objectclass ON waterbody.objectclass_id = objectclass.id &#34; + \
+            &#34;WHERE waterbody.id IN &#34; + waterbodies_ids + &#34; &#34; + \
+            &#34;GROUP BY waterbody.id, objectclass.classname&#34;
+
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries_with_texture_coordinates"><code class="name flex">
+<span>def <span class="ident">sql_query_geometries_with_texture_coordinates</span></span>(<span>water_bodies_ids=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>param water_bodies_ids: a formatted list of (city)gml identifier corresponding to
+objects_type type objects whose geometries are sought.
+:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_geometries_with_texture_coordinates(water_bodies_ids=None):
+    &#34;&#34;&#34;
+    param water_bodies_ids: a formatted list of (city)gml identifier corresponding to
+                        objects_type type objects whose geometries are sought.
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    # cityobjects_ids contains ids of water_bodies
+    query = \
+        (&#34;SELECT surface_geometry.id, &#34;
+         &#34;ST_AsBinary(ST_Multi(surface_geometry.geometry)) as geom, &#34;
+         &#34;ST_AsBinary(ST_Multi(ST_Translate(ST_Scale(textureparam.texture_coordinates, 1, -1), 0, 1))) as uvs, &#34;
+         &#34;tex_image_uri AS uri &#34;
+         &#34;FROM citydb.waterbody JOIN citydb.waterbod_to_waterbnd_srf &#34;
+         &#34;ON waterbody.id=waterbod_to_waterbnd_srf.waterbody_id &#34;
+         &#34;JOIN citydb.waterboundary_surface &#34;
+         &#34;ON waterbod_to_waterbnd_srf.waterboundary_surface_id=waterboundary_surface.id &#34;
+         &#34;JOIN citydb.surface_geometry &#34;
+         &#34;ON surface_geometry.root_id=waterboundary_surface.lod3_surface_id &#34;
+         &#34;JOIN citydb.textureparam &#34;
+         &#34;ON textureparam.surface_geometry_id=surface_geometry.id &#34;
+         &#34;JOIN citydb.surface_data &#34;
+         &#34;ON textureparam.surface_data_id=surface_data.id &#34;
+         &#34;JOIN citydb.tex_image &#34;
+         &#34;ON surface_data.tex_image_id=tex_image.id &#34;
+         &#34;WHERE waterbody.id IN &#34; + water_bodies_ids)
+    return query</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityMWaterBodies.sql_query_objects"><code class="name flex">
+<span>def <span class="ident">sql_query_objects</span></span>(<span>waterbodies, citygml_ids=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:param waterbodies: a list of CityMWaterBody type object that should be sought
+in the database. When this list is empty all the objects
+encountered in the database are returned.
+:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+only the objects of the list</p>
+<p>:return: a string containing the right sql query that should be executed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def sql_query_objects(waterbodies, citygml_ids=list()):
+    &#34;&#34;&#34;
+    :param waterbodies: a list of CityMWaterBody type object that should be sought
+                    in the database. When this list is empty all the objects
+                    encountered in the database are returned.
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                    only the objects of the list
+
+    :return: a string containing the right sql query that should be executed.
+    &#34;&#34;&#34;
+    if not waterbodies:
+        # No specific waterbodies were sought. We thus retrieve all the ones
+        # we can find in the database:
+        query = &#34;SELECT waterbody.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id&#34;
+        if len(citygml_ids) &gt; 0:
+            citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+            query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
+    else:
+        waterbody_gmlids = [n.get_gml_id() for n in waterbodies]
+        waterbody_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(waterbody_gmlids) + &#34;&#39;)&#34;
+        query = &#34;SELECT waterbody.id, cityobject.gmlid &#34; + \
+                &#34;FROM citydb.waterbody JOIN citydb.cityobject ON waterbody.id=cityobject.id&#34; + \
+                &#34;WHERE cityobject.gmlid IN &#34; + waterbody_gmlids_as_string
+
+    return query</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTiler"><code class="flex name class">
+<span>class <span class="ident">CityTiler</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>The CityTiler can read 3DCityDB databases and create 3DTiles.
+The database can contain buildings, bridges, relief or water bodies.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CityTiler(Tiler):
+    &#34;&#34;&#34;
+    The CityTiler can read 3DCityDB databases and create 3DTiles.
+    The database can contain buildings, bridges, relief or water bodies.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        super().__init__()
+
+        # adding positional arguments
+        self.parser.add_argument(&#39;--db_config_path&#39;,
+                                 nargs=&#39;*&#39;,
+                                 default=[&#39;py3dtilers/CityTiler/CityTilerDBConfig.yml&#39;],
+                                 type=str,
+                                 help=&#39;Path(es) to the database configuration file(s)&#39;)
+
+        self.parser.add_argument(&#39;--type&#39;,
+                                 nargs=&#39;?&#39;,
+                                 default=&#39;building&#39;,
+                                 type=str,
+                                 choices=[&#39;building&#39;, &#39;relief&#39;, &#39;water&#39;, &#39;bridge&#39;],
+                                 help=&#39;identify the object type to seek in the database&#39;)
+
+        # adding optional arguments
+        self.parser.add_argument(&#39;--with_BTH&#39;,
+                                 dest=&#39;with_BTH&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;Adds a Batch Table Hierarchy when defined&#39;)
+
+        self.parser.add_argument(&#39;--split_surfaces&#39;,
+                                 dest=&#39;split_surfaces&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;Keeps the surfaces of the cityObjects split when defined&#39;)
+
+        self.parser.add_argument(&#39;--add_color&#39;,
+                                 dest=&#39;add_color&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;When defined, add colors to the features depending on their CityGML objectclass.&#39;)
+
+        self.parser.add_argument(&#39;--ids&#39;,
+                                 nargs=&#39;*&#39;,
+                                 default=[],
+                                 type=str,
+                                 help=&#39;If present, keep only the CityObjects which have their CityGML in the list.&#39;)
+
+    def get_output_dir(self):
+        &#34;&#34;&#34;
+        Return the directory name for the tileset.
+        &#34;&#34;&#34;
+        if self.args.output_dir is None:
+            if self.args.type == &#34;building&#34;:
+                return &#34;junk_buildings&#34;
+            elif self.args.type == &#34;relief&#34;:
+                return &#34;junk_reliefs&#34;
+            elif self.args.type == &#34;water&#34;:
+                return &#34;junk_water_bodies&#34;
+            elif self.args.type == &#34;bridge&#34;:
+                return &#34;junk_bridges&#34;
+            else:
+                return &#34;junk&#34;
+        else:
+            return self.args.output_dir
+
+    def get_kd_tree_max(self):
+        &#34;&#34;&#34;
+        The kd_tree_max is the maximum number of features in each tile when the features are distributed by a kd-tree.
+        If the user has specified a value for the kd_tree_max argument, use that value. Otherwise, use the
+        default value.
+        :return: a int
+        &#34;&#34;&#34;
+        if self.args.kd_tree_max is not None and self.args.kd_tree_max &gt; 0:
+            return self.args.kd_tree_max
+        return int(self.DEFAULT_KD_TREE_MAX / 20) if self.args.with_texture else self.DEFAULT_KD_TREE_MAX
+
+    def set_features_centroid(self, cursor, cityobjects, objects_type):
+        &#34;&#34;&#34;
+        Set the centroid of each CityObject. Only the CityObjects with a centroid (and a geometry) are kept.
+        :param cursor: a database access cursor.
+        :param cityobjects: the CityGML objects found in the database.
+        :param objects_type: a class name among CityMCityObject derived classes.
+        &#34;&#34;&#34;
+        cityobjects_with_centroid = list()
+        for cityobject in cityobjects:
+            try:
+                id = cityobject.get_database_id()
+                cursor.execute(objects_type.sql_query_centroid(id))
+                centroid = cursor.fetchall()
+                if centroid is not None:
+                    cityobject.centroid = np.array([centroid[0][0], centroid[0][1], centroid[0][2]])
+                    cityobjects_with_centroid.append(cityobject)
+            except AttributeError:
+                continue
+            except ValueError:
+                continue
+        cityobjects.set_features(cityobjects_with_centroid)
+
+    def from_3dcitydb(self, cursor, objects_type):
+        &#34;&#34;&#34;
+        Create a 3DTiles tileset from the objects contained in a database.
+        :param cursor: a database access cursor.
+        :param objects_type: a class name among CityMCityObject derived classes.
+                            For example, objects_type can be &#34;CityMBuilding&#34;.
+
+        :return: a tileset.
+        &#34;&#34;&#34;
+        print(&#39;Retrieving city objects from database...&#39;)
+        cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type, citygml_ids=self.args.ids)
+        print(len(cityobjects), f&#39;city objects of type \&#39;{objects_type.__name__}\&#39; found in the database.&#39;)
+
+        if not cityobjects:
+            raise ValueError(f&#39;The database does not contain any {objects_type.__name__} object&#39;)
+
+        self.set_features_centroid(cursor, cityobjects, objects_type)
+
+        extension_name = None
+        if CityMBuildings.is_bth_set():
+            extension_name = &#34;batch_table_hierarchy&#34;
+        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler" href="CityTemporalTiler.html#py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler">CityTemporalTiler</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.CityTiler.CityTiler.from_3dcitydb"><code class="name flex">
+<span>def <span class="ident">from_3dcitydb</span></span>(<span>self, cursor, objects_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a 3DTiles tileset from the objects contained in a database.
+:param cursor: a database access cursor.
+:param objects_type: a class name among CityMCityObject derived classes.
+For example, objects_type can be "CityMBuilding".</p>
+<p>:return: a tileset.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def from_3dcitydb(self, cursor, objects_type):
+    &#34;&#34;&#34;
+    Create a 3DTiles tileset from the objects contained in a database.
+    :param cursor: a database access cursor.
+    :param objects_type: a class name among CityMCityObject derived classes.
+                        For example, objects_type can be &#34;CityMBuilding&#34;.
+
+    :return: a tileset.
+    &#34;&#34;&#34;
+    print(&#39;Retrieving city objects from database...&#39;)
+    cityobjects = CityMCityObjects.retrieve_objects(cursor, objects_type, citygml_ids=self.args.ids)
+    print(len(cityobjects), f&#39;city objects of type \&#39;{objects_type.__name__}\&#39; found in the database.&#39;)
+
+    if not cityobjects:
+        raise ValueError(f&#39;The database does not contain any {objects_type.__name__} object&#39;)
+
+    self.set_features_centroid(cursor, cityobjects, objects_type)
+
+    extension_name = None
+    if CityMBuildings.is_bth_set():
+        extension_name = &#34;batch_table_hierarchy&#34;
+    return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.CityTiler.CityTiler.set_features_centroid"><code class="name flex">
+<span>def <span class="ident">set_features_centroid</span></span>(<span>self, cursor, cityobjects, objects_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the centroid of each CityObject. Only the CityObjects with a centroid (and a geometry) are kept.
+:param cursor: a database access cursor.
+:param cityobjects: the CityGML objects found in the database.
+:param objects_type: a class name among CityMCityObject derived classes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_features_centroid(self, cursor, cityobjects, objects_type):
+    &#34;&#34;&#34;
+    Set the centroid of each CityObject. Only the CityObjects with a centroid (and a geometry) are kept.
+    :param cursor: a database access cursor.
+    :param cityobjects: the CityGML objects found in the database.
+    :param objects_type: a class name among CityMCityObject derived classes.
+    &#34;&#34;&#34;
+    cityobjects_with_centroid = list()
+    for cityobject in cityobjects:
+        try:
+            id = cityobject.get_database_id()
+            cursor.execute(objects_type.sql_query_centroid(id))
+            centroid = cursor.fetchall()
+            if centroid is not None:
+                cityobject.centroid = np.array([centroid[0][0], centroid[0][1], centroid[0][2]])
+                cityobjects_with_centroid.append(cityobject)
+        except AttributeError:
+            continue
+        except ValueError:
+            continue
+    cityobjects.set_features(cityobjects_with_centroid)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
+<ul class="hlist">
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -234,7 +2512,6 @@ The tileset is writen in 'junk_<object_type>/' by default.
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="py3dtilers.CityTiler.CityTemporalTiler" href="CityTemporalTiler.html">py3dtilers.CityTiler.CityTemporalTiler</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.CityTiler" href="CityTiler.html">py3dtilers.CityTiler.CityTiler</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_bridge" href="citym_bridge.html">py3dtilers.CityTiler.citym_bridge</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_building" href="citym_building.html">py3dtilers.CityTiler.citym_building</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject" href="citym_cityobject.html">py3dtilers.CityTiler.citym_cityobject</a></code></li>
@@ -251,6 +2528,74 @@ The tileset is writen in 'junk_<object_type>/' by default.
 <ul class="">
 <li><code><a title="py3dtilers.CityTiler.main" href="#py3dtilers.CityTiler.main">main</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.main_temporal" href="#py3dtilers.CityTiler.main_temporal">main_temporal</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.open_data_base" href="#py3dtilers.CityTiler.open_data_base">open_data_base</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityMBridges" href="#py3dtilers.CityTiler.CityMBridges">CityMBridges</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityMBridges.sql_query_centroid" href="#py3dtilers.CityTiler.CityMBridges.sql_query_centroid">sql_query_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBridges.sql_query_geometries" href="#py3dtilers.CityTiler.CityMBridges.sql_query_geometries">sql_query_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBridges.sql_query_geometries_with_texture_coordinates" href="#py3dtilers.CityTiler.CityMBridges.sql_query_geometries_with_texture_coordinates">sql_query_geometries_with_texture_coordinates</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBridges.sql_query_objects" href="#py3dtilers.CityTiler.CityMBridges.sql_query_objects">sql_query_objects</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityMBuildings" href="#py3dtilers.CityTiler.CityMBuildings">CityMBuildings</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.is_bth_set" href="#py3dtilers.CityTiler.CityMBuildings.is_bth_set">is_bth_set</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.set_bth" href="#py3dtilers.CityTiler.CityMBuildings.set_bth">set_bth</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.sql_query_centroid" href="#py3dtilers.CityTiler.CityMBuildings.sql_query_centroid">sql_query_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.sql_query_geometries" href="#py3dtilers.CityTiler.CityMBuildings.sql_query_geometries">sql_query_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.sql_query_geometries_with_texture_coordinates" href="#py3dtilers.CityTiler.CityMBuildings.sql_query_geometries_with_texture_coordinates">sql_query_geometries_with_texture_coordinates</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.sql_query_objects" href="#py3dtilers.CityTiler.CityMBuildings.sql_query_objects">sql_query_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMBuildings.with_bth" href="#py3dtilers.CityTiler.CityMBuildings.with_bth">with_bth</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityMCityObjects" href="#py3dtilers.CityTiler.CityMCityObjects">CityMCityObjects</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.get_cursor" href="#py3dtilers.CityTiler.CityMCityObjects.get_cursor">get_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.get_image_from_binary" href="#py3dtilers.CityTiler.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.gml_cursor" href="#py3dtilers.CityTiler.CityMCityObjects.gml_cursor">gml_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.object_type" href="#py3dtilers.CityTiler.CityMCityObjects.object_type">object_type</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.retrieve_objects" href="#py3dtilers.CityTiler.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.retrieve_textures" href="#py3dtilers.CityTiler.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.set_cursor" href="#py3dtilers.CityTiler.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.sql_query_centroid" href="#py3dtilers.CityTiler.CityMCityObjects.sql_query_centroid">sql_query_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries" href="#py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries">sql_query_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries_with_texture_coordinates" href="#py3dtilers.CityTiler.CityMCityObjects.sql_query_geometries_with_texture_coordinates">sql_query_geometries_with_texture_coordinates</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.sql_query_objects" href="#py3dtilers.CityTiler.CityMCityObjects.sql_query_objects">sql_query_objects</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMCityObjects.sql_query_textures" href="#py3dtilers.CityTiler.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityMReliefs" href="#py3dtilers.CityTiler.CityMReliefs">CityMReliefs</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityMReliefs.sql_query_centroid" href="#py3dtilers.CityTiler.CityMReliefs.sql_query_centroid">sql_query_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMReliefs.sql_query_geometries" href="#py3dtilers.CityTiler.CityMReliefs.sql_query_geometries">sql_query_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMReliefs.sql_query_geometries_with_texture_coordinates" href="#py3dtilers.CityTiler.CityMReliefs.sql_query_geometries_with_texture_coordinates">sql_query_geometries_with_texture_coordinates</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMReliefs.sql_query_objects" href="#py3dtilers.CityTiler.CityMReliefs.sql_query_objects">sql_query_objects</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityMWaterBodies" href="#py3dtilers.CityTiler.CityMWaterBodies">CityMWaterBodies</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityMWaterBodies.sql_query_centroid" href="#py3dtilers.CityTiler.CityMWaterBodies.sql_query_centroid">sql_query_centroid</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries" href="#py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries">sql_query_geometries</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries_with_texture_coordinates" href="#py3dtilers.CityTiler.CityMWaterBodies.sql_query_geometries_with_texture_coordinates">sql_query_geometries_with_texture_coordinates</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityMWaterBodies.sql_query_objects" href="#py3dtilers.CityTiler.CityMWaterBodies.sql_query_objects">sql_query_objects</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="py3dtilers.CityTiler.CityTiler" href="#py3dtilers.CityTiler.CityTiler">CityTiler</a></code></h4>
+<ul class="">
+<li><code><a title="py3dtilers.CityTiler.CityTiler.from_3dcitydb" href="#py3dtilers.CityTiler.CityTiler.from_3dcitydb">from_3dcitydb</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.CityTiler.set_features_centroid" href="#py3dtilers.CityTiler.CityTiler.set_features_centroid">set_features_centroid</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

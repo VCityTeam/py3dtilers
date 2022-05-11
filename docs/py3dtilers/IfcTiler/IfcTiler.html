@@ -26,7 +26,9 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from ..Common import Tiler
+<pre><code class="python">import logging
+import time
+from ..Common import Tiler
 from .ifcObjectGeom import IfcObjectsGeom
 
 
@@ -72,9 +74,9 @@ class IfcTiler(Tiler):
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
         feature_list = IfcObjectsGeom(objects)
@@ -88,13 +90,18 @@ def main():
 
     this function creates an ifc tileset handling one ifc classe per tiles
     &#34;&#34;&#34;
+    logging.basicConfig(filename=&#39;ifctiler.log&#39;, level=logging.INFO, filemode=&#34;w&#34;)
+    start_time = time.time()
+    logging.info(&#39;Started&#39;)
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
+
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
+    logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
 
 
 if __name__ == &#39;__main__&#39;:
@@ -124,13 +131,18 @@ if __name__ == &#39;__main__&#39;:
 
     this function creates an ifc tileset handling one ifc classe per tiles
     &#34;&#34;&#34;
+    logging.basicConfig(filename=&#39;ifctiler.log&#39;, level=logging.INFO, filemode=&#34;w&#34;)
+    start_time = time.time()
+    logging.info(&#39;Started&#39;)
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
+
     tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
 
     if(tileset is not None):
-        tileset.write_as_json(ifc_tiler.get_output_dir())</code></pre>
+        tileset.write_as_json(ifc_tiler.get_output_dir())
+    logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))</code></pre>
 </details>
 </dd>
 </dl>
@@ -189,9 +201,9 @@ if __name__ == &#39;__main__&#39;:
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
         feature_list = IfcObjectsGeom(objects)
@@ -221,9 +233,9 @@ if __name__ == &#39;__main__&#39;:
     :return: a tileset.
     &#34;&#34;&#34;
     if(grouped_by == &#39;IfcTypeObject&#39;):
-        pre_tileset, centroid = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+        pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
     elif(grouped_by == &#39;IfcGroup&#39;):
-        pre_tileset, centroid = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+        pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
 
     objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
     feature_list = IfcObjectsGeom(objects)

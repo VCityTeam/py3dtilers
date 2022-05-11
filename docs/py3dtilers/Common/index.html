@@ -160,8 +160,7 @@ The objects are distributed by their centroid.
     # bounding boxes of the city objects. And thus, depending on the value of
     # axis, we alternatively sort on the X or Y coordinate of those centroids:
 
-    feature_list.objects = sorted(feature_list,
-                                  key=lambda obj: obj.get_centroid()[axis])
+    feature_list.set_features(sorted(feature_list, key=lambda obj: obj.get_centroid()[axis]))
     median = len(feature_list) // 2
     lObjects = feature_list[:median]
     rObjects = feature_list[median:]
@@ -261,8 +260,8 @@ but another polygon
         maxZ = self.max_height
 
         for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], minZ], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], maxZ], dtype=np.float32)
+            vertices[i] = np.array([coord[0], coord[1], minZ])
+            vertices[i + length] = np.array([coord[0], coord[1], maxZ])
 
         # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
@@ -272,7 +271,7 @@ but another polygon
 
         # Create upper face triangles
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], maxZ], dtype=np.float32) for coord in tri]
+            upper_tri = [np.array([coord[0], coord[1], maxZ]) for coord in tri]
             triangles.append(upper_tri)
 
         # Create side triangles
@@ -307,8 +306,8 @@ but another polygon
     maxZ = self.max_height
 
     for i, coord in enumerate(coordinates):
-        vertices[i] = np.array([coord[0], coord[1], minZ], dtype=np.float32)
-        vertices[i + length] = np.array([coord[0], coord[1], maxZ], dtype=np.float32)
+        vertices[i] = np.array([coord[0], coord[1], minZ])
+        vertices[i + length] = np.array([coord[0], coord[1], maxZ])
 
     # Contains the triangles vertices. Used to create 3D tiles
     triangles = list()
@@ -318,7 +317,7 @@ but another polygon
 
     # Create upper face triangles
     for tri in poly_triangles:
-        upper_tri = [np.array([coord[0], coord[1], maxZ], dtype=np.float32) for coord in tri]
+        upper_tri = [np.array([coord[0], coord[1], maxZ]) for coord in tri]
         triangles.append(upper_tri)
 
     # Create side triangles
@@ -859,9 +858,16 @@ Also set the centroid.</p></div>
                 objects.extend(objs.get_features())
             return objects
 
-    def delete_objects_ref(self):
+    def set_features(self, features):
+        &#34;&#34;&#34;
+        Set the list of features.
+        :param features: a list of Feature
+        &#34;&#34;&#34;
+        self.objects = features
+
+    def delete_features_ref(self):
         &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-        self.objects = list()
+        del self.objects
 
     def __len__(self):
         return len(self.objects)
@@ -915,9 +921,7 @@ Also set the centroid.</p></div>
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
+                    new_position.append(np.array(points - offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -933,7 +937,7 @@ Also set the centroid.</p></div>
                 new_position = []
                 for point in triangle:
                     new_point = transformer.transform(point[0], point[1], point[2])
-                    new_position.append(np.array(new_point, dtype=np.float32))
+                    new_position.append(np.array(new_point))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -971,7 +975,7 @@ Also set the centroid.</p></div>
         material_indexes = dict()
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-        self.objects = features_with_geom
+        self.set_features(features_with_geom)
 
     @classmethod
     def set_color_config(cls, config_path):
@@ -1151,14 +1155,14 @@ def set_color_config(cls, config_path):
             new_position = []
             for point in triangle:
                 new_point = transformer.transform(point[0], point[1], point[2])
-                new_position.append(np.array(new_point, dtype=np.float32))
+                new_position.append(np.array(new_point))
             new_geom.append(new_position)
         feature.set_triangles(new_geom)
         feature.set_box()</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.FeatureList.delete_objects_ref"><code class="name flex">
-<span>def <span class="ident">delete_objects_ref</span></span>(<span>self)</span>
+<dt id="py3dtilers.Common.FeatureList.delete_features_ref"><code class="name flex">
+<span>def <span class="ident">delete_features_ref</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.</p></div>
@@ -1166,9 +1170,9 @@ def set_color_config(cls, config_path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete_objects_ref(self):
+<pre><code class="python">def delete_features_ref(self):
     &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-    self.objects = list()</code></pre>
+    del self.objects</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.FeatureList.extend"><code class="name flex">
@@ -1311,6 +1315,24 @@ The centroid is the average of the centroids of all the features.
         feature.set_box()</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.Common.FeatureList.set_features"><code class="name flex">
+<span>def <span class="ident">set_features</span></span>(<span>self, features)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the list of features.
+:param features: a list of Feature</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_features(self, features):
+    &#34;&#34;&#34;
+    Set the list of features.
+    :param features: a list of Feature
+    &#34;&#34;&#34;
+    self.objects = features</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.Common.FeatureList.set_features_geom"><code class="name flex">
 <span>def <span class="ident">set_features_geom</span></span>(<span>self, user_arguments=None)</span>
 </code></dt>
@@ -1330,7 +1352,7 @@ Keep only the features with geometry.</p></div>
     material_indexes = dict()
     for feature in self.objects:
         features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-    self.objects = features_with_geom</code></pre>
+    self.set_features(features_with_geom)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.FeatureList.set_materials"><code class="name flex">
@@ -1372,9 +1394,7 @@ Keep only the features with geometry.</p></div>
         for triangle in feature.get_geom_as_triangles():
             new_position = []
             for points in triangle:
-                # Must to do this this way to ensure that the new position
-                # stays in float32, which is mandatory for writing the GLTF
-                new_position.append(np.array(points - offset, dtype=np.float32))
+                new_position.append(np.array(points - offset))
             new_geom.append(new_position)
         feature.set_triangles(new_geom)
         feature.set_box()</code></pre>
@@ -1490,7 +1510,7 @@ Keep only the features with geometry.</p></div>
 
         tile.set_bounding_volume(bounding_box)
 
-        node.feature_list.delete_objects_ref()
+        del node.feature_list
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
@@ -1511,7 +1531,7 @@ Keep only the features with geometry.</p></div>
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.png&#39;)])
+            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.jpeg&#39;)])
         for feature in objects:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes:
@@ -2587,16 +2607,16 @@ The distribution depends on the centroid of each feature.
         Set the geometry of the features.
         Keep only the features with geometry.
         &#34;&#34;&#34;
-        features = self.features_node.feature_list.objects.copy()
+        features = self.features_node.feature_list.get_features().copy()
 
         for polygon in self.polygons:
             feature_list = FeatureList(self.find_features_in_polygon(features, Polygon(polygon)))
             if len(feature_list) &gt; 0:
                 [features.remove(feature) for feature in feature_list]
-                self.objects.append(self.create_loa(feature_list, polygon))
+                self.append(self.create_loa(feature_list, polygon))
 
         for feature in features:
-            self.objects.append(self.create_loa(FeatureList([feature])))
+            self.append(self.create_loa(FeatureList([feature])))
 
         self.features_node = None
 
@@ -2708,7 +2728,7 @@ The distribution depends on the centroid of each feature.
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.change_crs" href="feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_batch_table_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_bounding_volume_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.delete_objects_ref" href="feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.delete_features_ref" href="feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_centroid" href="feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_features" href="feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -2717,6 +2737,7 @@ The distribution depends on the centroid of each feature.
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_list_of_feature_list" href="feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.scale_features" href="feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features_geom" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_materials" href="feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.translate_features" href="feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
@@ -2799,7 +2820,7 @@ If a feature isn't contained in any polygon, create a 3D extrusion of its footpr
         for i, feature in enumerate(self.features_node.feature_list):
             extruded_polygon = ExtrudedPolygon(&#34;lod1_&#34; + str(i), [feature])
             extruded_polygon.set_geom()
-            self.objects.append(extruded_polygon)
+            self.append(extruded_polygon)
         self.features_node = None</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -2815,7 +2836,7 @@ If a feature isn't contained in any polygon, create a 3D extrusion of its footpr
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.change_crs" href="feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_batch_table_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_bounding_volume_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.delete_objects_ref" href="feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.delete_features_ref" href="feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_centroid" href="feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_features" href="feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -2824,6 +2845,7 @@ If a feature isn't contained in any polygon, create a 3D extrusion of its footpr
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_list_of_feature_list" href="feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.scale_features" href="feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features_geom" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_materials" href="feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.translate_features" href="feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
@@ -3071,7 +3093,7 @@ A Group contains features and an optional polygon that will be used for LoaNodes
         V = triangle[2] - triangle[0]
         N = np.cross(U, V)
         norm = np.linalg.norm(N)
-        return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm
+        return np.array([0, 0, 1]) if norm == 0 else N / norm
 
     def add_triangle(self, triangle):
         &#34;&#34;&#34;
@@ -3232,7 +3254,7 @@ def vertex_index(self):
     V = triangle[2] - triangle[0]
     N = np.cross(U, V)
     norm = np.linalg.norm(N)
-    return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm</code></pre>
+    return np.array([0, 0, 1]) if norm == 0 else N / norm</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.ObjWriter.get_centroid"><code class="name flex">
@@ -3470,7 +3492,7 @@ If no index is associated to the vertex, create a new index and add the vertex t
         geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
         tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-        feature_list.delete_objects_ref()
+        feature_list.delete_features_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
@@ -3494,7 +3516,7 @@ If no index is associated to the vertex, create a new index and add the vertex t
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="../CityTiler/CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></li>
+<li>py3dtilers.CityTiler.CityTiler.CityTiler</li>
 <li><a title="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler" href="../GeojsonTiler/GeojsonTiler.html#py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler">GeojsonTiler</a></li>
 <li><a title="py3dtilers.IfcTiler.IfcTiler.IfcTiler" href="../IfcTiler/IfcTiler.html#py3dtilers.IfcTiler.IfcTiler.IfcTiler">IfcTiler</a></li>
 <li><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler" href="../ObjTiler/ObjTiler.html#py3dtilers.ObjTiler.ObjTiler.ObjTiler">ObjTiler</a></li>
@@ -3555,7 +3577,7 @@ If no index is associated to the vertex, create a new index and add the vertex t
     geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
     tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-    feature_list.delete_objects_ref()
+    feature_list.delete_features_ref()
     self.create_output_directory()
     return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())</code></pre>
 </details>
@@ -3812,7 +3834,7 @@ weak references.</p>
 <li><code><a title="py3dtilers.Common.FeatureList.create_batch_table_extension" href="#py3dtilers.Common.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.create_bounding_volume_extension" href="#py3dtilers.Common.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.default_mat" href="#py3dtilers.Common.FeatureList.default_mat">default_mat</a></code></li>
-<li><code><a title="py3dtilers.Common.FeatureList.delete_objects_ref" href="#py3dtilers.Common.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.delete_features_ref" href="#py3dtilers.Common.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.extend" href="#py3dtilers.Common.FeatureList.extend">extend</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.get_centroid" href="#py3dtilers.Common.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.get_color_config" href="#py3dtilers.Common.FeatureList.get_color_config">get_color_config</a></code></li>
@@ -3822,6 +3844,7 @@ weak references.</p>
 <li><code><a title="py3dtilers.Common.FeatureList.is_list_of_feature_list" href="#py3dtilers.Common.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.scale_features" href="#py3dtilers.Common.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.set_color_config" href="#py3dtilers.Common.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.FeatureList.set_features" href="#py3dtilers.Common.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.set_features_geom" href="#py3dtilers.Common.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.set_materials" href="#py3dtilers.Common.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.FeatureList.translate_features" href="#py3dtilers.Common.FeatureList.translate_features">translate_features</a></code></li>

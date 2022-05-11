@@ -212,9 +212,16 @@ class FeatureList(object):
                 objects.extend(objs.get_features())
             return objects
 
-    def delete_objects_ref(self):
+    def set_features(self, features):
+        &#34;&#34;&#34;
+        Set the list of features.
+        :param features: a list of Feature
+        &#34;&#34;&#34;
+        self.objects = features
+
+    def delete_features_ref(self):
         &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-        self.objects = list()
+        del self.objects
 
     def __len__(self):
         return len(self.objects)
@@ -268,9 +275,7 @@ class FeatureList(object):
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
+                    new_position.append(np.array(points - offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -286,7 +291,7 @@ class FeatureList(object):
                 new_position = []
                 for point in triangle:
                     new_point = transformer.transform(point[0], point[1], point[2])
-                    new_position.append(np.array(new_point, dtype=np.float32))
+                    new_position.append(np.array(new_point))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -324,7 +329,7 @@ class FeatureList(object):
         material_indexes = dict()
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-        self.objects = features_with_geom
+        self.set_features(features_with_geom)
 
     @classmethod
     def set_color_config(cls, config_path):
@@ -819,9 +824,16 @@ Also set the centroid.</p></div>
                 objects.extend(objs.get_features())
             return objects
 
-    def delete_objects_ref(self):
+    def set_features(self, features):
+        &#34;&#34;&#34;
+        Set the list of features.
+        :param features: a list of Feature
+        &#34;&#34;&#34;
+        self.objects = features
+
+    def delete_features_ref(self):
         &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-        self.objects = list()
+        del self.objects
 
     def __len__(self):
         return len(self.objects)
@@ -875,9 +887,7 @@ Also set the centroid.</p></div>
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    # Must to do this this way to ensure that the new position
-                    # stays in float32, which is mandatory for writing the GLTF
-                    new_position.append(np.array(points - offset, dtype=np.float32))
+                    new_position.append(np.array(points - offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -893,7 +903,7 @@ Also set the centroid.</p></div>
                 new_position = []
                 for point in triangle:
                     new_point = transformer.transform(point[0], point[1], point[2])
-                    new_position.append(np.array(new_point, dtype=np.float32))
+                    new_position.append(np.array(new_point))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -931,7 +941,7 @@ Also set the centroid.</p></div>
         material_indexes = dict()
         for feature in self.objects:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-        self.objects = features_with_geom
+        self.set_features(features_with_geom)
 
     @classmethod
     def set_color_config(cls, config_path):
@@ -1111,14 +1121,14 @@ def set_color_config(cls, config_path):
             new_position = []
             for point in triangle:
                 new_point = transformer.transform(point[0], point[1], point[2])
-                new_position.append(np.array(new_point, dtype=np.float32))
+                new_position.append(np.array(new_point))
             new_geom.append(new_position)
         feature.set_triangles(new_geom)
         feature.set_box()</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.feature.FeatureList.delete_objects_ref"><code class="name flex">
-<span>def <span class="ident">delete_objects_ref</span></span>(<span>self)</span>
+<dt id="py3dtilers.Common.feature.FeatureList.delete_features_ref"><code class="name flex">
+<span>def <span class="ident">delete_features_ref</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.</p></div>
@@ -1126,9 +1136,9 @@ def set_color_config(cls, config_path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete_objects_ref(self):
+<pre><code class="python">def delete_features_ref(self):
     &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-    self.objects = list()</code></pre>
+    del self.objects</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.extend"><code class="name flex">
@@ -1271,6 +1281,24 @@ The centroid is the average of the centroids of all the features.
         feature.set_box()</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.Common.feature.FeatureList.set_features"><code class="name flex">
+<span>def <span class="ident">set_features</span></span>(<span>self, features)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the list of features.
+:param features: a list of Feature</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_features(self, features):
+    &#34;&#34;&#34;
+    Set the list of features.
+    :param features: a list of Feature
+    &#34;&#34;&#34;
+    self.objects = features</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.Common.feature.FeatureList.set_features_geom"><code class="name flex">
 <span>def <span class="ident">set_features_geom</span></span>(<span>self, user_arguments=None)</span>
 </code></dt>
@@ -1290,7 +1318,7 @@ Keep only the features with geometry.</p></div>
     material_indexes = dict()
     for feature in self.objects:
         features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
-    self.objects = features_with_geom</code></pre>
+    self.set_features(features_with_geom)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.set_materials"><code class="name flex">
@@ -1332,9 +1360,7 @@ Keep only the features with geometry.</p></div>
         for triangle in feature.get_geom_as_triangles():
             new_position = []
             for points in triangle:
-                # Must to do this this way to ensure that the new position
-                # stays in float32, which is mandatory for writing the GLTF
-                new_position.append(np.array(points - offset, dtype=np.float32))
+                new_position.append(np.array(points - offset))
             new_geom.append(new_position)
         feature.set_triangles(new_geom)
         feature.set_box()</code></pre>
@@ -1386,7 +1412,7 @@ Keep only the features with geometry.</p></div>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.default_mat" href="#py3dtilers.Common.feature.FeatureList.default_mat">default_mat</a></code></li>
-<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.extend" href="#py3dtilers.Common.feature.FeatureList.extend">extend</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
@@ -1396,6 +1422,7 @@ Keep only the features with geometry.</p></div>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>

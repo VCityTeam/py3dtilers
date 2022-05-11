@@ -56,10 +56,11 @@ class Obj(Feature):
     def __init__(self, id=None):
         super().__init__(id)
 
-    def parse_geom(self, mesh):
+    def parse_geom(self, mesh, with_texture=False):
         &#34;&#34;&#34;
         Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
         :param mesh: an OBJ mesh
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: True if the parsing is complete, False if the format wasn&#39;t supported
         &#34;&#34;&#34;
@@ -82,27 +83,27 @@ class Obj(Feature):
         # Contains only vertex positions
         if mesh.materials[0].vertex_format == &#39;V3F&#39;:
             for i in range(0, length, 9):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
         # Contains texture and vertex positions
         elif mesh.materials[0].vertex_format == &#39;T2F_V3F&#39;:
             for i in range(0, length, 15):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 2, i + 17, 5)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 2, i + 17, 5)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 15, 5)]
                 uvs.append(uv)
         # Contains texture/vertex positions and normals
         elif mesh.materials[0].vertex_format == &#39;T2F_N3F_V3F&#39;:
             for i in range(0, length, 24):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 5, i + 29, 8)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 24, 8)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
         else:
             return False
 
         self.geom.triangles.append(triangles)
-        if len(uvs) &gt; 0:
+        if len(uvs) &gt; 0 and with_texture:
             self.geom.triangles.append(uvs)
             if mesh.materials[0].texture is not None:
                 path = str(mesh.materials[0].texture._path).replace(&#39;\\&#39;, &#39;/&#39;)
@@ -122,10 +123,11 @@ class Objs(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path):
+    def retrieve_objs(path, with_texture=False):
         &#34;&#34;&#34;
         Create Obj instance from OBJ file(s).
         :param path: a path to a directory
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: a list of Obj.
         &#34;&#34;&#34;
@@ -143,7 +145,7 @@ class Objs(FeatureList):
                         id = mesh.name
                         obj = Obj(id)
                         # Create geometry as expected from GLTF from an obj file
-                        if(obj.parse_geom(mesh)):
+                        if(obj.parse_geom(mesh, with_texture)):
                             objects.append(obj)
 
         return Objs(objects)</code></pre>
@@ -177,10 +179,11 @@ class Objs(FeatureList):
     def __init__(self, id=None):
         super().__init__(id)
 
-    def parse_geom(self, mesh):
+    def parse_geom(self, mesh, with_texture=False):
         &#34;&#34;&#34;
         Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
         :param mesh: an OBJ mesh
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: True if the parsing is complete, False if the format wasn&#39;t supported
         &#34;&#34;&#34;
@@ -203,27 +206,27 @@ class Objs(FeatureList):
         # Contains only vertex positions
         if mesh.materials[0].vertex_format == &#39;V3F&#39;:
             for i in range(0, length, 9):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
         # Contains texture and vertex positions
         elif mesh.materials[0].vertex_format == &#39;T2F_V3F&#39;:
             for i in range(0, length, 15):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 2, i + 17, 5)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 2, i + 17, 5)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 15, 5)]
                 uvs.append(uv)
         # Contains texture/vertex positions and normals
         elif mesh.materials[0].vertex_format == &#39;T2F_N3F_V3F&#39;:
             for i in range(0, length, 24):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 5, i + 29, 8)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 24, 8)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
         else:
             return False
 
         self.geom.triangles.append(triangles)
-        if len(uvs) &gt; 0:
+        if len(uvs) &gt; 0 and with_texture:
             self.geom.triangles.append(uvs)
             if mesh.materials[0].texture is not None:
                 path = str(mesh.materials[0].texture._path).replace(&#39;\\&#39;, &#39;/&#39;)
@@ -240,20 +243,22 @@ class Objs(FeatureList):
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.ObjTiler.obj.Obj.parse_geom"><code class="name flex">
-<span>def <span class="ident">parse_geom</span></span>(<span>self, mesh)</span>
+<span>def <span class="ident">parse_geom</span></span>(<span>self, mesh, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
-:param mesh: an OBJ mesh</p>
+:param mesh: an OBJ mesh
+:param with_texture: a boolean indicating if the textures should be read</p>
 <p>:return: True if the parsing is complete, False if the format wasn't supported</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def parse_geom(self, mesh):
+<pre><code class="python">def parse_geom(self, mesh, with_texture=False):
     &#34;&#34;&#34;
     Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
     :param mesh: an OBJ mesh
+    :param with_texture: a boolean indicating if the textures should be read
 
     :return: True if the parsing is complete, False if the format wasn&#39;t supported
     &#34;&#34;&#34;
@@ -276,27 +281,27 @@ class Objs(FeatureList):
     # Contains only vertex positions
     if mesh.materials[0].vertex_format == &#39;V3F&#39;:
         for i in range(0, length, 9):
-            triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
+            triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
             triangles.append(triangle)
     # Contains texture and vertex positions
     elif mesh.materials[0].vertex_format == &#39;T2F_V3F&#39;:
         for i in range(0, length, 15):
-            triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 2, i + 17, 5)]
+            triangle = [np.array(vertices[n:n + 3]) for n in range(i + 2, i + 17, 5)]
             triangles.append(triangle)
-            uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
+            uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 15, 5)]
             uvs.append(uv)
     # Contains texture/vertex positions and normals
     elif mesh.materials[0].vertex_format == &#39;T2F_N3F_V3F&#39;:
         for i in range(0, length, 24):
-            triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
+            triangle = [np.array(vertices[n:n + 3]) for n in range(i + 5, i + 29, 8)]
             triangles.append(triangle)
-            uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 24, 8)]
+            uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
             uvs.append(uv)
     else:
         return False
 
     self.geom.triangles.append(triangles)
-    if len(uvs) &gt; 0:
+    if len(uvs) &gt; 0 and with_texture:
         self.geom.triangles.append(uvs)
         if mesh.materials[0].texture is not None:
             path = str(mesh.materials[0].texture._path).replace(&#39;\\&#39;, &#39;/&#39;)
@@ -348,10 +353,11 @@ class Objs(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path):
+    def retrieve_objs(path, with_texture=False):
         &#34;&#34;&#34;
         Create Obj instance from OBJ file(s).
         :param path: a path to a directory
+        :param with_texture: a boolean indicating if the textures should be read
 
         :return: a list of Obj.
         &#34;&#34;&#34;
@@ -369,7 +375,7 @@ class Objs(FeatureList):
                         id = mesh.name
                         obj = Obj(id)
                         # Create geometry as expected from GLTF from an obj file
-                        if(obj.parse_geom(mesh)):
+                        if(obj.parse_geom(mesh, with_texture)):
                             objects.append(obj)
 
         return Objs(objects)</code></pre>
@@ -381,21 +387,23 @@ class Objs(FeatureList):
 <h3>Static methods</h3>
 <dl>
 <dt id="py3dtilers.ObjTiler.obj.Objs.retrieve_objs"><code class="name flex">
-<span>def <span class="ident">retrieve_objs</span></span>(<span>path)</span>
+<span>def <span class="ident">retrieve_objs</span></span>(<span>path, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create Obj instance from OBJ file(s).
-:param path: a path to a directory</p>
+:param path: a path to a directory
+:param with_texture: a boolean indicating if the textures should be read</p>
 <p>:return: a list of Obj.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def retrieve_objs(path):
+def retrieve_objs(path, with_texture=False):
     &#34;&#34;&#34;
     Create Obj instance from OBJ file(s).
     :param path: a path to a directory
+    :param with_texture: a boolean indicating if the textures should be read
 
     :return: a list of Obj.
     &#34;&#34;&#34;
@@ -413,7 +421,7 @@ def retrieve_objs(path):
                     id = mesh.name
                     obj = Obj(id)
                     # Create geometry as expected from GLTF from an obj file
-                    if(obj.parse_geom(mesh)):
+                    if(obj.parse_geom(mesh, with_texture)):
                         objects.append(obj)
 
     return Objs(objects)</code></pre>
@@ -428,7 +436,7 @@ def retrieve_objs(path):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -437,6 +445,7 @@ def retrieve_objs(path):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>

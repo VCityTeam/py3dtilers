@@ -27,32 +27,13 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
-import sys
-import math
+import logging
+import time
 import numpy as np
 import ifcopenshell
+from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList
-
-
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm
-
-
-def computeDirection(axis, refDirection):
-    # ref to https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcfirstprojaxis.htm
-    # and https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcbuildaxes.htm
-    Z = normalize(axis)
-    V = normalize(refDirection)
-    XVec = np.multiply(np.dot(V, Z), Z)
-    XAxis = normalize(np.subtract(V, XVec))
-    return np.array([XAxis, np.cross(Z, XAxis), Z])
-
-
-def compute2DDirection(refDirection):
-    return np.array([np.array([refDirection[0], refDirection[1]]), np.array([-refDirection[1], refDirection[0]])])
+from ifcopenshell import geom
 
 
 def unitConversion(originalUnit, targetedUnit):
@@ -66,19 +47,15 @@ def unitConversion(originalUnit, targetedUnit):
 
 
 class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, transform_matrix=None, ifcGroup=None):
+    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
-
-        self.ifcObject = ifcObject
-        self.setIfcClasse(ifcObject.is_a(), ifcGroup)
+        self.setIfcClasse(ifcObject, ifcGroup)
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
-        self.has_geom = self.parse_geom(transform_matrix)
+        # self.material = None
+        self.has_geom = self.parse_geom(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
-
-    def get_geom_as_triangles(self):
-        return self.geom.triangles[0]
 
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
@@ -89,258 +66,57 @@ class IfcObjectGeom(Feature):
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcClasse, ifcGroup):
-        self.ifcClasse = ifcClasse
+    def setIfcClasse(self, ifcObject, ifcGroup):
+        self.ifcClasse = ifcObject.is_a()
+        properties = list()
+        for prop in ifcObject.IsDefinedBy:
+            if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
+                if(prop.RelatingPropertyDefinition.is_a(&#39;IfcPropertySet&#39;)):
+                    props = list()
+                    props.append(prop.RelatingPropertyDefinition.Name)
+                    for propSet in prop.RelatingPropertyDefinition.HasProperties:
+                        if(propSet.is_a(&#39;IfcPropertySingleValue&#39;)):
+                            if(propSet.NominalValue):
+                                props.append([propSet.Name, propSet.NominalValue.wrappedValue])
+                    properties.append(props)
         batch_table_data = {
-            &#39;classe&#39;: ifcClasse,
-            &#39;group&#39;: ifcGroup
+            &#39;classe&#39;: self.ifcClasse,
+            &#39;group&#39;: ifcGroup,
+            &#39;name&#39;: ifcObject.Name,
+            &#39;properties&#39;: properties
         }
         super().set_batchtable_data(batch_table_data)
 
     def getIfcClasse(self):
         return self.ifcClasse
 
-    def computePointsFromRectangleProfileDef(self, sweptArea):
-        points = list()
-        maxX = sweptArea.XDim / 2
-        minX = -maxX
-        maxY = sweptArea.YDim / 2
-        minY = -maxY
-
-        position = sweptArea.Position.Location.Coordinates
-
-        refDirection = [1, 0]
-
-        if (sweptArea.Position.RefDirection):
-            refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-        direction = compute2DDirection(refDirection)
-
-        points.append(np.array([minX, minY]))
-        points.append(np.array([minX, maxY]))
-        points.append(np.array([maxX, maxY]))
-        points.append(np.array([maxX, minY]))
-        points.append(points[0])
-
-        for i in range(len(points)):
-            points[i] = np.dot(np.array(points[i]), direction) + position
-        return points
-
-    def computePointsFromCircleProfileDef(self, sweptArea):
-        radius = sweptArea.Radius
-        position = sweptArea.Position.Location.Coordinates
-
-        refDirection = [1, 0]
-
-        if (sweptArea.Position.RefDirection):
-            refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-        direction = compute2DDirection(refDirection)
-
-        points = list()
-        # The lower this value the higher quality the circle is with more points generated
-        stepSize = 0.1
-        t = 0
-        while t &lt; 2 * math.pi:
-            points.append(np.array([radius * math.cos(t), radius * math.sin(t)]))
-            t += stepSize
-        points.append(points[0])
-
-        for i in range(len(points)):
-            points[i] = np.dot(np.array(points[i]), direction) + position
-        return points
-
-    def getPointsFromOuterCurve(self, outerCurve):
-        if(hasattr(outerCurve, &#39;CoordList&#39;)):
-            return outerCurve.CoordList
-        else:
-            points = list()
-            for point in outerCurve:
-                coord = point.Coordinates
-                points.append(np.array([coord[0], coord[1]]))
-            return points
-
-    def extrudGeom(self, geom):
-        depth = geom.Depth
-        extrudedDirection = geom.ExtrudedDirection.DirectionRatios
-        extrudVector = np.multiply(extrudedDirection, depth)
-
-        position = geom.Position.Location.Coordinates
-
-        axis = [0, 0, 1]
-        refDirection = [1, 0, 0]
-
-        if (geom.Position.Axis):
-            axis = geom.Position.Axis.DirectionRatios
-
-        if (geom.Position.RefDirection):
-            refDirection = geom.Position.RefDirection.DirectionRatios
-
-        direction = computeDirection(axis, refDirection)
-
-        if(geom.SweptArea.is_a(&#39;IfcArbitraryClosedProfileDef&#39;)):
-            if(hasattr(geom.SweptArea.OuterCurve, &#34;Points&#34;)):
-                points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
-            else:
-                return None, None
-        elif(geom.SweptArea.is_a(&#39;IfcRectangleProfileDef&#39;)):
-            points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
-        elif(geom.SweptArea.is_a(&#39;IfcCircleProfileDef&#39;)):
-            points = self.computePointsFromCircleProfileDef(geom.SweptArea)
-        else:
-            return None, None
-
-        center = self.computeCenter(points)
-
-        vertexList = list()
-        indexList = list()
-        for point in points:
-            vertexList.append(np.array([point[0], point[1], 0]))
-        for point in points:
-            vertexList.append(np.array([point[0], point[1], 0]) + extrudVector)
-        vertexList.append(center)
-        vertexList.append(center + extrudVector)
-
-        for i in range(len(vertexList)):
-            vertexList[i] = np.dot(np.array(vertexList[i]), direction) + position
-
-        nb_points = len(points)
-        i = 0
-        for i in range(nb_points - 1):
-            indice = i + 1
-            indexList.append([indice, (nb_points * 2) + 1, indice + 1])
-            indexList.append([indice + nb_points, indice + nb_points + 1, (nb_points * 2) + 2])
-
-        i = 0
-        for i in range(nb_points - 1):
-            indice = i + 1
-            indexList.append([indice, indice + 1, indice + nb_points])
-            indexList.append([indice + 1, indice + nb_points + 1, indice + nb_points])
-
-        return vertexList, indexList
-
-    def getPosition(self, ObjectPlacement):
-        listPosition = list()
-        position = np.array(ObjectPlacement.RelativePlacement.Location.Coordinates)
-        listPosition.append(position)
-        placementRelTo = ObjectPlacement.PlacementRelTo
-
-        while (placementRelTo):
-            if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-                break
-            listPosition.append(np.array(placementRelTo.RelativePlacement.Location.Coordinates))
-            placementRelTo = placementRelTo.PlacementRelTo
-        return listPosition
-
-    def getDirections(self, ObjectPlacement):
-        listDirection = list()
-        axis = [0, 0, 1]
-        if (ObjectPlacement.RelativePlacement.Axis):
-            axis = ObjectPlacement.RelativePlacement.Axis.DirectionRatios
-
-        refDirection = [1, 0, 0]
-        if (ObjectPlacement.RelativePlacement.RefDirection):
-            refDirection = ObjectPlacement.RelativePlacement.RefDirection.DirectionRatios
-
-        listDirection.append(computeDirection(axis, refDirection))
-
-        placementRelTo = ObjectPlacement.PlacementRelTo
-
-        while (placementRelTo):
-            if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-                break
-            axis = [0, 0, 1]
-            if (placementRelTo.RelativePlacement.Axis):
-                axis = placementRelTo.RelativePlacement.Axis.DirectionRatios
-
-            refDirection = [1, 0, 0]
-            if (placementRelTo.RelativePlacement.RefDirection):
-                refDirection = placementRelTo.RelativePlacement.RefDirection.DirectionRatios
-
-            listDirection.append(computeDirection(axis, refDirection))
-            placementRelTo = placementRelTo.PlacementRelTo
-
-        return listDirection
-
-    def getElevation(self):
-        elevation = 0
-        if(self.ifcObject.ContainedInStructure):
-            if(not(self.ifcObject.ContainedInStructure[0].RelatingStructure.is_a(&#34;IfcSpace&#34;))):
-                elevation += (self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation * self.convertionRatio)
-        return elevation
-
-    def parse_indexed_faces(self, Faces):
-        indexListTemp = list()
-
-        for face in Faces:
-            for i in range(1, len(face.CoordIndex) - 1):
-                indexListTemp.append([face.CoordIndex[0], face.CoordIndex[i], face.CoordIndex[i + 1]])
-
-        return indexListTemp
-
-    def parse_geom(self, transform_matrix):
-        if (not(self.ifcObject.Representation)):
+    def parse_geom(self, ifcObject):
+        if (not(ifcObject.Representation)):
             return False
 
-        representations = self.ifcObject.Representation.Representations
-
-        listPosition = self.getPosition(self.ifcObject.ObjectPlacement)
-
-        listDirection = self.getDirections(self.ifcObject.ObjectPlacement)
-
-        offset = np.array(transform_matrix[3])
-        rotation = np.array(transform_matrix[:-1])
-
-        vertexList = list()
-        indexList = list()
-        for representation in representations:
-            if(representation.RepresentationType == &#34;MappedRepresentation&#34;):
-                representation = representation.Items[0].MappingSource.MappedRepresentation
-
-            nb_geom = 0
-            for itemGeom in representation.Items:
-                nb_geom += 1
-                if(nb_geom &gt; 300):
-                    continue
-                indexListTemp = None
-                vertexListTemp = None
-                if(representation.RepresentationType == &#34;Tessellation&#34;):
-                    if(hasattr(itemGeom, &#39;Faces&#39;)):
-                        indexListTemp = self.parse_indexed_faces(itemGeom.Faces)
-                    elif (hasattr(itemGeom, &#39;CoordIndex&#39;)):
-                        indexListTemp = itemGeom.CoordIndex
-                    else:
-                        sys.exit(&#34;Géométrie de ce type non encore gérée&#34;)
-                    vertexListTemp = itemGeom.Coordinates.CoordList
-
-                elif(representation.RepresentationType == &#34;SweptSolid&#34; and not(itemGeom.is_a(&#34;IfcBooleanClippingResult&#34;))):
-                    vertexListTemp, indexListTemp = self.extrudGeom(itemGeom)
-                if(vertexListTemp and indexListTemp):
-                    for index in indexListTemp:
-                        indexList.append([index[0] + len(vertexList), index[1] + len(vertexList), index[2] + len(vertexList)])
-                    for vertex in vertexListTemp:
-                        vertexList.append(np.array([vertex[0], vertex[1], vertex[2]], dtype=np.float32))
-
-        if (len(indexList) == 0):
+        try:
+            settings = geom.settings()
+            settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
+            settings.set(settings.SEW_SHELLS, True)
+            shape = geom.create_shape(settings, ifcObject)
+        except RuntimeError:
+            logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
             return False
 
-        for j in range(len(vertexList)):
-            vertex = vertexList[j]
-            for i in range(len(listDirection)):
-                vertex = np.dot(np.array(vertex), listDirection[i])
-                vertex = (vertex + listPosition[i])
-
-            vertex = vertex * self.convertionRatio
-            vertex = np.dot(np.array(vertex), rotation)
-            vertex += offset
-            vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
+        vertexList = np.reshape(np.array(shape.geometry.verts), (-1, 3))
+        indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
+        if(shape.geometry.materials):
+            ifc_material = shape.geometry.materials[0]
+            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
+                                         alpha=ifc_material.transparency if ifc_material.transparency else 0,
+                                         metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
         triangles = list()
         for index in indexList:
             triangle = []
             for i in range(0, 3):
                 # We store each position for each triangles, as GLTF expect
-                triangle.append(vertexList[index[i] - 1])
+                triangle.append(vertexList[index[i]])
             triangles.append(triangle)
 
         self.geom.triangles.append(triangles)
@@ -365,39 +141,6 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def getCentroid(ifcMapConversion):
-        location = (ifcMapConversion.Eastings, ifcMapConversion.Northings, ifcMapConversion.OrthogonalHeight)
-
-        centroid = [[0, ifcMapConversion.XAxisAbscissa, 0],
-                    [-ifcMapConversion.XAxisOrdinate, 0, 0],
-                    [0, 0, 1],
-                    [location[0], location[1], location[2]]]
-        return centroid
-
-    @staticmethod
-    def computeCentroid(ifcSite, unitRatio):
-        elevation = ifcSite.RefElevation
-        placement = ifcSite.ObjectPlacement.RelativePlacement
-        location = placement.Location.Coordinates
-        location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation))
-
-        if(placement.Axis is None):
-            axis = [0, 0, 1]
-        else:
-            axis = placement.Axis.DirectionRatios
-        if(placement.RefDirection is None):
-            refDirection = [1, 0, 0]
-        else:
-            refDirection = placement.RefDirection.DirectionRatios
-
-        direction = computeDirection(axis, refDirection)
-        centroid = [[direction[0][0], direction[0][1], direction[0][2]],
-                    [direction[1][0], direction[1][1], direction[1][2]],
-                    [direction[2][0], direction[2][1], direction[2][2]],
-                    [location[0], location[1], location[2]]]
-        return centroid
-
-    @staticmethod
     def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
         &#34;&#34;&#34;
         :param path: a path to a directory
@@ -406,28 +149,38 @@ class IfcObjectsGeom(FeatureList):
         &#34;&#34;&#34;
         ifc_file = ifcopenshell.open(path_to_file)
 
-        if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-        else:
-            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type(&#39;IfcElement&#39;)
         nb_element = str(len(elements))
-        print(nb_element + &#34; elements to parse&#34;)
+        logging.info(nb_element + &#34; elements to parse&#34;)
         i = 1
         dictObjByType = dict()
         for element in elements:
-            print(&#34;\r&#34; + str(i) + &#34; / &#34; + nb_element, end=&#39;&#39;, flush=True)
-            if not(element.is_a() in dictObjByType):
-                dictObjByType[element.is_a()] = list()
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+            start_time = time.time()
+            logging.info(str(i) + &#34; / &#34; + nb_element)
+            logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
             if(obj.hasGeom()):
+                if not(element.is_a() in dictObjByType):
+                    dictObjByType[element.is_a()] = IfcObjectsGeom()
                 dictObjByType[element.is_a()].append(obj)
+            logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
             i = i + 1
+        return dictObjByType
 
-        for key in dictObjByType.keys():
-            dictObjByType[key] = IfcObjectsGeom(dictObjByType[key])
+    def is_material_registered(self, material):
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return True
+        return False
 
-        return dictObjByType, centroid
+    def get_material_index(self, material):
+        i = 0
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return i
+            i = i + 1
+        self.add_material(material)
+        return i
 
     @staticmethod
     def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
@@ -438,13 +191,9 @@ class IfcObjectsGeom(FeatureList):
         &#34;&#34;&#34;
         ifc_file = ifcopenshell.open(path_to_file)
 
-        if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-        else:
-            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type(&#39;IfcElement&#39;)
         nb_element = str(len(elements))
-        print(nb_element + &#34; elements to parse&#34;)
+        logging.info(nb_element + &#34; elements to parse&#34;)
 
         groups = ifc_file.by_type(&#34;IFCRELASSIGNSTOGROUP&#34;)
 
@@ -454,14 +203,14 @@ class IfcObjectsGeom(FeatureList):
             for element in group.RelatedObjects:
                 if(element.is_a(&#39;IfcElement&#39;)):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
             if(obj.hasGeom()):
                 elements_not_in_group.append(obj)
         dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -469,7 +218,7 @@ class IfcObjectsGeom(FeatureList):
         for key in dictObjByGroup.keys():
             dictObjByGroup[key] = IfcObjectsGeom(dictObjByGroup[key])
 
-        return dictObjByGroup, centroid</code></pre>
+        return dictObjByGroup</code></pre>
 </details>
 </section>
 <section>
@@ -479,54 +228,6 @@ class IfcObjectsGeom(FeatureList):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.compute2DDirection"><code class="name flex">
-<span>def <span class="ident">compute2DDirection</span></span>(<span>refDirection)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def compute2DDirection(refDirection):
-    return np.array([np.array([refDirection[0], refDirection[1]]), np.array([-refDirection[1], refDirection[0]])])</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.computeDirection"><code class="name flex">
-<span>def <span class="ident">computeDirection</span></span>(<span>axis, refDirection)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def computeDirection(axis, refDirection):
-    # ref to https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcfirstprojaxis.htm
-    # and https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/FINAL/HTML/ifcgeometryresource/lexical/ifcbuildaxes.htm
-    Z = normalize(axis)
-    V = normalize(refDirection)
-    XVec = np.multiply(np.dot(V, Z), Z)
-    XAxis = normalize(np.subtract(V, XVec))
-    return np.array([XAxis, np.cross(Z, XAxis), Z])</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.normalize"><code class="name flex">
-<span>def <span class="ident">normalize</span></span>(<span>v)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    return v / norm</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.unitConversion"><code class="name flex">
 <span>def <span class="ident">unitConversion</span></span>(<span>originalUnit, targetedUnit)</span>
 </code></dt>
@@ -553,7 +254,7 @@ class IfcObjectsGeom(FeatureList):
 <dl>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom"><code class="flex name class">
 <span>class <span class="ident">IfcObjectGeom</span></span>
-<span>(</span><span>ifcObject, originalUnit='m', targetedUnit='m', transform_matrix=None, ifcGroup=None)</span>
+<span>(</span><span>ifcObject, originalUnit='m', targetedUnit='m', ifcGroup=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The base class of all object that need to be tiled, in order to be
@@ -564,19 +265,15 @@ used with the corresponding tiler.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, transform_matrix=None, ifcGroup=None):
+    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
-
-        self.ifcObject = ifcObject
-        self.setIfcClasse(ifcObject.is_a(), ifcGroup)
+        self.setIfcClasse(ifcObject, ifcGroup)
         self.convertionRatio = unitConversion(originalUnit, targetedUnit)
-        self.has_geom = self.parse_geom(transform_matrix)
+        # self.material = None
+        self.has_geom = self.parse_geom(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
-
-    def get_geom_as_triangles(self):
-        return self.geom.triangles[0]
 
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
@@ -587,258 +284,57 @@ used with the corresponding tiler.</p>
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcClasse, ifcGroup):
-        self.ifcClasse = ifcClasse
+    def setIfcClasse(self, ifcObject, ifcGroup):
+        self.ifcClasse = ifcObject.is_a()
+        properties = list()
+        for prop in ifcObject.IsDefinedBy:
+            if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
+                if(prop.RelatingPropertyDefinition.is_a(&#39;IfcPropertySet&#39;)):
+                    props = list()
+                    props.append(prop.RelatingPropertyDefinition.Name)
+                    for propSet in prop.RelatingPropertyDefinition.HasProperties:
+                        if(propSet.is_a(&#39;IfcPropertySingleValue&#39;)):
+                            if(propSet.NominalValue):
+                                props.append([propSet.Name, propSet.NominalValue.wrappedValue])
+                    properties.append(props)
         batch_table_data = {
-            &#39;classe&#39;: ifcClasse,
-            &#39;group&#39;: ifcGroup
+            &#39;classe&#39;: self.ifcClasse,
+            &#39;group&#39;: ifcGroup,
+            &#39;name&#39;: ifcObject.Name,
+            &#39;properties&#39;: properties
         }
         super().set_batchtable_data(batch_table_data)
 
     def getIfcClasse(self):
         return self.ifcClasse
 
-    def computePointsFromRectangleProfileDef(self, sweptArea):
-        points = list()
-        maxX = sweptArea.XDim / 2
-        minX = -maxX
-        maxY = sweptArea.YDim / 2
-        minY = -maxY
-
-        position = sweptArea.Position.Location.Coordinates
-
-        refDirection = [1, 0]
-
-        if (sweptArea.Position.RefDirection):
-            refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-        direction = compute2DDirection(refDirection)
-
-        points.append(np.array([minX, minY]))
-        points.append(np.array([minX, maxY]))
-        points.append(np.array([maxX, maxY]))
-        points.append(np.array([maxX, minY]))
-        points.append(points[0])
-
-        for i in range(len(points)):
-            points[i] = np.dot(np.array(points[i]), direction) + position
-        return points
-
-    def computePointsFromCircleProfileDef(self, sweptArea):
-        radius = sweptArea.Radius
-        position = sweptArea.Position.Location.Coordinates
-
-        refDirection = [1, 0]
-
-        if (sweptArea.Position.RefDirection):
-            refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-        direction = compute2DDirection(refDirection)
-
-        points = list()
-        # The lower this value the higher quality the circle is with more points generated
-        stepSize = 0.1
-        t = 0
-        while t &lt; 2 * math.pi:
-            points.append(np.array([radius * math.cos(t), radius * math.sin(t)]))
-            t += stepSize
-        points.append(points[0])
-
-        for i in range(len(points)):
-            points[i] = np.dot(np.array(points[i]), direction) + position
-        return points
-
-    def getPointsFromOuterCurve(self, outerCurve):
-        if(hasattr(outerCurve, &#39;CoordList&#39;)):
-            return outerCurve.CoordList
-        else:
-            points = list()
-            for point in outerCurve:
-                coord = point.Coordinates
-                points.append(np.array([coord[0], coord[1]]))
-            return points
-
-    def extrudGeom(self, geom):
-        depth = geom.Depth
-        extrudedDirection = geom.ExtrudedDirection.DirectionRatios
-        extrudVector = np.multiply(extrudedDirection, depth)
-
-        position = geom.Position.Location.Coordinates
-
-        axis = [0, 0, 1]
-        refDirection = [1, 0, 0]
-
-        if (geom.Position.Axis):
-            axis = geom.Position.Axis.DirectionRatios
-
-        if (geom.Position.RefDirection):
-            refDirection = geom.Position.RefDirection.DirectionRatios
-
-        direction = computeDirection(axis, refDirection)
-
-        if(geom.SweptArea.is_a(&#39;IfcArbitraryClosedProfileDef&#39;)):
-            if(hasattr(geom.SweptArea.OuterCurve, &#34;Points&#34;)):
-                points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
-            else:
-                return None, None
-        elif(geom.SweptArea.is_a(&#39;IfcRectangleProfileDef&#39;)):
-            points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
-        elif(geom.SweptArea.is_a(&#39;IfcCircleProfileDef&#39;)):
-            points = self.computePointsFromCircleProfileDef(geom.SweptArea)
-        else:
-            return None, None
-
-        center = self.computeCenter(points)
-
-        vertexList = list()
-        indexList = list()
-        for point in points:
-            vertexList.append(np.array([point[0], point[1], 0]))
-        for point in points:
-            vertexList.append(np.array([point[0], point[1], 0]) + extrudVector)
-        vertexList.append(center)
-        vertexList.append(center + extrudVector)
-
-        for i in range(len(vertexList)):
-            vertexList[i] = np.dot(np.array(vertexList[i]), direction) + position
-
-        nb_points = len(points)
-        i = 0
-        for i in range(nb_points - 1):
-            indice = i + 1
-            indexList.append([indice, (nb_points * 2) + 1, indice + 1])
-            indexList.append([indice + nb_points, indice + nb_points + 1, (nb_points * 2) + 2])
-
-        i = 0
-        for i in range(nb_points - 1):
-            indice = i + 1
-            indexList.append([indice, indice + 1, indice + nb_points])
-            indexList.append([indice + 1, indice + nb_points + 1, indice + nb_points])
-
-        return vertexList, indexList
-
-    def getPosition(self, ObjectPlacement):
-        listPosition = list()
-        position = np.array(ObjectPlacement.RelativePlacement.Location.Coordinates)
-        listPosition.append(position)
-        placementRelTo = ObjectPlacement.PlacementRelTo
-
-        while (placementRelTo):
-            if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-                break
-            listPosition.append(np.array(placementRelTo.RelativePlacement.Location.Coordinates))
-            placementRelTo = placementRelTo.PlacementRelTo
-        return listPosition
-
-    def getDirections(self, ObjectPlacement):
-        listDirection = list()
-        axis = [0, 0, 1]
-        if (ObjectPlacement.RelativePlacement.Axis):
-            axis = ObjectPlacement.RelativePlacement.Axis.DirectionRatios
-
-        refDirection = [1, 0, 0]
-        if (ObjectPlacement.RelativePlacement.RefDirection):
-            refDirection = ObjectPlacement.RelativePlacement.RefDirection.DirectionRatios
-
-        listDirection.append(computeDirection(axis, refDirection))
-
-        placementRelTo = ObjectPlacement.PlacementRelTo
-
-        while (placementRelTo):
-            if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-                break
-            axis = [0, 0, 1]
-            if (placementRelTo.RelativePlacement.Axis):
-                axis = placementRelTo.RelativePlacement.Axis.DirectionRatios
-
-            refDirection = [1, 0, 0]
-            if (placementRelTo.RelativePlacement.RefDirection):
-                refDirection = placementRelTo.RelativePlacement.RefDirection.DirectionRatios
-
-            listDirection.append(computeDirection(axis, refDirection))
-            placementRelTo = placementRelTo.PlacementRelTo
-
-        return listDirection
-
-    def getElevation(self):
-        elevation = 0
-        if(self.ifcObject.ContainedInStructure):
-            if(not(self.ifcObject.ContainedInStructure[0].RelatingStructure.is_a(&#34;IfcSpace&#34;))):
-                elevation += (self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation * self.convertionRatio)
-        return elevation
-
-    def parse_indexed_faces(self, Faces):
-        indexListTemp = list()
-
-        for face in Faces:
-            for i in range(1, len(face.CoordIndex) - 1):
-                indexListTemp.append([face.CoordIndex[0], face.CoordIndex[i], face.CoordIndex[i + 1]])
-
-        return indexListTemp
-
-    def parse_geom(self, transform_matrix):
-        if (not(self.ifcObject.Representation)):
+    def parse_geom(self, ifcObject):
+        if (not(ifcObject.Representation)):
             return False
 
-        representations = self.ifcObject.Representation.Representations
-
-        listPosition = self.getPosition(self.ifcObject.ObjectPlacement)
-
-        listDirection = self.getDirections(self.ifcObject.ObjectPlacement)
-
-        offset = np.array(transform_matrix[3])
-        rotation = np.array(transform_matrix[:-1])
-
-        vertexList = list()
-        indexList = list()
-        for representation in representations:
-            if(representation.RepresentationType == &#34;MappedRepresentation&#34;):
-                representation = representation.Items[0].MappingSource.MappedRepresentation
-
-            nb_geom = 0
-            for itemGeom in representation.Items:
-                nb_geom += 1
-                if(nb_geom &gt; 300):
-                    continue
-                indexListTemp = None
-                vertexListTemp = None
-                if(representation.RepresentationType == &#34;Tessellation&#34;):
-                    if(hasattr(itemGeom, &#39;Faces&#39;)):
-                        indexListTemp = self.parse_indexed_faces(itemGeom.Faces)
-                    elif (hasattr(itemGeom, &#39;CoordIndex&#39;)):
-                        indexListTemp = itemGeom.CoordIndex
-                    else:
-                        sys.exit(&#34;Géométrie de ce type non encore gérée&#34;)
-                    vertexListTemp = itemGeom.Coordinates.CoordList
-
-                elif(representation.RepresentationType == &#34;SweptSolid&#34; and not(itemGeom.is_a(&#34;IfcBooleanClippingResult&#34;))):
-                    vertexListTemp, indexListTemp = self.extrudGeom(itemGeom)
-                if(vertexListTemp and indexListTemp):
-                    for index in indexListTemp:
-                        indexList.append([index[0] + len(vertexList), index[1] + len(vertexList), index[2] + len(vertexList)])
-                    for vertex in vertexListTemp:
-                        vertexList.append(np.array([vertex[0], vertex[1], vertex[2]], dtype=np.float32))
-
-        if (len(indexList) == 0):
+        try:
+            settings = geom.settings()
+            settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
+            settings.set(settings.SEW_SHELLS, True)
+            shape = geom.create_shape(settings, ifcObject)
+        except RuntimeError:
+            logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
             return False
 
-        for j in range(len(vertexList)):
-            vertex = vertexList[j]
-            for i in range(len(listDirection)):
-                vertex = np.dot(np.array(vertex), listDirection[i])
-                vertex = (vertex + listPosition[i])
-
-            vertex = vertex * self.convertionRatio
-            vertex = np.dot(np.array(vertex), rotation)
-            vertex += offset
-            vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
+        vertexList = np.reshape(np.array(shape.geometry.verts), (-1, 3))
+        indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
+        if(shape.geometry.materials):
+            ifc_material = shape.geometry.materials[0]
+            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
+                                         alpha=ifc_material.transparency if ifc_material.transparency else 0,
+                                         metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
         triangles = list()
         for index in indexList:
             triangle = []
             for i in range(0, 3):
                 # We store each position for each triangles, as GLTF expect
-                triangle.append(vertexList[index[i] - 1])
+                triangle.append(vertexList[index[i]])
             triangles.append(triangle)
 
         self.geom.triangles.append(triangles)
@@ -875,202 +371,6 @@ used with the corresponding tiler.</p>
     return center / len(pointList)</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromCircleProfileDef"><code class="name flex">
-<span>def <span class="ident">computePointsFromCircleProfileDef</span></span>(<span>self, sweptArea)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def computePointsFromCircleProfileDef(self, sweptArea):
-    radius = sweptArea.Radius
-    position = sweptArea.Position.Location.Coordinates
-
-    refDirection = [1, 0]
-
-    if (sweptArea.Position.RefDirection):
-        refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-    direction = compute2DDirection(refDirection)
-
-    points = list()
-    # The lower this value the higher quality the circle is with more points generated
-    stepSize = 0.1
-    t = 0
-    while t &lt; 2 * math.pi:
-        points.append(np.array([radius * math.cos(t), radius * math.sin(t)]))
-        t += stepSize
-    points.append(points[0])
-
-    for i in range(len(points)):
-        points[i] = np.dot(np.array(points[i]), direction) + position
-    return points</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromRectangleProfileDef"><code class="name flex">
-<span>def <span class="ident">computePointsFromRectangleProfileDef</span></span>(<span>self, sweptArea)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def computePointsFromRectangleProfileDef(self, sweptArea):
-    points = list()
-    maxX = sweptArea.XDim / 2
-    minX = -maxX
-    maxY = sweptArea.YDim / 2
-    minY = -maxY
-
-    position = sweptArea.Position.Location.Coordinates
-
-    refDirection = [1, 0]
-
-    if (sweptArea.Position.RefDirection):
-        refDirection = sweptArea.Position.RefDirection.DirectionRatios
-
-    direction = compute2DDirection(refDirection)
-
-    points.append(np.array([minX, minY]))
-    points.append(np.array([minX, maxY]))
-    points.append(np.array([maxX, maxY]))
-    points.append(np.array([maxX, minY]))
-    points.append(points[0])
-
-    for i in range(len(points)):
-        points[i] = np.dot(np.array(points[i]), direction) + position
-    return points</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.extrudGeom"><code class="name flex">
-<span>def <span class="ident">extrudGeom</span></span>(<span>self, geom)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def extrudGeom(self, geom):
-    depth = geom.Depth
-    extrudedDirection = geom.ExtrudedDirection.DirectionRatios
-    extrudVector = np.multiply(extrudedDirection, depth)
-
-    position = geom.Position.Location.Coordinates
-
-    axis = [0, 0, 1]
-    refDirection = [1, 0, 0]
-
-    if (geom.Position.Axis):
-        axis = geom.Position.Axis.DirectionRatios
-
-    if (geom.Position.RefDirection):
-        refDirection = geom.Position.RefDirection.DirectionRatios
-
-    direction = computeDirection(axis, refDirection)
-
-    if(geom.SweptArea.is_a(&#39;IfcArbitraryClosedProfileDef&#39;)):
-        if(hasattr(geom.SweptArea.OuterCurve, &#34;Points&#34;)):
-            points = self.getPointsFromOuterCurve(geom.SweptArea.OuterCurve.Points)
-        else:
-            return None, None
-    elif(geom.SweptArea.is_a(&#39;IfcRectangleProfileDef&#39;)):
-        points = self.computePointsFromRectangleProfileDef(geom.SweptArea)
-    elif(geom.SweptArea.is_a(&#39;IfcCircleProfileDef&#39;)):
-        points = self.computePointsFromCircleProfileDef(geom.SweptArea)
-    else:
-        return None, None
-
-    center = self.computeCenter(points)
-
-    vertexList = list()
-    indexList = list()
-    for point in points:
-        vertexList.append(np.array([point[0], point[1], 0]))
-    for point in points:
-        vertexList.append(np.array([point[0], point[1], 0]) + extrudVector)
-    vertexList.append(center)
-    vertexList.append(center + extrudVector)
-
-    for i in range(len(vertexList)):
-        vertexList[i] = np.dot(np.array(vertexList[i]), direction) + position
-
-    nb_points = len(points)
-    i = 0
-    for i in range(nb_points - 1):
-        indice = i + 1
-        indexList.append([indice, (nb_points * 2) + 1, indice + 1])
-        indexList.append([indice + nb_points, indice + nb_points + 1, (nb_points * 2) + 2])
-
-    i = 0
-    for i in range(nb_points - 1):
-        indice = i + 1
-        indexList.append([indice, indice + 1, indice + nb_points])
-        indexList.append([indice + 1, indice + nb_points + 1, indice + nb_points])
-
-    return vertexList, indexList</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getDirections"><code class="name flex">
-<span>def <span class="ident">getDirections</span></span>(<span>self, ObjectPlacement)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getDirections(self, ObjectPlacement):
-    listDirection = list()
-    axis = [0, 0, 1]
-    if (ObjectPlacement.RelativePlacement.Axis):
-        axis = ObjectPlacement.RelativePlacement.Axis.DirectionRatios
-
-    refDirection = [1, 0, 0]
-    if (ObjectPlacement.RelativePlacement.RefDirection):
-        refDirection = ObjectPlacement.RelativePlacement.RefDirection.DirectionRatios
-
-    listDirection.append(computeDirection(axis, refDirection))
-
-    placementRelTo = ObjectPlacement.PlacementRelTo
-
-    while (placementRelTo):
-        if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-            break
-        axis = [0, 0, 1]
-        if (placementRelTo.RelativePlacement.Axis):
-            axis = placementRelTo.RelativePlacement.Axis.DirectionRatios
-
-        refDirection = [1, 0, 0]
-        if (placementRelTo.RelativePlacement.RefDirection):
-            refDirection = placementRelTo.RelativePlacement.RefDirection.DirectionRatios
-
-        listDirection.append(computeDirection(axis, refDirection))
-        placementRelTo = placementRelTo.PlacementRelTo
-
-    return listDirection</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getElevation"><code class="name flex">
-<span>def <span class="ident">getElevation</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getElevation(self):
-    elevation = 0
-    if(self.ifcObject.ContainedInStructure):
-        if(not(self.ifcObject.ContainedInStructure[0].RelatingStructure.is_a(&#34;IfcSpace&#34;))):
-            elevation += (self.ifcObject.ContainedInStructure[0].RelatingStructure.Elevation * self.convertionRatio)
-    return elevation</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getIfcClasse"><code class="name flex">
 <span>def <span class="ident">getIfcClasse</span></span>(<span>self)</span>
 </code></dt>
@@ -1082,49 +382,6 @@ used with the corresponding tiler.</p>
 </summary>
 <pre><code class="python">def getIfcClasse(self):
     return self.ifcClasse</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPointsFromOuterCurve"><code class="name flex">
-<span>def <span class="ident">getPointsFromOuterCurve</span></span>(<span>self, outerCurve)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getPointsFromOuterCurve(self, outerCurve):
-    if(hasattr(outerCurve, &#39;CoordList&#39;)):
-        return outerCurve.CoordList
-    else:
-        points = list()
-        for point in outerCurve:
-            coord = point.Coordinates
-            points.append(np.array([coord[0], coord[1]]))
-        return points</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPosition"><code class="name flex">
-<span>def <span class="ident">getPosition</span></span>(<span>self, ObjectPlacement)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getPosition(self, ObjectPlacement):
-    listPosition = list()
-    position = np.array(ObjectPlacement.RelativePlacement.Location.Coordinates)
-    listPosition.append(position)
-    placementRelTo = ObjectPlacement.PlacementRelTo
-
-    while (placementRelTo):
-        if(placementRelTo.PlacesObject[0].is_a(&#34;IfcSite&#34;)):
-            break
-        listPosition.append(np.array(placementRelTo.RelativePlacement.Location.Coordinates))
-        placementRelTo = placementRelTo.PlacementRelTo
-    return listPosition</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id"><code class="name flex">
@@ -1154,7 +411,7 @@ used with the corresponding tiler.</p>
 </details>
 </dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_geom"><code class="name flex">
-<span>def <span class="ident">parse_geom</span></span>(<span>self, transform_matrix)</span>
+<span>def <span class="ident">parse_geom</span></span>(<span>self, ifcObject)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1162,69 +419,33 @@ used with the corresponding tiler.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def parse_geom(self, transform_matrix):
-    if (not(self.ifcObject.Representation)):
+<pre><code class="python">def parse_geom(self, ifcObject):
+    if (not(ifcObject.Representation)):
         return False
 
-    representations = self.ifcObject.Representation.Representations
-
-    listPosition = self.getPosition(self.ifcObject.ObjectPlacement)
-
-    listDirection = self.getDirections(self.ifcObject.ObjectPlacement)
-
-    offset = np.array(transform_matrix[3])
-    rotation = np.array(transform_matrix[:-1])
-
-    vertexList = list()
-    indexList = list()
-    for representation in representations:
-        if(representation.RepresentationType == &#34;MappedRepresentation&#34;):
-            representation = representation.Items[0].MappingSource.MappedRepresentation
-
-        nb_geom = 0
-        for itemGeom in representation.Items:
-            nb_geom += 1
-            if(nb_geom &gt; 300):
-                continue
-            indexListTemp = None
-            vertexListTemp = None
-            if(representation.RepresentationType == &#34;Tessellation&#34;):
-                if(hasattr(itemGeom, &#39;Faces&#39;)):
-                    indexListTemp = self.parse_indexed_faces(itemGeom.Faces)
-                elif (hasattr(itemGeom, &#39;CoordIndex&#39;)):
-                    indexListTemp = itemGeom.CoordIndex
-                else:
-                    sys.exit(&#34;Géométrie de ce type non encore gérée&#34;)
-                vertexListTemp = itemGeom.Coordinates.CoordList
-
-            elif(representation.RepresentationType == &#34;SweptSolid&#34; and not(itemGeom.is_a(&#34;IfcBooleanClippingResult&#34;))):
-                vertexListTemp, indexListTemp = self.extrudGeom(itemGeom)
-            if(vertexListTemp and indexListTemp):
-                for index in indexListTemp:
-                    indexList.append([index[0] + len(vertexList), index[1] + len(vertexList), index[2] + len(vertexList)])
-                for vertex in vertexListTemp:
-                    vertexList.append(np.array([vertex[0], vertex[1], vertex[2]], dtype=np.float32))
-
-    if (len(indexList) == 0):
+    try:
+        settings = geom.settings()
+        settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
+        settings.set(settings.SEW_SHELLS, True)
+        shape = geom.create_shape(settings, ifcObject)
+    except RuntimeError:
+        logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
         return False
 
-    for j in range(len(vertexList)):
-        vertex = vertexList[j]
-        for i in range(len(listDirection)):
-            vertex = np.dot(np.array(vertex), listDirection[i])
-            vertex = (vertex + listPosition[i])
-
-        vertex = vertex * self.convertionRatio
-        vertex = np.dot(np.array(vertex), rotation)
-        vertex += offset
-        vertexList[j] = np.array([round(vertex[0], 5), round(vertex[1], 5), round(vertex[2], 5)], dtype=np.float32)
+    vertexList = np.reshape(np.array(shape.geometry.verts), (-1, 3))
+    indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
+    if(shape.geometry.materials):
+        ifc_material = shape.geometry.materials[0]
+        self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
+                                     alpha=ifc_material.transparency if ifc_material.transparency else 0,
+                                     metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
     triangles = list()
     for index in indexList:
         triangle = []
         for i in range(0, 3):
             # We store each position for each triangles, as GLTF expect
-            triangle.append(vertexList[index[i] - 1])
+            triangle.append(vertexList[index[i]])
         triangles.append(triangle)
 
     self.geom.triangles.append(triangles)
@@ -1234,27 +455,8 @@ used with the corresponding tiler.</p>
     return True</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_indexed_faces"><code class="name flex">
-<span>def <span class="ident">parse_indexed_faces</span></span>(<span>self, Faces)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def parse_indexed_faces(self, Faces):
-    indexListTemp = list()
-
-    for face in Faces:
-        for i in range(1, len(face.CoordIndex) - 1):
-            indexListTemp.append([face.CoordIndex[0], face.CoordIndex[i], face.CoordIndex[i + 1]])
-
-    return indexListTemp</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse"><code class="name flex">
-<span>def <span class="ident">setIfcClasse</span></span>(<span>self, ifcClasse, ifcGroup)</span>
+<span>def <span class="ident">setIfcClasse</span></span>(<span>self, ifcObject, ifcGroup)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1262,11 +464,24 @@ used with the corresponding tiler.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def setIfcClasse(self, ifcClasse, ifcGroup):
-    self.ifcClasse = ifcClasse
+<pre><code class="python">def setIfcClasse(self, ifcObject, ifcGroup):
+    self.ifcClasse = ifcObject.is_a()
+    properties = list()
+    for prop in ifcObject.IsDefinedBy:
+        if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
+            if(prop.RelatingPropertyDefinition.is_a(&#39;IfcPropertySet&#39;)):
+                props = list()
+                props.append(prop.RelatingPropertyDefinition.Name)
+                for propSet in prop.RelatingPropertyDefinition.HasProperties:
+                    if(propSet.is_a(&#39;IfcPropertySingleValue&#39;)):
+                        if(propSet.NominalValue):
+                            props.append([propSet.Name, propSet.NominalValue.wrappedValue])
+                properties.append(props)
     batch_table_data = {
-        &#39;classe&#39;: ifcClasse,
-        &#39;group&#39;: ifcGroup
+        &#39;classe&#39;: self.ifcClasse,
+        &#39;group&#39;: ifcGroup,
+        &#39;name&#39;: ifcObject.Name,
+        &#39;properties&#39;: properties
     }
     super().set_batchtable_data(batch_table_data)</code></pre>
 </details>
@@ -1325,39 +540,6 @@ used with the corresponding tiler.</p>
         super().__init__(objs)
 
     @staticmethod
-    def getCentroid(ifcMapConversion):
-        location = (ifcMapConversion.Eastings, ifcMapConversion.Northings, ifcMapConversion.OrthogonalHeight)
-
-        centroid = [[0, ifcMapConversion.XAxisAbscissa, 0],
-                    [-ifcMapConversion.XAxisOrdinate, 0, 0],
-                    [0, 0, 1],
-                    [location[0], location[1], location[2]]]
-        return centroid
-
-    @staticmethod
-    def computeCentroid(ifcSite, unitRatio):
-        elevation = ifcSite.RefElevation
-        placement = ifcSite.ObjectPlacement.RelativePlacement
-        location = placement.Location.Coordinates
-        location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation))
-
-        if(placement.Axis is None):
-            axis = [0, 0, 1]
-        else:
-            axis = placement.Axis.DirectionRatios
-        if(placement.RefDirection is None):
-            refDirection = [1, 0, 0]
-        else:
-            refDirection = placement.RefDirection.DirectionRatios
-
-        direction = computeDirection(axis, refDirection)
-        centroid = [[direction[0][0], direction[0][1], direction[0][2]],
-                    [direction[1][0], direction[1][1], direction[1][2]],
-                    [direction[2][0], direction[2][1], direction[2][2]],
-                    [location[0], location[1], location[2]]]
-        return centroid
-
-    @staticmethod
     def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
         &#34;&#34;&#34;
         :param path: a path to a directory
@@ -1366,28 +548,38 @@ used with the corresponding tiler.</p>
         &#34;&#34;&#34;
         ifc_file = ifcopenshell.open(path_to_file)
 
-        if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-        else:
-            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type(&#39;IfcElement&#39;)
         nb_element = str(len(elements))
-        print(nb_element + &#34; elements to parse&#34;)
+        logging.info(nb_element + &#34; elements to parse&#34;)
         i = 1
         dictObjByType = dict()
         for element in elements:
-            print(&#34;\r&#34; + str(i) + &#34; / &#34; + nb_element, end=&#39;&#39;, flush=True)
-            if not(element.is_a() in dictObjByType):
-                dictObjByType[element.is_a()] = list()
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+            start_time = time.time()
+            logging.info(str(i) + &#34; / &#34; + nb_element)
+            logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
             if(obj.hasGeom()):
+                if not(element.is_a() in dictObjByType):
+                    dictObjByType[element.is_a()] = IfcObjectsGeom()
                 dictObjByType[element.is_a()].append(obj)
+            logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
             i = i + 1
+        return dictObjByType
 
-        for key in dictObjByType.keys():
-            dictObjByType[key] = IfcObjectsGeom(dictObjByType[key])
+    def is_material_registered(self, material):
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return True
+        return False
 
-        return dictObjByType, centroid
+    def get_material_index(self, material):
+        i = 0
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return i
+            i = i + 1
+        self.add_material(material)
+        return i
 
     @staticmethod
     def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
@@ -1398,13 +590,9 @@ used with the corresponding tiler.</p>
         &#34;&#34;&#34;
         ifc_file = ifcopenshell.open(path_to_file)
 
-        if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-            centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-        else:
-            centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
         elements = ifc_file.by_type(&#39;IfcElement&#39;)
         nb_element = str(len(elements))
-        print(nb_element + &#34; elements to parse&#34;)
+        logging.info(nb_element + &#34; elements to parse&#34;)
 
         groups = ifc_file.by_type(&#34;IFCRELASSIGNSTOGROUP&#34;)
 
@@ -1414,14 +602,14 @@ used with the corresponding tiler.</p>
             for element in group.RelatedObjects:
                 if(element.is_a(&#39;IfcElement&#39;)):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
             if(obj.hasGeom()):
                 elements_not_in_group.append(obj)
         dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -1429,7 +617,7 @@ used with the corresponding tiler.</p>
         for key in dictObjByGroup.keys():
             dictObjByGroup[key] = IfcObjectsGeom(dictObjByGroup[key])
 
-        return dictObjByGroup, centroid</code></pre>
+        return dictObjByGroup</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1437,59 +625,6 @@ used with the corresponding tiler.</p>
 </ul>
 <h3>Static methods</h3>
 <dl>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.computeCentroid"><code class="name flex">
-<span>def <span class="ident">computeCentroid</span></span>(<span>ifcSite, unitRatio)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def computeCentroid(ifcSite, unitRatio):
-    elevation = ifcSite.RefElevation
-    placement = ifcSite.ObjectPlacement.RelativePlacement
-    location = placement.Location.Coordinates
-    location = (location[0] * unitRatio, location[1] * unitRatio, (location[2] + elevation))
-
-    if(placement.Axis is None):
-        axis = [0, 0, 1]
-    else:
-        axis = placement.Axis.DirectionRatios
-    if(placement.RefDirection is None):
-        refDirection = [1, 0, 0]
-    else:
-        refDirection = placement.RefDirection.DirectionRatios
-
-    direction = computeDirection(axis, refDirection)
-    centroid = [[direction[0][0], direction[0][1], direction[0][2]],
-                [direction[1][0], direction[1][1], direction[1][2]],
-                [direction[2][0], direction[2][1], direction[2][2]],
-                [location[0], location[1], location[2]]]
-    return centroid</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.getCentroid"><code class="name flex">
-<span>def <span class="ident">getCentroid</span></span>(<span>ifcMapConversion)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def getCentroid(ifcMapConversion):
-    location = (ifcMapConversion.Eastings, ifcMapConversion.Northings, ifcMapConversion.OrthogonalHeight)
-
-    centroid = [[0, ifcMapConversion.XAxisAbscissa, 0],
-                [-ifcMapConversion.XAxisOrdinate, 0, 0],
-                [0, 0, 1],
-                [location[0], location[1], location[2]]]
-    return centroid</code></pre>
-</details>
-</dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup"><code class="name flex">
 <span>def <span class="ident">retrievObjByGroup</span></span>(<span>path_to_file, originalUnit='m', targetedUnit='m')</span>
 </code></dt>
@@ -1509,13 +644,9 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
     &#34;&#34;&#34;
     ifc_file = ifcopenshell.open(path_to_file)
 
-    if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-        centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-    else:
-        centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
     elements = ifc_file.by_type(&#39;IfcElement&#39;)
     nb_element = str(len(elements))
-    print(nb_element + &#34; elements to parse&#34;)
+    logging.info(nb_element + &#34; elements to parse&#34;)
 
     groups = ifc_file.by_type(&#34;IFCRELASSIGNSTOGROUP&#34;)
 
@@ -1525,14 +656,14 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
         for element in group.RelatedObjects:
             if(element.is_a(&#39;IfcElement&#39;)):
                 elements.remove(element)
-                obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid, group.RelatingGroup.Name)
+                obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
                 if(obj.hasGeom()):
                     elements_in_group.append(obj)
         dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
     elements_not_in_group = list()
     for element in elements:
-        obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+        obj = IfcObjectGeom(element, originalUnit, targetedUnit)
         if(obj.hasGeom()):
             elements_not_in_group.append(obj)
     dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -1540,7 +671,7 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
     for key in dictObjByGroup.keys():
         dictObjByGroup[key] = IfcObjectsGeom(dictObjByGroup[key])
 
-    return dictObjByGroup, centroid</code></pre>
+    return dictObjByGroup</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType"><code class="name flex">
@@ -1562,28 +693,61 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
     &#34;&#34;&#34;
     ifc_file = ifcopenshell.open(path_to_file)
 
-    if(ifc_file.by_type(&#34;IfcMapConversion&#34;)):
-        centroid = IfcObjectsGeom.getCentroid(ifc_file.by_type(&#34;IfcMapConversion&#34;)[0])
-    else:
-        centroid = IfcObjectsGeom.computeCentroid(ifc_file.by_type(&#39;IfcSite&#39;)[0], unitConversion(originalUnit, targetedUnit))
     elements = ifc_file.by_type(&#39;IfcElement&#39;)
     nb_element = str(len(elements))
-    print(nb_element + &#34; elements to parse&#34;)
+    logging.info(nb_element + &#34; elements to parse&#34;)
     i = 1
     dictObjByType = dict()
     for element in elements:
-        print(&#34;\r&#34; + str(i) + &#34; / &#34; + nb_element, end=&#39;&#39;, flush=True)
-        if not(element.is_a() in dictObjByType):
-            dictObjByType[element.is_a()] = list()
-        obj = IfcObjectGeom(element, originalUnit, targetedUnit, centroid)
+        start_time = time.time()
+        logging.info(str(i) + &#34; / &#34; + nb_element)
+        logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
+        obj = IfcObjectGeom(element, originalUnit, targetedUnit)
         if(obj.hasGeom()):
+            if not(element.is_a() in dictObjByType):
+                dictObjByType[element.is_a()] = IfcObjectsGeom()
             dictObjByType[element.is_a()].append(obj)
+        logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
         i = i + 1
-
-    for key in dictObjByType.keys():
-        dictObjByType[key] = IfcObjectsGeom(dictObjByType[key])
-
-    return dictObjByType, centroid</code></pre>
+    return dictObjByType</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index"><code class="name flex">
+<span>def <span class="ident">get_material_index</span></span>(<span>self, material)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_material_index(self, material):
+    i = 0
+    for mat in self.materials:
+        if(mat.rgba == material.rgba).all():
+            return i
+        i = i + 1
+    self.add_material(material)
+    return i</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered"><code class="name flex">
+<span>def <span class="ident">is_material_registered</span></span>(<span>self, material)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_material_registered(self, material):
+    for mat in self.materials:
+        if(mat.rgba == material.rgba).all():
+            return True
+    return False</code></pre>
 </details>
 </dd>
 </dl>
@@ -1595,7 +759,7 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
@@ -1604,6 +768,7 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.translate_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.translate_features">translate_features</a></code></li>
@@ -1627,9 +792,6 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.compute2DDirection" href="#py3dtilers.IfcTiler.ifcObjectGeom.compute2DDirection">compute2DDirection</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.computeDirection" href="#py3dtilers.IfcTiler.ifcObjectGeom.computeDirection">computeDirection</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.normalize" href="#py3dtilers.IfcTiler.ifcObjectGeom.normalize">normalize</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.unitConversion" href="#py3dtilers.IfcTiler.ifcObjectGeom.unitConversion">unitConversion</a></code></li>
 </ul>
 </li>
@@ -1637,20 +799,12 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 <ul>
 <li>
 <h4><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom">IfcObjectGeom</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computeCenter" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computeCenter">computeCenter</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromCircleProfileDef" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromCircleProfileDef">computePointsFromCircleProfileDef</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromRectangleProfileDef" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computePointsFromRectangleProfileDef">computePointsFromRectangleProfileDef</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.extrudGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.extrudGeom">extrudGeom</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getDirections" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getDirections">getDirections</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getElevation" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getElevation">getElevation</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getIfcClasse" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getIfcClasse">getIfcClasse</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPointsFromOuterCurve" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPointsFromOuterCurve">getPointsFromOuterCurve</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPosition" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getPosition">getPosition</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id">get_obj_id</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.hasGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.hasGeom">hasGeom</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_geom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_geom">parse_geom</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_indexed_faces" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_indexed_faces">parse_indexed_faces</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse">setIfcClasse</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.set_obj_id" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.set_obj_id">set_obj_id</a></code></li>
 </ul>
@@ -1658,8 +812,8 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 <li>
 <h4><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom">IfcObjectsGeom</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.computeCentroid" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.computeCentroid">computeCentroid</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.getCentroid" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.getCentroid">getCentroid</a></code></li>
+<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index">get_material_index</a></code></li>
+<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup">retrievObjByGroup</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType">retrievObjByType</a></code></li>
 </ul>

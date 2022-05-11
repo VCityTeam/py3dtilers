@@ -52,11 +52,13 @@ class CityMBridges(CityMCityObjects):
         super().__init__(objects)
 
     @staticmethod
-    def sql_query_objects(bridges):
+    def sql_query_objects(bridges, citygml_ids=list()):
         &#34;&#34;&#34;
         :param bridges: a list of CityMbridge type object that should be sought
                         in the database. When this list is empty all the objects
                         encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
 
         :return: a string containing the right SQL query that should be executed.
         &#34;&#34;&#34;
@@ -66,6 +68,9 @@ class CityMBridges(CityMCityObjects):
             query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
         else:
             bridge_gmlids = [n.get_gml_id() for n in bridges]
             bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
@@ -240,11 +245,13 @@ class CityMBridges(CityMCityObjects):
         super().__init__(objects)
 
     @staticmethod
-    def sql_query_objects(bridges):
+    def sql_query_objects(bridges, citygml_ids=list()):
         &#34;&#34;&#34;
         :param bridges: a list of CityMbridge type object that should be sought
                         in the database. When this list is empty all the objects
                         encountered in the database are returned.
+        :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                        only the objects of the list
 
         :return: a string containing the right SQL query that should be executed.
         &#34;&#34;&#34;
@@ -254,6 +261,9 @@ class CityMBridges(CityMCityObjects):
             query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                     &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                     &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
+            if len(citygml_ids) &gt; 0:
+                citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+                query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
         else:
             bridge_gmlids = [n.get_gml_id() for n in bridges]
             bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
@@ -475,23 +485,27 @@ def sql_query_geometries_with_texture_coordinates(bridges_ids_arg):
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.citym_bridge.CityMBridges.sql_query_objects"><code class="name flex">
-<span>def <span class="ident">sql_query_objects</span></span>(<span>bridges)</span>
+<span>def <span class="ident">sql_query_objects</span></span>(<span>bridges, citygml_ids=[])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param bridges: a list of CityMbridge type object that should be sought
 in the database. When this list is empty all the objects
-encountered in the database are returned.</p>
+encountered in the database are returned.
+:param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep
+only the objects of the list</p>
 <p>:return: a string containing the right SQL query that should be executed.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def sql_query_objects(bridges):
+def sql_query_objects(bridges, citygml_ids=list()):
     &#34;&#34;&#34;
     :param bridges: a list of CityMbridge type object that should be sought
                     in the database. When this list is empty all the objects
                     encountered in the database are returned.
+    :param citygml_ids: a list of cityGML IDs. If the list isn&#39;t empty, we keep
+                    only the objects of the list
 
     :return: a string containing the right SQL query that should be executed.
     &#34;&#34;&#34;
@@ -501,6 +515,9 @@ def sql_query_objects(bridges):
         query = &#34;SELECT bridge.id, cityobject.gmlid &#34; + \
                 &#34;FROM citydb.bridge JOIN citydb.cityobject ON bridge.id=cityobject.id &#34; + \
                 &#34;WHERE bridge.id=bridge.bridge_root_id&#34;
+        if len(citygml_ids) &gt; 0:
+            citygml_ids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(citygml_ids) + &#34;&#39;)&#34;
+            query += &#34; AND cityobject.gmlid IN &#34; + citygml_ids_as_string
     else:
         bridge_gmlids = [n.get_gml_id() for n in bridges]
         bridge_gmlids_as_string = &#34;(&#39;&#34; + &#34;&#39;, &#39;&#34;.join(bridge_gmlids) + &#34;&#39;)&#34;
@@ -521,7 +538,7 @@ def sql_query_objects(bridges):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_bounding_volume_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension">create_bounding_volume_extension</a></code></li>
-<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_objects_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_objects_ref">delete_objects_ref</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.delete_features_ref" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.delete_features_ref">delete_features_ref</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_centroid" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_centroid">get_centroid</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_cursor">get_cursor</a></code></li>
@@ -536,6 +553,7 @@ def sql_query_objects(bridges):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_cursor">set_cursor</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_features_geom" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features_geom">set_features_geom</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.set_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_materials">set_materials</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.sql_query_textures">sql_query_textures</a></code></li>

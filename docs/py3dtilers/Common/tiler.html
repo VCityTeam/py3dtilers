@@ -157,7 +157,7 @@ class Tiler():
         geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
         tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-        feature_list.delete_objects_ref()
+        feature_list.delete_features_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
@@ -321,7 +321,7 @@ class Tiler():
         geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
         tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-        feature_list.delete_objects_ref()
+        feature_list.delete_features_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
@@ -345,7 +345,7 @@ class Tiler():
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="py3dtilers.CityTiler.CityTiler.CityTiler" href="../CityTiler/CityTiler.html#py3dtilers.CityTiler.CityTiler.CityTiler">CityTiler</a></li>
+<li>py3dtilers.CityTiler.CityTiler.CityTiler</li>
 <li><a title="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler" href="../GeojsonTiler/GeojsonTiler.html#py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler">GeojsonTiler</a></li>
 <li><a title="py3dtilers.IfcTiler.IfcTiler.IfcTiler" href="../IfcTiler/IfcTiler.html#py3dtilers.IfcTiler.IfcTiler.IfcTiler">IfcTiler</a></li>
 <li><a title="py3dtilers.ObjTiler.ObjTiler.ObjTiler" href="../ObjTiler/ObjTiler.html#py3dtilers.ObjTiler.ObjTiler.ObjTiler">ObjTiler</a></li>
@@ -406,7 +406,7 @@ class Tiler():
     geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
     tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-    feature_list.delete_objects_ref()
+    feature_list.delete_features_ref()
     self.create_output_directory()
     return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())</code></pre>
 </details>
