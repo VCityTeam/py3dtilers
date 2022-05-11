@@ -1,8 +1,5 @@
 import logging
-from statistics import mode
 import time
-from py3dtiles import BoundingVolumeBox
-import numpy as np
 from ..Common import Tiler
 from .ifcObjectGeom import IfcObjectsGeom
 

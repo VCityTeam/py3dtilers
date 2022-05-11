@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys
 import logging
-import math
 import time
 import numpy as np
 import ifcopenshell
