@@ -133,8 +133,8 @@ class Geojson(Feature):
         vertices = [None] * (2 * length)
 
         for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], coord[2]], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32)
+            vertices[i] = np.array([coord[0], coord[1], coord[2]])
+            vertices[i + length] = np.array([coord[0], coord[1], coord[2] + height])
 
         # Triangulate the feature footprint
         if self.custom_triangulation:
@@ -144,7 +144,7 @@ class Geojson(Feature):
 
         # Create upper face triangles
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], coord[2] + height], dtype=np.float32) for coord in tri]
+            upper_tri = [np.array([coord[0], coord[1], coord[2] + height]) for coord in tri]
             triangles.append(upper_tri)
 
         # Create side triangles

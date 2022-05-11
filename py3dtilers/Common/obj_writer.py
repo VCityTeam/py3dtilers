@@ -81,7 +81,7 @@ class ObjWriter():
         V = triangle[2] - triangle[0]
         N = np.cross(U, V)
         norm = np.linalg.norm(N)
-        return np.array([0, 0, 1], dtype=np.float32) if norm == 0 else N / norm
+        return np.array([0, 0, 1]) if norm == 0 else N / norm
 
     def add_triangle(self, triangle):
         """

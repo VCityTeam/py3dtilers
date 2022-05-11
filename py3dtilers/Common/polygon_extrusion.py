@@ -68,8 +68,8 @@ class ExtrudedPolygon(Feature):
         maxZ = self.max_height
 
         for i, coord in enumerate(coordinates):
-            vertices[i] = np.array([coord[0], coord[1], minZ], dtype=np.float32)
-            vertices[i + length] = np.array([coord[0], coord[1], maxZ], dtype=np.float32)
+            vertices[i] = np.array([coord[0], coord[1], minZ])
+            vertices[i + length] = np.array([coord[0], coord[1], maxZ])
 
         # Contains the triangles vertices. Used to create 3D tiles
         triangles = list()
@@ -79,7 +79,7 @@ class ExtrudedPolygon(Feature):
 
         # Create upper face triangles
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], maxZ], dtype=np.float32) for coord in tri]
+            upper_tri = [np.array([coord[0], coord[1], maxZ]) for coord in tri]
             triangles.append(upper_tri)
 
         # Create side triangles

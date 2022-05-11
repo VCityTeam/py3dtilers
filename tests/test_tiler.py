@@ -13,29 +13,29 @@ def get_default_namespace():
                      output_dir=None, geometric_error=[None, None, None], kd_tree_max=None)
 
 
-triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
-              np.array([1843466, 5174373, 400], dtype=np.float32),
-              np.array([1843566, 5174473, 200], dtype=np.float32)],
+triangles = [[np.array([1843366, 5174473, 200]),
+              np.array([1843466, 5174373, 400]),
+              np.array([1843566, 5174473, 200])],
 
-             [np.array([1843566, 5174473, 200], dtype=np.float32),
-              np.array([1843466, 5174373, 400], dtype=np.float32),
-              np.array([1843566, 5174273, 200], dtype=np.float32)],
+             [np.array([1843566, 5174473, 200]),
+              np.array([1843466, 5174373, 400]),
+              np.array([1843566, 5174273, 200])],
 
-             [np.array([1843566, 5174273, 200], dtype=np.float32),
-              np.array([1843466, 5174373, 400], dtype=np.float32),
-              np.array([1843366, 5174273, 200], dtype=np.float32)],
+             [np.array([1843566, 5174273, 200]),
+              np.array([1843466, 5174373, 400]),
+              np.array([1843366, 5174273, 200])],
 
-             [np.array([1843366, 5174273, 200], dtype=np.float32),
-              np.array([1843466, 5174373, 400], dtype=np.float32),
-              np.array([1843366, 5174473, 200], dtype=np.float32)],
+             [np.array([1843366, 5174273, 200]),
+              np.array([1843466, 5174373, 400]),
+              np.array([1843366, 5174473, 200])],
 
-             [np.array([1843366, 5174473, 200], dtype=np.float32),
-              np.array([1843566, 5174473, 200], dtype=np.float32),
-              np.array([1843366, 5174273, 200], dtype=np.float32)],
+             [np.array([1843366, 5174473, 200]),
+              np.array([1843566, 5174473, 200]),
+              np.array([1843366, 5174273, 200])],
 
-             [np.array([1843566, 5174473, 200], dtype=np.float32),
-              np.array([1843566, 5174273, 200], dtype=np.float32),
-              np.array([1843366, 5174273, 200], dtype=np.float32)]]
+             [np.array([1843566, 5174473, 200]),
+              np.array([1843566, 5174273, 200]),
+              np.array([1843366, 5174273, 200])]]
 
 
 class Test_Tile(unittest.TestCase):

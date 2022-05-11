@@ -224,12 +224,12 @@ The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/mas
 To set the triangles of a `Feature` instance, use:  
 
 ```python
-triangles = [[np.array([0., 0., 0.], dtype=np.float32), # First triangle
-              np.array([1., 0., 0.], dtype=np.float32),
-              np.array([1., 1., 0.], dtype=np.float32)],
-             [np.array([0., 0., 1.], dtype=np.float32), # Second triangle
-              np.array([1., 0., 1.], dtype=np.float32),
-              np.array([1., 1., 1.], dtype=np.float32)]] # Each np.array is a vertex with [x, y, z] coordinates
+triangles = [[np.array([0., 0., 0.]), # First triangle
+              np.array([1., 0., 0.]),
+              np.array([1., 1., 0.])],
+             [np.array([0., 0., 1.]), # Second triangle
+              np.array([1., 0., 1.]),
+              np.array([1., 1., 1.])]] # Each np.array is a vertex with [x, y, z] coordinates
 feature = Feature("id")
 feature.geom.triangles.append()
 ```

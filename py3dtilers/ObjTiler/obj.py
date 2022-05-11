@@ -55,21 +55,21 @@ class Obj(Feature):
         # Contains only vertex positions
         if mesh.materials[0].vertex_format == 'V3F':
             for i in range(0, length, 9):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i, i + 9, 3)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
         # Contains texture and vertex positions
         elif mesh.materials[0].vertex_format == 'T2F_V3F':
             for i in range(0, length, 15):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 2, i + 17, 5)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 2, i + 17, 5)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 15, 5)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 15, 5)]
                 uvs.append(uv)
         # Contains texture/vertex positions and normals
         elif mesh.materials[0].vertex_format == 'T2F_N3F_V3F':
             for i in range(0, length, 24):
-                triangle = [np.array(vertices[n:n + 3], dtype=np.float32) for n in range(i + 5, i + 29, 8)]
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 5, i + 29, 8)]
                 triangles.append(triangle)
-                uv = [np.array([vertices[n], 1 - vertices[n + 1]], dtype=np.float32) for n in range(i, i + 24, 8)]
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
         else:
             return False

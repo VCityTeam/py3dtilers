@@ -173,4 +173,4 @@ class Node(object):
                 new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
                 # warning : in order to be written correctly, the GLTF writter
                 # expects data to be in float32
-                uvs[i][y] = np.array([new_u, new_v], dtype=np.float32)
+                uvs[i][y] = np.array([new_u, new_v])
