@@ -11,6 +11,7 @@ class ObjWriter():
         self.vertices = list()
         self.normals = list()
         self.triangles = list()
+        self.colors = list()
         self.vertex_indexes_dict = {}
         self.normal_indexes_dict = {}
         self._vertex_index = 0
@@ -27,7 +28,7 @@ class ObjWriter():
         self._normal_index += 1
         return self._normal_index
 
-    def get_vertex_index(self, vertex):
+    def get_vertex_index(self, vertex, color):
         """
         Return the index associated to a vertex.
         If no index is associated to the vertex, create a new index and add the vertex to the OBJ's vertices.
@@ -38,6 +39,7 @@ class ObjWriter():
         if not tuple(vertex) in self.vertex_indexes_dict:
             self.vertex_indexes_dict[tuple(vertex)] = self.vertex_index
             self.vertices.append(vertex)
+            self.colors.append(color)
         return self.vertex_indexes_dict[tuple(vertex)]
 
     def get_normal_index(self, normal):
@@ -65,7 +67,7 @@ class ObjWriter():
         norm = np.linalg.norm(N)
         return np.array([0, 0, 1]) if norm == 0 else N / norm
 
-    def add_triangle(self, triangle, offset=np.array([0, 0, 0])):
+    def add_triangle(self, triangle, color, offset=np.array([0, 0, 0])):
         """
         Add a triangle to the OBJ.
         An offset can be added to the triangle.
@@ -74,10 +76,12 @@ class ObjWriter():
         """
         vertex_indexes = list()
         normal_indexes = list()
+
         normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            vertex_indexes.append(self.get_vertex_index(vertex + offset))
+            vertex_indexes.append(self.get_vertex_index(vertex + offset, color))
             normal_indexes.append(self.get_normal_index(normal))
+
         self.triangles.append([vertex_indexes, normal_indexes])
 
     def add_geometries(self, feature_list, offset=np.array([0, 0, 0])):
@@ -89,7 +93,7 @@ class ObjWriter():
         """
         for geometry in feature_list:
             for triangle in geometry.get_geom_as_triangles():
-                self.add_triangle(triangle, offset)
+                self.add_triangle(triangle, offset, feature_list.materials[geometry.material_index].rgba)
 
     def write_obj(self, file_name):
         """
@@ -100,8 +104,8 @@ class ObjWriter():
         f = open(file_name, "w")
         f.write("# " + str(file_name) + "\n")
 
-        for vertex in self.vertices:
-            f.write("v " + str(vertex[0]) + " " + str(vertex[1]) + " " + str(vertex[2]) + "\n")
+        for vertex,color in zip(self.vertices,self.colors):
+            f.write("v " + str(vertex[0]) + " " + str(vertex[1]) + " " + str(vertex[2]) + " " + str(color[0]) + " " + str(color[1]) + " " + str(color[2]) +  "\n")
 
         for normal in self.normals:
             f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")

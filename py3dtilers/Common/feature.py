@@ -229,12 +229,46 @@ class FeatureList(object):
         """
         self.materials.extend(materials)
 
+    def add_material(self, material):
+        """
+        Extend the materials of this object with a GltF material.
+        :param material: a GlTFMaterial
+        """
+        self.materials.append(material)
+
     def get_material(self, index):
         """
         Get the material at the index.
         :param index: the index (int) of the material
+        :return: a glTF material
         """
         return self.materials[index]
+
+    def is_material_registered(self, material):
+        """
+        Check if a material is already set in materials array
+        :param material: a GlTFMaterial
+        :return: bool
+        """
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return True
+        return False
+
+    def get_material_index(self, material):
+        """
+        Get the index of a given material. 
+        Add it to the materials array if it is not found
+        :param material: a GlTFMaterial
+        :return: an index as int
+        """
+        i = 0
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return i
+            i = i + 1
+        self.add_material(material)
+        return i
 
     def translate_features(self, offset):
         """
