@@ -9,8 +9,8 @@ class Texture():
     """
 
     folder = None
-    quality = 95
-    compress_level = 6
+    quality = 95  # 95 is considred the best because 100 disables some portions of jpeg compression
+    compress_level = 0
 
     def __init__(self, image_path):
         """

@@ -142,10 +142,16 @@ Project the features on another CRS. The `crs_in` flag allows to specify the inp
 | IfcTiler | :x: |
 | TilesetTiler | :heavy_check_mark: |
 
-Read the texture from the input and write it in the produced 3DTiles:
+Read the texture from the input and write it in image atlases (JPEG files):
 
 ```bash
 <tiler> <input> --with_texture
+```
+
+You can choose the quality and the level of compression of the textures with the flags `--quality` and `--compress_level`. Quality varies between 1 and 100, where 100 is the maximum quality. Compression level varies between 0 and 9, where 9 is the maximum level and compression and where 0 doesn't compress the texture. By default, the quality of the textures is set to 95 and the compress level to 0.
+
+```bash
+<tiler> <input> --with_texture --quality 10 --compress_level 6
 ```
 
 _Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max)._

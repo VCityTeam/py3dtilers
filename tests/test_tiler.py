@@ -5,6 +5,7 @@ from pathlib import Path
 
 from py3dtilers.Common.tiler import Tiler
 from py3dtilers.Common.feature import Feature, FeatureList
+from py3dtilers.Texture import Texture
 
 
 def get_default_namespace():
@@ -36,6 +37,13 @@ triangles = [[np.array([1843366, 5174473, 200], dtype=np.float32),
              [np.array([1843566, 5174473, 200], dtype=np.float32),
               np.array([1843566, 5174273, 200], dtype=np.float32),
               np.array([1843366, 5174273, 200], dtype=np.float32)]]
+
+uvs = [[np.array([0, 0]), np.array([0, 0]), np.array([0, 1])],
+       [np.array([1, 1]), np.array([1, 0.5]), np.array([1, 0])],
+       [np.array([0, 0]), np.array([0, 0]), np.array([0, 1])],
+       [np.array([1, 1]), np.array([1, 0.5]), np.array([1, 0])],
+       [np.array([0, 0]), np.array([0, 0]), np.array([0, 1])],
+       [np.array([1, 1]), np.array([1, 0.5]), np.array([1, 0])]]
 
 
 class Test_Tile(unittest.TestCase):
@@ -187,6 +195,26 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/kd_tree_max')
         tiler.args.kd_tree_max = 1
+
+        tileset = tiler.create_tileset_from_geometries(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_with_texture(self):
+        feature = Feature("with_texture")
+        feature.geom.triangles.append(triangles)
+        feature.geom.triangles.append(uvs)
+        texture = Texture(Path('tests/tiler_test_data/texture.jpg'))
+        feature.set_texture(texture.get_cropped_texture_image(feature.geom.triangles[1]))
+        feature.set_box()
+        feature_list = FeatureList([feature])
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/with_texture')
+        tiler.args.with_texture = True
+        tiler.args.quality = 10
+        tiler.args.compress_level = 5
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 
