@@ -8,11 +8,12 @@ from shapely.geometry import Polygon
 class ExtrudedPolygon(Feature):
     def __init__(self, id, features, polygon=None):
         """
-        Creates a 3D extrusion of the footprint of a Feature
-        :param feature: an instance of Feature containing triangles
-        :param override_points: when true, the polygon extruded won't be the footprint
-        but another polygon
-        :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
+        Creates a 3D extrusion of the footprint of a list of features.
+        The height and the altitude of the 3D model will be computed using the triangles of the features.
+        If a polygon is given, it will be extruded instead of the footprint.
+        :param id: the ID of the instance
+        :param features: a list of features
+        :param polygon: the polygon that will be extruded instead of the footprint
         """
         super().__init__(id)
         self.polygon = polygon

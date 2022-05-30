@@ -274,20 +274,24 @@ obj_writer.write_obj(file_name)
 
 ## [polygon_extrusion](polygon_extrusion.py)
 
-An instance of _ExtrudedPolygon_ contains a footprint (a polygon as list of points, and a point is a list of float), a minimal height and a maximal height.
+`ExtrudedPolygon` inherits from `Feature` class. Its constructor takes:
 
-The static method `create_footprint_extrusion` from _ExtrudedPolygon_ allows to create a `Feature` instance which is the extrusion of the footprint of another `Feature` instance. The height of the extrusion will be _max height - min height_ of the _ExtrudedPolygon_
+- an ID
+- a list of features
+- (optionally) a polygon as list of points
+
+Using the `set_geom` method of an instance of `ExtrudedPolygon` will create a 3D model by computing the footprint of the features then extruding this footprint. If the `ExtrudedPolygon` has a polygon, this polygon will be used instead of the footprint.
 
 To create an extrusion, use:
 
 ```python
-extruded_object = ExtrudedPolygon.create_footprint_extrusion(feature)
+extruded_polygon = ExtrudedPolygon("ep_1", [feature])
+extruded_polygon.set_geom()  # it will extrude the footprint of the feature
 ```
 
-_Note_: the footprint to extrude is computed from the `feature` param, but you can give another polygon to extrude (that will replace the footprint):
-
 ```python
-extruded_object = ExtrudedPolygon.create_footprint_extrusion(feature, override_points=True, polygon=points)
+extruded_polygon = ExtrudedPolygon("ep_2", [feature_1, feature_2], polygon=polygon)
+extruded_polygon.set_geom()  # it will extrude the polygon, but it will use the geometries of the feature to compute the altitude and the height of the 3D model
 ```
 
 ## [group](group.py)
