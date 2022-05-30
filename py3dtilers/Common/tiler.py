@@ -63,12 +63,20 @@ class Tiler():
         self.parser.add_argument('--quality',
                                  nargs='?',
                                  type=int,
-                                 help='Set the quality of the atlas images. The minimum value is 1 and the maximum 100.')
+                                 help='Set the quality of the atlas images. The minimum value is 1 and the maximum 100.\
+                                    Quality can only be used with the JPEG format.')
 
         self.parser.add_argument('--compress_level',
                                  nargs='?',
                                  type=int,
-                                 help='Set the compression level of the atlas images. The minimum value is 0 and the maximum 9.')
+                                 help='Set the compression level of the atlas images. The minimum value is 0 and the maximum 9.\
+                                    Compress level can only be used with the PNG format.')
+
+        self.parser.add_argument('--format',
+                                 nargs='?',
+                                 type=str,
+                                 choices=['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG'],
+                                 help='Set the image file format (PNG or JPEG).')
 
         self.parser.add_argument('--output_dir',
                                  '--out',
@@ -111,6 +119,8 @@ class Tiler():
             Texture.set_texture_quality(self.args.quality)
         if(self.args.compress_level is not None):
             Texture.set_texture_compress_level(self.args.compress_level)
+        if(self.args.format is not None):
+            Texture.set_texture_format(self.args.format)
 
     def get_output_dir(self):
         """

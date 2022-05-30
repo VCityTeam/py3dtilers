@@ -200,8 +200,8 @@ class Test_Tile(unittest.TestCase):
 
         tileset.write_as_json(tiler.args.output_dir)
 
-    def test_with_texture(self):
-        feature = Feature("with_texture")
+    def test_with_png_texture(self):
+        feature = Feature("with_png_texture")
         feature.geom.triangles.append(triangles)
         feature.geom.triangles.append(uvs)
         texture = Texture(Path('tests/tiler_test_data/texture.jpg'))
@@ -211,10 +211,30 @@ class Test_Tile(unittest.TestCase):
 
         tiler = Tiler()
         tiler.args = get_default_namespace()
-        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/with_texture')
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/with_png_texture')
         tiler.args.with_texture = True
-        tiler.args.quality = 10
-        tiler.args.compress_level = 5
+        Texture.set_texture_compress_level(3)
+        Texture.set_texture_format('png')
+
+        tileset = tiler.create_tileset_from_geometries(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_with_jpeg_texture(self):
+        feature = Feature("with_jpeg_texture")
+        feature.geom.triangles.append(triangles)
+        feature.geom.triangles.append(uvs)
+        texture = Texture(Path('tests/tiler_test_data/texture.jpg'))
+        feature.set_texture(texture.get_cropped_texture_image(feature.geom.triangles[1]))
+        feature.set_box()
+        feature_list = FeatureList([feature])
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/with_jpeg_texture')
+        tiler.args.with_texture = True
+        Texture.set_texture_quality(10)
+        Texture.set_texture_format('jpeg')
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 

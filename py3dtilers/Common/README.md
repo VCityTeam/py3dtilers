@@ -142,19 +142,25 @@ Project the features on another CRS. The `crs_in` flag allows to specify the inp
 | IfcTiler | :x: |
 | TilesetTiler | :heavy_check_mark: |
 
-Read the texture from the input and write it in image atlases (JPEG files):
+Read the texture from the input and write it in image atlases (JPEG or PNG files):
 
 ```bash
 <tiler> <input> --with_texture
 ```
 
-You can choose the quality and the level of compression of the textures with the flags `--quality` and `--compress_level`. Quality varies between 1 and 100, where 100 is the maximum quality. Compression level varies between 0 and 9, where 9 is the maximum level and compression and where 0 doesn't compress the texture. By default, the quality of the textures is set to 95 and the compress level to 0.
+You can choose the file format of the image with the flag `--format`. The two formats available are __JPEG__ and __PNG__. By default, the images will be saved in the JPEG format.
+
+Two flags can be use to reduce the size of the images. The flag `--quality` can be used to change the quality of the __JPEG images__. Quality varies between 1 and 100, where 100 is the maximum quality. The flag `--compress_level` can be used to compress the __PNG images__. Compression level varies between 0 and 9, where 9 is the maximum level and compression and where 0 doesn't compress the texture. By default, the quality of the JPEGs is set to 75 and the compress level of the PNGs is set to 0.
 
 ```bash
-<tiler> <input> --with_texture --quality 10 --compress_level 6
+<tiler> <input> --with_texture --format jpeg --quality 10
 ```
 
-_Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max)._
+```bash
+<tiler> <input> --with_texture --format png --compress_level 6
+```
+
+_Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max) to reduce the number of objects per tile._
 
 ### Geometric error
 

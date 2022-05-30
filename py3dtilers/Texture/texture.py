@@ -9,8 +9,9 @@ class Texture():
     """
 
     folder = None
-    quality = 95  # 95 is considred the best because 100 disables some portions of jpeg compression
+    quality = 75  # 95 is considered the best because 100 disables some portions of jpeg compression, 1 is the worst
     compress_level = 0
+    format = '.jpg'
 
     def __init__(self, image_path):
         """
@@ -109,3 +110,11 @@ class Texture():
         """
         compress_level = max(0, min(compress_level, 9))
         Texture.compress_level = compress_level
+
+    @staticmethod
+    def set_texture_format(format):
+        """
+        Sets the image file format (PNG or JPEG).
+        :param format: a format as string
+        """
+        Texture.format = '.' + format
