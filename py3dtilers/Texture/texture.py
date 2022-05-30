@@ -9,6 +9,9 @@ class Texture():
     """
 
     folder = None
+    quality = 75  # 95 is considered the best because 100 disables some portions of jpeg compression, 1 is the worst
+    compress_level = 0
+    format = '.jpg'
 
     def __init__(self, image_path):
         """
@@ -81,9 +84,35 @@ class Texture():
                 uvs[i][y] = np.array([new_u, new_v])
 
     @staticmethod
-    def get_texture_folder():
-        return Texture.folder
+    def set_texture_folder(folder):
+        """
+        Sets the folder where the textures should be written.
+        :param quality: the path to a folder
+        """
+        Texture.folder = folder
 
     @staticmethod
-    def set_texture_folder(folder):
-        Texture.folder = folder
+    def set_texture_quality(quality):
+        """
+        Sets the quality of the textures, between 1 and 100%.
+        :param quality: a number between 1 and 100
+        """
+        quality = max(1, min(quality, 100))
+        Texture.quality = quality
+
+    @staticmethod
+    def set_texture_compress_level(compress_level):
+        """
+        Sets the compression level of the textures, between 0 and 9. 0 is no compression, 9 is maximum compression.
+        :param compress_level: a number between 0 and 9
+        """
+        compress_level = max(0, min(compress_level, 9))
+        Texture.compress_level = compress_level
+
+    @staticmethod
+    def set_texture_format(format):
+        """
+        Sets the image file format (PNG or JPEG).
+        :param format: a format as string
+        """
+        Texture.format = '.' + format

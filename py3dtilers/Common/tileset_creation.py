@@ -126,17 +126,17 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri='./ATLAS_' + str(tile_atlas.tile_number) + '.jpeg')])
+            materials = [GlTFMaterial(textureUri='./' + tile_atlas.id)]
         for feature in objects:
             mat_index = feature.material_index
-            if mat_index not in seen_mat_indexes:
+            if mat_index not in seen_mat_indexes and not with_texture:
                 seen_mat_indexes[mat_index] = len(materials)
                 materials.append(objects.get_material(mat_index))
             content = {
                 'position': feature.geom.getPositionArray(),
                 'normal': feature.geom.getNormalArray(),
                 'bbox': [[float(i) for i in j] for j in feature.geom.getBbox()],
-                'matIndex': seen_mat_indexes[mat_index]
+                'matIndex': seen_mat_indexes[mat_index] if not with_texture else 0
             }
             if with_texture:
                 content['uv'] = feature.geom.getDataArray(0)
