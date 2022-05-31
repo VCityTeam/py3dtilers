@@ -131,6 +131,9 @@ It is also possible to translate a tileset by its own centroid by using `centroi
 <tiler> <input> --offset centroid
 ```
 
+
+___Warning__: The offset applied should be using the same projection system as the features_
+
 ### CRS in/out
 
 | Tiler | |
@@ -146,6 +149,8 @@ Project the features on another CRS. The `crs_in` flag allows to specify the inp
 ```bash
 <tiler> <input> --crs_in EPSG:3946 --crs_out EPSG:4171
 ```
+
+___Warning__: The offset option is done BEFORE the reprojection_
 
 ### With texture
 
