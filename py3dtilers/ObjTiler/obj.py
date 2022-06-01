@@ -57,6 +57,11 @@ class Obj(Feature):
             for i in range(0, length, 9):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
+        # Contains normals and vertex positions
+        elif mesh.materials[0].vertex_format == 'N3F_V3F':
+            for i in range(0, length, 18):
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 3, i + 21, 6)]
+                triangles.append(triangle)
         # Contains texture and vertex positions
         elif mesh.materials[0].vertex_format == 'T2F_V3F':
             for i in range(0, length, 15):
@@ -72,6 +77,7 @@ class Obj(Feature):
                 uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
         else:
+            print("Unsuported format", mesh.materials[0].vertex_format)
             return False
 
         self.geom.triangles.append(triangles)
