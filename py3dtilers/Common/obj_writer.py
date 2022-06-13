@@ -15,7 +15,6 @@ class ObjWriter():
         self.normal_indexes_dict = {}
         self._vertex_index = 0
         self._normal_index = 0
-        self.centroid = [0, 0, 0]
         self.nb_geometries = 0
 
     @property
@@ -27,23 +26,6 @@ class ObjWriter():
     def normal_index(self):
         self._normal_index += 1
         return self._normal_index
-
-    def get_centroid(self):
-        """
-        Compute and return the normalized centroid of the OBJ.
-        :return: the centroid
-        """
-        self.centroid[:] = [c / self.nb_geometries for c in self.centroid]
-        return self.centroid
-
-    def add_to_centroid(self, geom_centroid):
-        """
-        Add the centroid of a geometry to the centroid of the OBJ.
-        :param geom_centroid: the centroid of the geometry
-        """
-        self.nb_geometries += 1
-        for i, coord in enumerate(geom_centroid):
-            self.centroid[i] += coord
 
     def get_vertex_index(self, vertex):
         """
@@ -83,41 +65,43 @@ class ObjWriter():
         norm = np.linalg.norm(N)
         return np.array([0, 0, 1]) if norm == 0 else N / norm
 
-    def add_triangle(self, triangle):
+    def add_triangle(self, triangle, offset=np.array([0, 0, 0])):
         """
         Add a triangle to the OBJ.
+        An offset can be substracted to the triangle added.
         :param triangle: the triangle
+        :param offset: an 3D point as numpy array
         """
         vertex_indexes = list()
         normal_indexes = list()
         normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            vertex_indexes.append(self.get_vertex_index(vertex))
+            vertex_indexes.append(self.get_vertex_index(vertex - offset))
             normal_indexes.append(self.get_normal_index(normal))
         self.triangles.append([vertex_indexes, normal_indexes])
 
-    def add_geometries(self, feature_list):
+    def add_geometries(self, feature_list, offset=np.array([0, 0, 0])):
         """
         Add 3D features to the OBJ.
+        An offset can be substracted to the geometries added.
         :param feature_list: a FeatureList
+        :param offset: an 3D point as numpy array
         """
         for geometry in feature_list:
-            self.add_to_centroid(geometry.get_centroid())
             for triangle in geometry.get_geom_as_triangles():
-                self.add_triangle(triangle)
+                self.add_triangle(triangle, offset)
 
     def write_obj(self, file_name):
         """
         Write the OBJ into a file.
         :param file_name: the name of the OBJ file
         """
-        centroid = self.get_centroid()
         Path(file_name).parent.mkdir(parents=True, exist_ok=True)
         f = open(file_name, "w")
         f.write("# " + str(file_name) + "\n")
 
         for vertex in self.vertices:
-            f.write("v " + str(vertex[0] - centroid[0]) + " " + str(vertex[1] - centroid[1]) + " " + str(vertex[2] - centroid[2]) + "\n")
+            f.write("v " + str(vertex[0]) + " " + str(vertex[1]) + " " + str(vertex[2]) + "\n")
 
         for normal in self.normals:
             f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")
