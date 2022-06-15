@@ -9,7 +9,7 @@ class TilesetTree(GeometryTree):
 
         root_nodes = list()
         for i, tile in enumerate(root_tile.attributes['children']):
-            offset = [c for c in tile.get_transform()[12:15]]
+            offset = tile.get_transform()[12:15]
             root_node, depth = self.tile_to_node(tile, tileset_paths[i], offset, geometric_errors)
             root_nodes.append(root_node)
 
