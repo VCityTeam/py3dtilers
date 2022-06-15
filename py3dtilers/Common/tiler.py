@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-import numpy as np
 
 from ..Common import LodTree, FromGeometryTreeToTileset
 from ..Color import ColorConfig
@@ -111,8 +110,6 @@ class Tiler():
         for i, val in enumerate(self.args.offset):
             if not isinstance(val, (int, float)) and val.lstrip('-').replace('.', '', 1).isdigit():
                 self.args.offset[i] = float(val)
-        self.args.offset = np.array(self.args.offset,dtype=np.float32)
-        
 
         for i, val in enumerate(self.args.geometric_error):
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None

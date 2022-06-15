@@ -154,7 +154,7 @@ Description: Translates the tileset on \[x, y, z\] axis.
 
 Flag(s): `--offset <x> <y> <z>`
 
-Example: `geojson-tiler --path buildings.geojson --offset 0 0 -100`
+Example: `geojson-tiler --path buildings.geojson --offset 0 0 100`
 
 | Tiler | |
 | --- | --- |

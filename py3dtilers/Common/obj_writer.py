@@ -68,7 +68,7 @@ class ObjWriter():
     def add_triangle(self, triangle, offset=np.array([0, 0, 0])):
         """
         Add a triangle to the OBJ.
-        An offset can be substracted to the triangle added.
+        An offset can be added to the triangle.
         :param triangle: the triangle
         :param offset: an 3D point as numpy array
         """
@@ -76,14 +76,14 @@ class ObjWriter():
         normal_indexes = list()
         normal = self.compute_triangle_normal(triangle)
         for vertex in triangle:
-            vertex_indexes.append(self.get_vertex_index(vertex - offset))
+            vertex_indexes.append(self.get_vertex_index(vertex + offset))
             normal_indexes.append(self.get_normal_index(normal))
         self.triangles.append([vertex_indexes, normal_indexes])
 
     def add_geometries(self, feature_list, offset=np.array([0, 0, 0])):
         """
         Add 3D features to the OBJ.
-        An offset can be substracted to the geometries added.
+        An offset can be added to the geometries.
         :param feature_list: a FeatureList
         :param offset: an 3D point as numpy array
         """
