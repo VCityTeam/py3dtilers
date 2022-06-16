@@ -38,14 +38,6 @@ Group by `IfcGroup`:
 ifc-tiler --file_path <path> --grouped_by IfcGroup
 ```
 
-### Unit of length
-
-The flags `--originalUnit` and `--targetedUnit` respectively allow to choose the unit of length used to read the IFC file and the one used to write the features as 3DTiles. The default unit is meter. The options are millimeters (`mm`), centimeters (`cm`), meters (`m`) and kilometers (`km`).
-
-```bash
-ifc-tiler --file_path <path> --originalUnit cm --targetedUnit km
-```
-
 ## Shared Tiler features
 
 See [Common module features](../Common/README.md#common-tiler-features).

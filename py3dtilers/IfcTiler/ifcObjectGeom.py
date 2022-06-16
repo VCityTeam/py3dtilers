@@ -7,22 +7,10 @@ from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList
 from ifcopenshell import geom
 
-
-def unitConversion(originalUnit, targetedUnit):
-    conversions = {
-        "mm": {"mm": 1, "cm": 1 / 10, "m": 1 / 1000, "km": 1 / 1000000},
-        "cm": {"mm": 10, "cm": 1, "m": 1 / 100, "km": 1 / 100000},
-        "m": {"mm": 1000, "cm": 100, "m": 1, "km": 1 / 1000},
-        "km": {"mm": 100000, "cm": 10000, "m": 1000, "km": 1},
-    }
-    return conversions[originalUnit][targetedUnit]
-
-
 class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
         self.setIfcClasse(ifcObject, ifcGroup)
-        self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         # self.material = None
         self.has_geom = self.parse_geom(ifcObject)
 
@@ -113,7 +101,7 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file, originalUnit="m", targetedUnit="m"):
+    def retrievObjByType(path_to_file):
         """
         :param path: a path to a directory
 
@@ -130,7 +118,7 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
@@ -155,7 +143,7 @@ class IfcObjectsGeom(FeatureList):
         return i
 
     @staticmethod
-    def retrievObjByGroup(path_to_file, originalUnit="m", targetedUnit="m"):
+    def retrievObjByGroup(path_to_file):
         """
         :param path: a path to a directory
 
@@ -175,14 +163,14 @@ class IfcObjectsGeom(FeatureList):
             for element in group.RelatedObjects:
                 if(element.is_a('IfcElement')):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 elements_not_in_group.append(obj)
         dictObjByGroup["None"] = elements_not_in_group

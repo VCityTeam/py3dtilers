@@ -122,3 +122,5 @@ tests/city_temporal_tiler_test_data/generated_tilesets/
 tests/obj_tiler_data/generated_tilesets
 tests/tileset_reader_test_data/generated_tilesets
 tests/tileset_reader_test_data/generated_objs
+tests/ifc_tiler_test_data/generated_tilesets
+
