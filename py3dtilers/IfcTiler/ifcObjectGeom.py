@@ -118,7 +118,7 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            if(element.is_a("IfcWall")):
+            if(element.is_a("IfcWindow")):
                 obj = IfcObjectGeom(element)
                 if(obj.hasGeom()):
                     if not(element.is_a() in dictObjByType):

@@ -93,7 +93,7 @@ class ObjWriter():
         """
         for geometry in feature_list:
             for triangle in geometry.get_geom_as_triangles():
-                self.add_triangle(triangle, offset, feature_list.materials[geometry.material_index].rgba)
+                self.add_triangle(triangle, feature_list.materials[geometry.material_index].rgba, offset)
 
     def write_obj(self, file_name):
         """
