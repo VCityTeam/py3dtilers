@@ -19,16 +19,6 @@ class IfcTiler(Tiler):
                                  choices=['IfcTypeObject', 'IfcGroup'],
                                  help='Either IfcTypeObject or IfcGroup (default: %(default)s)'
                                  )
-        self.parser.add_argument('--originalUnit',
-                                 nargs='?',
-                                 default="m",
-                                 type=str,
-                                 help='original unit of the ifc file')
-        self.parser.add_argument('--targetedUnit',
-                                 nargs='?',
-                                 default="m",
-                                 type=str,
-                                 help='targeted unit of the 3DTiles produced')
 
     def get_output_dir(self):
         """
@@ -39,16 +29,16 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
+    def from_ifc(self, path_to_file, grouped_by):
         """
         :param path: a path to a directory
 
         :return: a tileset.
         """
         if(grouped_by == 'IfcTypeObject'):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
         elif(grouped_by == 'IfcGroup'):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         feature_list = IfcObjectsGeom(objects)
@@ -69,7 +59,7 @@ def main():
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
 
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
