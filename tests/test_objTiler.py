@@ -30,7 +30,7 @@ class Test_Tile(unittest.TestCase):
         obj_tiler.current_path = "texture"
         obj_tiler.args = get_default_namespace()
         obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/")
-        obj_tiler.args.offset = [-1843397, -5173891, -300]  # Arbitrary offset to place the 3DTiles in Lyon city
+        obj_tiler.args.offset = [1843397, 5173891, 300]  # Arbitrary offset to place the 3DTiles in Lyon city
         obj_tiler.args.with_texture = True
         obj_tiler.args.scale = 50
 

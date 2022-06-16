@@ -119,10 +119,10 @@ Rescale the features by a factor:
 | IfcTiler | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
-Translate the features by __substracting__ an offset. :
+Translate the features by __adding__ an offset. :
 
 ```bash
-<tiler> <input> --offset 10 20 30  # -10 on X, -20 on Y, -30 on Z
+<tiler> <input> --offset 10 20 30  # 10 on X, 20 on Y, 30 on Z
 ```
 
 It is also possible to translate a tileset by its own centroid by using `centroid` as parameter:
@@ -130,7 +130,6 @@ It is also possible to translate a tileset by its own centroid by using `centroi
 ```bash
 <tiler> <input> --offset centroid
 ```
-
 
 ___Warning__: The offset applied should be using the same projection system as the features_
 

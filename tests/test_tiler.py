@@ -114,7 +114,7 @@ class Test_Tile(unittest.TestCase):
         tiler = Tiler()
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/offset')
-        tiler.args.offset = [100, 100, -200]
+        tiler.args.offset = [100, 100, 200]
 
         tileset = tiler.create_tileset_from_geometries(feature_list)
 

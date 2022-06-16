@@ -56,9 +56,9 @@ class FromGeometryTreeToTileset():
         :param obj_writer: the writer used to create the OBJ model.
         """
         centroid = node.feature_list.get_centroid()
-        distance = tree_centroid - centroid
+        distance = centroid - tree_centroid
         for objects in node.get_features():
-            objects.translate_features(centroid)
+            objects.translate_features(-centroid)
 
         if hasattr(user_args, 'scale') and user_args.scale:
             for objects in node.get_features():
