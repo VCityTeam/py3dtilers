@@ -1,6 +1,6 @@
 import logging
 import time
-from ..Common import Tiler
+from ..Common import Tiler, Groups
 from .ifcObjectGeom import IfcObjectsGeom
 
 
@@ -41,9 +41,8 @@ class IfcTiler(Tiler):
             pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
-        feature_list = IfcObjectsGeom(objects)
-
-        return self.create_tileset_from_geometries(feature_list)
+        groups = Groups(objects)
+        return self.create_tileset_from_groups(groups)
 
 
 def main():

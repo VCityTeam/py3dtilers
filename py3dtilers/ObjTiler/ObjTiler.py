@@ -51,7 +51,7 @@ class ObjTiler(Tiler):
         else:
             print(str(len(objects)) + " .obj parsed")
 
-        return self.create_tileset_from_geometries(objects)
+        return self.create_tileset_from_feature_list(objects)
 
 
 def main():

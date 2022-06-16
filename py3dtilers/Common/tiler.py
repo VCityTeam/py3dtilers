@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from ..Common import LodTree, FromGeometryTreeToTileset
+from ..Common import LodTree, FromGeometryTreeToTileset, Groups
 from ..Color import ColorConfig
 from ..Texture import Texture
 
@@ -142,7 +142,17 @@ class Tiler():
         kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg > 0 else self.DEFAULT_KD_TREE_MAX
         return kd_tree_max
 
-    def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
+    def create_tileset_from_feature_list(self, feature_list, extension_name=None):
+        """
+        Create the 3DTiles tileset from the features.
+        :param feature_list: a FeatureList
+        :param extension_name: an optional extension to add to the tileset
+        """
+        groups = self.group_features(feature_list, self.args.loa, self.get_kd_tree_max())
+        feature_list.delete_features_ref()
+        self.create_tileset_from_groups(groups,extension_name)
+    
+    def create_tileset_from_groups(self, groups, extension_name=None):
         """
         Create the 3DTiles tileset from the features.
         :param feature_list: a FeatureList
@@ -152,9 +162,9 @@ class Tiler():
         """
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
-        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
+        
+        tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors)
 
-        feature_list.delete_features_ref()
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 
@@ -175,3 +185,14 @@ class Tiler():
         :return: a ColorConfig
         """
         return ColorConfig(config_path)
+    
+    def group_features(self, feature_list, polygons_path=None, kd_tree_max=500):
+        """
+        Distribute feature_list into groups to reduce the number of tiles.
+        :param feature_list: a FeatureList to distribute into groups.
+        :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
+        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
+        :return: a list of groups, each group containing features
+        """
+        groups = Groups(feature_list, polygons_path, kd_tree_max)
+        return groups.get_groups_as_list()

@@ -126,7 +126,7 @@ class CityTiler(Tiler):
         extension_name = None
         if CityMBuildings.is_bth_set():
             extension_name = "batch_table_hierarchy"
-        return self.create_tileset_from_geometries(cityobjects, extension_name=extension_name)
+        return self.create_tileset_from_feature_list(cityobjects, extension_name=extension_name)
 
 
 def main():

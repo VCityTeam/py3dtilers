@@ -58,6 +58,7 @@ class IfcObjectGeom(Feature):
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
             settings.set(settings.SEW_SHELLS, True)
+            settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
             shape = geom.create_shape(settings, ifcObject)
         except RuntimeError:
             logging.error("Error while creating geom with IfcOpenShell")
@@ -118,17 +119,16 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            if(element.is_a("IfcWindow")):
-                obj = IfcObjectGeom(element)
-                if(obj.hasGeom()):
-                    if not(element.is_a() in dictObjByType):
-                        dictObjByType[element.is_a()] = IfcObjectsGeom()
-                    if(obj.material):
-                        obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
-                    else:
-                        obj.material_index = 0
-                    dictObjByType[element.is_a()].append(obj)
-                logging.info("--- %s seconds ---" % (time.time() - start_time))
+            obj = IfcObjectGeom(element)
+            if(obj.hasGeom()):
+                if not(element.is_a() in dictObjByType):
+                    dictObjByType[element.is_a()] = IfcObjectsGeom()
+                if(obj.material):
+                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                else:
+                    obj.material_index = 0
+                dictObjByType[element.is_a()].append(obj)
+            logging.info("--- %s seconds ---" % (time.time() - start_time))
             i = i + 1
         return dictObjByType
 

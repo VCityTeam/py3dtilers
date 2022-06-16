@@ -37,7 +37,7 @@ class TilesetTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
+    def create_tileset_from_feature_list(self, tileset_tree, extension_name=None):
         """
         Override the parent tileset creation.
         """
@@ -54,7 +54,7 @@ class TilesetTiler(Tiler):
         """
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
-        return self.create_tileset_from_geometries(tileset_tree, self.args)
+        return self.create_tileset_from_feature_list(tileset_tree)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         """

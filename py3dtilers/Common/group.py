@@ -70,13 +70,11 @@ class Groups():
         When this param is not None, it means we want to group features by polygons
         :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         """
-        if ((type(feature_list) is list) or (type(feature_list) is dict)):
+        if ((type(feature_list) is list)):
             self.group_array_of_feature_list(feature_list)
         else:
             self.materials = feature_list.materials
-            if feature_list.is_list_of_feature_list():
-                self.group_objects_by_instance(feature_list)
-            elif polygons_path is not None:
+            if polygons_path is not None:
                 self.group_objects_by_polygons(feature_list, polygons_path)
             else:
                 self.group_objects_with_kdtree(feature_list, kd_tree_max)
@@ -98,21 +96,10 @@ class Groups():
             group.add_materials(materials)
 
     def group_array_of_feature_list(self,feature_lists_array):
-        groups = list()
+        self.groups = list()
         for feature_list in feature_lists_array:
             group = Group(feature_list)
-            groups.append(group)
-        self.groups = groups
-
-    def group_objects_by_instance(self, feature_list):
-        """
-        Create groups of features. One group is created per object in the FeatureList.
-        """
-        groups = list()
-        for objects in feature_list:
-            group = Group(objects)
-            groups.append(group)
-        self.groups = groups
+            self.groups.append(group)
 
     def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
         """

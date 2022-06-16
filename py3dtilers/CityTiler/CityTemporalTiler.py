@@ -88,7 +88,7 @@ class CityTemporalTiler(CityTiler):
 
         feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(feature_list, extension_name="temporal")
+        return self.create_tileset_from_feature_list(feature_list, extension_name="temporal")
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)
