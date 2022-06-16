@@ -41,7 +41,7 @@ class IfcTiler(Tiler):
             pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
-        groups = Groups(objects)
+        groups = Groups(objects).get_groups_as_list()
         return self.create_tileset_from_groups(groups)
 
 
