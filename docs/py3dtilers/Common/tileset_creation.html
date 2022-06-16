@@ -58,11 +58,11 @@ class FromGeometryTreeToTileset():
         FromGeometryTreeToTileset.tile_index = 0
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         obj_writer = ObjWriter()
+        tree_centroid = geometry_tree.get_centroid()
         while len(geometry_tree.root_nodes) &gt; 0:
             root_node = geometry_tree.root_nodes[0]
             root_node.set_node_features_geometry(user_arguments)
-            FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
-            centroid = root_node.feature_list.get_centroid()
+            centroid = FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, tree_centroid, obj_writer=obj_writer)
             tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
             geometry_tree.root_nodes.remove(root_node)
 
@@ -73,39 +73,42 @@ class FromGeometryTreeToTileset():
         return tileset
 
     @staticmethod
-    def __transform_node(node, user_args, obj_writer=None):
+    def __transform_node(node, user_args, tree_centroid=np.array([0, 0, 0]), obj_writer=None):
         &#34;&#34;&#34;
         Apply transformations on the features contained in a node.
         Those transformations are based on the arguments of the user.
         The features can also be writen in an OBJ file.
         :param node: the GeometryNode to transform.
         :param user_args: the Namespace containing the arguments of the command line.
+        :param tree_centroid: the centroid of the GeometryTree
         :param obj_writer: the writer used to create the OBJ model.
         &#34;&#34;&#34;
+        centroid = node.feature_list.get_centroid()
+        distance = centroid - tree_centroid
+        for objects in node.get_features():
+            objects.translate_features(-centroid)
+
         if hasattr(user_args, &#39;scale&#39;) and user_args.scale:
             for objects in node.get_features():
                 objects.scale_features(user_args.scale)
 
         if not all(v == 0 for v in user_args.offset) or user_args.offset[0] == &#39;centroid&#39;:
-            if user_args.offset[0] == &#39;centroid&#39;:
-                user_args.offset = node.feature_list.get_centroid()
-            for objects in node.get_features():
-                objects.translate_features(user_args.offset)
+            centroid = np.array([0, 0, 0]) if user_args.offset[0] == &#39;centroid&#39; else centroid - np.array(user_args.offset)
 
         if not user_args.crs_in == user_args.crs_out:
             transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
-            for objects in node.get_features():
-                objects.change_crs(transformer)
+            centroid = np.array(transformer.transform(centroid[0], centroid[1], centroid[2]))
 
         if user_args.obj is not None:
             for leaf in node.get_leaves():
-                obj_writer.add_geometries(leaf.feature_list)
+                # Since the tiles are centered on [0, 0, 0], we use an offset to place the geometries in the OBJ model
+                obj_writer.add_geometries(leaf.feature_list, offset=distance)
+        return centroid
 
     @staticmethod
     def __create_tile(node, centroid, transform_offset, extension_name=None, output_dir=None):
         print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, end=&#39;&#39;, flush=True)
         objects = node.feature_list
-        objects.translate_features(centroid)
 
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)
@@ -154,17 +157,17 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.jpeg&#39;)])
+            materials = [GlTFMaterial(textureUri=&#39;./&#39; + tile_atlas.id)]
         for feature in objects:
             mat_index = feature.material_index
-            if mat_index not in seen_mat_indexes:
+            if mat_index not in seen_mat_indexes and not with_texture:
                 seen_mat_indexes[mat_index] = len(materials)
                 materials.append(objects.get_material(mat_index))
             content = {
                 &#39;position&#39;: feature.geom.getPositionArray(),
                 &#39;normal&#39;: feature.geom.getNormalArray(),
                 &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-                &#39;matIndex&#39;: seen_mat_indexes[mat_index]
+                &#39;matIndex&#39;: seen_mat_indexes[mat_index] if not with_texture else 0
             }
             if with_texture:
                 content[&#39;uv&#39;] = feature.geom.getDataArray(0)
@@ -255,11 +258,11 @@ class FromGeometryTreeToTileset():
         FromGeometryTreeToTileset.tile_index = 0
         FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
         obj_writer = ObjWriter()
+        tree_centroid = geometry_tree.get_centroid()
         while len(geometry_tree.root_nodes) &gt; 0:
             root_node = geometry_tree.root_nodes[0]
             root_node.set_node_features_geometry(user_arguments)
-            FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
-            centroid = root_node.feature_list.get_centroid()
+            centroid = FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, tree_centroid, obj_writer=obj_writer)
             tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
             geometry_tree.root_nodes.remove(root_node)
 
@@ -270,39 +273,42 @@ class FromGeometryTreeToTileset():
         return tileset
 
     @staticmethod
-    def __transform_node(node, user_args, obj_writer=None):
+    def __transform_node(node, user_args, tree_centroid=np.array([0, 0, 0]), obj_writer=None):
         &#34;&#34;&#34;
         Apply transformations on the features contained in a node.
         Those transformations are based on the arguments of the user.
         The features can also be writen in an OBJ file.
         :param node: the GeometryNode to transform.
         :param user_args: the Namespace containing the arguments of the command line.
+        :param tree_centroid: the centroid of the GeometryTree
         :param obj_writer: the writer used to create the OBJ model.
         &#34;&#34;&#34;
+        centroid = node.feature_list.get_centroid()
+        distance = centroid - tree_centroid
+        for objects in node.get_features():
+            objects.translate_features(-centroid)
+
         if hasattr(user_args, &#39;scale&#39;) and user_args.scale:
             for objects in node.get_features():
                 objects.scale_features(user_args.scale)
 
         if not all(v == 0 for v in user_args.offset) or user_args.offset[0] == &#39;centroid&#39;:
-            if user_args.offset[0] == &#39;centroid&#39;:
-                user_args.offset = node.feature_list.get_centroid()
-            for objects in node.get_features():
-                objects.translate_features(user_args.offset)
+            centroid = np.array([0, 0, 0]) if user_args.offset[0] == &#39;centroid&#39; else centroid - np.array(user_args.offset)
 
         if not user_args.crs_in == user_args.crs_out:
             transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
-            for objects in node.get_features():
-                objects.change_crs(transformer)
+            centroid = np.array(transformer.transform(centroid[0], centroid[1], centroid[2]))
 
         if user_args.obj is not None:
             for leaf in node.get_leaves():
-                obj_writer.add_geometries(leaf.feature_list)
+                # Since the tiles are centered on [0, 0, 0], we use an offset to place the geometries in the OBJ model
+                obj_writer.add_geometries(leaf.feature_list, offset=distance)
+        return centroid
 
     @staticmethod
     def __create_tile(node, centroid, transform_offset, extension_name=None, output_dir=None):
         print(&#34;\r&#34; + str(FromGeometryTreeToTileset.tile_index), &#34;/&#34;, str(FromGeometryTreeToTileset.nb_nodes), &#34;tiles created&#34;, end=&#39;&#39;, flush=True)
         objects = node.feature_list
-        objects.translate_features(centroid)
 
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)
@@ -351,17 +357,17 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(objects)
-            objects.set_materials([GlTFMaterial(textureUri=&#39;./ATLAS_&#39; + str(tile_atlas.tile_number) + &#39;.jpeg&#39;)])
+            materials = [GlTFMaterial(textureUri=&#39;./&#39; + tile_atlas.id)]
         for feature in objects:
             mat_index = feature.material_index
-            if mat_index not in seen_mat_indexes:
+            if mat_index not in seen_mat_indexes and not with_texture:
                 seen_mat_indexes[mat_index] = len(materials)
                 materials.append(objects.get_material(mat_index))
             content = {
                 &#39;position&#39;: feature.geom.getPositionArray(),
                 &#39;normal&#39;: feature.geom.getNormalArray(),
                 &#39;bbox&#39;: [[float(i) for i in j] for j in feature.geom.getBbox()],
-                &#39;matIndex&#39;: seen_mat_indexes[mat_index]
+                &#39;matIndex&#39;: seen_mat_indexes[mat_index] if not with_texture else 0
             }
             if with_texture:
                 content[&#39;uv&#39;] = feature.geom.getDataArray(0)
@@ -452,11 +458,11 @@ def convert_to_tileset(geometry_tree, user_arguments=None, extension_name=None, 
     FromGeometryTreeToTileset.tile_index = 0
     FromGeometryTreeToTileset.nb_nodes = geometry_tree.get_number_of_nodes()
     obj_writer = ObjWriter()
+    tree_centroid = geometry_tree.get_centroid()
     while len(geometry_tree.root_nodes) &gt; 0:
         root_node = geometry_tree.root_nodes[0]
         root_node.set_node_features_geometry(user_arguments)
-        FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, obj_writer=obj_writer)
-        centroid = root_node.feature_list.get_centroid()
+        centroid = FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, tree_centroid, obj_writer=obj_writer)
         tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, centroid, centroid, extension_name, output_dir))
         geometry_tree.root_nodes.remove(root_node)
 

@@ -266,7 +266,7 @@ class FeatureList(object):
 
     def translate_features(self, offset):
         &#34;&#34;&#34;
-        Translate the features by substracting an offset
+        Translate the features by adding an offset
         :param offset: the Vec3 translation offset
         &#34;&#34;&#34;
         # Translate the position of each object by an offset
@@ -275,7 +275,7 @@ class FeatureList(object):
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    new_position.append(np.array(points - offset))
+                    new_position.append(np.array(points + offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -878,7 +878,7 @@ Also set the centroid.</p></div>
 
     def translate_features(self, offset):
         &#34;&#34;&#34;
-        Translate the features by substracting an offset
+        Translate the features by adding an offset
         :param offset: the Vec3 translation offset
         &#34;&#34;&#34;
         # Translate the position of each object by an offset
@@ -887,7 +887,7 @@ Also set the centroid.</p></div>
             for triangle in feature.get_geom_as_triangles():
                 new_position = []
                 for points in triangle:
-                    new_position.append(np.array(points - offset))
+                    new_position.append(np.array(points + offset))
                 new_geom.append(new_position)
             feature.set_triangles(new_geom)
             feature.set_box()
@@ -1343,7 +1343,7 @@ Keep only the features with geometry.</p></div>
 <span>def <span class="ident">translate_features</span></span>(<span>self, offset)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Translate the features by substracting an offset
+<div class="desc"><p>Translate the features by adding an offset
 :param offset: the Vec3 translation offset</p></div>
 <details class="source">
 <summary>
@@ -1351,7 +1351,7 @@ Keep only the features with geometry.</p></div>
 </summary>
 <pre><code class="python">def translate_features(self, offset):
     &#34;&#34;&#34;
-    Translate the features by substracting an offset
+    Translate the features by adding an offset
     :param offset: the Vec3 translation offset
     &#34;&#34;&#34;
     # Translate the position of each object by an offset
@@ -1360,7 +1360,7 @@ Keep only the features with geometry.</p></div>
         for triangle in feature.get_geom_as_triangles():
             new_position = []
             for points in triangle:
-                new_position.append(np.array(points - offset))
+                new_position.append(np.array(points + offset))
             new_geom.append(new_position)
         feature.set_triangles(new_geom)
         feature.set_box()</code></pre>

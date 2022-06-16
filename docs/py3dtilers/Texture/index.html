@@ -97,7 +97,7 @@ __all__ = [&#39;Rectangle&#39;,
 
         self.tile_number = atlasTree.get_tile_number()
 
-        atlasTree.createAtlasImage(objects_with_id_key, self.tile_number)
+        self.id = atlasTree.createAtlasImage(objects_with_id_key, self.tile_number)
 
     def computeArea(self, size):
         &#34;&#34;&#34;
@@ -384,7 +384,9 @@ It should be associate with at least a rectangle.</p></div>
             color=&#39;black&#39;)
 
         self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.jpeg&#39;))
+        atlas_id = &#39;ATLAS_&#39; + str(tile_number) + Texture.format
+        atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
+        return atlas_id
 
     def fillAtlasImage(self, atlasImg, city_objects_with_gmlid_key):
         &#34;&#34;&#34;
@@ -432,8 +434,6 @@ It should be associate with at least a rectangle.</p></div>
             for y in range(0, 3):
                 new_u = (uvs[i][y][0] * ratioWidth) + offsetWidth
                 new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
-                # warning : in order to be written correctly, the GLTF writter
-                # expects data to be in float32
                 uvs[i][y] = np.array([new_u, new_v])</code></pre>
 </details>
 <h3>Class variables</h3>
@@ -476,7 +476,9 @@ triangles[1]
         color=&#39;black&#39;)
 
     self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-    atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, &#39;ATLAS_&#39; + str(tile_number) + &#39;.jpeg&#39;))</code></pre>
+    atlas_id = &#39;ATLAS_&#39; + str(tile_number) + Texture.format
+    atlasImg.save(Path(Texture.folder, &#39;tiles&#39;, atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
+    return atlas_id</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Texture.Node.fillAtlasImage"><code class="name flex">
@@ -687,8 +689,6 @@ associated to the uvs
         for y in range(0, 3):
             new_u = (uvs[i][y][0] * ratioWidth) + offsetWidth
             new_v = (uvs[i][y][1] * ratioHeight) + offsetHeight
-            # warning : in order to be written correctly, the GLTF writter
-            # expects data to be in float32
             uvs[i][y] = np.array([new_u, new_v])</code></pre>
 </details>
 </dd>
@@ -917,6 +917,9 @@ Create a pillow.image:</p></div>
     &#34;&#34;&#34;
 
     folder = None
+    quality = 75  # 95 is considered the best because 100 disables some portions of jpeg compression, 1 is the worst
+    compress_level = 0
+    format = &#39;.jpg&#39;
 
     def __init__(self, image_path):
         &#34;&#34;&#34;
@@ -989,48 +992,136 @@ Create a pillow.image:</p></div>
                 uvs[i][y] = np.array([new_u, new_v])
 
     @staticmethod
-    def get_texture_folder():
-        return Texture.folder
+    def set_texture_folder(folder):
+        &#34;&#34;&#34;
+        Sets the folder where the textures should be written.
+        :param quality: the path to a folder
+        &#34;&#34;&#34;
+        Texture.folder = folder
 
     @staticmethod
-    def set_texture_folder(folder):
-        Texture.folder = folder</code></pre>
+    def set_texture_quality(quality):
+        &#34;&#34;&#34;
+        Sets the quality of the textures, between 1 and 100%.
+        :param quality: a number between 1 and 100
+        &#34;&#34;&#34;
+        quality = max(1, min(quality, 100))
+        Texture.quality = quality
+
+    @staticmethod
+    def set_texture_compress_level(compress_level):
+        &#34;&#34;&#34;
+        Sets the compression level of the textures, between 0 and 9. 0 is no compression, 9 is maximum compression.
+        :param compress_level: a number between 0 and 9
+        &#34;&#34;&#34;
+        compress_level = max(0, min(compress_level, 9))
+        Texture.compress_level = compress_level
+
+    @staticmethod
+    def set_texture_format(format):
+        &#34;&#34;&#34;
+        Sets the image file format (PNG or JPEG).
+        :param format: a format as string
+        &#34;&#34;&#34;
+        Texture.format = &#39;.&#39; + format</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
+<dt id="py3dtilers.Texture.Texture.compress_level"><code class="name">var <span class="ident">compress_level</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="py3dtilers.Texture.Texture.folder"><code class="name">var <span class="ident">folder</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="py3dtilers.Texture.Texture.format"><code class="name">var <span class="ident">format</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="py3dtilers.Texture.Texture.quality"><code class="name">var <span class="ident">quality</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="py3dtilers.Texture.Texture.get_texture_folder"><code class="name flex">
-<span>def <span class="ident">get_texture_folder</span></span>(<span>)</span>
+<dt id="py3dtilers.Texture.Texture.set_texture_compress_level"><code class="name flex">
+<span>def <span class="ident">set_texture_compress_level</span></span>(<span>compress_level)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Sets the compression level of the textures, between 0 and 9. 0 is no compression, 9 is maximum compression.
+:param compress_level: a number between 0 and 9</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def get_texture_folder():
-    return Texture.folder</code></pre>
+def set_texture_compress_level(compress_level):
+    &#34;&#34;&#34;
+    Sets the compression level of the textures, between 0 and 9. 0 is no compression, 9 is maximum compression.
+    :param compress_level: a number between 0 and 9
+    &#34;&#34;&#34;
+    compress_level = max(0, min(compress_level, 9))
+    Texture.compress_level = compress_level</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Texture.Texture.set_texture_folder"><code class="name flex">
 <span>def <span class="ident">set_texture_folder</span></span>(<span>folder)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Sets the folder where the textures should be written.
+:param quality: the path to a folder</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def set_texture_folder(folder):
+    &#34;&#34;&#34;
+    Sets the folder where the textures should be written.
+    :param quality: the path to a folder
+    &#34;&#34;&#34;
     Texture.folder = folder</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Texture.Texture.set_texture_format"><code class="name flex">
+<span>def <span class="ident">set_texture_format</span></span>(<span>format)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the image file format (PNG or JPEG).
+:param format: a format as string</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def set_texture_format(format):
+    &#34;&#34;&#34;
+    Sets the image file format (PNG or JPEG).
+    :param format: a format as string
+    &#34;&#34;&#34;
+    Texture.format = &#39;.&#39; + format</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Texture.Texture.set_texture_quality"><code class="name flex">
+<span>def <span class="ident">set_texture_quality</span></span>(<span>quality)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the quality of the textures, between 1 and 100%.
+:param quality: a number between 1 and 100</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def set_texture_quality(quality):
+    &#34;&#34;&#34;
+    Sets the quality of the textures, between 1 and 100%.
+    :param quality: a number between 1 and 100
+    &#34;&#34;&#34;
+    quality = max(1, min(quality, 100))
+    Texture.quality = quality</code></pre>
 </details>
 </dd>
 </dl>
@@ -1201,11 +1292,16 @@ The original is cropped to keep only the area defined by the UVs.
 <li>
 <h4><code><a title="py3dtilers.Texture.Texture" href="#py3dtilers.Texture.Texture">Texture</a></code></h4>
 <ul class="">
+<li><code><a title="py3dtilers.Texture.Texture.compress_level" href="#py3dtilers.Texture.Texture.compress_level">compress_level</a></code></li>
 <li><code><a title="py3dtilers.Texture.Texture.cropImage" href="#py3dtilers.Texture.Texture.cropImage">cropImage</a></code></li>
 <li><code><a title="py3dtilers.Texture.Texture.folder" href="#py3dtilers.Texture.Texture.folder">folder</a></code></li>
+<li><code><a title="py3dtilers.Texture.Texture.format" href="#py3dtilers.Texture.Texture.format">format</a></code></li>
 <li><code><a title="py3dtilers.Texture.Texture.get_cropped_texture_image" href="#py3dtilers.Texture.Texture.get_cropped_texture_image">get_cropped_texture_image</a></code></li>
-<li><code><a title="py3dtilers.Texture.Texture.get_texture_folder" href="#py3dtilers.Texture.Texture.get_texture_folder">get_texture_folder</a></code></li>
+<li><code><a title="py3dtilers.Texture.Texture.quality" href="#py3dtilers.Texture.Texture.quality">quality</a></code></li>
+<li><code><a title="py3dtilers.Texture.Texture.set_texture_compress_level" href="#py3dtilers.Texture.Texture.set_texture_compress_level">set_texture_compress_level</a></code></li>
 <li><code><a title="py3dtilers.Texture.Texture.set_texture_folder" href="#py3dtilers.Texture.Texture.set_texture_folder">set_texture_folder</a></code></li>
+<li><code><a title="py3dtilers.Texture.Texture.set_texture_format" href="#py3dtilers.Texture.Texture.set_texture_format">set_texture_format</a></code></li>
+<li><code><a title="py3dtilers.Texture.Texture.set_texture_quality" href="#py3dtilers.Texture.Texture.set_texture_quality">set_texture_quality</a></code></li>
 <li><code><a title="py3dtilers.Texture.Texture.updateUvs" href="#py3dtilers.Texture.Texture.updateUvs">updateUvs</a></code></li>
 </ul>
 </li>

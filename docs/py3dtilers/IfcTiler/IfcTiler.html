@@ -47,16 +47,6 @@ class IfcTiler(Tiler):
                                  choices=[&#39;IfcTypeObject&#39;, &#39;IfcGroup&#39;],
                                  help=&#39;Either IfcTypeObject or IfcGroup (default: %(default)s)&#39;
                                  )
-        self.parser.add_argument(&#39;--originalUnit&#39;,
-                                 nargs=&#39;?&#39;,
-                                 default=&#34;m&#34;,
-                                 type=str,
-                                 help=&#39;original unit of the ifc file&#39;)
-        self.parser.add_argument(&#39;--targetedUnit&#39;,
-                                 nargs=&#39;?&#39;,
-                                 default=&#34;m&#34;,
-                                 type=str,
-                                 help=&#39;targeted unit of the 3DTiles produced&#39;)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -67,16 +57,16 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
+    def from_ifc(self, path_to_file, grouped_by):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
         feature_list = IfcObjectsGeom(objects)
@@ -97,7 +87,7 @@ def main():
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
 
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
@@ -138,7 +128,7 @@ if __name__ == &#39;__main__&#39;:
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
 
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.originalUnit, args.targetedUnit)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
@@ -174,16 +164,6 @@ if __name__ == &#39;__main__&#39;:
                                  choices=[&#39;IfcTypeObject&#39;, &#39;IfcGroup&#39;],
                                  help=&#39;Either IfcTypeObject or IfcGroup (default: %(default)s)&#39;
                                  )
-        self.parser.add_argument(&#39;--originalUnit&#39;,
-                                 nargs=&#39;?&#39;,
-                                 default=&#34;m&#34;,
-                                 type=str,
-                                 help=&#39;original unit of the ifc file&#39;)
-        self.parser.add_argument(&#39;--targetedUnit&#39;,
-                                 nargs=&#39;?&#39;,
-                                 default=&#34;m&#34;,
-                                 type=str,
-                                 help=&#39;targeted unit of the 3DTiles produced&#39;)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -194,16 +174,16 @@ if __name__ == &#39;__main__&#39;:
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
+    def from_ifc(self, path_to_file, grouped_by):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
         feature_list = IfcObjectsGeom(objects)
@@ -217,7 +197,7 @@ if __name__ == &#39;__main__&#39;:
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.IfcTiler.IfcTiler.IfcTiler.from_ifc"><code class="name flex">
-<span>def <span class="ident">from_ifc</span></span>(<span>self, path_to_file, grouped_by, originalUnit, targetedUnit)</span>
+<span>def <span class="ident">from_ifc</span></span>(<span>self, path_to_file, grouped_by)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param path: a path to a directory</p>
@@ -226,16 +206,16 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit):
+<pre><code class="python">def from_ifc(self, path_to_file, grouped_by):
     &#34;&#34;&#34;
     :param path: a path to a directory
 
     :return: a tileset.
     &#34;&#34;&#34;
     if(grouped_by == &#39;IfcTypeObject&#39;):
-        pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, originalUnit, targetedUnit)
+        pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
     elif(grouped_by == &#39;IfcGroup&#39;):
-        pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, originalUnit, targetedUnit)
+        pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
 
     objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
     feature_list = IfcObjectsGeom(objects)

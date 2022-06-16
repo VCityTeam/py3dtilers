@@ -64,7 +64,7 @@ class Tiler():
         self.parser.add_argument(&#39;--offset&#39;,
                                  nargs=&#39;*&#39;,
                                  default=[0, 0, 0],
-                                 help=&#39;Substract an offset to all the vertices.&#39;)
+                                 help=&#39;Add an offset to all the vertices.&#39;)
 
         self.parser.add_argument(&#39;--scale&#39;,
                                  nargs=&#39;?&#39;,
@@ -87,6 +87,24 @@ class Tiler():
                                  dest=&#39;with_texture&#39;,
                                  action=&#39;store_true&#39;,
                                  help=&#39;Adds texture to 3DTiles when defined&#39;)
+
+        self.parser.add_argument(&#39;--quality&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the quality of the atlas images. The minimum value is 1 and the maximum 100.\
+                                    Quality can only be used with the JPEG format.&#39;)
+
+        self.parser.add_argument(&#39;--compress_level&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the compression level of the atlas images. The minimum value is 0 and the maximum 9.\
+                                    Compress level can only be used with the PNG format.&#39;)
+
+        self.parser.add_argument(&#39;--format&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=str,
+                                 choices=[&#39;jpg&#39;, &#39;JPG&#39;, &#39;jpeg&#39;, &#39;JPEG&#39;, &#39;png&#39;, &#39;PNG&#39;],
+                                 help=&#39;Set the image file format (PNG or JPEG).&#39;)
 
         self.parser.add_argument(&#39;--output_dir&#39;,
                                  &#39;--out&#39;,
@@ -124,6 +142,13 @@ class Tiler():
         for i, val in enumerate(self.args.geometric_error):
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
+
+        if(self.args.quality is not None):
+            Texture.set_texture_quality(self.args.quality)
+        if(self.args.compress_level is not None):
+            Texture.set_texture_compress_level(self.args.compress_level)
+        if(self.args.format is not None):
+            Texture.set_texture_format(self.args.format)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -228,7 +253,7 @@ class Tiler():
         self.parser.add_argument(&#39;--offset&#39;,
                                  nargs=&#39;*&#39;,
                                  default=[0, 0, 0],
-                                 help=&#39;Substract an offset to all the vertices.&#39;)
+                                 help=&#39;Add an offset to all the vertices.&#39;)
 
         self.parser.add_argument(&#39;--scale&#39;,
                                  nargs=&#39;?&#39;,
@@ -251,6 +276,24 @@ class Tiler():
                                  dest=&#39;with_texture&#39;,
                                  action=&#39;store_true&#39;,
                                  help=&#39;Adds texture to 3DTiles when defined&#39;)
+
+        self.parser.add_argument(&#39;--quality&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the quality of the atlas images. The minimum value is 1 and the maximum 100.\
+                                    Quality can only be used with the JPEG format.&#39;)
+
+        self.parser.add_argument(&#39;--compress_level&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=int,
+                                 help=&#39;Set the compression level of the atlas images. The minimum value is 0 and the maximum 9.\
+                                    Compress level can only be used with the PNG format.&#39;)
+
+        self.parser.add_argument(&#39;--format&#39;,
+                                 nargs=&#39;?&#39;,
+                                 type=str,
+                                 choices=[&#39;jpg&#39;, &#39;JPG&#39;, &#39;jpeg&#39;, &#39;JPEG&#39;, &#39;png&#39;, &#39;PNG&#39;],
+                                 help=&#39;Set the image file format (PNG or JPEG).&#39;)
 
         self.parser.add_argument(&#39;--output_dir&#39;,
                                  &#39;--out&#39;,
@@ -288,6 +331,13 @@ class Tiler():
         for i, val in enumerate(self.args.geometric_error):
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
+
+        if(self.args.quality is not None):
+            Texture.set_texture_quality(self.args.quality)
+        if(self.args.compress_level is not None):
+            Texture.set_texture_compress_level(self.args.compress_level)
+        if(self.args.format is not None):
+            Texture.set_texture_format(self.args.format)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -497,7 +547,14 @@ default value.
 
     for i, val in enumerate(self.args.geometric_error):
         self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
-    [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]</code></pre>
+    [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
+
+    if(self.args.quality is not None):
+        Texture.set_texture_quality(self.args.quality)
+    if(self.args.compress_level is not None):
+        Texture.set_texture_compress_level(self.args.compress_level)
+    if(self.args.format is not None):
+        Texture.set_texture_format(self.args.format)</code></pre>
 </details>
 </dd>
 </dl>

@@ -37,7 +37,7 @@ class TilesetTree(GeometryTree):
 
         root_nodes = list()
         for i, tile in enumerate(root_tile.attributes[&#39;children&#39;]):
-            offset = [c * -1 for c in tile.get_transform()[12:15]]
+            offset = tile.get_transform()[12:15]
             root_node, depth = self.tile_to_node(tile, tileset_paths[i], offset, geometric_errors)
             root_nodes.append(root_node)
 
@@ -103,7 +103,7 @@ The GeometryTree also contains the centroid of the root nodes.</p></div>
 
         root_nodes = list()
         for i, tile in enumerate(root_tile.attributes[&#39;children&#39;]):
-            offset = [c * -1 for c in tile.get_transform()[12:15]]
+            offset = tile.get_transform()[12:15]
             root_node, depth = self.tile_to_node(tile, tileset_paths[i], offset, geometric_errors)
             root_nodes.append(root_node)
 

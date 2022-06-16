@@ -35,22 +35,10 @@ from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList
 from ifcopenshell import geom
 
-
-def unitConversion(originalUnit, targetedUnit):
-    conversions = {
-        &#34;mm&#34;: {&#34;mm&#34;: 1, &#34;cm&#34;: 1 / 10, &#34;m&#34;: 1 / 1000, &#34;km&#34;: 1 / 1000000},
-        &#34;cm&#34;: {&#34;mm&#34;: 10, &#34;cm&#34;: 1, &#34;m&#34;: 1 / 100, &#34;km&#34;: 1 / 100000},
-        &#34;m&#34;: {&#34;mm&#34;: 1000, &#34;cm&#34;: 100, &#34;m&#34;: 1, &#34;km&#34;: 1 / 1000},
-        &#34;km&#34;: {&#34;mm&#34;: 100000, &#34;cm&#34;: 10000, &#34;m&#34;: 1000, &#34;km&#34;: 1},
-    }
-    return conversions[originalUnit][targetedUnit]
-
-
 class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
         self.setIfcClasse(ifcObject, ifcGroup)
-        self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         # self.material = None
         self.has_geom = self.parse_geom(ifcObject)
 
@@ -141,7 +129,7 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+    def retrievObjByType(path_to_file):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -158,7 +146,7 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + &#34; / &#34; + nb_element)
             logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
@@ -183,7 +171,7 @@ class IfcObjectsGeom(FeatureList):
         return i
 
     @staticmethod
-    def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+    def retrievObjByGroup(path_to_file):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -203,14 +191,14 @@ class IfcObjectsGeom(FeatureList):
             for element in group.RelatedObjects:
                 if(element.is_a(&#39;IfcElement&#39;)):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 elements_not_in_group.append(obj)
         dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -226,28 +214,6 @@ class IfcObjectsGeom(FeatureList):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.unitConversion"><code class="name flex">
-<span>def <span class="ident">unitConversion</span></span>(<span>originalUnit, targetedUnit)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def unitConversion(originalUnit, targetedUnit):
-    conversions = {
-        &#34;mm&#34;: {&#34;mm&#34;: 1, &#34;cm&#34;: 1 / 10, &#34;m&#34;: 1 / 1000, &#34;km&#34;: 1 / 1000000},
-        &#34;cm&#34;: {&#34;mm&#34;: 10, &#34;cm&#34;: 1, &#34;m&#34;: 1 / 100, &#34;km&#34;: 1 / 100000},
-        &#34;m&#34;: {&#34;mm&#34;: 1000, &#34;cm&#34;: 100, &#34;m&#34;: 1, &#34;km&#34;: 1 / 1000},
-        &#34;km&#34;: {&#34;mm&#34;: 100000, &#34;cm&#34;: 10000, &#34;m&#34;: 1000, &#34;km&#34;: 1},
-    }
-    return conversions[originalUnit][targetedUnit]</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -268,7 +234,6 @@ used with the corresponding tiler.</p>
     def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
         self.setIfcClasse(ifcObject, ifcGroup)
-        self.convertionRatio = unitConversion(originalUnit, targetedUnit)
         # self.material = None
         self.has_geom = self.parse_geom(ifcObject)
 
@@ -540,7 +505,7 @@ used with the corresponding tiler.</p>
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+    def retrievObjByType(path_to_file):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -557,7 +522,7 @@ used with the corresponding tiler.</p>
             start_time = time.time()
             logging.info(str(i) + &#34; / &#34; + nb_element)
             logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
@@ -582,7 +547,7 @@ used with the corresponding tiler.</p>
         return i
 
     @staticmethod
-    def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+    def retrievObjByGroup(path_to_file):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -602,14 +567,14 @@ used with the corresponding tiler.</p>
             for element in group.RelatedObjects:
                 if(element.is_a(&#39;IfcElement&#39;)):
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, group.RelatingGroup.Name)
                     if(obj.hasGeom()):
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
-            obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+            obj = IfcObjectGeom(element)
             if(obj.hasGeom()):
                 elements_not_in_group.append(obj)
         dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -626,7 +591,7 @@ used with the corresponding tiler.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup"><code class="name flex">
-<span>def <span class="ident">retrievObjByGroup</span></span>(<span>path_to_file, originalUnit='m', targetedUnit='m')</span>
+<span>def <span class="ident">retrievObjByGroup</span></span>(<span>path_to_file)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param path: a path to a directory</p>
@@ -636,7 +601,7 @@ used with the corresponding tiler.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+def retrievObjByGroup(path_to_file):
     &#34;&#34;&#34;
     :param path: a path to a directory
 
@@ -656,14 +621,14 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
         for element in group.RelatedObjects:
             if(element.is_a(&#39;IfcElement&#39;)):
                 elements.remove(element)
-                obj = IfcObjectGeom(element, originalUnit, targetedUnit, group.RelatingGroup.Name)
+                obj = IfcObjectGeom(element, group.RelatingGroup.Name)
                 if(obj.hasGeom()):
                     elements_in_group.append(obj)
         dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
     elements_not_in_group = list()
     for element in elements:
-        obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+        obj = IfcObjectGeom(element)
         if(obj.hasGeom()):
             elements_not_in_group.append(obj)
     dictObjByGroup[&#34;None&#34;] = elements_not_in_group
@@ -675,7 +640,7 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
 </details>
 </dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType"><code class="name flex">
-<span>def <span class="ident">retrievObjByType</span></span>(<span>path_to_file, originalUnit='m', targetedUnit='m')</span>
+<span>def <span class="ident">retrievObjByType</span></span>(<span>path_to_file)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param path: a path to a directory</p>
@@ -685,7 +650,7 @@ def retrievObjByGroup(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;):
+def retrievObjByType(path_to_file):
     &#34;&#34;&#34;
     :param path: a path to a directory
 
@@ -702,7 +667,7 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
         start_time = time.time()
         logging.info(str(i) + &#34; / &#34; + nb_element)
         logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-        obj = IfcObjectGeom(element, originalUnit, targetedUnit)
+        obj = IfcObjectGeom(element)
         if(obj.hasGeom()):
             if not(element.is_a() in dictObjByType):
                 dictObjByType[element.is_a()] = IfcObjectsGeom()
@@ -788,11 +753,6 @@ def retrievObjByType(path_to_file, originalUnit=&#34;m&#34;, targetedUnit=&#34;m
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="py3dtilers.IfcTiler" href="index.html">py3dtilers.IfcTiler</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.unitConversion" href="#py3dtilers.IfcTiler.ifcObjectGeom.unitConversion">unitConversion</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

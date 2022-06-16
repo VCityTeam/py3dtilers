@@ -36,11 +36,12 @@ from shapely.geometry import Polygon
 class ExtrudedPolygon(Feature):
     def __init__(self, id, features, polygon=None):
         &#34;&#34;&#34;
-        Creates a 3D extrusion of the footprint of a Feature
-        :param feature: an instance of Feature containing triangles
-        :param override_points: when true, the polygon extruded won&#39;t be the footprint
-        but another polygon
-        :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
+        Creates a 3D extrusion of the footprint of a list of features.
+        The height and the altitude of the 3D model will be computed using the triangles of the features.
+        If a polygon is given, it will be extruded instead of the footprint.
+        :param id: the ID of the instance
+        :param features: a list of features
+        :param polygon: the polygon that will be extruded instead of the footprint
         &#34;&#34;&#34;
         super().__init__(id)
         self.polygon = polygon
@@ -136,11 +137,12 @@ class ExtrudedPolygon(Feature):
 <dd>
 <div class="desc"><p>The base class of all object that need to be tiled, in order to be
 used with the corresponding tiler.</p>
-<p>Creates a 3D extrusion of the footprint of a Feature
-:param feature: an instance of Feature containing triangles
-:param override_points: when true, the polygon extruded won't be the footprint
-but another polygon
-:param polygon: the polygon that will be extruded instead of the footprint (when overriding points)</p></div>
+<p>Creates a 3D extrusion of the footprint of a list of features.
+The height and the altitude of the 3D model will be computed using the triangles of the features.
+If a polygon is given, it will be extruded instead of the footprint.
+:param id: the ID of the instance
+:param features: a list of features
+:param polygon: the polygon that will be extruded instead of the footprint</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -148,11 +150,12 @@ but another polygon
 <pre><code class="python">class ExtrudedPolygon(Feature):
     def __init__(self, id, features, polygon=None):
         &#34;&#34;&#34;
-        Creates a 3D extrusion of the footprint of a Feature
-        :param feature: an instance of Feature containing triangles
-        :param override_points: when true, the polygon extruded won&#39;t be the footprint
-        but another polygon
-        :param polygon: the polygon that will be extruded instead of the footprint (when overriding points)
+        Creates a 3D extrusion of the footprint of a list of features.
+        The height and the altitude of the 3D model will be computed using the triangles of the features.
+        If a polygon is given, it will be extruded instead of the footprint.
+        :param id: the ID of the instance
+        :param features: a list of features
+        :param polygon: the polygon that will be extruded instead of the footprint
         &#34;&#34;&#34;
         super().__init__(id)
         self.polygon = polygon
