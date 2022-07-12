@@ -147,10 +147,11 @@ class Tiler():
         Create the 3DTiles tileset from the features.
         :param feature_list: a FeatureList
         :param extension_name: an optional extension to add to the tileset
+        :return: a TileSet
         """
-        groups = self.group_features(feature_list, self.args.loa, self.get_kd_tree_max())
+        groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
         feature_list.delete_features_ref()
-        self.create_tileset_from_groups(groups, extension_name)
+        return self.create_tileset_from_groups(groups, extension_name)
 
     def create_tileset_from_groups(self, groups, extension_name=None):
         """
@@ -185,14 +186,3 @@ class Tiler():
         :return: a ColorConfig
         """
         return ColorConfig(config_path)
-
-    def group_features(self, feature_list, polygons_path=None, kd_tree_max=500):
-        """
-        Distribute feature_list into groups to reduce the number of tiles.
-        :param feature_list: a FeatureList to distribute into groups.
-        :param polygons_path: a path to the file(s) containing polygons (used for LOA creation)
-        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
-        :return: a list of groups, each group containing features
-        """
-        groups = Groups(feature_list, polygons_path, kd_tree_max)
-        return groups.get_groups_as_list()
