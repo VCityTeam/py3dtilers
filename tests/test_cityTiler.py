@@ -1,4 +1,5 @@
 import unittest
+import pytest
 from argparse import Namespace
 from pathlib import Path
 import psycopg2
@@ -23,8 +24,11 @@ class Test_Tile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.postgresql = testing.postgresql.Postgresql()
-        cls.db = psycopg2.connect(**cls.postgresql.dsn())
+        try:
+            cls.postgresql = testing.postgresql.Postgresql()
+            cls.db = psycopg2.connect(**cls.postgresql.dsn())
+        except Exception:
+            pytest.skip("Failed to setup test database")
         cls.cursor = cls.db.cursor()
         with open('tests/city_tiler_test_data/test_data.sql') as f:
             data = f.read()
@@ -42,6 +46,10 @@ class Test_Tile(unittest.TestCase):
         cls.cursor.close()
         cls.db.close()
         cls.postgresql.stop()
+
+    @classmethod
+    def __del__(cls):
+        print("Can't connect to the PostgreSQL database. Make sure PostgreSQL and PostGIS are installed locally.")
 
     def test_building_basic_case(self):
 

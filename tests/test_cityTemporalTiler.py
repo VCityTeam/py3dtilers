@@ -28,8 +28,11 @@ class Test_Tile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.postgresql_2009 = testing.postgresql.Postgresql()
-        cls.db_2009 = psycopg2.connect(**cls.postgresql_2009.dsn())
+        try:
+            cls.postgresql_2009 = testing.postgresql.Postgresql()
+            cls.db_2009 = psycopg2.connect(**cls.postgresql_2009.dsn())
+        except Exception:
+            raise
         cls.cursor_2009 = cls.db_2009.cursor()
         with open('tests/city_temporal_tiler_test_data/test_data_temporal_2009.sql') as f:
             data = f.read()
@@ -41,8 +44,11 @@ class Test_Tile(unittest.TestCase):
             cls.cursor_2009.execute(data)
             cls.cursor_2009.execute("ALTER DATABASE " + cls.postgresql_2009.dsn()['database'] + " SET search_path TO public, citydb;")
 
-        cls.postgresql_2012 = testing.postgresql.Postgresql()
-        cls.db_2012 = psycopg2.connect(**cls.postgresql_2012.dsn())
+        try:
+            cls.postgresql_2012 = testing.postgresql.Postgresql()
+            cls.db_2012 = psycopg2.connect(**cls.postgresql_2012.dsn())
+        except Exception:
+            raise
         cls.cursor_2012 = cls.db_2012.cursor()
         with open('tests/city_temporal_tiler_test_data/test_data_temporal_2012.sql') as f:
             data = f.read()
@@ -62,6 +68,10 @@ class Test_Tile(unittest.TestCase):
         cls.cursor_2012.close()
         cls.db_2012.close()
         cls.postgresql_2012.stop()
+
+    @classmethod
+    def __del__(cls):
+        print("Can't connect to the PostgreSQL database. Make sure PostgreSQL and PostGIS are installed locally.")
 
     def test_temporal(self):
         city_temp_tiler = CityTemporalTiler()
