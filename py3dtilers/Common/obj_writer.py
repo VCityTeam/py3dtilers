@@ -104,8 +104,8 @@ class ObjWriter():
         f = open(file_name, "w")
         f.write("# " + str(file_name) + "\n")
 
-        for vertex,color in zip(self.vertices,self.colors):
-            f.write("v " + str(vertex[0]) + " " + str(vertex[1]) + " " + str(vertex[2]) + " " + str(color[0]) + " " + str(color[1]) + " " + str(color[2]) +  "\n")
+        for vertex, color in zip(self.vertices, self.colors):
+            f.write("v " + str(vertex[0]) + " " + str(vertex[1]) + " " + str(vertex[2]) + " " + str(color[0]) + " " + str(color[1]) + " " + str(color[2]) + "\n")
 
         for normal in self.normals:
             f.write("vn " + str(normal[0]) + " " + str(normal[1]) + " " + str(normal[2]) + "\n")

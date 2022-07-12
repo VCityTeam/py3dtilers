@@ -95,7 +95,7 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_array_of_feature_list(self,feature_lists_array):
+    def group_array_of_feature_list(self, feature_lists_array):
         self.groups = list()
         for feature_list in feature_lists_array:
             group = Group(feature_list)

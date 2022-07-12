@@ -257,7 +257,7 @@ class FeatureList(object):
 
     def get_material_index(self, material):
         """
-        Get the index of a given material. 
+        Get the index of a given material.
         Add it to the materials array if it is not found
         :param material: a GlTFMaterial
         :return: an index as int

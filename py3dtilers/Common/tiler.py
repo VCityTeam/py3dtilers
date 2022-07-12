@@ -150,8 +150,8 @@ class Tiler():
         """
         groups = self.group_features(feature_list, self.args.loa, self.get_kd_tree_max())
         feature_list.delete_features_ref()
-        self.create_tileset_from_groups(groups,extension_name)
-    
+        self.create_tileset_from_groups(groups, extension_name)
+
     def create_tileset_from_groups(self, groups, extension_name=None):
         """
         Create the 3DTiles tileset from the features.
@@ -162,7 +162,7 @@ class Tiler():
         """
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
-        
+
         tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors)
 
         self.create_output_directory()
@@ -185,7 +185,7 @@ class Tiler():
         :return: a ColorConfig
         """
         return ColorConfig(config_path)
-    
+
     def group_features(self, feature_list, polygons_path=None, kd_tree_max=500):
         """
         Distribute feature_list into groups to reduce the number of tiles.

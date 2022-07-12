@@ -7,6 +7,7 @@ from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList
 from ifcopenshell import geom
 
+
 class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
@@ -131,7 +132,6 @@ class IfcObjectsGeom(FeatureList):
             logging.info("--- %s seconds ---" % (time.time() - start_time))
             i = i + 1
         return dictObjByType
-
 
     @staticmethod
     def retrievObjByGroup(path_to_file):

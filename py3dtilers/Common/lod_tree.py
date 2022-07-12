@@ -1,4 +1,4 @@
-from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode, Groups
+from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode
 
 
 class LodTree(GeometryTree):
