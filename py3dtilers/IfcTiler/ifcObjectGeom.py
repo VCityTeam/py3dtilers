@@ -7,11 +7,12 @@ from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList
 from ifcopenshell import geom
 
+
 class IfcObjectGeom(Feature):
     def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", ifcGroup=None):
         super().__init__(ifcObject.GlobalId)
         self.setIfcClasse(ifcObject, ifcGroup)
-        # self.material = None
+        self.material = None
         self.has_geom = self.parse_geom(ifcObject)
 
     def hasGeom(self):
@@ -58,6 +59,7 @@ class IfcObjectGeom(Feature):
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
             settings.set(settings.SEW_SHELLS, True)
+            settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
             shape = geom.create_shape(settings, ifcObject)
         except RuntimeError:
             logging.error("Error while creating geom with IfcOpenShell")
@@ -122,25 +124,14 @@ class IfcObjectsGeom(FeatureList):
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
+                if(obj.material):
+                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                else:
+                    obj.material_index = 0
                 dictObjByType[element.is_a()].append(obj)
             logging.info("--- %s seconds ---" % (time.time() - start_time))
             i = i + 1
         return dictObjByType
-
-    def is_material_registered(self, material):
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return True
-        return False
-
-    def get_material_index(self, material):
-        i = 0
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return i
-            i = i + 1
-        self.add_material(material)
-        return i
 
     @staticmethod
     def retrievObjByGroup(path_to_file):

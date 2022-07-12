@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from ..Common import LodTree, FromGeometryTreeToTileset
+from ..Common import LodTree, FromGeometryTreeToTileset, Groups
 from ..Color import ColorConfig
 from ..Texture import Texture
 
@@ -142,7 +142,18 @@ class Tiler():
         kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg > 0 else self.DEFAULT_KD_TREE_MAX
         return kd_tree_max
 
-    def create_tileset_from_geometries(self, feature_list, extension_name=None, kd_tree_max=500):
+    def create_tileset_from_feature_list(self, feature_list, extension_name=None):
+        """
+        Create the 3DTiles tileset from the features.
+        :param feature_list: a FeatureList
+        :param extension_name: an optional extension to add to the tileset
+        :return: a TileSet
+        """
+        groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
+        feature_list.delete_features_ref()
+        return self.create_tileset_from_groups(groups, extension_name)
+
+    def create_tileset_from_groups(self, groups, extension_name=None):
         """
         Create the 3DTiles tileset from the features.
         :param feature_list: a FeatureList
@@ -152,9 +163,9 @@ class Tiler():
         """
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
-        tree = LodTree(feature_list, self.args.lod1, create_loa, self.args.loa, self.args.with_texture, self.get_kd_tree_max(), geometric_errors)
 
-        feature_list.delete_features_ref()
+        tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors)
+
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
 

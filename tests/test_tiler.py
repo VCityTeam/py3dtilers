@@ -57,7 +57,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/kd_tree')
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -72,7 +72,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/lod1')
         tiler.args.lod1 = True
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -86,7 +86,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/loa')
         tiler.args.loa = Path('tests/tiler_test_data/loa_polygons')
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -101,7 +101,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/change_crs')
         tiler.args.crs_out = 'EPSG:4171'
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -116,7 +116,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/offset')
         tiler.args.offset = [100, 100, 200]
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -131,7 +131,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/offset_centroid')
         tiler.args.offset = ['centroid']
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -146,7 +146,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/scale')
         tiler.args.scale = 10
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -161,7 +161,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/obj')
         tiler.args.obj = Path('tests/tiler_test_data/generated_objs/cube.obj')
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -178,7 +178,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.lod1 = True
         tiler.args.loa = Path('tests/tiler_test_data/loa_polygons')
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -196,7 +196,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/kd_tree_max')
         tiler.args.kd_tree_max = 1
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -216,7 +216,7 @@ class Test_Tile(unittest.TestCase):
         Texture.set_texture_compress_level(3)
         Texture.set_texture_format('png')
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -236,7 +236,7 @@ class Test_Tile(unittest.TestCase):
         Texture.set_texture_quality(10)
         Texture.set_texture_format('jpeg')
 
-        tileset = tiler.create_tileset_from_geometries(feature_list)
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
 
         tileset.write_as_json(tiler.args.output_dir)
 

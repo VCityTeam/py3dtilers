@@ -199,7 +199,7 @@ class GeojsonTiler(Tiler):
         else:
             print(str(len(objects)) + " features parsed")
 
-        return self.create_tileset_from_geometries(objects)
+        return self.create_tileset_from_feature_list(objects)
 
 
 def main():
