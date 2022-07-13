@@ -23,12 +23,12 @@ Some features may not have been implemented for some Tilers.
 
 ### Output directory
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
 The flags `--output_dir`, `--out` or `-o` allow to choose the output directory of the Tiler.
@@ -39,15 +39,15 @@ The flags `--output_dir`, `--out` or `-o` allow to choose the output directory o
 
 ### LOA
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
-| TilesetTiler | :x: |
+| IfcTiler     | :heavy_check_mark: |
+| TilesetTiler | :x:                |
 
-Using the LOA\* option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA features of those detailed features. The LOA features are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
+Using the LOA\* option creates a tileset with a **refinement hierarchy**. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOA features of those detailed features. The LOA features are 3D extrusions of polygons. The polygons must be given as a path to a Geojson file, or a directory containing Geojson file(s) (the features in those geojsons must be Polygons or MultiPolygons). The polygons can for example be roads, boroughs, rivers or any other geographical partition.
 
 To use the LOA option:
 
@@ -59,17 +59,17 @@ To use the LOA option:
 
 ### LOD1
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
-| TilesetTiler | :x: |
+| IfcTiler     | :heavy_check_mark: |
+| TilesetTiler | :x:                |
 
-___Warning__: creating LOD1 can be useless if the features are already footprints._
+_**Warning**: creating LOD1 can be useless if the features are already footprints._
 
-Using the LOD1 option creates a tileset with a __refinement hierarchy__. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 features of those detailed features. The LOD1 features are 3D extrusions of the footprints of the features.
+Using the LOD1 option creates a tileset with a **refinement hierarchy**. The leaves of the created tree are the detailed features (features loaded from the data source) and their parents are LOD1 features of those detailed features. The LOD1 features are 3D extrusions of the footprints of the features.
 
 To use the LOD1 option:
 
@@ -79,12 +79,12 @@ To use the LOD1 option:
 
 ### Obj creation
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
 An .obj model (without texture) is created if the `--obj` flag is present in command line. To create an obj file, use:
@@ -93,14 +93,23 @@ An .obj model (without texture) is created if the `--obj` flag is present in com
 <tiler> <input> --obj <obj_file_name>
 ```
 
-### Scale
+### 3D transformations
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+During the tiling process, 3D transformations are done in the following order:
+
+```mermaid
+    graph TD;
+    Scale-->Offset-->Reprojection;
+```
+
+#### Scale
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
 Rescale the features by a factor:
@@ -109,17 +118,17 @@ Rescale the features by a factor:
 <tiler> <input> --scale 10
 ```
 
-### Offset
+#### Offset
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
-Translate the features by __adding__ an offset. :
+Translate the features by **adding** an offset. :
 
 ```bash
 <tiler> <input> --offset 10 20 30  # 10 on X, 20 on Y, 30 on Z
@@ -131,16 +140,16 @@ It is also possible to translate a tileset by its own centroid by using `centroi
 <tiler> <input> --offset centroid
 ```
 
-___Warning__: The offset applied should be using the same projection system as the features_
+_**Warning**: The offset applied should be using the same projection system as the features_
 
-### CRS in/out
+#### Reprojection
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
 Project the features on another CRS. The `crs_in` flag allows to specify the input CRS (default is EPSG:3946). The `crs_out` flag projects the features in another CRS (default output CRS is EPSG:3946).
@@ -149,16 +158,14 @@ Project the features on another CRS. The `crs_in` flag allows to specify the inp
 <tiler> <input> --crs_in EPSG:3946 --crs_out EPSG:4171
 ```
 
-___Warning__: The offset option is done BEFORE the reprojection_
-
 ### With texture
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
-| GeojsonTiler | :x: |
-| IfcTiler | :x: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :x:                |
+| IfcTiler     | :x:                |
 | TilesetTiler | :heavy_check_mark: |
 
 Read the texture from the input and write it in image atlases (JPEG or PNG files):
@@ -167,9 +174,9 @@ Read the texture from the input and write it in image atlases (JPEG or PNG files
 <tiler> <input> --with_texture
 ```
 
-You can choose the file format of the image with the flag `--format`. The two formats available are __JPEG__ and __PNG__. By default, the images will be saved in the JPEG format.
+You can choose the file format of the image with the flag `--format`. The two formats available are **JPEG** and **PNG**. By default, the images will be saved in the JPEG format.
 
-Two flags can be use to reduce the size of the images. The flag `--quality` can be used to change the quality of the __JPEG images__. Quality varies between 1 and 100, where 100 is the maximum quality. The flag `--compress_level` can be used to compress the __PNG images__. Compression level varies between 0 and 9, where 9 is the maximum level and compression and where 0 doesn't compress the texture. By default, the quality of the JPEGs is set to 75 and the compress level of the PNGs is set to 0.
+Two flags can be use to reduce the size of the images. The flag `--quality` can be used to change the quality of the **JPEG images**. Quality varies between 1 and 100, where 100 is the maximum quality. The flag `--compress_level` can be used to compress the **PNG images**. Compression level varies between 0 and 9, where 9 is the maximum level and compression and where 0 doesn't compress the texture. By default, the quality of the JPEGs is set to 75 and the compress level of the PNGs is set to 0.
 
 ```bash
 <tiler> <input> --with_texture --format jpeg --quality 10
@@ -183,15 +190,15 @@ _Note: if your texture images are too heavy, consider using [`--kd_tree_max` opt
 
 ### Geometric error
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
-In 3DTiles, [the geometric error](https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error) (__GE__) is the metric used to refine a tile or not. A tile should always have a lower geometric error than its parent. The root of the tileset should have the highest geometric error and the leaves the lowest geometric error.
+In 3DTiles, [the geometric error](https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error) (**GE**) is the metric used to refine a tile or not. A tile should always have a lower geometric error than its parent. The root of the tileset should have the highest geometric error and the leaves the lowest geometric error.
 
 The geometric errors of the tiles can be overwritten with the flag `--geometric_error`. The values after the flag will be used (from left to right) for the deeper tiles (leaves), their parents (if existing), etc until the root tiles of the tileset.
 
@@ -213,23 +220,23 @@ tileset-reader --paths <tileset_path> --geometric_error x x 100  # Set root tile
 
 ### Kd-tree max
 
-| Tiler | |
-| --- | --- |
-| CityTiler | :heavy_check_mark: |
-| ObjTiler | :heavy_check_mark: |
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
 | GeojsonTiler | :heavy_check_mark: |
-| IfcTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
 | TilesetTiler | :heavy_check_mark: |
 
-`--kd_tree_max` allows to choose the maximum number of features in each tile when the features are distributed by a kd-tree. The flag must be followed by an __integer__. By default, each tile contains a maximum of 500 features.
+`--kd_tree_max` allows to choose the maximum number of features in each tile when the features are distributed by a kd-tree. The flag must be followed by an **integer**. By default, each tile contains a maximum of 500 features.
 
-When using the CityTiler [with texture](#with-texture), the default maximum of features per tile is divided by __20__ in order to reduce the size of texture atlases. If a tile contains too much textured features, its atlas may be to heavy in memory, so consider choosing a `kd_tree_max` according to the resolution/size of the texture images.
+When using the CityTiler [with texture](#with-texture), the default maximum of features per tile is divided by **20** in order to reduce the size of texture atlases. If a tile contains too much textured features, its atlas may be to heavy in memory, so consider choosing a `kd_tree_max` according to the resolution/size of the texture images.
 
 ```bash
-<tiler> <input> --kd_tree_max 25  # Each tile will contain a maximum of 25 features 
+<tiler> <input> --kd_tree_max 25  # Each tile will contain a maximum of 25 features
 ```
 
-## __Developper notes__
+## Developper notes
 
 ## [feature](feature.py)
 
@@ -237,7 +244,7 @@ When using the CityTiler [with texture](#with-texture), the default maximum of f
 
 A `Feature` instance contains a geometry, a bounding box, and optionally can contain semantic data.  
 The geometry is a [TriangleSoup](https://github.com/VCityTeam/py3dtiles/blob/master/py3dtiles/wkb_utils.py), those triangles will be used to create the 3Dtiles geometry.
-To set the triangles of a `Feature` instance, use:  
+To set the triangles of a `Feature` instance, use:
 
 ```python
 triangles = [[np.array([0., 0., 0.]), # First triangle
