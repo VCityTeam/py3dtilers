@@ -62,6 +62,12 @@ class GeojsonTiler(Tiler):
                                  help='When defined, the features from geojsons will be considered as rooftops.\
                                     We will thus substract the height from the coordinates to reach the floor.')
 
+        self.parser.add_argument('--keep_properties',
+                                 '-k',
+                                 dest='keep_properties',
+                                 action='store_true',
+                                 help='When defined, keep the properties of the GeoJSON features into the batch table.')
+
         self.parser.add_argument('--add_color',
                                  nargs='*',
                                  default=['NONE', 'numeric'],
@@ -178,7 +184,7 @@ class GeojsonTiler(Tiler):
                 feature.material_index = attribute_dict[value] + 1
         feature_list.add_materials(colors)
 
-    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric')):
+    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric'), keep_properties=False):
         """
         Create a tileset from a GeoJson file or a directory of GeoJson files
         :param path: a path to the file(s)
@@ -192,6 +198,9 @@ class GeojsonTiler(Tiler):
 
         if not color_attribute[0] == 'NONE':
             self.add_colors(objects, color_attribute)
+
+        if keep_properties:
+            [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
 
         if(len(objects) == 0):
             print("No .geojson found in " + path)
@@ -217,7 +226,7 @@ def main():
                   'z', geojson_tiler.args.z]
 
     if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
         if(tileset is not None):
             print("tileset in", geojson_tiler.get_output_dir())
             tileset.write_as_json(geojson_tiler.get_output_dir())
