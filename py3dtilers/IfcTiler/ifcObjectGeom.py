@@ -185,16 +185,15 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            if(element.is_a('IfcWall')):
-                obj = IfcObjectGeom(element,with_BTH = with_BTH)
-                if(obj.hasGeom()):
-                    if not(element.is_a() in dictObjByType):
-                        dictObjByType[element.is_a()] = IfcObjectsGeom()
-                    if(obj.material):
-                        obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
-                    else:
-                        obj.material_index = 0
-                    dictObjByType[element.is_a()].append(obj)
+            obj = IfcObjectGeom(element,with_BTH = with_BTH)
+            if(obj.hasGeom()):
+                if not(element.is_a() in dictObjByType):
+                    dictObjByType[element.is_a()] = IfcObjectsGeom()
+                if(obj.material):
+                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                else:
+                    obj.material_index = 0
+                dictObjByType[element.is_a()].append(obj)
             logging.info("--- %s seconds ---" % (time.time() - start_time))
             i = i + 1
         return dictObjByType
