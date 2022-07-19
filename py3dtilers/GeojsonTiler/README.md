@@ -96,6 +96,14 @@ If you want to skip the precision, you can set _prec_ to '_NONE_':
 geojson-tiler --path <path> --prec NONE
 ```
 
+### Keep properties
+
+You can use the flag `-k` or `--keep_properties` to store the properties of the GeoJSON features in the batch table. All the properties of each feature will be stored.
+
+```bash
+geojson-tiler --path <path> --keep_properties
+```
+
 ## Shared Tiler features
 
 See [Common module features](../Common/README.md#common-tiler-features).
