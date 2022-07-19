@@ -146,6 +146,18 @@ class Test_Tile(unittest.TestCase):
         if(tileset is not None):
             tileset.write_as_json(geojson_tiler.args.output_dir)
 
+    def test_keep_properties(self):
+        path = Path('tests/geojson_tiler_test_data/buildings/feature_1/')
+        properties = ['height', 'HAUTEUR', 'prec', 'PREC_ALTI', 'z', 'NONE']
+
+        geojson_tiler = GeojsonTiler()
+        geojson_tiler.args = get_default_namespace()
+        geojson_tiler.args.output_dir = Path("tests/geojson_tiler_test_data/generated_tilesets/keep_props")
+        geojson_tiler.args.obj = Path('tests/geojson_tiler_test_data/generated_objs/block_keep_props.obj')
+        tileset = geojson_tiler.from_geojson_directory(path, properties, is_roof=True, keep_properties=True)
+        if(tileset is not None):
+            tileset.write_as_json(geojson_tiler.args.output_dir)
+
 
 if __name__ == '__main__':
     unittest.main()
