@@ -34,24 +34,21 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by, originalUnit, targetedUnit,with_BTH):
+    def from_ifc(self, path_to_file, grouped_by,with_BTH):
         """
         :param path: a path to a directory
 
         :return: a tileset.
         """
         if(grouped_by == 'IfcTypeObject'):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file,with_BTH)
         elif(grouped_by == 'IfcGroup'):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file,with_BTH)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
         groups = Groups(objects).get_groups_as_list()
-        return self.create_tileset_from_groups(groups)
-        # objects_to_tile = IfcObjectsGeom(objects)
 
-        # return self.create_tileset_from_geometries(objects_to_tile, "batch_table_hierarchy" if with_BTH  else None)
-
+        return self.create_tileset_from_groups(groups, "batch_table_hierarchy" if with_BTH  else None)
 
 def main():
     """
