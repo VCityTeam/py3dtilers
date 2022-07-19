@@ -32,7 +32,8 @@ class IfcObjectGeom(Feature):
         while(ifcObject):
             ifcParent = None
             if(hasattr(ifcObject,"ContainedInStructure")):
-                ifcParent =  ifcObject.ContainedInStructure[0].RelatingStructure
+                if(ifcObject.ContainedInStructure):
+                    ifcParent =  ifcObject.ContainedInStructure[0].RelatingStructure
             elif(hasattr(ifcObject,"Decomposes")):
                 if(len(ifcObject.Decomposes) > 0):
                     ifcParent = ifcObject.Decomposes[0].RelatingObject
@@ -130,7 +131,7 @@ class IfcObjectsGeom(FeatureList):
 
             for obj in objects:
                 resulting_bth.add_class(obj.ifcClass,{'GUID'})
-                if(obj.parents[0]):
+                if(obj.parents):
                     hierarchy.addNodeToParent(obj.id,obj.parents[0]['id'])
                 i = 0
                 for parent in obj.parents:
