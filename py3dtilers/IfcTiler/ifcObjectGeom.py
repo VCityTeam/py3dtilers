@@ -16,7 +16,7 @@ class IfcObjectGeom(Feature):
         super().__init__(ifcObject.GlobalId)
         self.ifcClass = ifcObject.is_a()
         self.material = None
-        # self.setBatchTableData(ifcObject, ifcGroup)
+        self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
         if(with_BTH):
             self.getParentsInIfc(ifcObject)
