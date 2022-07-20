@@ -163,6 +163,8 @@ class IfcObjectsGeom(FeatureList):
                 )
 
             return resulting_bth
+        else:
+            return None
 
     @staticmethod
     def retrievObjByType(path_to_file, with_BTH):

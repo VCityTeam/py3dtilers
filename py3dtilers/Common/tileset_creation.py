@@ -179,8 +179,7 @@ class FromGeometryTreeToTileset():
                 bt.add_property_from_array(key, key_data)
 
         if extension_name is not None:
-            if (extension_name == "batch_table_hierarchy" or extension_name == "temporal"):
-                extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
+            extension = objects.__class__.create_batch_table_extension(extension_name, ids, objects)
             if extension is not None:
                 bt.add_extension(extension)
 
