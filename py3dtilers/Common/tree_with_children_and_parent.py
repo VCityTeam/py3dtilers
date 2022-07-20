@@ -19,7 +19,7 @@ class TreeWithChildrenAndParent:
         if parent_id is not None:
             if parent_id not in self.hierarchy:
                 self.hierarchy[parent_id] = []
-            if object_id not in self.hierarchy[parent_id] : 
+            if object_id not in self.hierarchy[parent_id]:
                 self.hierarchy[parent_id].append(object_id)
                 self.reverseHierarchy[object_id] = parent_id
 
