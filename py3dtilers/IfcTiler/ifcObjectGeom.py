@@ -4,16 +4,20 @@ import time
 import numpy as np
 import ifcopenshell
 from py3dtiles import GlTFMaterial
-from ..Common import Feature, FeatureList
+from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
+from py3dtiles import BatchTableHierarchy
 
 
 class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, originalUnit="m", targetedUnit="m", ifcGroup=None):
+    def __init__(self, ifcObject, ifcGroup=None, with_BTH=False):
         super().__init__(ifcObject.GlobalId)
-        self.setIfcClasse(ifcObject, ifcGroup)
+        self.ifcClass = ifcObject.is_a()
         self.material = None
+        self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
+        if(with_BTH):
+            self.getParentsInIfc(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
@@ -21,14 +25,28 @@ class IfcObjectGeom(Feature):
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
 
+    def getParentsInIfc(self, ifcObject):
+        self.parents = list()
+        while(ifcObject):
+            ifcParent = None
+            if(hasattr(ifcObject, "ContainedInStructure")):
+                if(ifcObject.ContainedInStructure):
+                    ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
+            elif(hasattr(ifcObject, "Decomposes")):
+                if(len(ifcObject.Decomposes) > 0):
+                    ifcParent = ifcObject.Decomposes[0].RelatingObject
+
+            if(ifcParent):
+                self.parents.append({'id': ifcParent.GlobalId, 'ifcClass': ifcParent.is_a()})
+            ifcObject = ifcParent
+
     def computeCenter(self, pointList):
         center = np.array([0.0, 0.0, 0.0])
         for point in pointList:
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcObject, ifcGroup):
-        self.ifcClasse = ifcObject.is_a()
+    def setBatchTableData(self, ifcObject, ifcGroup):
         properties = list()
         for prop in ifcObject.IsDefinedBy:
             if(hasattr(prop, 'RelatingPropertyDefinition')):
@@ -41,7 +59,7 @@ class IfcObjectGeom(Feature):
                                 props.append([propSet.Name, propSet.NominalValue.wrappedValue])
                     properties.append(props)
         batch_table_data = {
-            'classe': self.ifcClasse,
+            'classe': self.ifcClass,
             'group': ifcGroup,
             'name': ifcObject.Name,
             'properties': properties
@@ -103,7 +121,53 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file):
+    def create_batch_table_extension(extension_name, ids, objects):
+        if extension_name == "batch_table_hierarchy":
+            resulting_bth = BatchTableHierarchy()
+            hierarchy = TreeWithChildrenAndParent()
+            parents = dict()
+
+            for obj in objects:
+                resulting_bth.add_class(obj.ifcClass, {'GUID'})
+                if(obj.parents):
+                    hierarchy.addNodeToParent(obj.id, obj.parents[0]['id'])
+                i = 0
+                for parent in obj.parents:
+                    hierarchy.addNodeToParent(obj.parents[i - 1]['id'], obj.parents[i]['id'])
+                    if parent['id'] not in parents:
+                        parents[parent['id']] = parent
+                        resulting_bth.add_class(parent['ifcClass'], {'GUID'})
+                    i = i + 1
+
+            objectPosition = {}
+            for i, (obj) in enumerate(objects):
+                objectPosition[obj.id] = i
+            for i, (parent) in enumerate(parents):
+                objectPosition[parent] = i + len(objects)
+
+            for obj in objects:
+                resulting_bth.add_class_instance(
+                    obj.ifcClass,
+                    {
+                        'GUID': obj.id
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(obj.id)]
+                )
+            for parent in parents.items():
+                resulting_bth.add_class_instance(
+                    parent[1]["ifcClass"],
+                    {
+                        'GUID': parent[1]["id"]
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(parent[1]["id"])]
+                )
+
+            return resulting_bth
+        else:
+            return None
+
+    @staticmethod
+    def retrievObjByType(path_to_file, with_BTH):
         """
         :param path: a path to a directory
 
@@ -120,7 +184,7 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            obj = IfcObjectGeom(element)
+            obj = IfcObjectGeom(element, with_BTH=with_BTH)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()

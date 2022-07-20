@@ -19,7 +19,7 @@ class Test_Tile(unittest.TestCase):
         ifc_tiler.args = get_default_namespace()
         ifc_tiler.args.output_dir = Path("tests/ifc_tiler_test_data/generated_tilesets/")
 
-        tileset = ifc_tiler.from_ifc(path, ifc_tiler.args.grouped_by)
+        tileset = ifc_tiler.from_ifc(path, ifc_tiler.args.grouped_by, with_BTH=False)
         if(tileset is not None):
             tileset.write_as_json(ifc_tiler.args.output_dir)
 
