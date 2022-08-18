@@ -16,7 +16,7 @@ class GeometryTree():
         Return the centroid of the tree.
         The centroid of the tree is the centroid of the root nodes features.
         """
-        return self.get_leaf_objects().get_centroid()
+        return self.get_root_objects().get_centroid()
 
     def get_leaf_nodes(self):
         """
