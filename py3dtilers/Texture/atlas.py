@@ -13,12 +13,12 @@ class Atlas():
     """
 
     def __init__(self, feature_list):
-        objects_with_id_key = dict()
+        features_with_id_key = dict()
         textures_with_id_key = dict()
 
         textures = feature_list.get_textures()
         for feature in feature_list:
-            objects_with_id_key[feature.get_id()] = feature.geom
+            features_with_id_key[feature.get_id()] = feature.geom
             textures_with_id_key[feature.get_id()] = textures[feature.get_id()]
 
         # Sort textures by size, starting by the biggest one
@@ -29,7 +29,7 @@ class Atlas():
 
         self.tile_number = atlasTree.get_tile_number()
 
-        self.id = atlasTree.createAtlasImage(objects_with_id_key, self.tile_number)
+        self.id = atlasTree.createAtlasImage(features_with_id_key, self.tile_number)
 
     def computeArea(self, size):
         """

@@ -15,7 +15,7 @@ class Node(object):
         self.rect = rect
         self.child = [None, None]
         self.image = None
-        self.building_id = None
+        self.feature_id = None
         self.node_number = 0
 
     def isLeaf(self):
@@ -28,22 +28,22 @@ class Node(object):
     def get_tile_number(self):
         return self.node_number
 
-    def insert(self, img, building_id):
+    def insert(self, img, feature_id):
         """
         :param img: A pillow image
-        :param building_id: A building_id,
+        :param feature_id: A feature_id,
                         in order to be able to modify the UV later
         :rtype node: The tree by returning the calling node
                     when the image is insert in it. It is computed recursively.
         """
         if not self.isLeaf():
-            newNode = self.child[0].insert(img, building_id)
+            newNode = self.child[0].insert(img, feature_id)
 
             if newNode is not None:
                 self.child[0] = newNode
                 return self
             else:
-                newNode = self.child[1].insert(img, building_id)
+                newNode = self.child[1].insert(img, feature_id)
                 if newNode is not None:
                     self.child[1] = newNode
                     return self
@@ -57,7 +57,7 @@ class Node(object):
             # If the current image perfectly fits, we stop the insertion here
             # and add the current image to the current node
             if self.rect.perfect_fits(img):
-                self.building_id = building_id
+                self.feature_id = feature_id
                 self.image = img
                 return self
 
@@ -104,14 +104,12 @@ class Node(object):
 
             # The first child is created in a way that the image always can be
             # inserted in it.
-            self.child[0].insert(img, building_id)
+            self.child[0].insert(img, feature_id)
             return self
 
-    def createAtlasImage(self, city_objects_with_gmlid_key, tile_number):
+    def createAtlasImage(self, features_with_id_key, tile_number):
         """
-        :param city_objects_with_gmlid_key: the geometry of the tile retrieved
-                        from the database.
-                        It is a dictionnary, with building_id as key,
+        :param features_with_id_key: a dictionnary, with feature_id as key,
                         and triangles as value. The triangles position must be
                         in triangles[0] and the UV must be in
                         triangles[1]
@@ -122,18 +120,16 @@ class Node(object):
             (self.rect.get_width(), self.rect.get_height()),
             color='black')
 
-        self.fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
+        self.fillAtlasImage(atlasImg, features_with_id_key)
         atlas_id = 'ATLAS_' + str(tile_number) + Texture.format
         atlasImg.save(Path(Texture.folder, 'tiles', atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
         return atlas_id
 
-    def fillAtlasImage(self, atlasImg, city_objects_with_gmlid_key):
+    def fillAtlasImage(self, atlasImg, features_with_id_key):
         """
         :param atlasImg: An empty pillow image that will be filled
                         with each textures in the tree
-        :param city_objects_with_gmlid_key: the geometry of the tile retrieved
-                        from the database.
-                        It is a dictionnary, with building_id as key,
+        :param features_with_id_key: a dictionnary, with feature_id as key,
                         and triangles as value. The triangles position must be
                         in triangles[0] and the UV must be in
                         triangles[1]
@@ -146,12 +142,12 @@ class Node(object):
                 )
 
                 self.updateUv(
-                    city_objects_with_gmlid_key[self.building_id].triangles[1],
+                    features_with_id_key[self.feature_id].triangles[1],
                     self.image,
                     atlasImg)
         else:
-            self.child[0].fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
-            self.child[1].fillAtlasImage(atlasImg, city_objects_with_gmlid_key)
+            self.child[0].fillAtlasImage(atlasImg, features_with_id_key)
+            self.child[1].fillAtlasImage(atlasImg, features_with_id_key)
 
     def updateUv(self, uvs, oldTexture, newTexture):
         """
