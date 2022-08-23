@@ -11,6 +11,6 @@ class LoaNode(GeometryNode):
 
     DEFAULT_GEOMETRIC_ERROR = 20
 
-    def __init__(self, features_node, geometric_error=None, polygons=list()):
+    def __init__(self, features_node: GeometryNode, geometric_error=None, polygons=list()):
         feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)

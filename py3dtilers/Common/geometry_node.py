@@ -1,3 +1,9 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import FeatureList
+
+
 class GeometryNode():
     """
     Each node contains an instance of FeatureList
@@ -10,7 +16,7 @@ class GeometryNode():
     # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
     DEFAULT_GEOMETRIC_ERROR = 1
 
-    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
+    def __init__(self, feature_list: 'FeatureList' = None, geometric_error=None, with_texture=False):
         """
         :param feature_list: an instance of FeatureList.
         :param geometric_error: the metric used to refine the node when visualizing the features.
@@ -21,14 +27,14 @@ class GeometryNode():
         self.with_texture = with_texture
         self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
-    def set_child_nodes(self, nodes=list()):
+    def set_child_nodes(self, nodes: list['GeometryNode'] = list()):
         """
         Set the child nodes of this node.
         :param nodes: list of nodes
         """
         self.child_nodes = nodes
 
-    def add_child_node(self, node):
+    def add_child_node(self, node: 'GeometryNode'):
         """
         Add a child to the child nodes.
         :param node: a node
@@ -54,10 +60,10 @@ class GeometryNode():
         Return the features in this node and the features in the child nodes (recursively).
         :return: a list of Feature
         """
-        objects = [self.feature_list]
+        features = [self.feature_list]
         for child in self.child_nodes:
-            objects.extend(child.get_features())
-        return objects
+            features.extend(child.get_features())
+        return features
 
     def set_node_features_geometry(self, user_arguments=None):
         """

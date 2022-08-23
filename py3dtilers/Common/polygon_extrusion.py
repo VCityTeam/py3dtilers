@@ -3,10 +3,14 @@ from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
 from shapely.geometry import Polygon
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import FeatureList
 
 
 class ExtrudedPolygon(Feature):
-    def __init__(self, id, features, polygon=None):
+    def __init__(self, id, features: 'FeatureList', polygon=None):
         """
         Creates a 3D extrusion of the footprint of a list of features.
         The height and the altitude of the 3D model will be computed using the triangles of the features.
@@ -62,6 +66,9 @@ class ExtrudedPolygon(Feature):
         self.extrude_footprint()
 
     def extrude_footprint(self):
+        """
+        Extrude the 2D footprint to create a triangulated 3D mesh.
+        """
         coordinates = self.points
         length = len(coordinates)
         vertices = [None] * (2 * length)

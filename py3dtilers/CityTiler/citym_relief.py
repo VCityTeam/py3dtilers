@@ -35,8 +35,8 @@ class CityMReliefs(CityMCityObjects):
 
     object_type = CityMRelief
 
-    def __init__(self, objects=None):
-        super().__init__(objects)
+    def __init__(self, features=None):
+        super().__init__(features)
 
     @staticmethod
     def sql_query_objects(reliefs, citygml_ids=list()):

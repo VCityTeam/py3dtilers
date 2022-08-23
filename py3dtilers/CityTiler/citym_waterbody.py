@@ -35,8 +35,8 @@ class CityMWaterBodies(CityMCityObjects):
 
     object_type = CityMWaterBody
 
-    def __init__(self, objects=None):
-        super().__init__(objects)
+    def __init__(self, features=None):
+        super().__init__(features)
 
     @staticmethod
     def sql_query_objects(waterbodies, citygml_ids=list()):

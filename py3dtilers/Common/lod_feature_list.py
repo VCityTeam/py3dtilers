@@ -1,11 +1,15 @@
 from shapely.geometry import Point, Polygon
 from ..Common import FeatureList, ExtrudedPolygon
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import Feature, GeometryNode
 
 
 class LodFeatureList(FeatureList):
 
-    def __init__(self, objects=None, features_node=None):
-        super().__init__(objects)
+    def __init__(self, features=None, features_node: 'GeometryNode' = None):
+        super().__init__(features)
         self.features_node = features_node
         self.centroid = features_node.feature_list.get_centroid()
 
@@ -28,8 +32,8 @@ class LoaFeatureList(LodFeatureList):
 
     loa_index = 0
 
-    def __init__(self, objects=None, polygons=list(), features_node=None):
-        super().__init__(objects, features_node=features_node)
+    def __init__(self, features=None, polygons=list(), features_node: 'GeometryNode' = None):
+        super().__init__(features, features_node=features_node)
         self.polygons = polygons
 
     def set_features_geom(self, user_arguments=None):
@@ -50,7 +54,7 @@ class LoaFeatureList(LodFeatureList):
 
         self.features_node = None
 
-    def find_features_in_polygon(self, features, polygon):
+    def find_features_in_polygon(self, features: list['Feature'], polygon: 'Polygon'):
         """
         Find all the features which are in the polygon.
         :param features: a list of Feature
@@ -64,7 +68,7 @@ class LoaFeatureList(LodFeatureList):
                 features_in_polygon.append(feature)
         return features_in_polygon
 
-    def create_loa(self, feature_list, polygon=None):
+    def create_loa(self, feature_list: 'FeatureList', polygon: 'Polygon' = None):
         """
         Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
         :param feature_list: the features contained in the LOA

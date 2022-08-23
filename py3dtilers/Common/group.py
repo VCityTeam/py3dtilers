@@ -12,7 +12,7 @@ class Group():
     It can also contain additional polygon points (used to create LOA nodes)
     """
 
-    def __init__(self, feature_list, polygons=list()):
+    def __init__(self, feature_list: FeatureList, polygons=list()):
         self.feature_list = feature_list
         self.polygons = polygons
 
@@ -61,7 +61,7 @@ class Groups():
     # Used to put in a same group the features which are in a same 1000 m^3 cube.
     DEFAULT_CUBE_SIZE = 1000
 
-    def __init__(self, feature_list, polygons_path=None, kd_tree_max=500):
+    def __init__(self, feature_list: FeatureList, polygons_path=None, kd_tree_max=500):
         """
         Distribute the features contained in feature_list into different Group
         The way to distribute the features depends on the parameters
@@ -95,13 +95,13 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_array_of_feature_list(self, feature_lists_array):
+    def group_array_of_feature_list(self, feature_lists_array: list[FeatureList]):
         self.groups = list()
         for feature_list in feature_lists_array:
             group = Group(feature_list)
             self.groups.append(group)
 
-    def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
+    def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
         """
         Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
         The distribution depends on the centroid of each feature.
@@ -115,7 +115,7 @@ class Groups():
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, feature_list, polygons_path):
+    def group_objects_by_polygons(self, feature_list: FeatureList, polygons_path):
         """
         Load the polygons from GeoJSON files.
         Group the features depending in which polygon they are contained.
@@ -147,7 +147,7 @@ class Groups():
                     polygons.append(Polygon(coords))
         self.groups = self.distribute_objects_in_polygons(feature_list, polygons)
 
-    def distribute_objects_in_polygons(self, feature_list, polygons):
+    def distribute_objects_in_polygons(self, feature_list: FeatureList, polygons):
         """
         Distribute the features in the polygons.
         The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
@@ -187,7 +187,7 @@ class Groups():
 
         return self.distribute_groups_in_cubes(groups, Groups.DEFAULT_CUBE_SIZE)
 
-    def distribute_groups_in_cubes(self, groups, cube_size):
+    def distribute_groups_in_cubes(self, groups: list[Group], cube_size):
         """
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
@@ -212,7 +212,7 @@ class Groups():
             groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube]))
         return groups_in_cube
 
-    def merge_groups_together(self, groups, group_indexes):
+    def merge_groups_together(self, groups: list[Group], group_indexes):
         """
         Creates a Group from a list of Groups
         :param groups: all the groups

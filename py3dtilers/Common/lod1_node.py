@@ -9,6 +9,6 @@ class Lod1Node(GeometryNode):
 
     DEFAULT_GEOMETRIC_ERROR = 5
 
-    def __init__(self, features_node, geometric_error=None):
+    def __init__(self, features_node: GeometryNode, geometric_error=None):
         feature_list = Lod1FeatureList(features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)

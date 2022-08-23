@@ -4,6 +4,10 @@ from pathlib import Path
 from ..Common import LodTree, FromGeometryTreeToTileset, Groups
 from ..Color import ColorConfig
 from ..Texture import Texture
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import FeatureList
 
 
 class Tiler():
@@ -142,7 +146,7 @@ class Tiler():
         kd_tree_max = ktm_arg if ktm_arg is not None and ktm_arg > 0 else self.DEFAULT_KD_TREE_MAX
         return kd_tree_max
 
-    def create_tileset_from_feature_list(self, feature_list, extension_name=None):
+    def create_tileset_from_feature_list(self, feature_list: 'FeatureList', extension_name=None):
         """
         Create the 3DTiles tileset from the features.
         :param feature_list: a FeatureList
@@ -153,12 +157,11 @@ class Tiler():
         feature_list.delete_features_ref()
         return self.create_tileset_from_groups(groups, extension_name)
 
-    def create_tileset_from_groups(self, groups, extension_name=None):
+    def create_tileset_from_groups(self, groups: Groups, extension_name=None):
         """
-        Create the 3DTiles tileset from the features.
-        :param feature_list: a FeatureList
+        Create the 3DTiles tileset from the groups.
+        :param groups: Groups
         :param extension_name: an optional extension to add to the tileset
-        :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         :return: a TileSet
         """
         create_loa = self.args.loa is not None

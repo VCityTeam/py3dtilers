@@ -20,8 +20,8 @@ class CityMBridges(CityMCityObjects):
 
     object_type = CityMBridge
 
-    def __init__(self, objects=None):
-        super().__init__(objects)
+    def __init__(self, features=None):
+        super().__init__(features)
 
     @staticmethod
     def sql_query_objects(bridges, citygml_ids=list()):

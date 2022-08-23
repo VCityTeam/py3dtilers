@@ -1,4 +1,8 @@
 from ..Common import FeatureList
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import GeometryNode
 
 
 class GeometryTree():
@@ -8,7 +12,7 @@ class GeometryTree():
     The GeometryTree also contains the centroid of the root nodes.
     """
 
-    def __init__(self, root_nodes):
+    def __init__(self, root_nodes: list['GeometryNode']):
         self.root_nodes = root_nodes
 
     def get_centroid(self):

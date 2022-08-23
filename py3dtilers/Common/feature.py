@@ -133,7 +133,7 @@ class Feature(object):
 
 class FeatureList(object):
     """
-    A decorated list of FeatureList type objects.
+    A decorated list of Feature instances.
     """
 
     # The color config used to create colored materials
@@ -141,35 +141,35 @@ class FeatureList(object):
     # The material used by default for geometries
     default_mat = None
 
-    def __init__(self, objects=None):
-        self.objects = list()
+    def __init__(self, features: list[Feature] = None):
+        self.features = list()
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
         self.materials = [FeatureList.default_mat]
-        if(objects):
-            self.objects.extend(objects)
+        if(features):
+            self.features.extend(features)
 
     def __iter__(self):
-        return iter(self.objects)
+        return iter(self.features)
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            objects_class = self.__class__
-            return objects_class(self.objects.__getitem__(item))
+            features_class = self.__class__
+            return features_class(self.features.__getitem__(item))
         # item is then an int type:
-        return self.objects.__getitem__(item)
+        return self.features.__getitem__(item)
 
-    def __add__(self, other):
-        objects_class = self.__class__
-        new_objects = objects_class(self.objects)
-        new_objects.objects.extend(other.objects)
-        return new_objects
+    def __add__(self, other: 'FeatureList'):
+        features_class = self.__class__
+        new_features = features_class(self.features)
+        new_features.features.extend(other.features)
+        return new_features
 
-    def append(self, obj):
-        self.objects.append(obj)
+    def append(self, feature: Feature):
+        self.features.append(feature)
 
-    def extend(self, others):
-        self.objects.extend(others)
+    def extend(self, others: 'FeatureList'):
+        self.features.extend(others)
 
     def get_features(self):
         """
@@ -177,30 +177,30 @@ class FeatureList(object):
         :return: a list of Feature instances
         """
         if not self.is_list_of_feature_list():
-            return self.objects
+            return self.features
         else:
-            objects = list()
-            for objs in self.objects:
-                objects.extend(objs.get_features())
-            return objects
+            features = list()
+            for objs in self.features:
+                features.extend(objs.get_features())
+            return features
 
-    def set_features(self, features):
+    def set_features(self, features: list[Feature]):
         """
         Set the list of features.
         :param features: a list of Feature
         """
-        self.objects = features
+        self.features = features
 
     def delete_features_ref(self):
-        """Delete the reference to the objects contained by this instance, so the objects are destroyed when unused."""
-        del self.objects
+        """Delete the reference to the features contained by this instance, so the features are destroyed when unused."""
+        del self.features
 
     def __len__(self):
-        return len(self.objects)
+        return len(self.features)
 
     def is_list_of_feature_list(self):
         """Check if this instance of FeatureList contains others FeatureList"""
-        return isinstance(self.objects[0], FeatureList)
+        return isinstance(self.features[0], FeatureList)
 
     def get_centroid(self):
         """
@@ -305,7 +305,7 @@ class FeatureList(object):
     def scale_features(self, scale_factor):
         """
         Rescale the features.
-        :param scale_factor: the factor to scale the objects
+        :param scale_factor: the factor to scale the features
         """
         centroid = self.get_centroid()
         for feature in self.get_features():
@@ -333,7 +333,7 @@ class FeatureList(object):
         """
         features_with_geom = list()
         material_indexes = dict()
-        for feature in self.objects:
+        for feature in self.features:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.set_features(features_with_geom)
 
@@ -357,11 +357,11 @@ class FeatureList(object):
         return FeatureList.color_config
 
     @staticmethod
-    def create_batch_table_extension(extension_name, ids=None, objects=None):
+    def create_batch_table_extension(extension_name, ids=None, features=None):
         """Virtual method to create a batch table extension."""
         pass
 
     @staticmethod
-    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+    def create_bounding_volume_extension(extension_name, ids=None, features=None):
         """Virtual method to create a bounding volume box extension."""
         pass
