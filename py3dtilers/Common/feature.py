@@ -1,6 +1,6 @@
 import numpy as np
 from py3dtiles import BoundingVolumeBox, TriangleSoup
-
+from typing import List
 from ..Color import ColorConfig
 
 
@@ -141,7 +141,7 @@ class FeatureList(object):
     # The material used by default for geometries
     default_mat = None
 
-    def __init__(self, features=None):
+    def __init__(self, features: List[Feature] = None):
         self.features = list()
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
@@ -159,16 +159,16 @@ class FeatureList(object):
         # item is then an int type:
         return self.features.__getitem__(item)
 
-    def __add__(self, other):
+    def __add__(self, other: 'FeatureList'):
         features_class = self.__class__
         new_features = features_class(self.features)
         new_features.features.extend(other.features)
         return new_features
 
-    def append(self, feature):
+    def append(self, feature: Feature):
         self.features.append(feature)
 
-    def extend(self, others):
+    def extend(self, others: 'FeatureList'):
         self.features.extend(others)
 
     def get_features(self):
@@ -184,7 +184,7 @@ class FeatureList(object):
                 features.extend(objs.get_features())
             return features
 
-    def set_features(self, features):
+    def set_features(self, features: List[Feature]):
         """
         Set the list of features.
         :param features: a list of Feature

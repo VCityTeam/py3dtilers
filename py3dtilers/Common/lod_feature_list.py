@@ -1,6 +1,6 @@
 from shapely.geometry import Point, Polygon
 from ..Common import FeatureList, ExtrudedPolygon
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from ..Common import Feature, GeometryNode
@@ -54,7 +54,7 @@ class LoaFeatureList(LodFeatureList):
 
         self.features_node = None
 
-    def find_features_in_polygon(self, features: list['Feature'], polygon: 'Polygon'):
+    def find_features_in_polygon(self, features: List['Feature'], polygon: 'Polygon'):
         """
         Find all the features which are in the polygon.
         :param features: a list of Feature

@@ -4,6 +4,7 @@ import json
 from shapely.geometry import Point, Polygon
 from ..Common import FeatureList
 from ..Common import kd_tree
+from typing import List
 
 
 class Group():
@@ -95,7 +96,7 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_array_of_feature_list(self, feature_lists_array: list[FeatureList]):
+    def group_array_of_feature_list(self, feature_lists_array: List[FeatureList]):
         self.groups = list()
         for feature_list in feature_lists_array:
             group = Group(feature_list)
@@ -187,7 +188,7 @@ class Groups():
 
         return self.distribute_groups_in_cubes(groups, Groups.DEFAULT_CUBE_SIZE)
 
-    def distribute_groups_in_cubes(self, groups: list[Group], cube_size):
+    def distribute_groups_in_cubes(self, groups: List[Group], cube_size):
         """
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
@@ -212,7 +213,7 @@ class Groups():
             groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube]))
         return groups_in_cube
 
-    def merge_groups_together(self, groups: list[Group], group_indexes):
+    def merge_groups_together(self, groups: List[Group], group_indexes):
         """
         Creates a Group from a list of Groups
         :param groups: all the groups

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from ..Common import FeatureList
@@ -27,7 +27,7 @@ class GeometryNode():
         self.with_texture = with_texture
         self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
-    def set_child_nodes(self, nodes: list['GeometryNode'] = list()):
+    def set_child_nodes(self, nodes: List['GeometryNode'] = list()):
         """
         Set the child nodes of this node.
         :param nodes: list of nodes
