@@ -159,16 +159,16 @@ class FeatureList(object):
         # item is then an int type:
         return self.features.__getitem__(item)
 
-    def __add__(self, other: 'FeatureList'):
+    def __add__(self, other):
         features_class = self.__class__
         new_features = features_class(self.features)
         new_features.features.extend(other.features)
         return new_features
 
-    def append(self, feature: Feature):
+    def append(self, feature):
         self.features.append(feature)
 
-    def extend(self, others: 'FeatureList'):
+    def extend(self, others):
         self.features.extend(others)
 
     def get_features(self):
@@ -184,7 +184,7 @@ class FeatureList(object):
                 features.extend(objs.get_features())
             return features
 
-    def set_features(self, features: list[Feature]):
+    def set_features(self, features):
         """
         Set the list of features.
         :param features: a list of Feature
