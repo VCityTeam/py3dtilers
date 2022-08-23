@@ -37,7 +37,7 @@ class Lod1Node(GeometryNode):
 
     DEFAULT_GEOMETRIC_ERROR = 5
 
-    def __init__(self, features_node, geometric_error=None):
+    def __init__(self, features_node: GeometryNode, geometric_error=None):
         feature_list = Lod1FeatureList(features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>
@@ -53,7 +53,7 @@ class Lod1Node(GeometryNode):
 <dl>
 <dt id="py3dtilers.Common.lod1_node.Lod1Node"><code class="flex name class">
 <span>class <span class="ident">Lod1Node</span></span>
-<span>(</span><span>features_node, geometric_error=None)</span>
+<span>(</span><span>features_node: <a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a>, geometric_error=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates 3D extrusions of the footprint of each feature in the feature_list parameter of the constructor.</p>
@@ -71,7 +71,7 @@ class Lod1Node(GeometryNode):
 
     DEFAULT_GEOMETRIC_ERROR = 5
 
-    def __init__(self, features_node, geometric_error=None):
+    def __init__(self, features_node: GeometryNode, geometric_error=None):
         feature_list = Lod1FeatureList(features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>

@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">import logging
 import time
-from ..Common import Tiler
+from ..Common import Tiler, Groups
 from .ifcObjectGeom import IfcObjectsGeom
 
 
@@ -47,6 +47,10 @@ class IfcTiler(Tiler):
                                  choices=[&#39;IfcTypeObject&#39;, &#39;IfcGroup&#39;],
                                  help=&#39;Either IfcTypeObject or IfcGroup (default: %(default)s)&#39;
                                  )
+        self.parser.add_argument(&#39;--with_BTH&#39;,
+                                 dest=&#39;with_BTH&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;Adds a Batch Table Hierarchy when defined&#39;)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -57,21 +61,21 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by):
+    def from_ifc(self, path_to_file, grouped_by, with_BTH):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, with_BTH)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, with_BTH)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-        feature_list = IfcObjectsGeom(objects)
+        groups = Groups(objects).get_groups_as_list()
 
-        return self.create_tileset_from_geometries(feature_list)
+        return self.create_tileset_from_groups(groups, &#34;batch_table_hierarchy&#34; if with_BTH else None)
 
 
 def main():
@@ -86,8 +90,7 @@ def main():
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.with_BTH)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
@@ -127,8 +130,7 @@ if __name__ == &#39;__main__&#39;:
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.with_BTH)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())
@@ -164,6 +166,10 @@ if __name__ == &#39;__main__&#39;:
                                  choices=[&#39;IfcTypeObject&#39;, &#39;IfcGroup&#39;],
                                  help=&#39;Either IfcTypeObject or IfcGroup (default: %(default)s)&#39;
                                  )
+        self.parser.add_argument(&#39;--with_BTH&#39;,
+                                 dest=&#39;with_BTH&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;Adds a Batch Table Hierarchy when defined&#39;)
 
     def get_output_dir(self):
         &#34;&#34;&#34;
@@ -174,21 +180,21 @@ if __name__ == &#39;__main__&#39;:
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by):
+    def from_ifc(self, path_to_file, grouped_by, with_BTH):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
         :return: a tileset.
         &#34;&#34;&#34;
         if(grouped_by == &#39;IfcTypeObject&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, with_BTH)
         elif(grouped_by == &#39;IfcGroup&#39;):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
+            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, with_BTH)
 
         objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-        feature_list = IfcObjectsGeom(objects)
+        groups = Groups(objects).get_groups_as_list()
 
-        return self.create_tileset_from_geometries(feature_list)</code></pre>
+        return self.create_tileset_from_groups(groups, &#34;batch_table_hierarchy&#34; if with_BTH else None)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -197,7 +203,7 @@ if __name__ == &#39;__main__&#39;:
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.IfcTiler.IfcTiler.IfcTiler.from_ifc"><code class="name flex">
-<span>def <span class="ident">from_ifc</span></span>(<span>self, path_to_file, grouped_by)</span>
+<span>def <span class="ident">from_ifc</span></span>(<span>self, path_to_file, grouped_by, with_BTH)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param path: a path to a directory</p>
@@ -206,21 +212,21 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_ifc(self, path_to_file, grouped_by):
+<pre><code class="python">def from_ifc(self, path_to_file, grouped_by, with_BTH):
     &#34;&#34;&#34;
     :param path: a path to a directory
 
     :return: a tileset.
     &#34;&#34;&#34;
     if(grouped_by == &#39;IfcTypeObject&#39;):
-        pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file)
+        pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, with_BTH)
     elif(grouped_by == &#39;IfcGroup&#39;):
-        pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file)
+        pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, with_BTH)
 
     objects = [objs for objs in pre_tileset.values() if len(objs) &gt; 0]
-    feature_list = IfcObjectsGeom(objects)
+    groups = Groups(objects).get_groups_as_list()
 
-    return self.create_tileset_from_geometries(feature_list)</code></pre>
+    return self.create_tileset_from_groups(groups, &#34;batch_table_hierarchy&#34; if with_BTH else None)</code></pre>
 </details>
 </dd>
 </dl>
@@ -229,7 +235,8 @@ if __name__ == &#39;__main__&#39;:
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list">create_tileset_from_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_groups" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_groups">create_tileset_from_groups</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>

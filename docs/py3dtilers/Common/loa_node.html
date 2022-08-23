@@ -39,7 +39,7 @@ class LoaNode(GeometryNode):
 
     DEFAULT_GEOMETRIC_ERROR = 20
 
-    def __init__(self, features_node, geometric_error=None, polygons=list()):
+    def __init__(self, features_node: GeometryNode, geometric_error=None, polygons=list()):
         feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>
@@ -55,7 +55,7 @@ class LoaNode(GeometryNode):
 <dl>
 <dt id="py3dtilers.Common.loa_node.LoaNode"><code class="flex name class">
 <span>class <span class="ident">LoaNode</span></span>
-<span>(</span><span>features_node, geometric_error=None, polygons=[])</span>
+<span>(</span><span>features_node: <a title="py3dtilers.Common.geometry_node.GeometryNode" href="geometry_node.html#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a>, geometric_error=None, polygons=[])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates 3D extrusions of the polygons given as parameter.
@@ -77,7 +77,7 @@ If a feature isn't contained in any polygon, create a 3D extrusion of its footpr
 
     DEFAULT_GEOMETRIC_ERROR = 20
 
-    def __init__(self, features_node, geometric_error=None, polygons=list()):
+    def __init__(self, features_node: GeometryNode, geometric_error=None, polygons=list()):
         feature_list = LoaFeatureList(polygons=polygons, features_node=features_node)
         super().__init__(feature_list, geometric_error=geometric_error)</code></pre>
 </details>

@@ -31,10 +31,14 @@ from ..Common import Feature
 from alphashape import alphashape
 from earclip import triangulate
 from shapely.geometry import Polygon
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import FeatureList
 
 
 class ExtrudedPolygon(Feature):
-    def __init__(self, id, features, polygon=None):
+    def __init__(self, id, features: &#39;FeatureList&#39;, polygon=None):
         &#34;&#34;&#34;
         Creates a 3D extrusion of the footprint of a list of features.
         The height and the altitude of the 3D model will be computed using the triangles of the features.
@@ -90,6 +94,9 @@ class ExtrudedPolygon(Feature):
         self.extrude_footprint()
 
     def extrude_footprint(self):
+        &#34;&#34;&#34;
+        Extrude the 2D footprint to create a triangulated 3D mesh.
+        &#34;&#34;&#34;
         coordinates = self.points
         length = len(coordinates)
         vertices = [None] * (2 * length)
@@ -132,7 +139,7 @@ class ExtrudedPolygon(Feature):
 <dl>
 <dt id="py3dtilers.Common.polygon_extrusion.ExtrudedPolygon"><code class="flex name class">
 <span>class <span class="ident">ExtrudedPolygon</span></span>
-<span>(</span><span>id, features, polygon=None)</span>
+<span>(</span><span>id, features: FeatureList, polygon=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The base class of all object that need to be tiled, in order to be
@@ -148,7 +155,7 @@ If a polygon is given, it will be extruded instead of the footprint.
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ExtrudedPolygon(Feature):
-    def __init__(self, id, features, polygon=None):
+    def __init__(self, id, features: &#39;FeatureList&#39;, polygon=None):
         &#34;&#34;&#34;
         Creates a 3D extrusion of the footprint of a list of features.
         The height and the altitude of the 3D model will be computed using the triangles of the features.
@@ -204,6 +211,9 @@ If a polygon is given, it will be extruded instead of the footprint.
         self.extrude_footprint()
 
     def extrude_footprint(self):
+        &#34;&#34;&#34;
+        Extrude the 2D footprint to create a triangulated 3D mesh.
+        &#34;&#34;&#34;
         coordinates = self.points
         length = len(coordinates)
         vertices = [None] * (2 * length)
@@ -244,12 +254,15 @@ If a polygon is given, it will be extruded instead of the footprint.
 <span>def <span class="ident">extrude_footprint</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Extrude the 2D footprint to create a triangulated 3D mesh.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extrude_footprint(self):
+    &#34;&#34;&#34;
+    Extrude the 2D footprint to create a triangulated 3D mesh.
+    &#34;&#34;&#34;
     coordinates = self.points
     length = len(coordinates)
     vertices = [None] * (2 * length)

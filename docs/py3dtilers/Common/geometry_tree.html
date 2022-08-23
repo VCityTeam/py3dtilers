@@ -27,6 +27,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from ..Common import FeatureList
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import GeometryNode
 
 
 class GeometryTree():
@@ -36,7 +40,7 @@ class GeometryTree():
     The GeometryTree also contains the centroid of the root nodes.
     &#34;&#34;&#34;
 
-    def __init__(self, root_nodes):
+    def __init__(self, root_nodes: list[&#39;GeometryNode&#39;]):
         self.root_nodes = root_nodes
 
     def get_centroid(self):
@@ -44,7 +48,7 @@ class GeometryTree():
         Return the centroid of the tree.
         The centroid of the tree is the centroid of the root nodes features.
         &#34;&#34;&#34;
-        return self.get_leaf_objects().get_centroid()
+        return self.get_root_objects().get_centroid()
 
     def get_leaf_nodes(self):
         &#34;&#34;&#34;
@@ -102,7 +106,7 @@ class GeometryTree():
 <dl>
 <dt id="py3dtilers.Common.geometry_tree.GeometryTree"><code class="flex name class">
 <span>class <span class="ident">GeometryTree</span></span>
-<span>(</span><span>root_nodes)</span>
+<span>(</span><span>root_nodes: list['GeometryNode'])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The GeometryTree contains a list of GeometryNode instances.
@@ -119,7 +123,7 @@ The GeometryTree also contains the centroid of the root nodes.</p></div>
     The GeometryTree also contains the centroid of the root nodes.
     &#34;&#34;&#34;
 
-    def __init__(self, root_nodes):
+    def __init__(self, root_nodes: list[&#39;GeometryNode&#39;]):
         self.root_nodes = root_nodes
 
     def get_centroid(self):
@@ -127,7 +131,7 @@ The GeometryTree also contains the centroid of the root nodes.</p></div>
         Return the centroid of the tree.
         The centroid of the tree is the centroid of the root nodes features.
         &#34;&#34;&#34;
-        return self.get_leaf_objects().get_centroid()
+        return self.get_root_objects().get_centroid()
 
     def get_leaf_nodes(self):
         &#34;&#34;&#34;
@@ -216,7 +220,7 @@ The centroid of the tree is the centroid of the root nodes features.</p></div>
     Return the centroid of the tree.
     The centroid of the tree is the centroid of the root nodes features.
     &#34;&#34;&#34;
-    return self.get_leaf_objects().get_centroid()</code></pre>
+    return self.get_root_objects().get_centroid()</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.geometry_tree.GeometryTree.get_leaf_nodes"><code class="name flex">

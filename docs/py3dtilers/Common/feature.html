@@ -161,7 +161,7 @@ class Feature(object):
 
 class FeatureList(object):
     &#34;&#34;&#34;
-    A decorated list of FeatureList type objects.
+    A decorated list of Feature instances.
     &#34;&#34;&#34;
 
     # The color config used to create colored materials
@@ -169,35 +169,35 @@ class FeatureList(object):
     # The material used by default for geometries
     default_mat = None
 
-    def __init__(self, objects=None):
-        self.objects = list()
+    def __init__(self, features: list[Feature] = None):
+        self.features = list()
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
         self.materials = [FeatureList.default_mat]
-        if(objects):
-            self.objects.extend(objects)
+        if(features):
+            self.features.extend(features)
 
     def __iter__(self):
-        return iter(self.objects)
+        return iter(self.features)
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            objects_class = self.__class__
-            return objects_class(self.objects.__getitem__(item))
+            features_class = self.__class__
+            return features_class(self.features.__getitem__(item))
         # item is then an int type:
-        return self.objects.__getitem__(item)
+        return self.features.__getitem__(item)
 
-    def __add__(self, other):
-        objects_class = self.__class__
-        new_objects = objects_class(self.objects)
-        new_objects.objects.extend(other.objects)
-        return new_objects
+    def __add__(self, other: &#39;FeatureList&#39;):
+        features_class = self.__class__
+        new_features = features_class(self.features)
+        new_features.features.extend(other.features)
+        return new_features
 
-    def append(self, obj):
-        self.objects.append(obj)
+    def append(self, feature: Feature):
+        self.features.append(feature)
 
-    def extend(self, others):
-        self.objects.extend(others)
+    def extend(self, others: &#39;FeatureList&#39;):
+        self.features.extend(others)
 
     def get_features(self):
         &#34;&#34;&#34;
@@ -205,30 +205,30 @@ class FeatureList(object):
         :return: a list of Feature instances
         &#34;&#34;&#34;
         if not self.is_list_of_feature_list():
-            return self.objects
+            return self.features
         else:
-            objects = list()
-            for objs in self.objects:
-                objects.extend(objs.get_features())
-            return objects
+            features = list()
+            for objs in self.features:
+                features.extend(objs.get_features())
+            return features
 
-    def set_features(self, features):
+    def set_features(self, features: list[Feature]):
         &#34;&#34;&#34;
         Set the list of features.
         :param features: a list of Feature
         &#34;&#34;&#34;
-        self.objects = features
+        self.features = features
 
     def delete_features_ref(self):
-        &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-        del self.objects
+        &#34;&#34;&#34;Delete the reference to the features contained by this instance, so the features are destroyed when unused.&#34;&#34;&#34;
+        del self.features
 
     def __len__(self):
-        return len(self.objects)
+        return len(self.features)
 
     def is_list_of_feature_list(self):
         &#34;&#34;&#34;Check if this instance of FeatureList contains others FeatureList&#34;&#34;&#34;
-        return isinstance(self.objects[0], FeatureList)
+        return isinstance(self.features[0], FeatureList)
 
     def get_centroid(self):
         &#34;&#34;&#34;
@@ -257,12 +257,46 @@ class FeatureList(object):
         &#34;&#34;&#34;
         self.materials.extend(materials)
 
+    def add_material(self, material):
+        &#34;&#34;&#34;
+        Extend the materials of this object with a GltF material.
+        :param material: a GlTFMaterial
+        &#34;&#34;&#34;
+        self.materials.append(material)
+
     def get_material(self, index):
         &#34;&#34;&#34;
         Get the material at the index.
         :param index: the index (int) of the material
+        :return: a glTF material
         &#34;&#34;&#34;
         return self.materials[index]
+
+    def is_material_registered(self, material):
+        &#34;&#34;&#34;
+        Check if a material is already set in materials array
+        :param material: a GlTFMaterial
+        :return: bool
+        &#34;&#34;&#34;
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return True
+        return False
+
+    def get_material_index(self, material):
+        &#34;&#34;&#34;
+        Get the index of a given material.
+        Add it to the materials array if it is not found
+        :param material: a GlTFMaterial
+        :return: an index as int
+        &#34;&#34;&#34;
+        i = 0
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return i
+            i = i + 1
+        self.add_material(material)
+        return i
 
     def translate_features(self, offset):
         &#34;&#34;&#34;
@@ -299,7 +333,7 @@ class FeatureList(object):
     def scale_features(self, scale_factor):
         &#34;&#34;&#34;
         Rescale the features.
-        :param scale_factor: the factor to scale the objects
+        :param scale_factor: the factor to scale the features
         &#34;&#34;&#34;
         centroid = self.get_centroid()
         for feature in self.get_features():
@@ -327,7 +361,7 @@ class FeatureList(object):
         &#34;&#34;&#34;
         features_with_geom = list()
         material_indexes = dict()
-        for feature in self.objects:
+        for feature in self.features:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.set_features(features_with_geom)
 
@@ -351,12 +385,12 @@ class FeatureList(object):
         return FeatureList.color_config
 
     @staticmethod
-    def create_batch_table_extension(extension_name, ids=None, objects=None):
+    def create_batch_table_extension(extension_name, ids=None, features=None):
         &#34;&#34;&#34;Virtual method to create a batch table extension.&#34;&#34;&#34;
         pass
 
     @staticmethod
-    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+    def create_bounding_volume_extension(extension_name, ids=None, features=None):
         &#34;&#34;&#34;Virtual method to create a bounding volume box extension.&#34;&#34;&#34;
         pass</code></pre>
 </details>
@@ -763,17 +797,17 @@ Also set the centroid.</p></div>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList"><code class="flex name class">
 <span>class <span class="ident">FeatureList</span></span>
-<span>(</span><span>objects=None)</span>
+<span>(</span><span>features: list[<a title="py3dtilers.Common.feature.Feature" href="#py3dtilers.Common.feature.Feature">Feature</a>] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
+<div class="desc"><p>A decorated list of Feature instances.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FeatureList(object):
     &#34;&#34;&#34;
-    A decorated list of FeatureList type objects.
+    A decorated list of Feature instances.
     &#34;&#34;&#34;
 
     # The color config used to create colored materials
@@ -781,35 +815,35 @@ Also set the centroid.</p></div>
     # The material used by default for geometries
     default_mat = None
 
-    def __init__(self, objects=None):
-        self.objects = list()
+    def __init__(self, features: list[Feature] = None):
+        self.features = list()
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
         self.materials = [FeatureList.default_mat]
-        if(objects):
-            self.objects.extend(objects)
+        if(features):
+            self.features.extend(features)
 
     def __iter__(self):
-        return iter(self.objects)
+        return iter(self.features)
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            objects_class = self.__class__
-            return objects_class(self.objects.__getitem__(item))
+            features_class = self.__class__
+            return features_class(self.features.__getitem__(item))
         # item is then an int type:
-        return self.objects.__getitem__(item)
+        return self.features.__getitem__(item)
 
-    def __add__(self, other):
-        objects_class = self.__class__
-        new_objects = objects_class(self.objects)
-        new_objects.objects.extend(other.objects)
-        return new_objects
+    def __add__(self, other: &#39;FeatureList&#39;):
+        features_class = self.__class__
+        new_features = features_class(self.features)
+        new_features.features.extend(other.features)
+        return new_features
 
-    def append(self, obj):
-        self.objects.append(obj)
+    def append(self, feature: Feature):
+        self.features.append(feature)
 
-    def extend(self, others):
-        self.objects.extend(others)
+    def extend(self, others: &#39;FeatureList&#39;):
+        self.features.extend(others)
 
     def get_features(self):
         &#34;&#34;&#34;
@@ -817,30 +851,30 @@ Also set the centroid.</p></div>
         :return: a list of Feature instances
         &#34;&#34;&#34;
         if not self.is_list_of_feature_list():
-            return self.objects
+            return self.features
         else:
-            objects = list()
-            for objs in self.objects:
-                objects.extend(objs.get_features())
-            return objects
+            features = list()
+            for objs in self.features:
+                features.extend(objs.get_features())
+            return features
 
-    def set_features(self, features):
+    def set_features(self, features: list[Feature]):
         &#34;&#34;&#34;
         Set the list of features.
         :param features: a list of Feature
         &#34;&#34;&#34;
-        self.objects = features
+        self.features = features
 
     def delete_features_ref(self):
-        &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-        del self.objects
+        &#34;&#34;&#34;Delete the reference to the features contained by this instance, so the features are destroyed when unused.&#34;&#34;&#34;
+        del self.features
 
     def __len__(self):
-        return len(self.objects)
+        return len(self.features)
 
     def is_list_of_feature_list(self):
         &#34;&#34;&#34;Check if this instance of FeatureList contains others FeatureList&#34;&#34;&#34;
-        return isinstance(self.objects[0], FeatureList)
+        return isinstance(self.features[0], FeatureList)
 
     def get_centroid(self):
         &#34;&#34;&#34;
@@ -869,12 +903,46 @@ Also set the centroid.</p></div>
         &#34;&#34;&#34;
         self.materials.extend(materials)
 
+    def add_material(self, material):
+        &#34;&#34;&#34;
+        Extend the materials of this object with a GltF material.
+        :param material: a GlTFMaterial
+        &#34;&#34;&#34;
+        self.materials.append(material)
+
     def get_material(self, index):
         &#34;&#34;&#34;
         Get the material at the index.
         :param index: the index (int) of the material
+        :return: a glTF material
         &#34;&#34;&#34;
         return self.materials[index]
+
+    def is_material_registered(self, material):
+        &#34;&#34;&#34;
+        Check if a material is already set in materials array
+        :param material: a GlTFMaterial
+        :return: bool
+        &#34;&#34;&#34;
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return True
+        return False
+
+    def get_material_index(self, material):
+        &#34;&#34;&#34;
+        Get the index of a given material.
+        Add it to the materials array if it is not found
+        :param material: a GlTFMaterial
+        :return: an index as int
+        &#34;&#34;&#34;
+        i = 0
+        for mat in self.materials:
+            if(mat.rgba == material.rgba).all():
+                return i
+            i = i + 1
+        self.add_material(material)
+        return i
 
     def translate_features(self, offset):
         &#34;&#34;&#34;
@@ -911,7 +979,7 @@ Also set the centroid.</p></div>
     def scale_features(self, scale_factor):
         &#34;&#34;&#34;
         Rescale the features.
-        :param scale_factor: the factor to scale the objects
+        :param scale_factor: the factor to scale the features
         &#34;&#34;&#34;
         centroid = self.get_centroid()
         for feature in self.get_features():
@@ -939,7 +1007,7 @@ Also set the centroid.</p></div>
         &#34;&#34;&#34;
         features_with_geom = list()
         material_indexes = dict()
-        for feature in self.objects:
+        for feature in self.features:
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.set_features(features_with_geom)
 
@@ -963,12 +1031,12 @@ Also set the centroid.</p></div>
         return FeatureList.color_config
 
     @staticmethod
-    def create_batch_table_extension(extension_name, ids=None, objects=None):
+    def create_batch_table_extension(extension_name, ids=None, features=None):
         &#34;&#34;&#34;Virtual method to create a batch table extension.&#34;&#34;&#34;
         pass
 
     @staticmethod
-    def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+    def create_bounding_volume_extension(extension_name, ids=None, features=None):
         &#34;&#34;&#34;Virtual method to create a bounding volume box extension.&#34;&#34;&#34;
         pass</code></pre>
 </details>
@@ -995,7 +1063,7 @@ Also set the centroid.</p></div>
 <h3>Static methods</h3>
 <dl>
 <dt id="py3dtilers.Common.feature.FeatureList.create_batch_table_extension"><code class="name flex">
-<span>def <span class="ident">create_batch_table_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
+<span>def <span class="ident">create_batch_table_extension</span></span>(<span>extension_name, ids=None, features=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Virtual method to create a batch table extension.</p></div>
@@ -1004,13 +1072,13 @@ Also set the centroid.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def create_batch_table_extension(extension_name, ids=None, objects=None):
+def create_batch_table_extension(extension_name, ids=None, features=None):
     &#34;&#34;&#34;Virtual method to create a batch table extension.&#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.create_bounding_volume_extension"><code class="name flex">
-<span>def <span class="ident">create_bounding_volume_extension</span></span>(<span>extension_name, ids=None, objects=None)</span>
+<span>def <span class="ident">create_bounding_volume_extension</span></span>(<span>extension_name, ids=None, features=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Virtual method to create a bounding volume box extension.</p></div>
@@ -1019,7 +1087,7 @@ def create_batch_table_extension(extension_name, ids=None, objects=None):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def create_bounding_volume_extension(extension_name, ids=None, objects=None):
+def create_bounding_volume_extension(extension_name, ids=None, features=None):
     &#34;&#34;&#34;Virtual method to create a bounding volume box extension.&#34;&#34;&#34;
     pass</code></pre>
 </details>
@@ -1069,6 +1137,24 @@ def set_color_config(cls, config_path):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="py3dtilers.Common.feature.FeatureList.add_material"><code class="name flex">
+<span>def <span class="ident">add_material</span></span>(<span>self, material)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extend the materials of this object with a GltF material.
+:param material: a GlTFMaterial</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_material(self, material):
+    &#34;&#34;&#34;
+    Extend the materials of this object with a GltF material.
+    :param material: a GlTFMaterial
+    &#34;&#34;&#34;
+    self.materials.append(material)</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.Common.feature.FeatureList.add_materials"><code class="name flex">
 <span>def <span class="ident">add_materials</span></span>(<span>self, materials)</span>
 </code></dt>
@@ -1088,7 +1174,7 @@ def set_color_config(cls, config_path):
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.append"><code class="name flex">
-<span>def <span class="ident">append</span></span>(<span>self, obj)</span>
+<span>def <span class="ident">append</span></span>(<span>self, feature: <a title="py3dtilers.Common.feature.Feature" href="#py3dtilers.Common.feature.Feature">Feature</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1096,8 +1182,8 @@ def set_color_config(cls, config_path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def append(self, obj):
-    self.objects.append(obj)</code></pre>
+<pre><code class="python">def append(self, feature: Feature):
+    self.features.append(feature)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.change_crs"><code class="name flex">
@@ -1131,18 +1217,18 @@ def set_color_config(cls, config_path):
 <span>def <span class="ident">delete_features_ref</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.</p></div>
+<div class="desc"><p>Delete the reference to the features contained by this instance, so the features are destroyed when unused.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete_features_ref(self):
-    &#34;&#34;&#34;Delete the reference to the objects contained by this instance, so the objects are destroyed when unused.&#34;&#34;&#34;
-    del self.objects</code></pre>
+    &#34;&#34;&#34;Delete the reference to the features contained by this instance, so the features are destroyed when unused.&#34;&#34;&#34;
+    del self.features</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.extend"><code class="name flex">
-<span>def <span class="ident">extend</span></span>(<span>self, others)</span>
+<span>def <span class="ident">extend</span></span>(<span>self, others: <a title="py3dtilers.Common.feature.FeatureList" href="#py3dtilers.Common.feature.FeatureList">FeatureList</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1150,8 +1236,8 @@ def set_color_config(cls, config_path):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extend(self, others):
-    self.objects.extend(others)</code></pre>
+<pre><code class="python">def extend(self, others: &#39;FeatureList&#39;):
+    self.features.extend(others)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.get_centroid"><code class="name flex">
@@ -1195,12 +1281,12 @@ The centroid is the average of the centroids of all the features.
     :return: a list of Feature instances
     &#34;&#34;&#34;
     if not self.is_list_of_feature_list():
-        return self.objects
+        return self.features
     else:
-        objects = list()
-        for objs in self.objects:
-            objects.extend(objs.get_features())
-        return objects</code></pre>
+        features = list()
+        for objs in self.features:
+            features.extend(objs.get_features())
+        return features</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.get_material"><code class="name flex">
@@ -1208,7 +1294,8 @@ The centroid is the average of the centroids of all the features.
 </code></dt>
 <dd>
 <div class="desc"><p>Get the material at the index.
-:param index: the index (int) of the material</p></div>
+:param index: the index (int) of the material
+:return: a glTF material</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1217,8 +1304,37 @@ The centroid is the average of the centroids of all the features.
     &#34;&#34;&#34;
     Get the material at the index.
     :param index: the index (int) of the material
+    :return: a glTF material
     &#34;&#34;&#34;
     return self.materials[index]</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.feature.FeatureList.get_material_index"><code class="name flex">
+<span>def <span class="ident">get_material_index</span></span>(<span>self, material)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the index of a given material.
+Add it to the materials array if it is not found
+:param material: a GlTFMaterial
+:return: an index as int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_material_index(self, material):
+    &#34;&#34;&#34;
+    Get the index of a given material.
+    Add it to the materials array if it is not found
+    :param material: a GlTFMaterial
+    :return: an index as int
+    &#34;&#34;&#34;
+    i = 0
+    for mat in self.materials:
+        if(mat.rgba == material.rgba).all():
+            return i
+        i = i + 1
+    self.add_material(material)
+    return i</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.get_textures"><code class="name flex">
@@ -1253,7 +1369,30 @@ The centroid is the average of the centroids of all the features.
 </summary>
 <pre><code class="python">def is_list_of_feature_list(self):
     &#34;&#34;&#34;Check if this instance of FeatureList contains others FeatureList&#34;&#34;&#34;
-    return isinstance(self.objects[0], FeatureList)</code></pre>
+    return isinstance(self.features[0], FeatureList)</code></pre>
+</details>
+</dd>
+<dt id="py3dtilers.Common.feature.FeatureList.is_material_registered"><code class="name flex">
+<span>def <span class="ident">is_material_registered</span></span>(<span>self, material)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if a material is already set in materials array
+:param material: a GlTFMaterial
+:return: bool</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_material_registered(self, material):
+    &#34;&#34;&#34;
+    Check if a material is already set in materials array
+    :param material: a GlTFMaterial
+    :return: bool
+    &#34;&#34;&#34;
+    for mat in self.materials:
+        if(mat.rgba == material.rgba).all():
+            return True
+    return False</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.scale_features"><code class="name flex">
@@ -1261,7 +1400,7 @@ The centroid is the average of the centroids of all the features.
 </code></dt>
 <dd>
 <div class="desc"><p>Rescale the features.
-:param scale_factor: the factor to scale the objects</p></div>
+:param scale_factor: the factor to scale the features</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1269,7 +1408,7 @@ The centroid is the average of the centroids of all the features.
 <pre><code class="python">def scale_features(self, scale_factor):
     &#34;&#34;&#34;
     Rescale the features.
-    :param scale_factor: the factor to scale the objects
+    :param scale_factor: the factor to scale the features
     &#34;&#34;&#34;
     centroid = self.get_centroid()
     for feature in self.get_features():
@@ -1282,7 +1421,7 @@ The centroid is the average of the centroids of all the features.
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.set_features"><code class="name flex">
-<span>def <span class="ident">set_features</span></span>(<span>self, features)</span>
+<span>def <span class="ident">set_features</span></span>(<span>self, features: list[<a title="py3dtilers.Common.feature.Feature" href="#py3dtilers.Common.feature.Feature">Feature</a>])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the list of features.
@@ -1291,12 +1430,12 @@ The centroid is the average of the centroids of all the features.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_features(self, features):
+<pre><code class="python">def set_features(self, features: list[Feature]):
     &#34;&#34;&#34;
     Set the list of features.
     :param features: a list of Feature
     &#34;&#34;&#34;
-    self.objects = features</code></pre>
+    self.features = features</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.feature.FeatureList.set_features_geom"><code class="name flex">
@@ -1316,7 +1455,7 @@ Keep only the features with geometry.</p></div>
     &#34;&#34;&#34;
     features_with_geom = list()
     material_indexes = dict()
-    for feature in self.objects:
+    for feature in self.features:
         features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
     self.set_features(features_with_geom)</code></pre>
 </details>
@@ -1405,6 +1544,7 @@ Keep only the features with geometry.</p></div>
 <li>
 <h4><code><a title="py3dtilers.Common.feature.FeatureList" href="#py3dtilers.Common.feature.FeatureList">FeatureList</a></code></h4>
 <ul class="">
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_material" href="#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.append" href="#py3dtilers.Common.feature.FeatureList.append">append</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
@@ -1418,8 +1558,10 @@ Keep only the features with geometry.</p></div>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material_index" href="#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_material_registered" href="#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>

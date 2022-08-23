@@ -71,8 +71,7 @@ __all__ = [&#39;main&#39;]</code></pre>
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by)
+    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.with_BTH)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())

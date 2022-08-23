@@ -78,8 +78,8 @@ class CityMReliefs(CityMCityObjects):
 
     object_type = CityMRelief
 
-    def __init__(self, objects=None):
-        super().__init__(objects)
+    def __init__(self, features=None):
+        super().__init__(features)
 
     @staticmethod
     def sql_query_objects(reliefs, citygml_ids=list()):
@@ -262,7 +262,7 @@ class CityMReliefs(CityMCityObjects):
 </dd>
 <dt id="py3dtilers.CityTiler.citym_relief.CityMReliefs"><code class="flex name class">
 <span>class <span class="ident">CityMReliefs</span></span>
-<span>(</span><span>objects=None)</span>
+<span>(</span><span>features=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A decorated list of CityMRelief type objects.</p></div>
@@ -277,8 +277,8 @@ class CityMReliefs(CityMCityObjects):
 
     object_type = CityMRelief
 
-    def __init__(self, objects=None):
-        super().__init__(objects)
+    def __init__(self, features=None):
+        super().__init__(features)
 
     @staticmethod
     def sql_query_objects(reliefs, citygml_ids=list()):
@@ -582,6 +582,7 @@ def sql_query_objects(reliefs, citygml_ids=list()):
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects">CityMCityObjects</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
@@ -593,8 +594,10 @@ def sql_query_objects(reliefs, citygml_ids=list()):
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_image_from_binary">get_image_from_binary</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_material_index" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.is_material_registered" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.object_type">object_type</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_objects">retrieve_objects</a></code></li>
 <li><code><a title="py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures" href="citym_cityobject.html#py3dtilers.CityTiler.citym_cityobject.CityMCityObjects.retrieve_textures">retrieve_textures</a></code></li>

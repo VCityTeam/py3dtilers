@@ -116,7 +116,7 @@ class CityTemporalTiler(CityTiler):
 
         feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)
+        return self.create_tileset_from_feature_list(feature_list, extension_name=&#34;temporal&#34;)
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)
@@ -536,7 +536,7 @@ The database can contain buildings, bridges, relief or water bodies.</p></div>
 
         feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-        return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)
+        return self.create_tileset_from_feature_list(feature_list, extension_name=&#34;temporal&#34;)
 
     def combine_nodes_with_buildings_from_3dcitydb(self, graph, cursors, cli_args):
         # ######## Convert the nodes to buildings (optimization purpose)
@@ -962,7 +962,7 @@ as values
 
     feature_list = self.get_surfaces_merged(cursors, buildings, CityMBuildings)
 
-    return self.create_tileset_from_geometries(feature_list, extension_name=&#34;temporal&#34;)</code></pre>
+    return self.create_tileset_from_feature_list(feature_list, extension_name=&#34;temporal&#34;)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.CityTiler.CityTemporalTiler.CityTemporalTiler.get_surfaces_merged"><code class="name flex">
@@ -1037,7 +1037,8 @@ Surfaces of the same cityObject are merged into one geometry</p></div>
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list">create_tileset_from_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_groups" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_groups">create_tileset_from_groups</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>

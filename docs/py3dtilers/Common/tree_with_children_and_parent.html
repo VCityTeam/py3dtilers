@@ -47,8 +47,9 @@
         if parent_id is not None:
             if parent_id not in self.hierarchy:
                 self.hierarchy[parent_id] = []
-            self.hierarchy[parent_id].append(object_id)
-            self.reverseHierarchy[object_id] = parent_id
+            if object_id not in self.hierarchy[parent_id]:
+                self.hierarchy[parent_id].append(object_id)
+                self.reverseHierarchy[object_id] = parent_id
 
     def getParents(self, object_id):
         if object_id in self.reverseHierarchy:
@@ -102,8 +103,9 @@ weak references.</p>
         if parent_id is not None:
             if parent_id not in self.hierarchy:
                 self.hierarchy[parent_id] = []
-            self.hierarchy[parent_id].append(object_id)
-            self.reverseHierarchy[object_id] = parent_id
+            if object_id not in self.hierarchy[parent_id]:
+                self.hierarchy[parent_id].append(object_id)
+                self.reverseHierarchy[object_id] = parent_id
 
     def getParents(self, object_id):
         if object_id in self.reverseHierarchy:
@@ -132,8 +134,9 @@ weak references.</p>
     if parent_id is not None:
         if parent_id not in self.hierarchy:
             self.hierarchy[parent_id] = []
-        self.hierarchy[parent_id].append(object_id)
-        self.reverseHierarchy[object_id] = parent_id</code></pre>
+        if object_id not in self.hierarchy[parent_id]:
+            self.hierarchy[parent_id].append(object_id)
+            self.reverseHierarchy[object_id] = parent_id</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.tree_with_children_and_parent.TreeWithChildrenAndParent.getParents"><code class="name flex">

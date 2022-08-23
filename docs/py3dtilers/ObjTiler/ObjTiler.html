@@ -79,7 +79,7 @@ class ObjTiler(Tiler):
         else:
             print(str(len(objects)) + &#34; .obj parsed&#34;)
 
-        return self.create_tileset_from_geometries(objects)
+        return self.create_tileset_from_feature_list(objects)
 
 
 def main():
@@ -215,7 +215,7 @@ and a classes.txt that contains the name of all tilesets
         else:
             print(str(len(objects)) + &#34; .obj parsed&#34;)
 
-        return self.create_tileset_from_geometries(objects)</code></pre>
+        return self.create_tileset_from_feature_list(objects)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -250,7 +250,7 @@ and a classes.txt that contains the name of all tilesets
     else:
         print(str(len(objects)) + &#34; .obj parsed&#34;)
 
-    return self.create_tileset_from_geometries(objects)</code></pre>
+    return self.create_tileset_from_feature_list(objects)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.ObjTiler.ObjTiler.ObjTiler.parse_command_line"><code class="name flex">
@@ -278,7 +278,8 @@ and a classes.txt that contains the name of all tilesets
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list">create_tileset_from_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_groups" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_groups">create_tileset_from_groups</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>

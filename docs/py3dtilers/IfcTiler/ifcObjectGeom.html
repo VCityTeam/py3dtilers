@@ -32,15 +32,20 @@ import time
 import numpy as np
 import ifcopenshell
 from py3dtiles import GlTFMaterial
-from ..Common import Feature, FeatureList
+from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
+from py3dtiles import BatchTableHierarchy
+
 
 class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
+    def __init__(self, ifcObject, ifcGroup=None, with_BTH=False):
         super().__init__(ifcObject.GlobalId)
-        self.setIfcClasse(ifcObject, ifcGroup)
-        # self.material = None
+        self.ifcClass = ifcObject.is_a()
+        self.material = None
+        self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
+        if(with_BTH):
+            self.getParentsInIfc(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
@@ -48,14 +53,28 @@ class IfcObjectGeom(Feature):
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
 
+    def getParentsInIfc(self, ifcObject):
+        self.parents = list()
+        while(ifcObject):
+            ifcParent = None
+            if(hasattr(ifcObject, &#34;ContainedInStructure&#34;)):
+                if(ifcObject.ContainedInStructure):
+                    ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
+            elif(hasattr(ifcObject, &#34;Decomposes&#34;)):
+                if(len(ifcObject.Decomposes) &gt; 0):
+                    ifcParent = ifcObject.Decomposes[0].RelatingObject
+
+            if(ifcParent):
+                self.parents.append({&#39;id&#39;: ifcParent.GlobalId, &#39;ifcClass&#39;: ifcParent.is_a()})
+            ifcObject = ifcParent
+
     def computeCenter(self, pointList):
         center = np.array([0.0, 0.0, 0.0])
         for point in pointList:
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcObject, ifcGroup):
-        self.ifcClasse = ifcObject.is_a()
+    def setBatchTableData(self, ifcObject, ifcGroup):
         properties = list()
         for prop in ifcObject.IsDefinedBy:
             if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
@@ -68,7 +87,7 @@ class IfcObjectGeom(Feature):
                                 props.append([propSet.Name, propSet.NominalValue.wrappedValue])
                     properties.append(props)
         batch_table_data = {
-            &#39;classe&#39;: self.ifcClasse,
+            &#39;classe&#39;: self.ifcClass,
             &#39;group&#39;: ifcGroup,
             &#39;name&#39;: ifcObject.Name,
             &#39;properties&#39;: properties
@@ -86,6 +105,7 @@ class IfcObjectGeom(Feature):
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
             settings.set(settings.SEW_SHELLS, True)
+            settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
             shape = geom.create_shape(settings, ifcObject)
         except RuntimeError:
             logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
@@ -129,7 +149,53 @@ class IfcObjectsGeom(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file):
+    def create_batch_table_extension(extension_name, ids, objects):
+        if extension_name == &#34;batch_table_hierarchy&#34;:
+            resulting_bth = BatchTableHierarchy()
+            hierarchy = TreeWithChildrenAndParent()
+            parents = dict()
+
+            for obj in objects:
+                resulting_bth.add_class(obj.ifcClass, {&#39;GUID&#39;})
+                if(obj.parents):
+                    hierarchy.addNodeToParent(obj.id, obj.parents[0][&#39;id&#39;])
+                i = 0
+                for parent in obj.parents:
+                    hierarchy.addNodeToParent(obj.parents[i - 1][&#39;id&#39;], obj.parents[i][&#39;id&#39;])
+                    if parent[&#39;id&#39;] not in parents:
+                        parents[parent[&#39;id&#39;]] = parent
+                        resulting_bth.add_class(parent[&#39;ifcClass&#39;], {&#39;GUID&#39;})
+                    i = i + 1
+
+            objectPosition = {}
+            for i, (obj) in enumerate(objects):
+                objectPosition[obj.id] = i
+            for i, (parent) in enumerate(parents):
+                objectPosition[parent] = i + len(objects)
+
+            for obj in objects:
+                resulting_bth.add_class_instance(
+                    obj.ifcClass,
+                    {
+                        &#39;GUID&#39;: obj.id
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(obj.id)]
+                )
+            for parent in parents.items():
+                resulting_bth.add_class_instance(
+                    parent[1][&#34;ifcClass&#34;],
+                    {
+                        &#39;GUID&#39;: parent[1][&#34;id&#34;]
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(parent[1][&#34;id&#34;])]
+                )
+
+            return resulting_bth
+        else:
+            return None
+
+    @staticmethod
+    def retrievObjByType(path_to_file, with_BTH):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -146,29 +212,18 @@ class IfcObjectsGeom(FeatureList):
             start_time = time.time()
             logging.info(str(i) + &#34; / &#34; + nb_element)
             logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-            obj = IfcObjectGeom(element)
+            obj = IfcObjectGeom(element, with_BTH=with_BTH)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
+                if(obj.material):
+                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                else:
+                    obj.material_index = 0
                 dictObjByType[element.is_a()].append(obj)
             logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
             i = i + 1
         return dictObjByType
-
-    def is_material_registered(self, material):
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return True
-        return False
-
-    def get_material_index(self, material):
-        i = 0
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return i
-            i = i + 1
-        self.add_material(material)
-        return i
 
     @staticmethod
     def retrievObjByGroup(path_to_file):
@@ -220,7 +275,7 @@ class IfcObjectsGeom(FeatureList):
 <dl>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom"><code class="flex name class">
 <span>class <span class="ident">IfcObjectGeom</span></span>
-<span>(</span><span>ifcObject, originalUnit='m', targetedUnit='m', ifcGroup=None)</span>
+<span>(</span><span>ifcObject, ifcGroup=None, with_BTH=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The base class of all object that need to be tiled, in order to be
@@ -231,11 +286,14 @@ used with the corresponding tiler.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, originalUnit=&#34;m&#34;, targetedUnit=&#34;m&#34;, ifcGroup=None):
+    def __init__(self, ifcObject, ifcGroup=None, with_BTH=False):
         super().__init__(ifcObject.GlobalId)
-        self.setIfcClasse(ifcObject, ifcGroup)
-        # self.material = None
+        self.ifcClass = ifcObject.is_a()
+        self.material = None
+        self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
+        if(with_BTH):
+            self.getParentsInIfc(ifcObject)
 
     def hasGeom(self):
         return self.has_geom
@@ -243,14 +301,28 @@ used with the corresponding tiler.</p>
     def set_triangles(self, triangles):
         self.geom.triangles[0] = triangles
 
+    def getParentsInIfc(self, ifcObject):
+        self.parents = list()
+        while(ifcObject):
+            ifcParent = None
+            if(hasattr(ifcObject, &#34;ContainedInStructure&#34;)):
+                if(ifcObject.ContainedInStructure):
+                    ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
+            elif(hasattr(ifcObject, &#34;Decomposes&#34;)):
+                if(len(ifcObject.Decomposes) &gt; 0):
+                    ifcParent = ifcObject.Decomposes[0].RelatingObject
+
+            if(ifcParent):
+                self.parents.append({&#39;id&#39;: ifcParent.GlobalId, &#39;ifcClass&#39;: ifcParent.is_a()})
+            ifcObject = ifcParent
+
     def computeCenter(self, pointList):
         center = np.array([0.0, 0.0, 0.0])
         for point in pointList:
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setIfcClasse(self, ifcObject, ifcGroup):
-        self.ifcClasse = ifcObject.is_a()
+    def setBatchTableData(self, ifcObject, ifcGroup):
         properties = list()
         for prop in ifcObject.IsDefinedBy:
             if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
@@ -263,7 +335,7 @@ used with the corresponding tiler.</p>
                                 props.append([propSet.Name, propSet.NominalValue.wrappedValue])
                     properties.append(props)
         batch_table_data = {
-            &#39;classe&#39;: self.ifcClasse,
+            &#39;classe&#39;: self.ifcClass,
             &#39;group&#39;: ifcGroup,
             &#39;name&#39;: ifcObject.Name,
             &#39;properties&#39;: properties
@@ -281,6 +353,7 @@ used with the corresponding tiler.</p>
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
             settings.set(settings.SEW_SHELLS, True)
+            settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
             shape = geom.create_shape(settings, ifcObject)
         except RuntimeError:
             logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
@@ -349,6 +422,31 @@ used with the corresponding tiler.</p>
     return self.ifcClasse</code></pre>
 </details>
 </dd>
+<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getParentsInIfc"><code class="name flex">
+<span>def <span class="ident">getParentsInIfc</span></span>(<span>self, ifcObject)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getParentsInIfc(self, ifcObject):
+    self.parents = list()
+    while(ifcObject):
+        ifcParent = None
+        if(hasattr(ifcObject, &#34;ContainedInStructure&#34;)):
+            if(ifcObject.ContainedInStructure):
+                ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
+        elif(hasattr(ifcObject, &#34;Decomposes&#34;)):
+            if(len(ifcObject.Decomposes) &gt; 0):
+                ifcParent = ifcObject.Decomposes[0].RelatingObject
+
+        if(ifcParent):
+            self.parents.append({&#39;id&#39;: ifcParent.GlobalId, &#39;ifcClass&#39;: ifcParent.is_a()})
+        ifcObject = ifcParent</code></pre>
+</details>
+</dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id"><code class="name flex">
 <span>def <span class="ident">get_obj_id</span></span>(<span>self)</span>
 </code></dt>
@@ -392,6 +490,7 @@ used with the corresponding tiler.</p>
         settings = geom.settings()
         settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
         settings.set(settings.SEW_SHELLS, True)
+        settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
         shape = geom.create_shape(settings, ifcObject)
     except RuntimeError:
         logging.error(&#34;Error while creating geom with IfcOpenShell&#34;)
@@ -420,8 +519,8 @@ used with the corresponding tiler.</p>
     return True</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse"><code class="name flex">
-<span>def <span class="ident">setIfcClasse</span></span>(<span>self, ifcObject, ifcGroup)</span>
+<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setBatchTableData"><code class="name flex">
+<span>def <span class="ident">setBatchTableData</span></span>(<span>self, ifcObject, ifcGroup)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -429,8 +528,7 @@ used with the corresponding tiler.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def setIfcClasse(self, ifcObject, ifcGroup):
-    self.ifcClasse = ifcObject.is_a()
+<pre><code class="python">def setBatchTableData(self, ifcObject, ifcGroup):
     properties = list()
     for prop in ifcObject.IsDefinedBy:
         if(hasattr(prop, &#39;RelatingPropertyDefinition&#39;)):
@@ -443,7 +541,7 @@ used with the corresponding tiler.</p>
                             props.append([propSet.Name, propSet.NominalValue.wrappedValue])
                 properties.append(props)
     batch_table_data = {
-        &#39;classe&#39;: self.ifcClasse,
+        &#39;classe&#39;: self.ifcClass,
         &#39;group&#39;: ifcGroup,
         &#39;name&#39;: ifcObject.Name,
         &#39;properties&#39;: properties
@@ -505,7 +603,53 @@ used with the corresponding tiler.</p>
         super().__init__(objs)
 
     @staticmethod
-    def retrievObjByType(path_to_file):
+    def create_batch_table_extension(extension_name, ids, objects):
+        if extension_name == &#34;batch_table_hierarchy&#34;:
+            resulting_bth = BatchTableHierarchy()
+            hierarchy = TreeWithChildrenAndParent()
+            parents = dict()
+
+            for obj in objects:
+                resulting_bth.add_class(obj.ifcClass, {&#39;GUID&#39;})
+                if(obj.parents):
+                    hierarchy.addNodeToParent(obj.id, obj.parents[0][&#39;id&#39;])
+                i = 0
+                for parent in obj.parents:
+                    hierarchy.addNodeToParent(obj.parents[i - 1][&#39;id&#39;], obj.parents[i][&#39;id&#39;])
+                    if parent[&#39;id&#39;] not in parents:
+                        parents[parent[&#39;id&#39;]] = parent
+                        resulting_bth.add_class(parent[&#39;ifcClass&#39;], {&#39;GUID&#39;})
+                    i = i + 1
+
+            objectPosition = {}
+            for i, (obj) in enumerate(objects):
+                objectPosition[obj.id] = i
+            for i, (parent) in enumerate(parents):
+                objectPosition[parent] = i + len(objects)
+
+            for obj in objects:
+                resulting_bth.add_class_instance(
+                    obj.ifcClass,
+                    {
+                        &#39;GUID&#39;: obj.id
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(obj.id)]
+                )
+            for parent in parents.items():
+                resulting_bth.add_class_instance(
+                    parent[1][&#34;ifcClass&#34;],
+                    {
+                        &#39;GUID&#39;: parent[1][&#34;id&#34;]
+                    },
+                    [objectPosition[id_parent] for id_parent in hierarchy.getParents(parent[1][&#34;id&#34;])]
+                )
+
+            return resulting_bth
+        else:
+            return None
+
+    @staticmethod
+    def retrievObjByType(path_to_file, with_BTH):
         &#34;&#34;&#34;
         :param path: a path to a directory
 
@@ -522,29 +666,18 @@ used with the corresponding tiler.</p>
             start_time = time.time()
             logging.info(str(i) + &#34; / &#34; + nb_element)
             logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-            obj = IfcObjectGeom(element)
+            obj = IfcObjectGeom(element, with_BTH=with_BTH)
             if(obj.hasGeom()):
                 if not(element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
+                if(obj.material):
+                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+                else:
+                    obj.material_index = 0
                 dictObjByType[element.is_a()].append(obj)
             logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
             i = i + 1
         return dictObjByType
-
-    def is_material_registered(self, material):
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return True
-        return False
-
-    def get_material_index(self, material):
-        i = 0
-        for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
-                return i
-            i = i + 1
-        self.add_material(material)
-        return i
 
     @staticmethod
     def retrievObjByGroup(path_to_file):
@@ -640,7 +773,7 @@ def retrievObjByGroup(path_to_file):
 </details>
 </dd>
 <dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType"><code class="name flex">
-<span>def <span class="ident">retrievObjByType</span></span>(<span>path_to_file)</span>
+<span>def <span class="ident">retrievObjByType</span></span>(<span>path_to_file, with_BTH)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>:param path: a path to a directory</p>
@@ -650,7 +783,7 @@ def retrievObjByGroup(path_to_file):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def retrievObjByType(path_to_file):
+def retrievObjByType(path_to_file, with_BTH):
     &#34;&#34;&#34;
     :param path: a path to a directory
 
@@ -667,10 +800,14 @@ def retrievObjByType(path_to_file):
         start_time = time.time()
         logging.info(str(i) + &#34; / &#34; + nb_element)
         logging.info(&#34;Parsing &#34; + element.GlobalId + &#34;, &#34; + element.is_a())
-        obj = IfcObjectGeom(element)
+        obj = IfcObjectGeom(element, with_BTH=with_BTH)
         if(obj.hasGeom()):
             if not(element.is_a() in dictObjByType):
                 dictObjByType[element.is_a()] = IfcObjectsGeom()
+            if(obj.material):
+                obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
+            else:
+                obj.material_index = 0
             dictObjByType[element.is_a()].append(obj)
         logging.info(&#34;--- %s seconds ---&#34; % (time.time() - start_time))
         i = i + 1
@@ -678,48 +815,11 @@ def retrievObjByType(path_to_file):
 </details>
 </dd>
 </dl>
-<h3>Methods</h3>
-<dl>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index"><code class="name flex">
-<span>def <span class="ident">get_material_index</span></span>(<span>self, material)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_material_index(self, material):
-    i = 0
-    for mat in self.materials:
-        if(mat.rgba == material.rgba).all():
-            return i
-        i = i + 1
-    self.add_material(material)
-    return i</code></pre>
-</details>
-</dd>
-<dt id="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered"><code class="name flex">
-<span>def <span class="ident">is_material_registered</span></span>(<span>self, material)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_material_registered(self, material):
-    for mat in self.materials:
-        if(mat.rgba == material.rgba).all():
-            return True
-    return False</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.feature.FeatureList" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
@@ -729,8 +829,10 @@ def retrievObjByType(path_to_file):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material_index" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_material_registered" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="../Common/feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
@@ -762,18 +864,17 @@ def retrievObjByType(path_to_file):
 <ul class="two-column">
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computeCenter" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.computeCenter">computeCenter</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getIfcClasse" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getIfcClasse">getIfcClasse</a></code></li>
+<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getParentsInIfc" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.getParentsInIfc">getParentsInIfc</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.get_obj_id">get_obj_id</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.hasGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.hasGeom">hasGeom</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_geom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.parse_geom">parse_geom</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setIfcClasse">setIfcClasse</a></code></li>
+<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setBatchTableData" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.setBatchTableData">setBatchTableData</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.set_obj_id" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectGeom.set_obj_id">set_obj_id</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom">IfcObjectsGeom</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.get_material_index">get_material_index</a></code></li>
-<li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByGroup">retrievObjByGroup</a></code></li>
 <li><code><a title="py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType" href="#py3dtilers.IfcTiler.ifcObjectGeom.IfcObjectsGeom.retrievObjByType">retrievObjByType</a></code></li>
 </ul>

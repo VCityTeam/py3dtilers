@@ -90,6 +90,12 @@ class GeojsonTiler(Tiler):
                                  help=&#39;When defined, the features from geojsons will be considered as rooftops.\
                                     We will thus substract the height from the coordinates to reach the floor.&#39;)
 
+        self.parser.add_argument(&#39;--keep_properties&#39;,
+                                 &#39;-k&#39;,
+                                 dest=&#39;keep_properties&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;When defined, keep the properties of the GeoJSON features into the batch table.&#39;)
+
         self.parser.add_argument(&#39;--add_color&#39;,
                                  nargs=&#39;*&#39;,
                                  default=[&#39;NONE&#39;, &#39;numeric&#39;],
@@ -206,7 +212,7 @@ class GeojsonTiler(Tiler):
                 feature.material_index = attribute_dict[value] + 1
         feature_list.add_materials(colors)
 
-    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;), keep_properties=False):
         &#34;&#34;&#34;
         Create a tileset from a GeoJson file or a directory of GeoJson files
         :param path: a path to the file(s)
@@ -221,13 +227,16 @@ class GeojsonTiler(Tiler):
         if not color_attribute[0] == &#39;NONE&#39;:
             self.add_colors(objects, color_attribute)
 
+        if keep_properties:
+            [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
+
         if(len(objects) == 0):
             print(&#34;No .geojson found in &#34; + path)
             return None
         else:
             print(str(len(objects)) + &#34; features parsed&#34;)
 
-        return self.create_tileset_from_geometries(objects)
+        return self.create_tileset_from_feature_list(objects)
 
 
 def main():
@@ -245,7 +254,7 @@ def main():
                   &#39;z&#39;, geojson_tiler.args.z]
 
     if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
         if(tileset is not None):
             print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
             tileset.write_as_json(geojson_tiler.get_output_dir())
@@ -290,7 +299,7 @@ The tileset is writen in '/geojson_tilesets/'.
                   &#39;z&#39;, geojson_tiler.args.z]
 
     if(os.path.isdir(path) or Path(path).suffix == &#34;.geojson&#34; or Path(path).suffix == &#34;.json&#34;):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color)
+        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
         if(tileset is not None):
             print(&#34;tileset in&#34;, geojson_tiler.get_output_dir())
             tileset.write_as_json(geojson_tiler.get_output_dir())
@@ -363,6 +372,12 @@ The tileset is writen in '/geojson_tilesets/'.
                                  help=&#39;When defined, the features from geojsons will be considered as rooftops.\
                                     We will thus substract the height from the coordinates to reach the floor.&#39;)
 
+        self.parser.add_argument(&#39;--keep_properties&#39;,
+                                 &#39;-k&#39;,
+                                 dest=&#39;keep_properties&#39;,
+                                 action=&#39;store_true&#39;,
+                                 help=&#39;When defined, keep the properties of the GeoJSON features into the batch table.&#39;)
+
         self.parser.add_argument(&#39;--add_color&#39;,
                                  nargs=&#39;*&#39;,
                                  default=[&#39;NONE&#39;, &#39;numeric&#39;],
@@ -479,7 +494,7 @@ The tileset is writen in '/geojson_tilesets/'.
                 feature.material_index = attribute_dict[value] + 1
         feature_list.add_materials(colors)
 
-    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;), keep_properties=False):
         &#34;&#34;&#34;
         Create a tileset from a GeoJson file or a directory of GeoJson files
         :param path: a path to the file(s)
@@ -494,13 +509,16 @@ The tileset is writen in '/geojson_tilesets/'.
         if not color_attribute[0] == &#39;NONE&#39;:
             self.add_colors(objects, color_attribute)
 
+        if keep_properties:
+            [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
+
         if(len(objects) == 0):
             print(&#34;No .geojson found in &#34; + path)
             return None
         else:
             print(str(len(objects)) + &#34; features parsed&#34;)
 
-        return self.create_tileset_from_geometries(objects)</code></pre>
+        return self.create_tileset_from_feature_list(objects)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -556,7 +574,7 @@ Else, we create a color per value of the property.
 </details>
 </dd>
 <dt id="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler.from_geojson_directory"><code class="name flex">
-<span>def <span class="ident">from_geojson_directory</span></span>(<span>self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric'))</span>
+<span>def <span class="ident">from_geojson_directory</span></span>(<span>self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric'), keep_properties=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a tileset from a GeoJson file or a directory of GeoJson files
@@ -567,7 +585,7 @@ Else, we create a color per value of the property.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;)):
+<pre><code class="python">def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=(&#39;NONE&#39;, &#39;numeric&#39;), keep_properties=False):
     &#34;&#34;&#34;
     Create a tileset from a GeoJson file or a directory of GeoJson files
     :param path: a path to the file(s)
@@ -582,13 +600,16 @@ Else, we create a color per value of the property.
     if not color_attribute[0] == &#39;NONE&#39;:
         self.add_colors(objects, color_attribute)
 
+    if keep_properties:
+        [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
+
     if(len(objects) == 0):
         print(&#34;No .geojson found in &#34; + path)
         return None
     else:
         print(str(len(objects)) + &#34; features parsed&#34;)
 
-    return self.create_tileset_from_geometries(objects)</code></pre>
+    return self.create_tileset_from_feature_list(objects)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.GeojsonTiler.GeojsonTiler.GeojsonTiler.get_geojson_instance"><code class="name flex">
@@ -702,7 +723,8 @@ Return a list of Geojson instances containing properties and a geometry.
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
-<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_feature_list">create_tileset_from_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_groups" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_groups">create_tileset_from_groups</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>

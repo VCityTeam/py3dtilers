@@ -65,7 +65,7 @@ class TilesetTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
+    def create_tileset_from_feature_list(self, tileset_tree, extension_name=None):
         &#34;&#34;&#34;
         Override the parent tileset creation.
         &#34;&#34;&#34;
@@ -82,7 +82,7 @@ class TilesetTiler(Tiler):
         &#34;&#34;&#34;
         geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
-        return self.create_tileset_from_geometries(tileset_tree, self.args)
+        return self.create_tileset_from_feature_list(tileset_tree)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         &#34;&#34;&#34;
@@ -184,7 +184,7 @@ if __name__ == &#39;__main__&#39;:
         else:
             return self.args.output_dir
 
-    def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
+    def create_tileset_from_feature_list(self, tileset_tree, extension_name=None):
         &#34;&#34;&#34;
         Override the parent tileset creation.
         &#34;&#34;&#34;
@@ -201,7 +201,7 @@ if __name__ == &#39;__main__&#39;:
         &#34;&#34;&#34;
         geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
-        return self.create_tileset_from_geometries(tileset_tree, self.args)
+        return self.create_tileset_from_feature_list(tileset_tree)
 
     def read_and_merge_tilesets(self, paths_to_tilesets=list()):
         &#34;&#34;&#34;
@@ -221,8 +221,8 @@ if __name__ == &#39;__main__&#39;:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_geometries"><code class="name flex">
-<span>def <span class="ident">create_tileset_from_geometries</span></span>(<span>self, tileset_tree, extension_name=None)</span>
+<dt id="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_feature_list"><code class="name flex">
+<span>def <span class="ident">create_tileset_from_feature_list</span></span>(<span>self, tileset_tree, extension_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Override the parent tileset creation.</p></div>
@@ -230,7 +230,7 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_tileset_from_geometries(self, tileset_tree, extension_name=None):
+<pre><code class="python">def create_tileset_from_feature_list(self, tileset_tree, extension_name=None):
     &#34;&#34;&#34;
     Override the parent tileset creation.
     &#34;&#34;&#34;
@@ -303,7 +303,7 @@ Then, apply transformations (reprojection, translation, etc) on the FeatureList.
     &#34;&#34;&#34;
     geometric_errors = self.args.geometric_error if hasattr(self.args, &#39;geometric_error&#39;) else [None, None, None]
     tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
-    return self.create_tileset_from_geometries(tileset_tree, self.args)</code></pre>
+    return self.create_tileset_from_feature_list(tileset_tree)</code></pre>
 </details>
 </dd>
 </dl>
@@ -312,6 +312,7 @@ Then, apply transformations (reprojection, translation, etc) on the FeatureList.
 <li><code><b><a title="py3dtilers.Common.tiler.Tiler" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler">Tiler</a></b></code>:
 <ul class="hlist">
 <li><code><a title="py3dtilers.Common.tiler.Tiler.create_output_directory" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_output_directory">create_output_directory</a></code></li>
+<li><code><a title="py3dtilers.Common.tiler.Tiler.create_tileset_from_groups" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.create_tileset_from_groups">create_tileset_from_groups</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_color_config" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_kd_tree_max" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_kd_tree_max">get_kd_tree_max</a></code></li>
 <li><code><a title="py3dtilers.Common.tiler.Tiler.get_output_dir" href="../Common/tiler.html#py3dtilers.Common.tiler.Tiler.get_output_dir">get_output_dir</a></code></li>
@@ -343,7 +344,7 @@ Then, apply transformations (reprojection, translation, etc) on the FeatureList.
 <li>
 <h4><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler">TilesetTiler</a></code></h4>
 <ul class="">
-<li><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_geometries" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_geometries">create_tileset_from_geometries</a></code></li>
+<li><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_feature_list" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler.create_tileset_from_feature_list">create_tileset_from_feature_list</a></code></li>
 <li><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.parse_command_line" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler.parse_command_line">parse_command_line</a></code></li>
 <li><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.read_and_merge_tilesets" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler.read_and_merge_tilesets">read_and_merge_tilesets</a></code></li>
 <li><code><a title="py3dtilers.TilesetReader.TilesetReader.TilesetTiler.transform_tileset" href="#py3dtilers.TilesetReader.TilesetReader.TilesetTiler.transform_tileset">transform_tileset</a></code></li>

@@ -28,12 +28,16 @@
 </summary>
 <pre><code class="python">from shapely.geometry import Point, Polygon
 from ..Common import FeatureList, ExtrudedPolygon
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import Feature, GeometryNode
 
 
 class LodFeatureList(FeatureList):
 
-    def __init__(self, objects=None, features_node=None):
-        super().__init__(objects)
+    def __init__(self, features=None, features_node: &#39;GeometryNode&#39; = None):
+        super().__init__(features)
         self.features_node = features_node
         self.centroid = features_node.feature_list.get_centroid()
 
@@ -56,8 +60,8 @@ class LoaFeatureList(LodFeatureList):
 
     loa_index = 0
 
-    def __init__(self, objects=None, polygons=list(), features_node=None):
-        super().__init__(objects, features_node=features_node)
+    def __init__(self, features=None, polygons=list(), features_node: &#39;GeometryNode&#39; = None):
+        super().__init__(features, features_node=features_node)
         self.polygons = polygons
 
     def set_features_geom(self, user_arguments=None):
@@ -78,7 +82,7 @@ class LoaFeatureList(LodFeatureList):
 
         self.features_node = None
 
-    def find_features_in_polygon(self, features, polygon):
+    def find_features_in_polygon(self, features: list[&#39;Feature&#39;], polygon: &#39;Polygon&#39;):
         &#34;&#34;&#34;
         Find all the features which are in the polygon.
         :param features: a list of Feature
@@ -92,7 +96,7 @@ class LoaFeatureList(LodFeatureList):
                 features_in_polygon.append(feature)
         return features_in_polygon
 
-    def create_loa(self, feature_list, polygon=None):
+    def create_loa(self, feature_list: &#39;FeatureList&#39;, polygon: &#39;Polygon&#39; = None):
         &#34;&#34;&#34;
         Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
         :param feature_list: the features contained in the LOA
@@ -119,10 +123,10 @@ class LoaFeatureList(LodFeatureList):
 <dl>
 <dt id="py3dtilers.Common.lod_feature_list.LoaFeatureList"><code class="flex name class">
 <span>class <span class="ident">LoaFeatureList</span></span>
-<span>(</span><span>objects=None, polygons=[], features_node=None)</span>
+<span>(</span><span>features=None, polygons=[], features_node: GeometryNode = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
+<div class="desc"><p>A decorated list of Feature instances.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -131,8 +135,8 @@ class LoaFeatureList(LodFeatureList):
 
     loa_index = 0
 
-    def __init__(self, objects=None, polygons=list(), features_node=None):
-        super().__init__(objects, features_node=features_node)
+    def __init__(self, features=None, polygons=list(), features_node: &#39;GeometryNode&#39; = None):
+        super().__init__(features, features_node=features_node)
         self.polygons = polygons
 
     def set_features_geom(self, user_arguments=None):
@@ -153,7 +157,7 @@ class LoaFeatureList(LodFeatureList):
 
         self.features_node = None
 
-    def find_features_in_polygon(self, features, polygon):
+    def find_features_in_polygon(self, features: list[&#39;Feature&#39;], polygon: &#39;Polygon&#39;):
         &#34;&#34;&#34;
         Find all the features which are in the polygon.
         :param features: a list of Feature
@@ -167,7 +171,7 @@ class LoaFeatureList(LodFeatureList):
                 features_in_polygon.append(feature)
         return features_in_polygon
 
-    def create_loa(self, feature_list, polygon=None):
+    def create_loa(self, feature_list: &#39;FeatureList&#39;, polygon: &#39;Polygon&#39; = None):
         &#34;&#34;&#34;
         Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
         :param feature_list: the features contained in the LOA
@@ -197,7 +201,7 @@ class LoaFeatureList(LodFeatureList):
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.lod_feature_list.LoaFeatureList.create_loa"><code class="name flex">
-<span>def <span class="ident">create_loa</span></span>(<span>self, feature_list, polygon=None)</span>
+<span>def <span class="ident">create_loa</span></span>(<span>self, feature_list: FeatureList, polygon: Polygon = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
@@ -209,7 +213,7 @@ class LoaFeatureList(LodFeatureList):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_loa(self, feature_list, polygon=None):
+<pre><code class="python">def create_loa(self, feature_list: &#39;FeatureList&#39;, polygon: &#39;Polygon&#39; = None):
     &#34;&#34;&#34;
     Create a LOA (3D extrusion of a polygon). The LOA is a 3D geometry containing a group of features.
     :param feature_list: the features contained in the LOA
@@ -226,7 +230,7 @@ class LoaFeatureList(LodFeatureList):
 </details>
 </dd>
 <dt id="py3dtilers.Common.lod_feature_list.LoaFeatureList.find_features_in_polygon"><code class="name flex">
-<span>def <span class="ident">find_features_in_polygon</span></span>(<span>self, features, polygon)</span>
+<span>def <span class="ident">find_features_in_polygon</span></span>(<span>self, features: list['Feature'], polygon: Polygon)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Find all the features which are in the polygon.
@@ -237,7 +241,7 @@ class LoaFeatureList(LodFeatureList):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def find_features_in_polygon(self, features, polygon):
+<pre><code class="python">def find_features_in_polygon(self, features: list[&#39;Feature&#39;], polygon: &#39;Polygon&#39;):
     &#34;&#34;&#34;
     Find all the features which are in the polygon.
     :param features: a list of Feature
@@ -257,6 +261,7 @@ class LoaFeatureList(LodFeatureList):
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.lod_feature_list.LodFeatureList" href="#py3dtilers.Common.lod_feature_list.LodFeatureList">LodFeatureList</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.add_material" href="feature.html#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.add_materials" href="feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.change_crs" href="feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_batch_table_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
@@ -266,8 +271,10 @@ class LoaFeatureList(LodFeatureList):
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_features" href="feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_material" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_material_index" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_textures" href="feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_list_of_feature_list" href="feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_material_registered" href="feature.html#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.scale_features" href="feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
@@ -280,10 +287,10 @@ class LoaFeatureList(LodFeatureList):
 </dd>
 <dt id="py3dtilers.Common.lod_feature_list.Lod1FeatureList"><code class="flex name class">
 <span>class <span class="ident">Lod1FeatureList</span></span>
-<span>(</span><span>objects=None, features_node=None)</span>
+<span>(</span><span>features=None, features_node: GeometryNode = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
+<div class="desc"><p>A decorated list of Feature instances.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -310,6 +317,7 @@ class LoaFeatureList(LodFeatureList):
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.lod_feature_list.LodFeatureList" href="#py3dtilers.Common.lod_feature_list.LodFeatureList">LodFeatureList</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.add_material" href="feature.html#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.add_materials" href="feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.change_crs" href="feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.create_batch_table_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
@@ -319,8 +327,10 @@ class LoaFeatureList(LodFeatureList):
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_features" href="feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_material" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_material_index" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.get_textures" href="feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_list_of_feature_list" href="feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.is_material_registered" href="feature.html#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.scale_features" href="feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.lod_feature_list.LodFeatureList.set_features" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>
@@ -333,18 +343,18 @@ class LoaFeatureList(LodFeatureList):
 </dd>
 <dt id="py3dtilers.Common.lod_feature_list.LodFeatureList"><code class="flex name class">
 <span>class <span class="ident">LodFeatureList</span></span>
-<span>(</span><span>objects=None, features_node=None)</span>
+<span>(</span><span>features=None, features_node: GeometryNode = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A decorated list of FeatureList type objects.</p></div>
+<div class="desc"><p>A decorated list of Feature instances.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LodFeatureList(FeatureList):
 
-    def __init__(self, objects=None, features_node=None):
-        super().__init__(objects)
+    def __init__(self, features=None, features_node: &#39;GeometryNode&#39; = None):
+        super().__init__(features)
         self.features_node = features_node
         self.centroid = features_node.feature_list.get_centroid()</code></pre>
 </details>
@@ -361,6 +371,7 @@ class LoaFeatureList(LodFeatureList):
 <ul class="hlist">
 <li><code><b><a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a></b></code>:
 <ul class="hlist">
+<li><code><a title="py3dtilers.Common.feature.FeatureList.add_material" href="feature.html#py3dtilers.Common.feature.FeatureList.add_material">add_material</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.add_materials" href="feature.html#py3dtilers.Common.feature.FeatureList.add_materials">add_materials</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.change_crs" href="feature.html#py3dtilers.Common.feature.FeatureList.change_crs">change_crs</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.create_batch_table_extension" href="feature.html#py3dtilers.Common.feature.FeatureList.create_batch_table_extension">create_batch_table_extension</a></code></li>
@@ -370,8 +381,10 @@ class LoaFeatureList(LodFeatureList):
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.get_color_config">get_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_features" href="feature.html#py3dtilers.Common.feature.FeatureList.get_features">get_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_material" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material">get_material</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.get_material_index" href="feature.html#py3dtilers.Common.feature.FeatureList.get_material_index">get_material_index</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.get_textures" href="feature.html#py3dtilers.Common.feature.FeatureList.get_textures">get_textures</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.is_list_of_feature_list" href="feature.html#py3dtilers.Common.feature.FeatureList.is_list_of_feature_list">is_list_of_feature_list</a></code></li>
+<li><code><a title="py3dtilers.Common.feature.FeatureList.is_material_registered" href="feature.html#py3dtilers.Common.feature.FeatureList.is_material_registered">is_material_registered</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.scale_features" href="feature.html#py3dtilers.Common.feature.FeatureList.scale_features">scale_features</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_color_config" href="feature.html#py3dtilers.Common.feature.FeatureList.set_color_config">set_color_config</a></code></li>
 <li><code><a title="py3dtilers.Common.feature.FeatureList.set_features" href="feature.html#py3dtilers.Common.feature.FeatureList.set_features">set_features</a></code></li>

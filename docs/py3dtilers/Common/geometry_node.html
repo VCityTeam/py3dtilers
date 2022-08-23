@@ -26,7 +26,13 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class GeometryNode():
+<pre><code class="python">from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Common import FeatureList
+
+
+class GeometryNode():
     &#34;&#34;&#34;
     Each node contains an instance of FeatureList
     and a list of child nodes.
@@ -38,7 +44,7 @@
     # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
     DEFAULT_GEOMETRIC_ERROR = 1
 
-    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
+    def __init__(self, feature_list: &#39;FeatureList&#39; = None, geometric_error=None, with_texture=False):
         &#34;&#34;&#34;
         :param feature_list: an instance of FeatureList.
         :param geometric_error: the metric used to refine the node when visualizing the features.
@@ -49,14 +55,14 @@
         self.with_texture = with_texture
         self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
-    def set_child_nodes(self, nodes=list()):
+    def set_child_nodes(self, nodes: list[&#39;GeometryNode&#39;] = list()):
         &#34;&#34;&#34;
         Set the child nodes of this node.
         :param nodes: list of nodes
         &#34;&#34;&#34;
         self.child_nodes = nodes
 
-    def add_child_node(self, node):
+    def add_child_node(self, node: &#39;GeometryNode&#39;):
         &#34;&#34;&#34;
         Add a child to the child nodes.
         :param node: a node
@@ -82,10 +88,10 @@
         Return the features in this node and the features in the child nodes (recursively).
         :return: a list of Feature
         &#34;&#34;&#34;
-        objects = [self.feature_list]
+        features = [self.feature_list]
         for child in self.child_nodes:
-            objects.extend(child.get_features())
-        return objects
+            features.extend(child.get_features())
+        return features
 
     def set_node_features_geometry(self, user_arguments=None):
         &#34;&#34;&#34;
@@ -131,7 +137,7 @@
 <dl>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode"><code class="flex name class">
 <span>class <span class="ident">GeometryNode</span></span>
-<span>(</span><span>feature_list=None, geometric_error=None, with_texture=False)</span>
+<span>(</span><span>feature_list: FeatureList = None, geometric_error=None, with_texture=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Each node contains an instance of FeatureList
@@ -156,7 +162,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
     # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
     DEFAULT_GEOMETRIC_ERROR = 1
 
-    def __init__(self, feature_list=None, geometric_error=None, with_texture=False):
+    def __init__(self, feature_list: &#39;FeatureList&#39; = None, geometric_error=None, with_texture=False):
         &#34;&#34;&#34;
         :param feature_list: an instance of FeatureList.
         :param geometric_error: the metric used to refine the node when visualizing the features.
@@ -167,14 +173,14 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
         self.with_texture = with_texture
         self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
 
-    def set_child_nodes(self, nodes=list()):
+    def set_child_nodes(self, nodes: list[&#39;GeometryNode&#39;] = list()):
         &#34;&#34;&#34;
         Set the child nodes of this node.
         :param nodes: list of nodes
         &#34;&#34;&#34;
         self.child_nodes = nodes
 
-    def add_child_node(self, node):
+    def add_child_node(self, node: &#39;GeometryNode&#39;):
         &#34;&#34;&#34;
         Add a child to the child nodes.
         :param node: a node
@@ -200,10 +206,10 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
         Return the features in this node and the features in the child nodes (recursively).
         :return: a list of Feature
         &#34;&#34;&#34;
-        objects = [self.feature_list]
+        features = [self.feature_list]
         for child in self.child_nodes:
-            objects.extend(child.get_features())
-        return objects
+            features.extend(child.get_features())
+        return features
 
     def set_node_features_geometry(self, user_arguments=None):
         &#34;&#34;&#34;
@@ -252,7 +258,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.add_child_node"><code class="name flex">
-<span>def <span class="ident">add_child_node</span></span>(<span>self, node)</span>
+<span>def <span class="ident">add_child_node</span></span>(<span>self, node: <a title="py3dtilers.Common.geometry_node.GeometryNode" href="#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a child to the child nodes.
@@ -261,7 +267,7 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_child_node(self, node):
+<pre><code class="python">def add_child_node(self, node: &#39;GeometryNode&#39;):
     &#34;&#34;&#34;
     Add a child to the child nodes.
     :param node: a node
@@ -302,10 +308,10 @@ A node will correspond to a tile of the 3dtiles tileset.</p>
     Return the features in this node and the features in the child nodes (recursively).
     :return: a list of Feature
     &#34;&#34;&#34;
-    objects = [self.feature_list]
+    features = [self.feature_list]
     for child in self.child_nodes:
-        objects.extend(child.get_features())
-    return objects</code></pre>
+        features.extend(child.get_features())
+    return features</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.get_leaves"><code class="name flex">
@@ -376,7 +382,7 @@ The count is recursive.
 </details>
 </dd>
 <dt id="py3dtilers.Common.geometry_node.GeometryNode.set_child_nodes"><code class="name flex">
-<span>def <span class="ident">set_child_nodes</span></span>(<span>self, nodes=[])</span>
+<span>def <span class="ident">set_child_nodes</span></span>(<span>self, nodes: list['<a title="py3dtilers.Common.geometry_node.GeometryNode" href="#py3dtilers.Common.geometry_node.GeometryNode">GeometryNode</a>'] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the child nodes of this node.
@@ -385,7 +391,7 @@ The count is recursive.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_child_nodes(self, nodes=list()):
+<pre><code class="python">def set_child_nodes(self, nodes: list[&#39;GeometryNode&#39;] = list()):
     &#34;&#34;&#34;
     Set the child nodes of this node.
     :param nodes: list of nodes

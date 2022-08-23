@@ -40,7 +40,7 @@ class Group():
     It can also contain additional polygon points (used to create LOA nodes)
     &#34;&#34;&#34;
 
-    def __init__(self, feature_list, polygons=list()):
+    def __init__(self, feature_list: FeatureList, polygons=list()):
         self.feature_list = feature_list
         self.polygons = polygons
 
@@ -89,7 +89,7 @@ class Groups():
     # Used to put in a same group the features which are in a same 1000 m^3 cube.
     DEFAULT_CUBE_SIZE = 1000
 
-    def __init__(self, feature_list, polygons_path=None, kd_tree_max=500):
+    def __init__(self, feature_list: FeatureList, polygons_path=None, kd_tree_max=500):
         &#34;&#34;&#34;
         Distribute the features contained in feature_list into different Group
         The way to distribute the features depends on the parameters
@@ -98,14 +98,15 @@ class Groups():
         When this param is not None, it means we want to group features by polygons
         :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         &#34;&#34;&#34;
-        self.materials = feature_list.materials
-        if feature_list.is_list_of_feature_list():
-            self.group_objects_by_instance(feature_list)
-        elif polygons_path is not None:
-            self.group_objects_by_polygons(feature_list, polygons_path)
+        if ((type(feature_list) is list)):
+            self.group_array_of_feature_list(feature_list)
         else:
-            self.group_objects_with_kdtree(feature_list, kd_tree_max)
-        self.set_materials(self.materials)
+            self.materials = feature_list.materials
+            if polygons_path is not None:
+                self.group_objects_by_polygons(feature_list, polygons_path)
+            else:
+                self.group_objects_with_kdtree(feature_list, kd_tree_max)
+            self.set_materials(self.materials)
 
     def get_groups_as_list(self):
         &#34;&#34;&#34;
@@ -122,17 +123,13 @@ class Groups():
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_objects_by_instance(self, feature_list):
-        &#34;&#34;&#34;
-        Create groups of features. One group is created per object in the FeatureList.
-        &#34;&#34;&#34;
-        groups = list()
-        for objects in feature_list:
-            group = Group(objects)
-            groups.append(group)
-        self.groups = groups
+    def group_array_of_feature_list(self, feature_lists_array: list[FeatureList]):
+        self.groups = list()
+        for feature_list in feature_lists_array:
+            group = Group(feature_list)
+            self.groups.append(group)
 
-    def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
+    def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
         &#34;&#34;&#34;
         Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
         The distribution depends on the centroid of each feature.
@@ -146,7 +143,7 @@ class Groups():
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, feature_list, polygons_path):
+    def group_objects_by_polygons(self, feature_list: FeatureList, polygons_path):
         &#34;&#34;&#34;
         Load the polygons from GeoJSON files.
         Group the features depending in which polygon they are contained.
@@ -178,7 +175,7 @@ class Groups():
                     polygons.append(Polygon(coords))
         self.groups = self.distribute_objects_in_polygons(feature_list, polygons)
 
-    def distribute_objects_in_polygons(self, feature_list, polygons):
+    def distribute_objects_in_polygons(self, feature_list: FeatureList, polygons):
         &#34;&#34;&#34;
         Distribute the features in the polygons.
         The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
@@ -218,7 +215,7 @@ class Groups():
 
         return self.distribute_groups_in_cubes(groups, Groups.DEFAULT_CUBE_SIZE)
 
-    def distribute_groups_in_cubes(self, groups, cube_size):
+    def distribute_groups_in_cubes(self, groups: list[Group], cube_size):
         &#34;&#34;&#34;
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
@@ -243,7 +240,7 @@ class Groups():
             groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube]))
         return groups_in_cube
 
-    def merge_groups_together(self, groups, group_indexes):
+    def merge_groups_together(self, groups: list[Group], group_indexes):
         &#34;&#34;&#34;
         Creates a Group from a list of Groups
         :param groups: all the groups
@@ -270,7 +267,7 @@ class Groups():
 <dl>
 <dt id="py3dtilers.Common.group.Group"><code class="flex name class">
 <span>class <span class="ident">Group</span></span>
-<span>(</span><span>feature_list, polygons=[])</span>
+<span>(</span><span>feature_list: <a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>, polygons=[])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Contains an instance of FeatureList
@@ -285,7 +282,7 @@ It can also contain additional polygon points (used to create LOA nodes)</p></di
     It can also contain additional polygon points (used to create LOA nodes)
     &#34;&#34;&#34;
 
-    def __init__(self, feature_list, polygons=list()):
+    def __init__(self, feature_list: FeatureList, polygons=list()):
         self.feature_list = feature_list
         self.polygons = polygons
 
@@ -403,7 +400,7 @@ among all the materials created, and add them to the features.
 </dd>
 <dt id="py3dtilers.Common.group.Groups"><code class="flex name class">
 <span>class <span class="ident">Groups</span></span>
-<span>(</span><span>feature_list, polygons_path=None, kd_tree_max=500)</span>
+<span>(</span><span>feature_list: <a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>, polygons_path=None, kd_tree_max=500)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Contains a list of Group</p>
@@ -425,7 +422,7 @@ When this param is not None, it means we want to group features by polygons
     # Used to put in a same group the features which are in a same 1000 m^3 cube.
     DEFAULT_CUBE_SIZE = 1000
 
-    def __init__(self, feature_list, polygons_path=None, kd_tree_max=500):
+    def __init__(self, feature_list: FeatureList, polygons_path=None, kd_tree_max=500):
         &#34;&#34;&#34;
         Distribute the features contained in feature_list into different Group
         The way to distribute the features depends on the parameters
@@ -434,14 +431,15 @@ When this param is not None, it means we want to group features by polygons
         When this param is not None, it means we want to group features by polygons
         :param kd_tree_max: the maximum number of features in each list created by the kd_tree
         &#34;&#34;&#34;
-        self.materials = feature_list.materials
-        if feature_list.is_list_of_feature_list():
-            self.group_objects_by_instance(feature_list)
-        elif polygons_path is not None:
-            self.group_objects_by_polygons(feature_list, polygons_path)
+        if ((type(feature_list) is list)):
+            self.group_array_of_feature_list(feature_list)
         else:
-            self.group_objects_with_kdtree(feature_list, kd_tree_max)
-        self.set_materials(self.materials)
+            self.materials = feature_list.materials
+            if polygons_path is not None:
+                self.group_objects_by_polygons(feature_list, polygons_path)
+            else:
+                self.group_objects_with_kdtree(feature_list, kd_tree_max)
+            self.set_materials(self.materials)
 
     def get_groups_as_list(self):
         &#34;&#34;&#34;
@@ -458,17 +456,13 @@ When this param is not None, it means we want to group features by polygons
         for group in self.groups:
             group.add_materials(materials)
 
-    def group_objects_by_instance(self, feature_list):
-        &#34;&#34;&#34;
-        Create groups of features. One group is created per object in the FeatureList.
-        &#34;&#34;&#34;
-        groups = list()
-        for objects in feature_list:
-            group = Group(objects)
-            groups.append(group)
-        self.groups = groups
+    def group_array_of_feature_list(self, feature_lists_array: list[FeatureList]):
+        self.groups = list()
+        for feature_list in feature_lists_array:
+            group = Group(feature_list)
+            self.groups.append(group)
 
-    def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
+    def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
         &#34;&#34;&#34;
         Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
         The distribution depends on the centroid of each feature.
@@ -482,7 +476,7 @@ When this param is not None, it means we want to group features by polygons
             groups.append(group)
         self.groups = groups
 
-    def group_objects_by_polygons(self, feature_list, polygons_path):
+    def group_objects_by_polygons(self, feature_list: FeatureList, polygons_path):
         &#34;&#34;&#34;
         Load the polygons from GeoJSON files.
         Group the features depending in which polygon they are contained.
@@ -514,7 +508,7 @@ When this param is not None, it means we want to group features by polygons
                     polygons.append(Polygon(coords))
         self.groups = self.distribute_objects_in_polygons(feature_list, polygons)
 
-    def distribute_objects_in_polygons(self, feature_list, polygons):
+    def distribute_objects_in_polygons(self, feature_list: FeatureList, polygons):
         &#34;&#34;&#34;
         Distribute the features in the polygons.
         The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
@@ -554,7 +548,7 @@ When this param is not None, it means we want to group features by polygons
 
         return self.distribute_groups_in_cubes(groups, Groups.DEFAULT_CUBE_SIZE)
 
-    def distribute_groups_in_cubes(self, groups, cube_size):
+    def distribute_groups_in_cubes(self, groups: list[Group], cube_size):
         &#34;&#34;&#34;
         Merges together the groups in order to reduce the number of tiles.
         The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
@@ -579,7 +573,7 @@ When this param is not None, it means we want to group features by polygons
             groups_in_cube.append(self.merge_groups_together(groups, groups_dict[cube]))
         return groups_in_cube
 
-    def merge_groups_together(self, groups, group_indexes):
+    def merge_groups_together(self, groups: list[Group], group_indexes):
         &#34;&#34;&#34;
         Creates a Group from a list of Groups
         :param groups: all the groups
@@ -604,7 +598,7 @@ When this param is not None, it means we want to group features by polygons
 <h3>Methods</h3>
 <dl>
 <dt id="py3dtilers.Common.group.Groups.distribute_groups_in_cubes"><code class="name flex">
-<span>def <span class="ident">distribute_groups_in_cubes</span></span>(<span>self, groups, cube_size)</span>
+<span>def <span class="ident">distribute_groups_in_cubes</span></span>(<span>self, groups: list[<a title="py3dtilers.Common.group.Group" href="#py3dtilers.Common.group.Group">Group</a>], cube_size)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Merges together the groups in order to reduce the number of tiles.
@@ -616,7 +610,7 @@ The groups are distributed into cubes of a grid. The groups in the same cube are
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def distribute_groups_in_cubes(self, groups, cube_size):
+<pre><code class="python">def distribute_groups_in_cubes(self, groups: list[Group], cube_size):
     &#34;&#34;&#34;
     Merges together the groups in order to reduce the number of tiles.
     The groups are distributed into cubes of a grid. The groups in the same cube are merged together.
@@ -643,7 +637,7 @@ The groups are distributed into cubes of a grid. The groups in the same cube are
 </details>
 </dd>
 <dt id="py3dtilers.Common.group.Groups.distribute_objects_in_polygons"><code class="name flex">
-<span>def <span class="ident">distribute_objects_in_polygons</span></span>(<span>self, feature_list, polygons)</span>
+<span>def <span class="ident">distribute_objects_in_polygons</span></span>(<span>self, feature_list: <a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>, polygons)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Distribute the features in the polygons.
@@ -654,7 +648,7 @@ If a feature is not in any polygon, create a Group containing only this feature.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def distribute_objects_in_polygons(self, feature_list, polygons):
+<pre><code class="python">def distribute_objects_in_polygons(self, feature_list: FeatureList, polygons):
     &#34;&#34;&#34;
     Distribute the features in the polygons.
     The features in the same polygon are grouped together. The Group created will also contain the points of the polygon.
@@ -713,28 +707,24 @@ If a feature is not in any polygon, create a Group containing only this feature.
     return self.groups</code></pre>
 </details>
 </dd>
-<dt id="py3dtilers.Common.group.Groups.group_objects_by_instance"><code class="name flex">
-<span>def <span class="ident">group_objects_by_instance</span></span>(<span>self, feature_list)</span>
+<dt id="py3dtilers.Common.group.Groups.group_array_of_feature_list"><code class="name flex">
+<span>def <span class="ident">group_array_of_feature_list</span></span>(<span>self, feature_lists_array: list[<a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create groups of features. One group is created per object in the FeatureList.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_by_instance(self, feature_list):
-    &#34;&#34;&#34;
-    Create groups of features. One group is created per object in the FeatureList.
-    &#34;&#34;&#34;
-    groups = list()
-    for objects in feature_list:
-        group = Group(objects)
-        groups.append(group)
-    self.groups = groups</code></pre>
+<pre><code class="python">def group_array_of_feature_list(self, feature_lists_array: list[FeatureList]):
+    self.groups = list()
+    for feature_list in feature_lists_array:
+        group = Group(feature_list)
+        self.groups.append(group)</code></pre>
 </details>
 </dd>
 <dt id="py3dtilers.Common.group.Groups.group_objects_by_polygons"><code class="name flex">
-<span>def <span class="ident">group_objects_by_polygons</span></span>(<span>self, feature_list, polygons_path)</span>
+<span>def <span class="ident">group_objects_by_polygons</span></span>(<span>self, feature_list: <a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>, polygons_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load the polygons from GeoJSON files.
@@ -745,7 +735,7 @@ Group the features depending in which polygon they are contained.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_by_polygons(self, feature_list, polygons_path):
+<pre><code class="python">def group_objects_by_polygons(self, feature_list: FeatureList, polygons_path):
     &#34;&#34;&#34;
     Load the polygons from GeoJSON files.
     Group the features depending in which polygon they are contained.
@@ -779,7 +769,7 @@ Group the features depending in which polygon they are contained.
 </details>
 </dd>
 <dt id="py3dtilers.Common.group.Groups.group_objects_with_kdtree"><code class="name flex">
-<span>def <span class="ident">group_objects_with_kdtree</span></span>(<span>self, feature_list, kd_tree_max=500)</span>
+<span>def <span class="ident">group_objects_with_kdtree</span></span>(<span>self, feature_list: <a title="py3dtilers.Common.feature.FeatureList" href="feature.html#py3dtilers.Common.feature.FeatureList">FeatureList</a>, kd_tree_max=500)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
@@ -790,7 +780,7 @@ The distribution depends on the centroid of each feature.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def group_objects_with_kdtree(self, feature_list, kd_tree_max=500):
+<pre><code class="python">def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
     &#34;&#34;&#34;
     Create groups of features. The features are distributed into FeatureList of (by default) max 500 features.
     The distribution depends on the centroid of each feature.
@@ -806,7 +796,7 @@ The distribution depends on the centroid of each feature.
 </details>
 </dd>
 <dt id="py3dtilers.Common.group.Groups.merge_groups_together"><code class="name flex">
-<span>def <span class="ident">merge_groups_together</span></span>(<span>self, groups, group_indexes)</span>
+<span>def <span class="ident">merge_groups_together</span></span>(<span>self, groups: list[<a title="py3dtilers.Common.group.Group" href="#py3dtilers.Common.group.Group">Group</a>], group_indexes)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a Group from a list of Groups
@@ -817,7 +807,7 @@ The distribution depends on the centroid of each feature.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def merge_groups_together(self, groups, group_indexes):
+<pre><code class="python">def merge_groups_together(self, groups: list[Group], group_indexes):
     &#34;&#34;&#34;
     Creates a Group from a list of Groups
     :param groups: all the groups
@@ -885,7 +875,7 @@ The distribution depends on the centroid of each feature.
 <li><code><a title="py3dtilers.Common.group.Groups.distribute_groups_in_cubes" href="#py3dtilers.Common.group.Groups.distribute_groups_in_cubes">distribute_groups_in_cubes</a></code></li>
 <li><code><a title="py3dtilers.Common.group.Groups.distribute_objects_in_polygons" href="#py3dtilers.Common.group.Groups.distribute_objects_in_polygons">distribute_objects_in_polygons</a></code></li>
 <li><code><a title="py3dtilers.Common.group.Groups.get_groups_as_list" href="#py3dtilers.Common.group.Groups.get_groups_as_list">get_groups_as_list</a></code></li>
-<li><code><a title="py3dtilers.Common.group.Groups.group_objects_by_instance" href="#py3dtilers.Common.group.Groups.group_objects_by_instance">group_objects_by_instance</a></code></li>
+<li><code><a title="py3dtilers.Common.group.Groups.group_array_of_feature_list" href="#py3dtilers.Common.group.Groups.group_array_of_feature_list">group_array_of_feature_list</a></code></li>
 <li><code><a title="py3dtilers.Common.group.Groups.group_objects_by_polygons" href="#py3dtilers.Common.group.Groups.group_objects_by_polygons">group_objects_by_polygons</a></code></li>
 <li><code><a title="py3dtilers.Common.group.Groups.group_objects_with_kdtree" href="#py3dtilers.Common.group.Groups.group_objects_with_kdtree">group_objects_with_kdtree</a></code></li>
 <li><code><a title="py3dtilers.Common.group.Groups.merge_groups_together" href="#py3dtilers.Common.group.Groups.merge_groups_together">merge_groups_together</a></code></li>
