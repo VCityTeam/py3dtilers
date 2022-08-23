@@ -141,7 +141,7 @@ class FeatureList(object):
     # The material used by default for geometries
     default_mat = None
 
-    def __init__(self, features: list[Feature] = None):
+    def __init__(self, features=None):
         self.features = list()
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
