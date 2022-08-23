@@ -97,10 +97,11 @@ class Groups():
             group.add_materials(materials)
 
     def group_array_of_feature_list(self, feature_lists_array: List[FeatureList]):
-        self.groups = list()
-        for feature_list in feature_lists_array:
-            group = Group(feature_list)
-            self.groups.append(group)
+        """
+        Create one Group per FeatureList.
+        :param feature_lists_array: a list of FeatureList
+        """
+        self.groups = [Group(feature_list) for feature_list in feature_lists_array]
 
     def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
         """
