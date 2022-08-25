@@ -202,12 +202,6 @@ class GeojsonTiler(Tiler):
         if keep_properties:
             [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
 
-        if(len(objects) == 0):
-            print("No .geojson found in " + path)
-            return None
-        else:
-            print(str(len(objects)) + " features parsed")
-
         return self.create_tileset_from_feature_list(objects)
 
 

@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import sys
 
 from ..Common import LodTree, FromGeometryTreeToTileset, Groups
 from ..Color import ColorConfig
@@ -153,6 +154,11 @@ class Tiler():
         :param extension_name: an optional extension to add to the tileset
         :return: a TileSet
         """
+        if(len(feature_list) == 0):
+            print("No feature found in source")
+            sys.exit(1)
+        else:
+            print("Distribution of the", len(feature_list), "features...")
         groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
         feature_list.delete_features_ref()
         return self.create_tileset_from_groups(groups, extension_name)

@@ -42,14 +42,7 @@ class ObjTiler(Tiler):
 
         :return: a tileset.
         """
-
         objects = Objs.retrieve_objs(path, self.args.with_texture)
-
-        if(len(objects) == 0):
-            print("No .obj found in " + path)
-            return None
-        else:
-            print(str(len(objects)) + " .obj parsed")
 
         return self.create_tileset_from_feature_list(objects)
 
