@@ -65,7 +65,7 @@ class FromGeometryTreeToTileset():
         centroid = node.feature_list.get_centroid()
         distance = tree_centroid - centroid
 
-        offset = np.array([0, 0, 0]) if user_args.offset[0] == 'centroid' else centroid - np.array(user_args.offset)
+        offset = np.array([0, 0, 0]) if user_args.offset[0] == 'centroid' else centroid + np.array(user_args.offset)
 
         if not user_args.crs_in == user_args.crs_out:
             transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
@@ -74,7 +74,7 @@ class FromGeometryTreeToTileset():
                 feature_list.change_crs(transformer)
 
         for feature_list in node.get_features():
-            feature_list.translate_features(feature_list.get_centroid())
+            feature_list.translate_features(-feature_list.get_centroid())
 
         if user_args.obj is not None:
             for leaf in node.get_leaves():
