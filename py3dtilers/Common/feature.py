@@ -302,12 +302,12 @@ class FeatureList(object):
             feature.set_triangles(new_geom)
             feature.set_box()
 
-    def scale_features(self, scale_factor):
+    def scale_features(self, scale_factor, centroid):
         """
         Rescale the features.
-        :param scale_factor: the factor to scale the features
+        :param scale_factor: the factor to scale the objects
+        :param centroid: the centroid used as reference point
         """
-        centroid = self.get_centroid()
         for feature in self.get_features():
             new_geom = []
             for triangle in feature.get_geom_as_triangles():
