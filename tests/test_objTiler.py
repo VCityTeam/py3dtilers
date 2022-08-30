@@ -14,29 +14,27 @@ def get_default_namespace():
 class Test_Tile(unittest.TestCase):
 
     def test_basic_case(self):
-        path = Path('tests/obj_tiler_data/Cube')
         obj_tiler = ObjTiler()
-        obj_tiler.current_path = "basic_case"
+        obj_tiler.files = [Path('tests/obj_tiler_data/Cube/cube_1.obj'), Path('tests/obj_tiler_data/Cube/cube_2.obj')]
         obj_tiler.args = get_default_namespace()
-        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/")
+        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/basic_case")
 
-        tileset = obj_tiler.from_obj_directory(path)
+        tileset = obj_tiler.from_obj_directory()
         if(tileset is not None):
-            tileset.write_as_json(Path(obj_tiler.args.output_dir, obj_tiler.current_path))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
     def test_texture(self):
-        path = Path('tests/obj_tiler_data/TexturedCube')
         obj_tiler = ObjTiler()
-        obj_tiler.current_path = "texture"
+        obj_tiler.files = [Path('tests/obj_tiler_data/TexturedCube/cube.obj')]
         obj_tiler.args = get_default_namespace()
-        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/")
+        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/texture")
         obj_tiler.args.offset = [1843397, 5173891, 300]  # Arbitrary offset to place the 3DTiles in Lyon city
         obj_tiler.args.with_texture = True
         obj_tiler.args.scale = 50
 
-        tileset = obj_tiler.from_obj_directory(path)
+        tileset = obj_tiler.from_obj_directory()
         if(tileset is not None):
-            tileset.write_as_json(Path(obj_tiler.args.output_dir, obj_tiler.current_path))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
 
 if __name__ == '__main__':
