@@ -21,7 +21,7 @@ Copy and customize the [CityTilerDBConfigReference.yml](CityTilerDBConfigReferen
 You can then run the tiler by specifying the path to the _.yml_ configuration file:
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml
+citygml-tiler -i <path_to_file>/Config.yml
 ```
 
 The created tileset will be placed in a folder named `junk_<objects-type>` in the root directory. The name of the folder will be either `junk_buildings`, `junk_reliefs`, `junk_water_bodies` or `junk_bridges`, depending on the [objects type](#objects-type) (respectively `building`, `relief`, `water` and `bridge`).
@@ -53,25 +53,25 @@ By default, the tiler will treat the data as __buildings__. You can change the t
 * `building`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --type building
+citygml-tiler -i <path_to_file>/Config.yml --type building
 ```
 
 * `relief`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --type relief
+citygml-tiler -i <path_to_file>/Config.yml --type relief
 ```
 
 * `water`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --type water
+citygml-tiler -i <path_to_file>/Config.yml --type water
 ```
 
 * `bridge`
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --type bridge
+citygml-tiler -i <path_to_file>/Config.yml --type bridge
 ```
 
 ### Split surfaces
@@ -81,7 +81,7 @@ By default, the tiler merges the surfaces of the same CityObject into one `Featu
 To keep the surfaces split:
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --split_surfaces
+citygml-tiler -i <path_to_file>/Config.yml --split_surfaces
 ```
 
 ### Batch Table Hierarchy
@@ -91,7 +91,7 @@ The Batch table hierarchy is a [Batch Table](https://github.com/CesiumGS/3d-tile
 To create the BatchTableHierarchy extension:
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --with_BTH
+citygml-tiler -i <path_to_file>/Config.yml --with_BTH
 ```
 
 ### Color
@@ -99,13 +99,13 @@ citygml-tiler --db_config_path <path_to_file>/Config.yml --with_BTH
 When present, the `--add_color` flag adds a single colored material to each feature. The color of the material is determined by CityGML `objectclass` of each feature.  
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --add_color
+citygml-tiler -i <path_to_file>/Config.yml --add_color
 ```
 
 If you want to apply different colors on the surfaces of buildings (roof, wall and floor), use the `--split_surfaces` flag:
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --add_color --split_surfaces
+citygml-tiler -i <path_to_file>/Config.yml --add_color --split_surfaces
 ```
 
 The default colors are defined by a [JSON file](../Color/citytiler_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md#color_dict) for more details__)
@@ -115,7 +115,7 @@ The default colors are defined by a [JSON file](../Color/citytiler_config.json).
 The flag `--ids` allows to keep only the selected CityObject(s). The flag must be followed by a list of CityGML IDs.
 
 ```bash
-citygml-tiler --db_config_path <path_to_file>/Config.yml --ids CityGML_ID_1 CityGML_ID_2
+citygml-tiler -i <path_to_file>/Config.yml --ids CityGML_ID_1 CityGML_ID_2
 ```
 
 ## CityTemporalTiler features
@@ -128,7 +128,7 @@ In order to run the CityTemporalTiler you will first need to obtain the so calle
 
 ```bash
 citygml-tiler-temporal                                         \
-  --db_config_path py3dtilers/CityTiler/CityTilerDBConfig2009.yml  \
+  -i py3dtilers/CityTiler/CityTilerDBConfig2009.yml  \
                    py3dtilers/CityTiler/CityTilerDBConfig2012.yml  \
                    py3dtilers/CityTiler/CityTilerDBConfig2015.yml  \
   --time_stamps 2009 2012 2015                                  \

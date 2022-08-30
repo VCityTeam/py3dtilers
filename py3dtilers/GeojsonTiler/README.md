@@ -17,28 +17,34 @@ See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/REA
 
 ### Run the GeojsonTiler
 
-To execute the GeojsonTiler, use the flag `--path` followed by the path of a geojson file or a folder containing geojson files
+To execute the GeojsonTiler, use the flag `-i` followed by paths of Geojson files or directories containing Geojson files
 
 Example:
 
 ```bash
-geojson-tiler --path ../../geojsons/file.geojson
+geojson-tiler -i ../../geojsons/file.geojson
 ```
 
 It will read ___file.geojson___ and parse it into 3DTiles.
 
 ```bash
-geojson-tiler --path ../../geojsons/
+geojson-tiler -i ../../geojsons/
 ```
 
 It will read all .geojson and .json in the ___geojsons___ directory and parse them into 3DTiles.
+
+```bash
+geojson-tiler -i ../../geojsons/file_1.geojson ../../geojsons/file_2.geojson
+```
+
+It will read ___file_1.geojson___ and all .geojson and .json in the ___geojsons___ directory, and parse them into 3DTiles.
 
 ### Roofprint or footprint
 
 By default, the tiler considers that the polygons in the .geojson files are at the floor level. But sometimes, the coordinates can be at the roof level (especially for buildings). In this case, you can tell the tiler to consider the polygons as roofprints by adding the `--is_roof` flag. The tiler will substract the height of the feature from the coordinates to reach the floor level.
 
 ```bash
-geojson-tiler --path <path> --is_roof
+geojson-tiler -i <path> --is_roof
 ```
 
 ### Color
@@ -52,13 +58,13 @@ The flag takes 2 arguments: the name of the property and its type ('numeric' or 
 Example for numeric property:
 
 ```bash
-geojson-tiler --path <path> --add_color HEIGTH numeric
+geojson-tiler -i <path> --add_color HEIGTH numeric
 ```
 
 Example for semantic property:
 
 ```bash
-geojson-tiler --path <path> --add_color NATURE semantic
+geojson-tiler -i <path> --add_color NATURE semantic
 ```
 
 The default colors are defined by a [JSON file](../Color/default_config.json). If you want to change the colors used, update the file with the right color codes. (__See [Color module](../Color/README.md) for more details__)
@@ -81,19 +87,19 @@ It means the tiler will target the property 'HAUTEUR' to find the height, 'LARGE
 If the file doesn't contain those properties, you can change one or several property names to target in command line with `--height`, `--width` or `--prec`. If the features don't have a Z (2D features), a Z can be targeted with `--z`.
 
 ```bash
-geojson-tiler --path <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME --z Z_NAME
+geojson-tiler -i <path> --height HEIGHT_NAME --width WIDTH_NAME --prec PREC_NAME --z Z_NAME
 ```
 
 You can set the height, the width or the Z to a default value (used for all features). The value must be an _int_ or a _float_:
 
 ```bash
-geojson-tiler --path <path> --height 10.5 --width 6.4 --z 100
+geojson-tiler -i <path> --height 10.5 --width 6.4 --z 100
 ```
 
 If you want to skip the precision, you can set _prec_ to '_NONE_':
 
 ```bash
-geojson-tiler --path <path> --prec NONE
+geojson-tiler -i <path> --prec NONE
 ```
 
 ### Keep properties
@@ -101,7 +107,7 @@ geojson-tiler --path <path> --prec NONE
 You can use the flag `-k` or `--keep_properties` to store the properties of the GeoJSON features in the batch table. All the properties of each feature will be stored.
 
 ```bash
-geojson-tiler --path <path> --keep_properties
+geojson-tiler -i <path> --keep_properties
 ```
 
 ## Shared Tiler features

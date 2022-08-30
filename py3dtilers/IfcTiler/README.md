@@ -12,11 +12,14 @@ See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/REA
 
 ### Run the IfcTiler
 
+To execute the IfcTiler, use the flag `-i` followed by paths of IFC files or directories containing IFC files
+
 ```bash
-(venv) ifc-tiler --file_path <path>
+(venv) ifc-tiler -i <path>
 ```
 
-\<path\> should point to a directory holding an IFC file.
+\<path\> should point to an IFC file or a directory holding IFC files.
+
 The resulting 3DTiles tileset will contain the ifc geometry, ordered by category :
 each tile will contain an IFC Object Type, that can be found in the batch table, along with its GUID
 
@@ -29,13 +32,13 @@ The `--grouped_by` flag allows to choose how to group the objects. The two are o
 Group by `IfcTypeObject`:
 
 ```bash
-ifc-tiler --file_path <path> --grouped_by IfcTypeObject
+ifc-tiler -i <path> --grouped_by IfcTypeObject
 ```
 
 Group by `IfcGroup`:
 
 ```bash
-ifc-tiler --file_path <path> --grouped_by IfcGroup
+ifc-tiler -i <path> --grouped_by IfcGroup
 ```
 
 ## Shared Tiler features
