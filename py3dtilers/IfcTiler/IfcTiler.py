@@ -8,11 +8,8 @@ class IfcTiler(Tiler):
 
     def __init__(self):
         super().__init__()
+        self.supported_extensions = ['.ifc', '.IFC']
 
-        self.parser.add_argument('--file_path',
-                                 nargs='?',
-                                 type=str,
-                                 help='path to the ifc file')
         self.parser.add_argument('--grouped_by',
                                  nargs='?',
                                  default='IfcTypeObject',
@@ -33,18 +30,19 @@ class IfcTiler(Tiler):
         else:
             return self.args.output_dir
 
-    def from_ifc(self, path_to_file, grouped_by, with_BTH):
+    def from_ifc(self, grouped_by, with_BTH):
         """
-        :param path: a path to a directory
-
         :return: a tileset.
         """
-        if(grouped_by == 'IfcTypeObject'):
-            pre_tileset = IfcObjectsGeom.retrievObjByType(path_to_file, with_BTH)
-        elif(grouped_by == 'IfcGroup'):
-            pre_tileset = IfcObjectsGeom.retrievObjByGroup(path_to_file, with_BTH)
+        objects = []
+        for ifc_file in self.files:
+            print("Reading " + str(ifc_file))
+            if(grouped_by == 'IfcTypeObject'):
+                pre_tileset = IfcObjectsGeom.retrievObjByType(ifc_file, with_BTH)
+            elif(grouped_by == 'IfcGroup'):
+                pre_tileset = IfcObjectsGeom.retrievObjByGroup(ifc_file, with_BTH)
 
-        objects = [objs for objs in pre_tileset.values() if len(objs) > 0]
+            objects.extend([objs for objs in pre_tileset.values() if len(objs) > 0])
         groups = Groups(objects).get_groups_as_list()
 
         return self.create_tileset_from_groups(groups, "batch_table_hierarchy" if with_BTH else None)
@@ -62,7 +60,7 @@ def main():
     ifc_tiler = IfcTiler()
     ifc_tiler.parse_command_line()
     args = ifc_tiler.args
-    tileset = ifc_tiler.from_ifc(args.file_path, args.grouped_by, args.with_BTH)
+    tileset = ifc_tiler.from_ifc(args.grouped_by, args.with_BTH)
 
     if(tileset is not None):
         tileset.write_as_json(ifc_tiler.get_output_dir())

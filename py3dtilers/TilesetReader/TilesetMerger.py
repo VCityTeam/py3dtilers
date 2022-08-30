@@ -18,6 +18,7 @@ class TilesetMerger():
         """
         parser = argparse.ArgumentParser()
         parser.add_argument('--paths',
+                            '-i',
                             nargs='*',
                             type=str,
                             help='Paths to 3DTiles tilesets')

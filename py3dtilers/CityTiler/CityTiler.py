@@ -17,13 +17,8 @@ class CityTiler(Tiler):
 
     def __init__(self):
         super().__init__()
-
-        # adding positional arguments
-        self.parser.add_argument('--db_config_path',
-                                 nargs='*',
-                                 default=['py3dtilers/CityTiler/CityTilerDBConfig.yml'],
-                                 type=str,
-                                 help='Path(es) to the database configuration file(s)')
+        self.supported_extensions = ['.yml', '.YML']
+        self.default_input_path = 'py3dtilers/CityTiler/CityTilerDBConfig.yml'
 
         self.parser.add_argument('--type',
                                  nargs='?',
@@ -139,9 +134,6 @@ def main():
     city_tiler.parse_command_line()
     args = city_tiler.args
 
-    print('Connecting to database...')
-    cursor = open_data_base(args.db_config_path[0])
-
     if args.type == "building":
         objects_type = CityMBuildings
         if args.with_BTH:
@@ -153,6 +145,8 @@ def main():
     elif args.type == "bridge":
         objects_type = CityMBridges
 
+    print('Connecting to database...')
+    cursor = open_data_base(city_tiler.files[0])
     objects_type.set_cursor(cursor)
 
     tileset = city_tiler.from_3dcitydb(cursor, objects_type)

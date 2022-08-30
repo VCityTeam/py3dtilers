@@ -1,4 +1,5 @@
 import sys
+import os
 
 from py3dtiles import TilesetReader
 from .tileset_tree import TilesetTree
@@ -10,13 +11,6 @@ class TilesetTiler(Tiler):
 
     def __init__(self):
         super().__init__()
-
-        # adding positional arguments
-        self.parser.add_argument('--paths',
-                                 nargs='*',
-                                 type=str,
-                                 help='Paths to 3DTiles tilesets')
-
         self.tileset_of_root_tiles = list()
         self.reader = TilesetReader()
 
@@ -27,6 +21,23 @@ class TilesetTiler(Tiler):
             print("Please provide a path to directory containing the root of your 3DTiles.")
             print("Exiting")
             sys.exit(1)
+
+    def retrieve_files(self, paths):
+        """
+        Retrieve the files from paths given by the user.
+        :param paths: a list of paths
+        """
+        self.files = []
+
+        for path in paths:
+            if(os.path.isdir(path)):
+                self.files.append(path)
+
+        if len(self.files) == 0:
+            print("No tileset was found")
+            sys.exit(1)
+        else:
+            print(len(self.files), "tilesets found")
 
     def get_output_dir(self):
         """
@@ -56,7 +67,7 @@ class TilesetTiler(Tiler):
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
         return self.create_tileset_from_feature_list(tileset_tree)
 
-    def read_and_merge_tilesets(self, paths_to_tilesets=list()):
+    def read_and_merge_tilesets(self):
         """
         Read all tilesets and merge them into a single TileSet instance with the TilesetMerger.
         The paths of all tilesets are keeped to be able to find the source of each tile.
@@ -64,8 +75,8 @@ class TilesetTiler(Tiler):
 
         :return: a TileSet
         """
-        tilesets = self.reader.read_tilesets(paths_to_tilesets)
-        tileset, self.tileset_of_root_tiles = TilesetMerger.merge_tilesets(tilesets, paths_to_tilesets)
+        tilesets = self.reader.read_tilesets(self.files)
+        tileset, self.tileset_of_root_tiles = TilesetMerger.merge_tilesets(tilesets, self.files)
         return tileset
 
 
@@ -74,7 +85,7 @@ def main():
     tiler = TilesetTiler()
     tiler.parse_command_line()
 
-    tileset = tiler.read_and_merge_tilesets(tiler.args.paths)
+    tileset = tiler.read_and_merge_tilesets()
 
     tileset = tiler.transform_tileset(tileset)
     tileset.write_as_json(tiler.get_output_dir())
