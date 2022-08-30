@@ -34,7 +34,7 @@ geojson-tiler -i ../../geojsons/
 It will read all .geojson and .json in the ___geojsons___ directory and parse them into 3DTiles.
 
 ```bash
-geojson-tiler -i ../../geojsons/file_1.geojson ../../geojsons/file_2.geojson
+geojson-tiler -i ../../file_1.geojson ../../geojsons
 ```
 
 It will read ___file_1.geojson___ and all .geojson and .json in the ___geojsons___ directory, and parse them into 3DTiles.
