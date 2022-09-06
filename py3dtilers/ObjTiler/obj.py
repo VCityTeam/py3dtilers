@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-from os import listdir
-
 import numpy as np
 import pywavefront
 
@@ -101,29 +98,27 @@ class Objs(FeatureList):
         super().__init__(objs)
 
     @staticmethod
-    def retrieve_objs(path, with_texture=False):
+    def retrieve_objs(files, with_texture=False):
         """
         Create Obj instance from OBJ file(s).
-        :param path: a path to a directory
+        :param files: paths to files
         :param with_texture: a boolean indicating if the textures should be read
 
         :return: a list of Obj.
         """
         objects = list()
-        obj_dir = listdir(path)
 
-        for obj_file in obj_dir:
-            if(os.path.isfile(os.path.join(path, obj_file))):
-                if(".obj" in obj_file):
-                    geom = pywavefront.Wavefront(os.path.join(path, obj_file), collect_faces=True)
-                    if(len(geom.vertices) == 0):
-                        continue
-                    for mesh in geom.mesh_list:
-                        # Get id from its name
-                        id = mesh.name
-                        obj = Obj(id)
-                        # Create geometry as expected from GLTF from an obj file
-                        if(obj.parse_geom(mesh, with_texture)):
-                            objects.append(obj)
+        for obj_file in files:
+            print("Reading " + str(obj_file))
+            geom = pywavefront.Wavefront(obj_file, collect_faces=True)
+            if(len(geom.vertices) == 0):
+                continue
+            for mesh in geom.mesh_list:
+                # Get id from its name
+                id = mesh.name
+                obj = Obj(id)
+                # Create geometry as expected from GLTF from an obj file
+                if(obj.parse_geom(mesh, with_texture)):
+                    objects.append(obj)
 
         return Objs(objects)

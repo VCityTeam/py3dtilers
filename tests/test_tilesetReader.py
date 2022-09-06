@@ -18,9 +18,9 @@ class Test_Tile(unittest.TestCase):
         tiler = TilesetTiler()
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/basic_case/")
-        paths = [Path("tests/tileset_reader_test_data/white_buildings/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -28,9 +28,9 @@ class Test_Tile(unittest.TestCase):
         tiler = TilesetTiler()
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/merge/")
-        paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -39,9 +39,9 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/texture/")
         tiler.args.with_texture = True
-        paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -51,9 +51,9 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/transform/")
         tiler.args.offset = [0, 0, -200]
         tiler.args.scale = 1.2
-        paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -62,9 +62,9 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/obj/")
         tiler.args.obj = "tests/tileset_reader_test_data/generated_objs/output.obj"
-        paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 
@@ -73,9 +73,9 @@ class Test_Tile(unittest.TestCase):
         tiler.args = get_default_namespace()
         tiler.args.output_dir = Path("tests/tileset_reader_test_data/generated_tilesets/geometric_error/")
         tiler.args.geometric_error = [3, None, 100]
-        paths = [Path("tests/tileset_reader_test_data/white_buildings_with_lods/"), Path("tests/tileset_reader_test_data/textured_cube/")]
+        tiler.files = [Path("tests/tileset_reader_test_data/white_buildings_with_lods/"), Path("tests/tileset_reader_test_data/textured_cube/")]
 
-        tileset = tiler.read_and_merge_tilesets(paths)
+        tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
         tileset.write_as_json(tiler.args.output_dir)
 

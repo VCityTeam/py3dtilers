@@ -8,14 +8,16 @@ See [installation notes](https://github.com/VCityTeam/py3dtilers/blob/master/REA
 
 ### Run the ObjTiler
 
+To execute the ObjTiler, use the flag `-i` followed by paths of OBJ files or directories containing OBJ files
+
 ```bash
-(venv) obj-tiler --paths <directory_path>
+obj-tiler -i <path>
 ```
 
-where `directory_path` should point to directories holding a set of OBJ files.
+where `path` should point to an OBJ file or a directory holding a set of OBJ files.
 
 The resulting 3DTiles tileset will contain all of the converted OBJ that are
-located within this directory, using their filename as ID.
+located within the files, using their filename as ID.
 
 This command should produce a directory named `obj_tilesets`.
 

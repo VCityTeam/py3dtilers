@@ -21,7 +21,27 @@ graph TD;
 
 Some features may not have been implemented for some Tilers.
 
-### Output directory
+### Input
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+The flag `-i` allows to choose the input paths of the Tiler.
+
+The flag should be followed by paths to files or directories holding a set of files.
+
+```bash
+<tiler> -i <path>
+```
+
+Note that `--paths`, `--path`, `--file_path` and `--db_config_file` were kept as alternatives of `-i` to ensure retro-compability.
+
+### Output
 
 | Tiler        |                    |
 | ------------ | ------------------ |

@@ -1,9 +1,5 @@
 import os
-import sys
-from os import listdir
 import json
-
-from pathlib import Path
 
 from .geojson import Geojson, Geojsons
 from .geojson_line import GeojsonLine
@@ -18,12 +14,7 @@ class GeojsonTiler(Tiler):
 
     def __init__(self):
         super().__init__()
-
-        # adding positional arguments
-        self.parser.add_argument('--path',
-                                 nargs=1,
-                                 type=str,
-                                 help='Path to a geojson file or a directory containing geojson files')
+        self.supported_extensions = ['.geojson', '.GEOJSON', 'json', '.JSON']
 
         self.parser.add_argument('--height',
                                  nargs='?',
@@ -82,12 +73,6 @@ class GeojsonTiler(Tiler):
         elif(len(self.args.add_color) == 1):
             self.args.add_color.append('numeric')
 
-        if(self.args.path is None):
-            print("Please provide a path to a directory "
-                  "containing some geojson files")
-            print("Exiting")
-            sys.exit(1)
-
     def get_output_dir(self):
         """
         Return the directory name for the tileset.
@@ -113,29 +98,17 @@ class GeojsonTiler(Tiler):
             'MultiLineString': GeojsonLine(id, feature_properties, feature_geometry, is_multi_geom=True)
         }[feature_geometry['type']]
 
-    def retrieve_geojsons(self, path):
+    def retrieve_geojsons(self):
         """
         Retrieve the GeoJson features from GeoJson file(s).
         Return a list of Geojson instances containing properties and a geometry.
-        :param path: a path to the file(s)
 
         :return: a list of Geojson instances.
         """
-        files = []
         features = []
 
-        if(os.path.isdir(path)):
-            geojson_dir = listdir(path)
-            for geojson_file in geojson_dir:
-                file_path = os.path.join(path, geojson_file)
-                if(os.path.isfile(file_path)):
-                    if(".geojson" in geojson_file or ".json" in geojson_file):
-                        files.append(file_path)
-        else:
-            files.append(path)
-
         # Reads and parse every features from the file(s)
-        for geojson_file in files:
+        for geojson_file in self.files:
             print("Reading " + str(geojson_file))
             with open(geojson_file) as f:
                 gjContent = json.load(f)
@@ -184,16 +157,14 @@ class GeojsonTiler(Tiler):
                 feature.material_index = attribute_dict[value] + 1
         feature_list.add_materials(colors)
 
-    def from_geojson_directory(self, path, properties, is_roof=False, color_attribute=('NONE', 'numeric'), keep_properties=False):
+    def from_geojson_directory(self, properties, is_roof=False, color_attribute=('NONE', 'numeric'), keep_properties=False):
         """
-        Create a tileset from a GeoJson file or a directory of GeoJson files
-        :param path: a path to the file(s)
+        Create a tileset from GeoJson files or a directories of GeoJson files
         :param properties: the names of the properties to read in the GeoJson file(s)
 
         :return: a tileset.
         """
-
-        features = self.retrieve_geojsons(path)
+        features = self.retrieve_geojsons()
         objects = Geojsons.parse_geojsons(features, properties, is_roof, color_attribute)
 
         if not color_attribute[0] == 'NONE':
@@ -201,12 +172,6 @@ class GeojsonTiler(Tiler):
 
         if keep_properties:
             [feature.set_batchtable_data(feature.feature_properties) for feature in objects]
-
-        if(len(objects) == 0):
-            print("No .geojson found in " + path)
-            return None
-        else:
-            print(str(len(objects)) + " features parsed")
 
         return self.create_tileset_from_feature_list(objects)
 
@@ -219,19 +184,15 @@ def main():
     """
     geojson_tiler = GeojsonTiler()
     geojson_tiler.parse_command_line()
-    path = geojson_tiler.args.path[0]
     properties = ['height', geojson_tiler.args.height,
                   'width', geojson_tiler.args.width,
                   'prec', geojson_tiler.args.prec,
                   'z', geojson_tiler.args.z]
 
-    if(os.path.isdir(path) or Path(path).suffix == ".geojson" or Path(path).suffix == ".json"):
-        tileset = geojson_tiler.from_geojson_directory(path, properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
-        if(tileset is not None):
-            print("tileset in", geojson_tiler.get_output_dir())
-            tileset.write_as_json(geojson_tiler.get_output_dir())
-    else:
-        print(path, "is neither a geojson file or a directory. Please target geojson file or a directory containing geojson files.")
+    tileset = geojson_tiler.from_geojson_directory(properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
+    if(tileset is not None):
+        print("Writing tileset in", geojson_tiler.get_output_dir())
+        tileset.write_as_json(geojson_tiler.get_output_dir())
 
 
 if __name__ == '__main__':

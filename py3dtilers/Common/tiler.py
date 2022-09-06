@@ -1,5 +1,7 @@
 import argparse
 from pathlib import Path
+import sys
+import os
 
 from ..Common import LodTree, FromGeometryTreeToTileset, Groups
 from ..Color import ColorConfig
@@ -17,6 +19,8 @@ class Tiler():
 
     def __init__(self):
         text = '''A small utility that build a 3DTiles tileset out of data'''
+        self.supported_extensions = []
+        self.default_input_path = None
         self.parser = argparse.ArgumentParser(description=text)
 
         self.parser.add_argument('--obj',
@@ -89,6 +93,15 @@ class Tiler():
                                  type=str,
                                  help='Output directory of the tileset.')
 
+        self.parser.add_argument('--paths',
+                                 '--path',
+                                 '--db_config_path',
+                                 '--file_path',
+                                 '-i',
+                                 nargs='*',
+                                 type=str,
+                                 help='Paths to input files or directories.')
+
         self.parser.add_argument('--geometric_error',
                                  nargs='*',
                                  default=[None, None, None],
@@ -103,6 +116,15 @@ class Tiler():
 
     def parse_command_line(self):
         self.args = self.parser.parse_args()
+
+        if(self.args.paths is None or len(self.args.paths) == 0):
+            if(self.default_input_path is not None):
+                self.args.paths = [self.default_input_path]
+            else:
+                print("Please provide at least one path to a file or directory")
+                print("Exiting")
+                sys.exit(1)
+        self.retrieve_files(self.args.paths)
 
         if(self.args.obj is not None and '.obj' not in self.args.obj):
             self.args.obj = self.args.obj + '.obj'
@@ -125,6 +147,30 @@ class Tiler():
             Texture.set_texture_compress_level(self.args.compress_level)
         if(self.args.format is not None):
             Texture.set_texture_format(self.args.format)
+
+    def retrieve_files(self, paths):
+        """
+        Retrieve the files from paths given by the user.
+        :param paths: a list of paths
+        """
+        self.files = []
+
+        for path in paths:
+            if(os.path.isdir(path)):
+                dir = os.listdir(path)
+                for file in dir:
+                    file_path = os.path.join(path, file)
+                    if(os.path.isfile(file_path)):
+                        if(Path(file).suffix in self.supported_extensions):
+                            self.files.append(file_path)
+            else:
+                self.files.append(path)
+
+        if len(self.files) == 0:
+            print("No file with supported extensions was found")
+            sys.exit(1)
+        else:
+            print(len(self.files), "file(s) with supported extensions found")
 
     def get_output_dir(self):
         """
@@ -153,6 +199,11 @@ class Tiler():
         :param extension_name: an optional extension to add to the tileset
         :return: a TileSet
         """
+        if(len(feature_list) == 0):
+            print("No feature found in source")
+            sys.exit(1)
+        else:
+            print("Distribution of the", len(feature_list), "features...")
         groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
         feature_list.delete_features_ref()
         return self.create_tileset_from_groups(groups, extension_name)
