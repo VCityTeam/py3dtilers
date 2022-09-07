@@ -33,11 +33,11 @@ class CityTemporalTiler(CityTiler):
 
     def parse_command_line(self):
         super().parse_command_line()
-
-        if len(self.args.db_config_path) <= 1:
+        
+        if len(self.args.paths) <= 1:
             print("Only a single database configuration file was provided.")
             print("This is highly suspect since temporal comparisons require at")
-            print("lest to time-stamps and thus two databases (one for each).")
+            print("least two time-stamps and thus two databases (one for each).")
             print("Exiting.")
             sys.exit(1)
         else:
@@ -49,9 +49,9 @@ class CityTemporalTiler(CityTiler):
                 print("There must be as many time-stamps as databases.")
                 print("Provide time-stamps with the --time_stamps option.")
                 sys.exit(1)
-            if len(self.args.db_config_path) != len(self.args.time_stamps):
+            if len(self.args.paths) != len(self.args.time_stamps):
                 print("Mismatching number of databases vs time-stamps:")
-                print(" - databases (configurations): ", self.args.db_config_path)
+                print(" - databases (configurations): ", self.args.paths)
                 print(" - timestamps: ", self.args.time_stamps)
                 print("Exiting.")
                 sys.exit(1)
@@ -304,7 +304,7 @@ def main():
             sys.exit(1)
 
     # Extract the information form the databases
-    cursors = open_data_bases(cli_args.db_config_path)
+    cursors = open_data_bases(cli_args.paths)
     time_stamped_cursors = dict()
     for index in range(len(cursors)):
         time_stamped_cursors[cli_args.time_stamps[index]] = cursors[index]
