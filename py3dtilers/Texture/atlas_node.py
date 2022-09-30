@@ -107,7 +107,7 @@ class Node(object):
             self.child[0].insert(img, feature_id)
             return self
 
-    def createAtlasImage(self, features_with_id_key, tile_number):
+    def createAtlasImage(self, features_with_id_key, tile_number, downsample_factor=1):
         """
         :param features_with_id_key: a dictionnary, with feature_id as key,
                         and triangles as value. The triangles position must be
@@ -122,6 +122,8 @@ class Node(object):
 
         self.fillAtlasImage(atlasImg, features_with_id_key)
         atlas_id = 'ATLAS_' + str(tile_number) + Texture.format
+        
+        atlasImg = atlasImg.resize((int(atlasImg.width/downsample_factor), int(atlasImg.height/downsample_factor)))
         atlasImg.save(Path(Texture.folder, 'tiles', atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
         return atlas_id
 

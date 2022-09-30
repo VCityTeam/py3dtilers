@@ -97,7 +97,7 @@ class FromGeometryTreeToTileset():
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)
 
-        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture())
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor)
         tile.set_content(content_b3dm)
         tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
         tile.write_content(output_dir)
@@ -129,7 +129,7 @@ class FromGeometryTreeToTileset():
         return tile
 
     @staticmethod
-    def __create_tile_content(feature_list: 'FeatureList', extension_name=None, with_texture=False):
+    def __create_tile_content(feature_list: 'FeatureList', extension_name=None, with_texture=False, geometric_error=1):
         """
         :param pre_tile: an array containing features of a single tile
 
@@ -140,7 +140,7 @@ class FromGeometryTreeToTileset():
         materials = []
         seen_mat_indexes = dict()
         if with_texture:
-            tile_atlas = Atlas(feature_list)
+            tile_atlas = Atlas(feature_list, geometric_error)
             materials = [GlTFMaterial(textureUri='./' + tile_atlas.id)]
         for feature in feature_list:
             mat_index = feature.material_index

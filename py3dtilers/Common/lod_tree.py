@@ -1,5 +1,6 @@
 from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode
 from typing import TYPE_CHECKING
+import copy
 
 if TYPE_CHECKING:
     from ..Common import Groups
@@ -19,8 +20,14 @@ class LodTree(GeometryTree):
         root_nodes = list()
 
         for group in groups:
-            node = GeometryNode(group.feature_list, geometric_errors[0], with_texture)
+            node = GeometryNode(group.feature_list, 1, with_texture)
             root_node = node
+            factor = 3
+            for _ in range(0,4):
+                textured_node = GeometryNode(copy.deepcopy(group.feature_list), int(factor/3), with_texture, factor)
+                textured_node.add_child_node(root_node)
+                root_node = textured_node
+                factor += 10
             if create_lod1:
                 lod1_node = Lod1Node(node, geometric_errors[1])
                 lod1_node.add_child_node(root_node)
