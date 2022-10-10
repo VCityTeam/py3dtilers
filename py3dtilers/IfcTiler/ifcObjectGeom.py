@@ -176,6 +176,7 @@ class IfcObjectsGeom(FeatureList):
         ifc_file = ifcopenshell.open(path_to_file)
 
         elements = ifc_file.by_type('IfcElement')
+        ifc_space = ifc_file.by_type('IfcSpace')
         nb_element = str(len(elements))
         logging.info(nb_element + " elements to parse")
         i = 1
