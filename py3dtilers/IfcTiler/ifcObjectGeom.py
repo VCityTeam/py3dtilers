@@ -91,6 +91,10 @@ class IfcObjectGeom(Feature):
                                          alpha=ifc_material.transparency if ifc_material.transparency else 0,
                                          metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
+        if(indexList.size == 0):
+            logging.error("Error while creating geom : No triangles found")
+            return False
+            
         triangles = list()
         for index in indexList:
             triangle = []
