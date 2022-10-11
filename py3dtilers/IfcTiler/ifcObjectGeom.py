@@ -91,6 +91,10 @@ class IfcObjectGeom(Feature):
                                          alpha=ifc_material.transparency if ifc_material.transparency else 0,
                                          metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
+        if(indexList.size == 0):
+            logging.error("Error while creating geom : No triangles found")
+            return False
+            
         triangles = list()
         for index in indexList:
             triangle = []
@@ -176,6 +180,7 @@ class IfcObjectsGeom(FeatureList):
         ifc_file = ifcopenshell.open(path_to_file)
 
         elements = ifc_file.by_type('IfcElement')
+        ifc_space = ifc_file.by_type('IfcSpace')
         nb_element = str(len(elements))
         logging.info(nb_element + " elements to parse")
         i = 1
