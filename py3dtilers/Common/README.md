@@ -208,6 +208,34 @@ Two flags can be use to reduce the size of the images. The flag `--quality` can 
 
 _Note: if your texture images are too heavy, consider using [`--kd_tree_max` option](#kd-tree-max) to reduce the number of objects per tile._
 
+### Texture LODs
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :x:                |
+| IfcTiler     | :x:                |
+| TilesetTiler | :x:                |
+
+The flag `--texture_lods` (or `--tl`) can be used to set the number of levels of detail that will be created for each textured tile. Each level of detail will be a tile with a less detailled image but the same geometry. The size of the images is reduced with a [Nearest Neighbor Resampling algorithm](https://clouard.users.greyc.fr/Pantheon/experiments/rescaling/index-en.html#nearest).
+
+```bash
+<tiler> <input> --texture_lods 4  # Create 4 additional tiles for each textured tile
+```
+
+The first additional level has downsize ratio of 3, meaning the image will be 3 times smaller than the original. Then each following level increment this ratio by 10.
+
+```mermaid
+graph TD;
+   LOD1[LOD1, ratio=33];
+   LOD2[LOD2, ratio=23];
+   LOD3[LOD3, ratio=13];
+   LOD4[LOD4, ratio=3];
+   Tile[Textured Tile]---LOD4---LOD3---LOD2---LOD1;
+
+```
+
 ### Geometric error
 
 | Tiler        |                    |
