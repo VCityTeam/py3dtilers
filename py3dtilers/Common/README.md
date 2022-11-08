@@ -233,7 +233,6 @@ graph TD;
    LOD3[LOD3, ratio=13];
    LOD4[LOD4, ratio=3];
    Tile[Textured Tile]---LOD4---LOD3---LOD2---LOD1;
-
 ```
 
 ### Geometric error
