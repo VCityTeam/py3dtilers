@@ -114,6 +114,7 @@ class Node(object):
                         in triangles[0] and the UV must be in
                         triangles[1]
         :param tile_number: the tile number
+        :param int downsample_factor: the factor used to downsize the image
         """
         atlasImg = Image.new(
             'RGB',
@@ -122,8 +123,8 @@ class Node(object):
 
         self.fillAtlasImage(atlasImg, features_with_id_key)
         atlas_id = 'ATLAS_' + str(tile_number) + Texture.format
-        
-        atlasImg = atlasImg.resize((int(atlasImg.width/downsample_factor), int(atlasImg.height/downsample_factor)))
+
+        atlasImg = atlasImg.resize((int(atlasImg.width / downsample_factor), int(atlasImg.height / downsample_factor)))
         atlasImg.save(Path(Texture.folder, 'tiles', atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
         return atlas_id
 
