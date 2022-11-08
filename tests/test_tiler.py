@@ -11,7 +11,8 @@ from py3dtilers.Texture import Texture
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
-                     output_dir=None, geometric_error=[None, None, None], kd_tree_max=None)
+                     output_dir=None, geometric_error=[None, None, None], kd_tree_max=None,
+                     texture_lods=0)
 
 
 triangles = [[np.array([1843366, 5174473, 200]),
@@ -235,6 +236,25 @@ class Test_Tile(unittest.TestCase):
         tiler.args.with_texture = True
         Texture.set_texture_quality(10)
         Texture.set_texture_format('jpeg')
+
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_texture_lods(self):
+        feature = Feature("texture_lods")
+        feature.geom.triangles.append(triangles)
+        feature.geom.triangles.append(uvs)
+        texture = Texture(Path('tests/tiler_test_data/texture.jpg'))
+        feature.set_texture(texture.get_cropped_texture_image(feature.geom.triangles[1]))
+        feature.set_box()
+        feature_list = FeatureList([feature])
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/texture_lods')
+        tiler.args.with_texture = True
+        tiler.args.texture_lods = 4
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
