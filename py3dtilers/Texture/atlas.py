@@ -12,7 +12,7 @@ class Atlas():
     An Atlas contains the texture images of a tile.
     """
 
-    def __init__(self, feature_list):
+    def __init__(self, feature_list, downsample_factor=1):
         features_with_id_key = dict()
         textures_with_id_key = dict()
 
@@ -29,7 +29,7 @@ class Atlas():
 
         self.tile_number = atlasTree.get_tile_number()
 
-        self.id = atlasTree.createAtlasImage(features_with_id_key, self.tile_number)
+        self.id = atlasTree.createAtlasImage(features_with_id_key, self.tile_number, downsample_factor)
 
     def computeArea(self, size):
         """

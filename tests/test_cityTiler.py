@@ -17,7 +17,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None],
-                     split_surfaces=False, add_color=False, kd_tree_max=None, ids=[])
+                     split_surfaces=False, add_color=False, kd_tree_max=None, ids=[], texture_lods=0)
 
 
 class Test_Tile(unittest.TestCase):
@@ -167,6 +167,18 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args = get_default_namespace()
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_texture")
         city_tiler.args.with_texture = True
+        tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
+
+        tileset.write_as_json(city_tiler.args.output_dir)
+
+    def test_building_texture_lods(self):
+
+        objects_type = CityMBuildings
+        city_tiler = CityTiler()
+        city_tiler.args = get_default_namespace()
+        city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_texture_lods")
+        city_tiler.args.with_texture = True
+        city_tiler.args.texture_lods = 5
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
         tileset.write_as_json(city_tiler.args.output_dir)

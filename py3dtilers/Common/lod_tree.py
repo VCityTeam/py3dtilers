@@ -1,5 +1,6 @@
 from ..Common import GeometryTree, GeometryNode, Lod1Node, LoaNode
 from typing import TYPE_CHECKING
+import copy
 
 if TYPE_CHECKING:
     from ..Common import Groups
@@ -10,7 +11,7 @@ class LodTree(GeometryTree):
     The LodTree contains the root node(s) of the LOD hierarchy and the centroid of the whole tileset
     """
 
-    def __init__(self, groups: 'Groups', create_lod1=False, create_loa=False, with_texture=False, geometric_errors=[None, None, None]):
+    def __init__(self, groups: 'Groups', create_lod1=False, create_loa=False, with_texture=False, geometric_errors=[None, None, None], texture_lods=0):
         """
         LodTree takes an instance of FeatureList (which contains a collection of Feature) and creates nodes.
         In order to reduce the number of .b3dm, it also distributes the features into a list of Group.
@@ -21,6 +22,13 @@ class LodTree(GeometryTree):
         for group in groups:
             node = GeometryNode(group.feature_list, geometric_errors[0], with_texture)
             root_node = node
+            downsample_factor = 3
+            for _ in range(0, texture_lods):
+                geometric_error = (downsample_factor / 3) + geometric_errors[0] if geometric_errors[0] else downsample_factor / 3
+                textured_node = GeometryNode(copy.deepcopy(group.feature_list), geometric_error, with_texture, downsample_factor)
+                textured_node.add_child_node(root_node)
+                root_node = textured_node
+                downsample_factor += 10
             if create_lod1:
                 lod1_node = Lod1Node(node, geometric_errors[1])
                 lod1_node.add_child_node(root_node)

@@ -16,16 +16,18 @@ class GeometryNode():
     # https://github.com/CesiumGS/3d-tiles/tree/main/specification#geometric-error
     DEFAULT_GEOMETRIC_ERROR = 1
 
-    def __init__(self, feature_list: 'FeatureList' = None, geometric_error=None, with_texture=False):
+    def __init__(self, feature_list: 'FeatureList' = None, geometric_error=None, with_texture=False, downsample_factor=1):
         """
         :param feature_list: an instance of FeatureList.
         :param geometric_error: the metric used to refine the node when visualizing the features.
         :param Boolean with_texture: if this node must keep the texture of the features or not.
+        :param int downsample_factor: the factor used to downsize the texture image
         """
         self.feature_list = feature_list
         self.child_nodes = list()
         self.with_texture = with_texture
         self.geometric_error = geometric_error if geometric_error is not None else self.DEFAULT_GEOMETRIC_ERROR
+        self.downsample_factor = downsample_factor
 
     def set_child_nodes(self, nodes: List['GeometryNode'] = list()):
         """

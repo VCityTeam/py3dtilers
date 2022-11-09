@@ -114,6 +114,14 @@ class Tiler():
                                  help='Set the maximum number of features in each tile when the features are distributed by a kd-tree.\
                                      The value must be an integer.')
 
+        self.parser.add_argument('--texture_lods',
+                                 '--tl',
+                                 nargs='?',
+                                 type=int,
+                                 default=0,
+                                 help='Set the number of levels of detail that will be created for each textured tile.\
+                                     Each level of detail will be a tile with a less detailled image but the same geometry.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -218,7 +226,7 @@ class Tiler():
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
 
-        tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors)
+        tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors, self.args.texture_lods)
 
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
