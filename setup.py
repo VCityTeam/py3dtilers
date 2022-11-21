@@ -30,7 +30,8 @@ requirements = (
     'alphashape',
     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
     'earclip @ git+https://github.com/lionfish0/earclip',
-    'Pillow'
+    'Pillow',
+    'ifcopenshell'
     # 'ifcopenshell' requires specific treatment, refer to
     # install_ifcopenshell_from_url() function definition.
 )
@@ -109,19 +110,19 @@ class CustomInstallCommand(install):
     """Custom install command."""
 
     def run(self):
-        install_ifcopenshell_from_url()
+        # install_ifcopenshell_from_url()
         install.run(self)
 
 
 class CustomDevelopCommand(develop):
     def run(self):
-        install_ifcopenshell_from_url()
+        # install_ifcopenshell_from_url()
         develop.run(self)
 
 
 class CustomEggInfoCommand(egg_info):
     def run(self):
-        install_ifcopenshell_from_url()
+        # install_ifcopenshell_from_url()
         egg_info.run(self)
 
 
