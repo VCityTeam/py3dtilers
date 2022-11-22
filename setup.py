@@ -41,7 +41,6 @@ dev_requirements = (
     'pytest',
     'pytest-cov',
     'autopep8',
-    'pytest-flake8',
     'pdoc3'
 )
 
