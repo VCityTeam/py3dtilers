@@ -17,7 +17,7 @@ class TilesetTiler(Tiler):
     def parse_command_line(self):
         super().parse_command_line()
 
-        if(len(self.args.paths) < 1):
+        if len(self.args.paths) < 1:
             print("Please provide a path to directory containing the root of your 3DTiles.")
             print("Exiting")
             sys.exit(1)
@@ -30,7 +30,7 @@ class TilesetTiler(Tiler):
         self.files = []
 
         for path in paths:
-            if(os.path.isdir(path)):
+            if os.path.isdir(path):
                 self.files.append(path)
 
         if len(self.files) == 0:

@@ -127,18 +127,18 @@ class Groups():
         polygons = list()
         files = []
 
-        if(os.path.isdir(polygons_path)):
+        if os.path.isdir(polygons_path):
             geojson_dir = listdir(polygons_path)
             for geojson_file in geojson_dir:
                 file_path = os.path.join(polygons_path, geojson_file)
-                if(os.path.isfile(file_path)):
+                if os.path.isfile(file_path):
                     files.append(file_path)
         else:
             files.append(polygons_path)
 
         # Read all the polygons in the file(s)
         for file in files:
-            if(".geojson" in file or ".json" in file):
+            if ".geojson" in file or ".json" in file:
                 with open(file) as f:
                     gjContent = json.load(f)
                 for feature in gjContent['features']:

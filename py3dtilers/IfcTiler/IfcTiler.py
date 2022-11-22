@@ -37,9 +37,9 @@ class IfcTiler(Tiler):
         objects = []
         for ifc_file in self.files:
             print("Reading " + str(ifc_file))
-            if(grouped_by == 'IfcTypeObject'):
+            if grouped_by == 'IfcTypeObject':
                 pre_tileset = IfcObjectsGeom.retrievObjByType(ifc_file, with_BTH)
-            elif(grouped_by == 'IfcGroup'):
+            elif grouped_by == 'IfcGroup':
                 pre_tileset = IfcObjectsGeom.retrievObjByGroup(ifc_file, with_BTH)
 
             objects.extend([objs for objs in pre_tileset.values() if len(objs) > 0])
@@ -62,7 +62,7 @@ def main():
     args = ifc_tiler.args
     tileset = ifc_tiler.from_ifc(args.grouped_by, args.with_BTH)
 
-    if(tileset is not None):
+    if tileset is not None:
         tileset.write_as_json(ifc_tiler.get_output_dir())
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 

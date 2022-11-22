@@ -33,7 +33,7 @@ class CityTemporalTiler(CityTiler):
 
     def parse_command_line(self):
         super().parse_command_line()
-        
+
         if len(self.args.paths) <= 1:
             print("Only a single database configuration file was provided.")
             print("This is highly suspect since temporal comparisons require at")

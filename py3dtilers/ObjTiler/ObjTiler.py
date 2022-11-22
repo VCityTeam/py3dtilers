@@ -41,7 +41,7 @@ def main():
     obj_tiler.parse_command_line()
 
     tileset = obj_tiler.from_obj_directory()
-    if(tileset is not None):
+    if tileset is not None:
         print("Writing tileset in", obj_tiler.get_output_dir())
         tileset.write_as_json(obj_tiler.get_output_dir())
 

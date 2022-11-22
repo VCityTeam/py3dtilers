@@ -16,7 +16,7 @@ class IfcObjectGeom(Feature):
         self.material = None
         self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
-        if(with_BTH):
+        if with_BTH:
             self.getParentsInIfc(ifcObject)
 
     def hasGeom(self):
@@ -27,16 +27,16 @@ class IfcObjectGeom(Feature):
 
     def getParentsInIfc(self, ifcObject):
         self.parents = list()
-        while(ifcObject):
+        while ifcObject:
             ifcParent = None
-            if(hasattr(ifcObject, "ContainedInStructure")):
-                if(ifcObject.ContainedInStructure):
+            if hasattr(ifcObject, "ContainedInStructure"):
+                if ifcObject.ContainedInStructure:
                     ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
-            elif(hasattr(ifcObject, "Decomposes")):
-                if(len(ifcObject.Decomposes) > 0):
+            elif hasattr(ifcObject, "Decomposes"):
+                if len(ifcObject.Decomposes) > 0:
                     ifcParent = ifcObject.Decomposes[0].RelatingObject
 
-            if(ifcParent):
+            if ifcParent:
                 self.parents.append({'id': ifcParent.GlobalId, 'ifcClass': ifcParent.is_a()})
             ifcObject = ifcParent
 
@@ -49,13 +49,13 @@ class IfcObjectGeom(Feature):
     def setBatchTableData(self, ifcObject, ifcGroup):
         properties = list()
         for prop in ifcObject.IsDefinedBy:
-            if(hasattr(prop, 'RelatingPropertyDefinition')):
-                if(prop.RelatingPropertyDefinition.is_a('IfcPropertySet')):
+            if hasattr(prop, 'RelatingPropertyDefinition'):
+                if prop.RelatingPropertyDefinition.is_a('IfcPropertySet'):
                     props = list()
                     props.append(prop.RelatingPropertyDefinition.Name)
                     for propSet in prop.RelatingPropertyDefinition.HasProperties:
-                        if(propSet.is_a('IfcPropertySingleValue')):
-                            if(propSet.NominalValue):
+                        if propSet.is_a('IfcPropertySingleValue'):
+                            if propSet.NominalValue:
                                 props.append([propSet.Name, propSet.NominalValue.wrappedValue])
                     properties.append(props)
         batch_table_data = {
@@ -70,7 +70,7 @@ class IfcObjectGeom(Feature):
         return self.ifcClasse
 
     def parse_geom(self, ifcObject):
-        if (not(ifcObject.Representation)):
+        if not (ifcObject.Representation):
             return False
 
         try:
@@ -85,16 +85,16 @@ class IfcObjectGeom(Feature):
 
         vertexList = np.reshape(np.array(shape.geometry.verts), (-1, 3))
         indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
-        if(shape.geometry.materials):
+        if shape.geometry.materials:
             ifc_material = shape.geometry.materials[0]
             self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
                                          alpha=ifc_material.transparency if ifc_material.transparency else 0,
                                          metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
-        if(indexList.size == 0):
+        if indexList.size == 0:
             logging.error("Error while creating geom : No triangles found")
             return False
-            
+
         triangles = list()
         for index in indexList:
             triangle = []
@@ -133,7 +133,7 @@ class IfcObjectsGeom(FeatureList):
 
             for obj in objects:
                 resulting_bth.add_class(obj.ifcClass, {'GUID'})
-                if(obj.parents):
+                if obj.parents:
                     hierarchy.addNodeToParent(obj.id, obj.parents[0]['id'])
                 i = 0
                 for parent in obj.parents:
@@ -144,9 +144,9 @@ class IfcObjectsGeom(FeatureList):
                     i = i + 1
 
             objectPosition = {}
-            for i, (obj) in enumerate(objects):
+            for i, obj in enumerate(objects):
                 objectPosition[obj.id] = i
-            for i, (parent) in enumerate(parents):
+            for i, parent in enumerate(parents):
                 objectPosition[parent] = i + len(objects)
 
             for obj in objects:
@@ -190,10 +190,10 @@ class IfcObjectsGeom(FeatureList):
             logging.info(str(i) + " / " + nb_element)
             logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
             obj = IfcObjectGeom(element, with_BTH=with_BTH)
-            if(obj.hasGeom()):
-                if not(element.is_a() in dictObjByType):
+            if obj.hasGeom():
+                if not (element.is_a() in dictObjByType):
                     dictObjByType[element.is_a()] = IfcObjectsGeom()
-                if(obj.material):
+                if obj.material:
                     obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
                 else:
                     obj.material_index = 0
@@ -221,17 +221,17 @@ class IfcObjectsGeom(FeatureList):
         for group in groups:
             elements_in_group = list()
             for element in group.RelatedObjects:
-                if(element.is_a('IfcElement')):
+                if element.is_a('IfcElement'):
                     elements.remove(element)
                     obj = IfcObjectGeom(element, group.RelatingGroup.Name)
-                    if(obj.hasGeom()):
+                    if obj.hasGeom():
                         elements_in_group.append(obj)
             dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
 
         elements_not_in_group = list()
         for element in elements:
             obj = IfcObjectGeom(element)
-            if(obj.hasGeom()):
+            if obj.hasGeom():
                 elements_not_in_group.append(obj)
         dictObjByGroup["None"] = elements_not_in_group
 

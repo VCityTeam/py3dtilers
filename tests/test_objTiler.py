@@ -21,7 +21,7 @@ class Test_Tile(unittest.TestCase):
         obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/basic_case")
 
         tileset = obj_tiler.from_obj_directory()
-        if(tileset is not None):
+        if tileset is not None:
             tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
     def test_texture(self):
@@ -34,7 +34,7 @@ class Test_Tile(unittest.TestCase):
         obj_tiler.args.scale = 50
 
         tileset = obj_tiler.from_obj_directory()
-        if(tileset is not None):
+        if tileset is not None:
             tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
     def test_texture_lods(self):
@@ -48,7 +48,7 @@ class Test_Tile(unittest.TestCase):
         obj_tiler.args.texture_lods = 5
 
         tileset = obj_tiler.from_obj_directory()
-        if(tileset is not None):
+        if tileset is not None:
             tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
 

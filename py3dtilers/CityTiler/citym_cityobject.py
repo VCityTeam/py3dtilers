@@ -238,7 +238,7 @@ class CityMCityObjects(FeatureList):
         cursor.execute(objects_type.sql_query_textures(image_uri))
         for t in cursor.fetchall():
             res.append(t)
-        return(res)
+        return res
 
     @staticmethod
     def get_image_from_binary(textureUri, objects_type, cursor):

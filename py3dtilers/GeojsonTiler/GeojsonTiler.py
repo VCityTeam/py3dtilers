@@ -68,9 +68,9 @@ class GeojsonTiler(Tiler):
     def parse_command_line(self):
         super().parse_command_line()
 
-        if(len(self.args.add_color) == 0):
+        if len(self.args.add_color) == 0:
             self.args.add_color = ['NONE', 'numeric']
-        elif(len(self.args.add_color) == 1):
+        elif len(self.args.add_color) == 1:
             self.args.add_color.append('numeric')
 
     def get_output_dir(self):
@@ -190,7 +190,7 @@ def main():
                   'z', geojson_tiler.args.z]
 
     tileset = geojson_tiler.from_geojson_directory(properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
-    if(tileset is not None):
+    if tileset is not None:
         print("Writing tileset in", geojson_tiler.get_output_dir())
         tileset.write_as_json(geojson_tiler.get_output_dir())
 

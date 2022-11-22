@@ -111,14 +111,14 @@ class Objs(FeatureList):
         for obj_file in files:
             print("Reading " + str(obj_file))
             geom = pywavefront.Wavefront(obj_file, collect_faces=True)
-            if(len(geom.vertices) == 0):
+            if len(geom.vertices) == 0:
                 continue
             for mesh in geom.mesh_list:
                 # Get id from its name
                 id = mesh.name
                 obj = Obj(id)
                 # Create geometry as expected from GLTF from an obj file
-                if(obj.parse_geom(mesh, with_texture)):
+                if obj.parse_geom(mesh, with_texture):
                     objects.append(obj)
 
         return Objs(objects)

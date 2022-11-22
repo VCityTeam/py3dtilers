@@ -125,8 +125,8 @@ class Tiler():
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
-        if(self.args.paths is None or len(self.args.paths) == 0):
-            if(self.default_input_path is not None):
+        if self.args.paths is None or len(self.args.paths) == 0:
+            if self.default_input_path is not None:
                 self.args.paths = [self.default_input_path]
             else:
                 print("Please provide at least one path to a file or directory")
@@ -134,12 +134,12 @@ class Tiler():
                 sys.exit(1)
         self.retrieve_files(self.args.paths)
 
-        if(self.args.obj is not None and '.obj' not in self.args.obj):
+        if self.args.obj is not None and '.obj' not in self.args.obj:
             self.args.obj = self.args.obj + '.obj'
 
-        if(len(self.args.offset) < 3):
+        if len(self.args.offset) < 3:
             [self.args.offset.append(0) for _ in range(len(self.args.offset), 3)]
-        elif(len(self.args.offset) > 3):
+        elif len(self.args.offset) > 3:
             self.args.offset = self.args.offset[:3]
         for i, val in enumerate(self.args.offset):
             if not isinstance(val, (int, float)) and val.lstrip('-').replace('.', '', 1).isdigit():
@@ -149,11 +149,11 @@ class Tiler():
             self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
 
-        if(self.args.quality is not None):
+        if self.args.quality is not None:
             Texture.set_texture_quality(self.args.quality)
-        if(self.args.compress_level is not None):
+        if self.args.compress_level is not None:
             Texture.set_texture_compress_level(self.args.compress_level)
-        if(self.args.format is not None):
+        if self.args.format is not None:
             Texture.set_texture_format(self.args.format)
 
     def retrieve_files(self, paths):
@@ -164,12 +164,12 @@ class Tiler():
         self.files = []
 
         for path in paths:
-            if(os.path.isdir(path)):
+            if os.path.isdir(path):
                 dir = os.listdir(path)
                 for file in dir:
                     file_path = os.path.join(path, file)
-                    if(os.path.isfile(file_path)):
-                        if(Path(file).suffix in self.supported_extensions):
+                    if os.path.isfile(file_path):
+                        if Path(file).suffix in self.supported_extensions:
                             self.files.append(file_path)
             else:
                 self.files.append(path)
@@ -207,7 +207,7 @@ class Tiler():
         :param extension_name: an optional extension to add to the tileset
         :return: a TileSet
         """
-        if(len(feature_list) == 0):
+        if len(feature_list) == 0:
             print("No feature found in source")
             sys.exit(1)
         else:

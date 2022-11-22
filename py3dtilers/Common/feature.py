@@ -146,7 +146,7 @@ class FeatureList(object):
         if FeatureList.default_mat is None:
             FeatureList.default_mat = self.get_color_config().get_default_color()
         self.materials = [FeatureList.default_mat]
-        if(features):
+        if features:
             self.features.extend(features)
 
     def __iter__(self):
@@ -251,7 +251,7 @@ class FeatureList(object):
         :return: bool
         """
         for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
+            if (mat.rgba == material.rgba).all():
                 return True
         return False
 
@@ -264,7 +264,7 @@ class FeatureList(object):
         """
         i = 0
         for mat in self.materials:
-            if(mat.rgba == material.rgba).all():
+            if (mat.rgba == material.rgba).all():
                 return i
             i = i + 1
         self.add_material(material)
