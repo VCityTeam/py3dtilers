@@ -92,17 +92,16 @@ class Geojson(Feature):
 
         # If precision is equal to 9999, it means Z values of the features are missing, so we skip the feature
         prec_name = target_properties[target_properties.index('prec') + 1]
-        if prec_name != 'NONE':
-            if prec_name in self.feature_properties:
-                if self.feature_properties[prec_name] >= 9999.:
-                    return False
+        if prec_name != 'NONE' and prec_name in self.feature_properties and self.feature_properties[prec_name] is not None:
+            if self.feature_properties[prec_name] >= 9999.:
+                return False
 
         height_name = target_properties[target_properties.index('height') + 1]
         if height_name.replace('.', '', 1).isdigit():
             self.height = float(height_name)
         else:
             if height_name in self.feature_properties:
-                if self.feature_properties[height_name] > 0:
+                if self.feature_properties[height_name] is not None and self.feature_properties[height_name] > 0:
                     self.height = self.feature_properties[height_name]
                 else:
                     self.height = Geojson.default_height
