@@ -14,9 +14,6 @@ jobs:
       language: python
       python: "3.6"
       install:
-          ### Dealing with py3dtiles sub-dependencies
-        - sudo add-apt-repository universe
-        - sudo apt-get install -y liblas-c3 libopenblas-base flake8
           ### Proceed with the install of py3dtilers per se.
           # The extra flag installs the dev dependencies, refer to e.g.
           # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
@@ -24,9 +21,8 @@ jobs:
         - python -c 'import ifcopenshell'  # Just to make sure
       script:
       - |
-        autopep8 --in-place --recursive py3dtilers/
-        pytest --flake8
-        pytest -v
+        flake8 .
+        pytest
     - stage: "Markdown link checks"
       language: node_js
       node_js: 14
