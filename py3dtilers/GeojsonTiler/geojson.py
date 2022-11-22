@@ -21,7 +21,7 @@ class Geojson(Feature):
     n_feature = 0
 
     # Default height will be used if no height is found when parsing the data
-    default_height = 2
+    default_height = 10
 
     # Default Z will be used if no Z is found in the feature coordinates
     default_z = 0
