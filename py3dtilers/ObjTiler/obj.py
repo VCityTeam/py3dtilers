@@ -49,32 +49,39 @@ class Obj(Feature):
 
         vertices = mesh.materials[0].vertices
         length = len(vertices)
+        vertex_format = mesh.materials[0].vertex_format
         # Contains only vertex positions
-        if mesh.materials[0].vertex_format == 'V3F':
+        if vertex_format == 'V3F':
             for i in range(0, length, 9):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
         # Contains normals and vertex positions
-        elif mesh.materials[0].vertex_format == 'N3F_V3F':
+        elif vertex_format == 'N3F_V3F':
             for i in range(0, length, 18):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i + 3, i + 21, 6)]
                 triangles.append(triangle)
         # Contains texture and vertex positions
-        elif mesh.materials[0].vertex_format == 'T2F_V3F':
+        elif vertex_format == 'T2F_V3F':
             for i in range(0, length, 15):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i + 2, i + 17, 5)]
                 triangles.append(triangle)
                 uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 15, 5)]
                 uvs.append(uv)
         # Contains texture/vertex positions and normals
-        elif mesh.materials[0].vertex_format == 'T2F_N3F_V3F':
+        elif vertex_format == 'T2F_N3F_V3F' or vertex_format == 'T2F_C3F_V3F':
             for i in range(0, length, 24):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i + 5, i + 29, 8)]
                 triangles.append(triangle)
                 uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
+        elif vertex_format == 'T2F_C3F_N3F_V3F':
+            for i in range(0, length, 33):
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 8, i + 41, 11)]
+                triangles.append(triangle)
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 33, 11)]
+                uvs.append(uv)
         else:
-            print("Unsuported format", mesh.materials[0].vertex_format)
+            print("Unsuported format", vertex_format)
             return False
 
         self.geom.triangles.append(triangles)
