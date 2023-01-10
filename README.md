@@ -23,13 +23,17 @@ Find 3D Tiles created with Py3DTilers in [__this online demo__](https://py3dtile
 
 ## Installation from sources
 
+py3dtilers works with **Python 3.9**.
+
+You can a lower version if you don't plan to work with the IfcTiler. Then, comment the line of the [IfcOpenShell in the setup.py](./setup.py#L23).
+
 ### For Unix
 
 Install binary sub-dependencies with your platform package installer e.g. for Ubuntu use
 
 ```bash
 apt-get install -y libpq-dev       # required usage of psycopg2 within py3dtilers
-apt install python3 python3-pip    # Python3 version must be <=3.9
+apt install python3.9              # Python3 version must be 3.9
 ```
 
 First create a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html)
@@ -37,7 +41,7 @@ First create a safe [python virtual environment](https://docs.python.org/3/tutor
 
 ```bash
 apt install virtualenv
-virtualenv -p python3 venv
+virtualenv -p python3.9 venv
 . venv/bin/activate
 (venv)$
 ```
@@ -60,29 +64,17 @@ Then, depending on your use case, proceed with the installation of `py3dtilers` 
 
 ### For Windows
 
-Install python3 (**<= 3.9**).
+Install **python3.9**.
 
 In order to install py3dtilers from sources use:
 
 ```bash
 git clone https://github.com/VCityTeam/py3dtilers
 cd py3dtilers
-python3 -m venv venv
+python3.9 -m venv venv
 . venv/Scripts/activate
 (venv)$ pip install -e .
 ```
-
-### About IfcOpenShell dependency
-
-**Caveat emptor**: make sure, that the IfcOpenShell dependency was properly installed with help of the `python -c 'import ifcopenshell'` command. In case
-of failure of the importation try re-installing but this time with the verbose
-flag, that is try
-
-```bash
-(venv)$ pip install -e . -v
-```
-
-and look for the lines concerning `IfcOpenShell.`
 
 ## Usage
 
