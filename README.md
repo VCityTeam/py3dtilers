@@ -25,7 +25,7 @@ Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtile
 
 Py3DTilers works with **Python 3.9**.
 
-You can a lower version if you don't plan to work with the IfcTiler. Then, comment the line of the [IfcOpenShell in the setup.py](./setup.py#L23).
+You can use a lower version if you don't plan to work with the IfcTiler. Then, comment the line of the [IfcOpenShell in the setup.py](./setup.py#L23).
 
 ### For Unix
 
@@ -36,8 +36,7 @@ apt-get install -y libpq-dev       # required usage of psycopg2 within py3dtiler
 apt install python3.9              # Python3 version must be 3.9
 ```
 
-First create a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html)
-(not mandatory yet quite recommended)
+Install Py3DTilers in a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html) (not mandatory yet quite recommended)
 
 ```bash
 apt install virtualenv git
