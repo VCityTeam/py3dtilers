@@ -1,12 +1,11 @@
-sudo: required
-dist: bionic
+dist: focal
 
 addons:
-  postgresql: "10"
+  postgresql: "12"
   apt:
     update: true
     packages:
-      - postgresql-10-postgis-2.4
+      - postgresql-12-postgis-3
 
 jobs:
   include:
@@ -35,5 +34,3 @@ jobs:
           if [ $warnings -gt $FAILURE_THRESHOLD ]; then
             exit 1;
           fi
-
-
