@@ -33,13 +33,13 @@ Install binary sub-dependencies with your platform package installer e.g. for Ub
 
 ```bash
 apt-get install -y libpq-dev       # required usage of psycopg2 within py3dtilers
-apt install python3.9              # Python3 version must be 3.9
+apt-get install python3.9          # Python3 version must be 3.9
 ```
 
 Install Py3DTilers in a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html) (not mandatory yet quite recommended)
 
 ```bash
-apt install virtualenv git
+apt-get install virtualenv git
 git clone https://github.com/VCityTeam/py3dtilers
 cd py3dtilers
 virtualenv -p python3.9 venv
