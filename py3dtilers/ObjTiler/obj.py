@@ -108,7 +108,6 @@ class Objs(FeatureList):
     def __init__(self, objs=None):
         super().__init__(objs)
 
-
     @staticmethod
     def retrieve_objs(files, with_texture=False):
         """
@@ -121,39 +120,25 @@ class Objs(FeatureList):
 
         for obj_file in files:
             print("Reading " + str(obj_file))
-            geom = pywavefront.Wavefront(obj_file, collect_faces=True, create_materials = True)
+            geom = pywavefront.Wavefront(obj_file, collect_faces=True, create_materials=True)
             mesh = geom.mesh_list[0]
             if len(geom.vertices) == 0:
                 continue
-            glTFMaterialArray = []
-            index_mat = 0
-            for material in mesh.materials:
+            gltfMaterials = []
+            mesh_index = 1
+
+            for mesh in mesh.materials:
                 # get id from its name
-                id = material.name
+                id = mesh.name
                 obj = Obj(id)
-                obj.set_material_index(index_mat)
-                index_mat += 1
-                if obj.parse_geom(material, with_texture):
+                obj.set_material_index(mesh_index)
+                mesh_index += 1
+                if obj.parse_geom(mesh, with_texture):                        
                     objects.append(obj)
-                mat = GlTFMaterial(rgb=[material.diffuse[0], material.diffuse[1], material.diffuse[2]], alpha= 1 - material.diffuse[3], metallicFactor = 0.)
-                glTFMaterialArray.append(mat)
+                material = GlTFMaterial(rgb=[mesh.diffuse[0], mesh.diffuse[1], mesh.diffuse[2]], alpha=1. - mesh.diffuse[3], metallicFactor=0.)
+                gltfMaterials.append(material)
 
-                
+        fList = Objs(objects)
+        fList.add_materials(gltfMaterials)
 
-
-        # for obj_file in files:
-        #     print("Reading " + str(obj_file))
-        #     geom = pywavefront.Wavefront(obj_file, collect_faces=True) # create_materials = True
-        #     if len(geom.vertices) == 0:
-        #         continue
-        #     for mesh in geom.mesh_list:
-        #         # Get id from its name
-        #         id = mesh.name
-        #         obj = Obj(id)
-        #         # Create geometry as expected from GLTF from an obj file
-        #         if obj.parse_geom(mesh, with_texture):
-        #             objects.append(obj)
-        
-        FList = Objs(objects)
-        FList.add_materials(glTFMaterialArray)
-        return FList
+        return fList

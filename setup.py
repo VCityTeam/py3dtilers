@@ -36,6 +36,7 @@ prod_requirements = (
     'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -93,9 +94,9 @@ setup(
                  ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/default_config.json']
-                ),
+                 ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/citytiler_config.json']
-                )],
+                 )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )

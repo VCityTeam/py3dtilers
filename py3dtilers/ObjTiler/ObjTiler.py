@@ -37,7 +37,6 @@ def main():
     and a classes.txt that contains the name of all tilesets
     :return: no return value
     """
-    print("!!!!!!!!!!!!!!!!!! devMode !!!!!!!!!!!!!!!!!!")
     obj_tiler = ObjTiler()
     obj_tiler.parse_command_line()
 
