@@ -9,6 +9,8 @@ Py3DTilers uses [`py3dtiles` python library](https://github.com/VCityTeam/py3dti
 
 Py3DTilers can only produce [`Batched 3D Models (B3DM)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/Batched3DModel/README.md). If you want to produce [`Point Clouds (PNTS)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/PointCloud/README.md), see [Oslandia's py3dtiles CLI](https://gitlab.com/Oslandia/py3dtiles/-/blob/master/docs/cli.rst).
 
+An article that present the tool is available in the ISPRS annals [here](https://hal.science/hal-03852828/).  
+
 ## Demo
 
 Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtilers-demo.vcityliris.data.alpha.grandlyon.com/).
