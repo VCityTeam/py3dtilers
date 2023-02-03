@@ -337,6 +337,14 @@ class FeatureList(object):
             features_with_geom.extend(feature.get_geom(user_arguments, self, material_indexes))
         self.set_features(features_with_geom)
 
+    def filter(self, filter_function):
+        """
+        Filter the features. Keep only those accepted by the filter function.
+        The filter function must take an ID as input.
+        :param filter_function: a function
+        """
+        self.features = list(filter(lambda f: filter_function(f.get_id()), self.features))
+
     @classmethod
     def set_color_config(cls, config_path):
         """

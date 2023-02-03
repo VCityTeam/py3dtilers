@@ -283,6 +283,30 @@ When using the CityTiler [with texture](#with-texture), the default maximum of f
 <tiler> <input> --kd_tree_max 25  # Each tile will contain a maximum of 25 features
 ```
 
+### ID filter
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler     | :x: |
+| TilesetTiler | :heavy_check_mark: |
+
+The flag `--keep_ids` and `--exclude_ids` allows to filter the features. The flag must be followed by a list of IDs.
+
+`--keep_ids` keeps **only** the features which have their ID in the list.
+
+```bash
+<tiler> <input> --keep_ids id_1 id_2  # Keep only the features with those IDs
+```
+
+`--exclude_ids` **exclude** the features which have their ID in the list.
+
+```bash
+<tiler> <input> --exclude_ids id_1 id_2  # Exclude the features with those IDs
+```
+
 ## Developper notes
 
 ## [feature](feature.py)

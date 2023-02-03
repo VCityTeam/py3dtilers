@@ -122,6 +122,18 @@ class Tiler():
                                  help='Set the number of levels of detail that will be created for each textured tile.\
                                      Each level of detail will be a tile with a less detailled image but the same geometry.')
 
+        self.parser.add_argument('--keep_ids',
+                                 nargs='*',
+                                 default=[],
+                                 type=str,
+                                 help='If present, keep only the features which have their ID in the list.')
+
+        self.parser.add_argument('--exclude_ids',
+                                 nargs='*',
+                                 default=[],
+                                 type=str,
+                                 help='If present, exlude the features which have their ID in the list.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -211,6 +223,14 @@ class Tiler():
             print("No feature found in source")
             sys.exit(1)
         else:
+            if len(self.args.keep_ids) > 0:
+                feature_list.filter(lambda id: id in self.args.keep_ids)
+            if len(self.args.exclude_ids) > 0:
+                feature_list.filter(lambda id: id not in self.args.exclude_ids)
+            print(len(feature_list), "feature(s) after filter")
+            if len(feature_list) == 0:
+                print("No feature left, exiting")
+                sys.exit(1)
             print("Distribution of the", len(feature_list), "features...")
         groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
         feature_list.delete_features_ref()
