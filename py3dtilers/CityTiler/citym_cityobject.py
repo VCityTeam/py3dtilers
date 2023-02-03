@@ -129,6 +129,14 @@ class CityMCityObjects(FeatureList):
             texture_dict[feature.get_id()] = uri_dict[uri].get_cropped_texture_image(feature.geom.triangles[1])
         return texture_dict
 
+    def filter(self, filter_function):
+        """
+        Filter the features. Keep only those accepted by the filter function.
+        The filter function must take an ID as input.
+        :param filter_function: a function
+        """
+        self.features = list(filter(lambda f: filter_function(f.get_gml_id()), self.features))
+
     @staticmethod
     def set_cursor(cursor):
         """
@@ -156,7 +164,7 @@ class CityMCityObjects(FeatureList):
         pass
 
     @staticmethod
-    def retrieve_objects(cursor, objects_type, cityobjects=list(), citygml_ids=list()):
+    def retrieve_objects(cursor, objects_type, cityobjects=list()):
         """
         :param cursor: a database access cursor.
         :param objects_type: a class name among CityMCityObject derived classes.
@@ -166,9 +174,6 @@ class CityMCityObjects(FeatureList):
                         sought in the database. When this list is empty all
                         the objects encountered in the database are returned.
 
-        :param citygml_ids: a list of cityGML IDs. If the list isn't empty, we keep only
-                        the city objects of the list
-
         :return: an objects_type type object containing the objects that were retrieved
                 in the 3DCityDB database, each object being decorated with its database
                 identifier as well as its 3D bounding box (as retrieved in the database).
@@ -177,7 +182,7 @@ class CityMCityObjects(FeatureList):
             no_input = True
         else:
             no_input = False
-        cursor.execute(objects_type.sql_query_objects(cityobjects, citygml_ids))
+        cursor.execute(objects_type.sql_query_objects(cityobjects))
 
         if no_input:
             result_objects = objects_type()
