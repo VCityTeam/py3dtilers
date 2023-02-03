@@ -112,10 +112,14 @@ The default colors are defined by a [JSON file](../Color/citytiler_config.json).
 
 ### ID filter
 
-The flag `--ids` allows to keep only the selected CityObject(s). The flag must be followed by a list of CityGML IDs.
+The flag `--keep_ids` and `--exclude_ids` allows to filter the CityObject(s). The flag must be followed by a list of __CityGML IDs__. See [ID filter](../Common/README.md#id-filter).
 
 ```bash
-citygml-tiler -i <path_to_file>/Config.yml --ids CityGML_ID_1 CityGML_ID_2
+citygml-tiler -i <path_to_file>/Config.yml --keep_ids CityGML_ID_1 CityGML_ID_2
+```
+
+```bash
+citygml-tiler -i <path_to_file>/Config.yml --exclude_ids CityGML_ID_1 CityGML_ID_2
 ```
 
 ## CityTemporalTiler features
