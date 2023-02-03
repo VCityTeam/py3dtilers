@@ -8,7 +8,7 @@ from py3dtilers.IfcTiler.IfcTiler import IfcTiler
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, grouped_by='IfcTypeObject', scale=1,
-                     output_dir=None, geometric_error=[None, None, None], kd_tree_max=None, texture_lods=0)
+                     output_dir=None, geometric_error=[None, None, None], kd_tree_max=None, texture_lods=0, keep_ids=[], exclude_ids=[])
 
 
 class Test_Tile(unittest.TestCase):
