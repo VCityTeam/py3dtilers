@@ -227,11 +227,10 @@ class Tiler():
                 feature_list.filter(lambda id: id in self.args.keep_ids)
             if len(self.args.exclude_ids) > 0:
                 feature_list.filter(lambda id: id not in self.args.exclude_ids)
-            print(len(feature_list), "feature(s) after filter")
             if len(feature_list) == 0:
                 print("No feature left, exiting")
                 sys.exit(1)
-            print("Distribution of the", len(feature_list), "features...")
+            print("Distribution of the", len(feature_list), "feature(s)...")
         groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
         feature_list.delete_features_ref()
         return self.create_tileset_from_groups(groups, extension_name)
