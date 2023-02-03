@@ -12,7 +12,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None], kd_tree_max=None,
-                     texture_lods=0)
+                     texture_lods=0, keep_ids=[], exclude_ids=[])
 
 
 triangles = [[np.array([1843366, 5174473, 200]),
@@ -255,6 +255,42 @@ class Test_Tile(unittest.TestCase):
         tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/texture_lods')
         tiler.args.with_texture = True
         tiler.args.texture_lods = 4
+
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_keep_ids(self):
+        features = list()
+        for i in range(0, 3):
+            feature = Feature("id_" + str(i))
+            feature.geom.triangles.append(triangles)
+            feature.set_box()
+            features.append(feature)
+        feature_list = FeatureList(features)
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/keep_ids')
+        tiler.args.keep_ids = ["id_1"]
+
+        tileset = tiler.create_tileset_from_feature_list(feature_list)
+
+        tileset.write_as_json(tiler.args.output_dir)
+
+    def test_exclude_ids(self):
+        features = list()
+        for i in range(0, 3):
+            feature = Feature("id_" + str(i))
+            feature.geom.triangles.append(triangles)
+            feature.set_box()
+            features.append(feature)
+        feature_list = FeatureList(features)
+
+        tiler = Tiler()
+        tiler.args = get_default_namespace()
+        tiler.args.output_dir = Path('tests/tiler_test_data/generated_tilesets/exclude_ids')
+        tiler.args.exclude_ids = ["id_1"]
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
