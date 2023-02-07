@@ -129,11 +129,11 @@ class Objs(FeatureList):
             for mesh in geom.mesh_list:
                 for mesh_mat in mesh.materials:
                     # get id from its name
-                    id = mesh.name
+                    id = mesh_mat.name
                     obj = Obj(id)
                     obj.set_material_index(mesh_index)
                     mesh_index += 1
-                    if obj.parse_geom(mesh, with_texture):
+                    if obj.parse_geom(mesh_mat, with_texture):
                         objects.append(obj)
                     material = GlTFMaterial(rgb=[mesh.diffuse[0], mesh.diffuse[1], mesh.diffuse[2]], alpha=1. - mesh.diffuse[3], metallicFactor=0.)
                     gltfMaterials.append(material)
