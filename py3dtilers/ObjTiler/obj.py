@@ -121,22 +121,22 @@ class Objs(FeatureList):
         for obj_file in files:
             print("Reading " + str(obj_file))
             geom = pywavefront.Wavefront(obj_file, collect_faces=True, create_materials=True)
-            mesh = geom.mesh_list[0]
             if len(geom.vertices) == 0:
                 continue
             gltfMaterials = []
             mesh_index = 1
 
-            for mesh in mesh.materials:
-                # get id from its name
-                id = mesh.name
-                obj = Obj(id)
-                obj.set_material_index(mesh_index)
-                mesh_index += 1
-                if obj.parse_geom(mesh, with_texture):                        
-                    objects.append(obj)
-                material = GlTFMaterial(rgb=[mesh.diffuse[0], mesh.diffuse[1], mesh.diffuse[2]], alpha=1. - mesh.diffuse[3], metallicFactor=0.)
-                gltfMaterials.append(material)
+            for mesh in geom.mesh_list:
+                for mesh_mat in mesh.materials:
+                    # get id from its name
+                    id = mesh.name
+                    obj = Obj(id)
+                    obj.set_material_index(mesh_index)
+                    mesh_index += 1
+                    if obj.parse_geom(mesh, with_texture):
+                        objects.append(obj)
+                    material = GlTFMaterial(rgb=[mesh.diffuse[0], mesh.diffuse[1], mesh.diffuse[2]], alpha=1. - mesh.diffuse[3], metallicFactor=0.)
+                    gltfMaterials.append(material)
 
         fList = Objs(objects)
         fList.add_materials(gltfMaterials)
