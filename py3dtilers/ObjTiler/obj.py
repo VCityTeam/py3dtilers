@@ -135,7 +135,7 @@ class Objs(FeatureList):
                     mesh_index += 1
                     if obj.parse_geom(mesh_mat, with_texture):
                         objects.append(obj)
-                    material = GlTFMaterial(rgb=[mesh.diffuse[0], mesh.diffuse[1], mesh.diffuse[2]], alpha=1. - mesh.diffuse[3], metallicFactor=0.)
+                    material = GlTFMaterial(rgb=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2]], alpha=1. - mesh_mat.diffuse[3], metallicFactor=0.)
                     gltfMaterials.append(material)
 
         fList = Objs(objects)
