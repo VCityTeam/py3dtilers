@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pywavefront
+from py3dtiles import GlTFMaterial
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -25,7 +26,10 @@ class Obj(Feature):
     def __init__(self, id=None):
         super().__init__(id)
 
-    def parse_geom(self, mesh, with_texture=False):
+    def set_material_index(self, index):
+        self.material_index = index
+
+    def parse_geom(self, material, with_texture=False):
         """
         Parse the geometry of a OBJ mesh to create a triangle soup with UVs.
         :param mesh: an OBJ mesh
@@ -47,9 +51,9 @@ class Obj(Feature):
         triangles = list()
         uvs = list()
 
-        vertices = mesh.materials[0].vertices
+        vertices = material.vertices
         length = len(vertices)
-        vertex_format = mesh.materials[0].vertex_format
+        vertex_format = material.vertex_format
         # Contains only vertex positions
         if vertex_format == 'V3F':
             for i in range(0, length, 9):
@@ -87,8 +91,8 @@ class Obj(Feature):
         self.geom.triangles.append(triangles)
         if len(uvs) > 0 and with_texture:
             self.geom.triangles.append(uvs)
-            if mesh.materials[0].texture is not None:
-                path = str(mesh.materials[0].texture._path).replace('\\', '/')
+            if material.texture is not None:
+                path = str(material.texture._path).replace('\\', '/')
                 texture = Texture(path)
                 self.set_texture(texture.get_cropped_texture_image(self.geom.triangles[1]))
         self.set_box()
@@ -110,22 +114,31 @@ class Objs(FeatureList):
         Create Obj instance from OBJ file(s).
         :param files: paths to files
         :param with_texture: a boolean indicating if the textures should be read
-
         :return: a list of Obj.
         """
         objects = list()
 
         for obj_file in files:
             print("Reading " + str(obj_file))
-            geom = pywavefront.Wavefront(obj_file, collect_faces=True)
+            geom = pywavefront.Wavefront(obj_file, collect_faces=True, create_materials=True)
             if len(geom.vertices) == 0:
                 continue
-            for mesh in geom.mesh_list:
-                # Get id from its name
-                id = mesh.name
-                obj = Obj(id)
-                # Create geometry as expected from GLTF from an obj file
-                if obj.parse_geom(mesh, with_texture):
-                    objects.append(obj)
+            gltfMaterials = []
+            mesh_index = 1
 
-        return Objs(objects)
+            for mesh in geom.mesh_list:
+                for mesh_mat in mesh.materials:
+                    # get id from its name
+                    id = mesh_mat.name
+                    obj = Obj(id)
+                    obj.set_material_index(mesh_index)
+                    mesh_index += 1
+                    if obj.parse_geom(mesh_mat, with_texture):
+                        objects.append(obj)
+                    material = GlTFMaterial(rgb=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2]], alpha=1. - mesh_mat.diffuse[3], metallicFactor=0.)
+                    gltfMaterials.append(material)
+
+        fList = Objs(objects)
+        fList.add_materials(gltfMaterials)
+
+        return fList
