@@ -88,7 +88,7 @@ class IfcObjectGeom(Feature):
         if shape.geometry.materials:
             ifc_material = shape.geometry.materials[0]
             self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
-                                         alpha=ifc_material.transparency if ifc_material.transparency else 0,
+                                         alpha=ifc_material.transparency if ifc_material.transparency else 1,
                                          metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
 
         if indexList.size == 0:
