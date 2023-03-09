@@ -10,10 +10,11 @@ from py3dtiles import BatchTableHierarchy
 
 
 class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, ifcGroup=None, with_BTH=False):
+    def __init__(self, ifcObject, ifcGroup="None", with_BTH=False):
         super().__init__(ifcObject.GlobalId)
         self.ifcClass = ifcObject.is_a()
         self.material = None
+        self.ifcGroup = ifcGroup
         self.setBatchTableData(ifcObject, ifcGroup)
         self.has_geom = self.parse_geom(ifcObject)
         if with_BTH:
@@ -180,7 +181,6 @@ class IfcObjectsGeom(FeatureList):
         ifc_file = ifcopenshell.open(path_to_file)
 
         elements = ifc_file.by_type('IfcElement')
-        ifc_space = ifc_file.by_type('IfcSpace')
         nb_element = str(len(elements))
         logging.info(nb_element + " elements to parse")
         i = 1
@@ -203,7 +203,7 @@ class IfcObjectsGeom(FeatureList):
         return dictObjByType
 
     @staticmethod
-    def retrievObjByGroup(path_to_file):
+    def retrievObjByGroup(path_to_file, with_BTH):
         """
         :param path: a path to a directory
 
@@ -216,26 +216,33 @@ class IfcObjectsGeom(FeatureList):
         logging.info(nb_element + " elements to parse")
 
         groups = ifc_file.by_type("IFCRELASSIGNSTOGROUP")
+        if not groups:
+            logging.info("No IfcGroup found")
 
         dictObjByGroup = dict()
         for group in groups:
-            elements_in_group = list()
+            dictObjByGroup[group.RelatingGroup.Name] = IfcObjectsGeom()
             for element in group.RelatedObjects:
                 if element.is_a('IfcElement'):
+                    logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
                     elements.remove(element)
-                    obj = IfcObjectGeom(element, group.RelatingGroup.Name)
+                    obj = IfcObjectGeom(element, ifcGroup=group.RelatingGroup.Name, with_BTH=with_BTH)
                     if obj.hasGeom():
-                        elements_in_group.append(obj)
-            dictObjByGroup[group.RelatingGroup.Name] = elements_in_group
+                        dictObjByGroup[element.ifcGroup].append(obj)
+                    if obj.material:
+                        obj.material_index = dictObjByGroup[element.ifcGroup].get_material_index(obj.material)
+                    else:
+                        obj.material_index = 0
 
-        elements_not_in_group = list()
+        dictObjByGroup["None"] = IfcObjectsGeom()
         for element in elements:
-            obj = IfcObjectGeom(element)
+            logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
+            obj = IfcObjectGeom(element, with_BTH=with_BTH)
             if obj.hasGeom():
-                elements_not_in_group.append(obj)
-        dictObjByGroup["None"] = elements_not_in_group
-
-        for key in dictObjByGroup.keys():
-            dictObjByGroup[key] = IfcObjectsGeom(dictObjByGroup[key])
+                dictObjByGroup[obj.ifcGroup].append(obj)
+            if obj.material:
+                obj.material_index = dictObjByGroup[obj.ifcGroup].get_material_index(obj.material)
+            else:
+                obj.material_index = 0
 
         return dictObjByGroup
