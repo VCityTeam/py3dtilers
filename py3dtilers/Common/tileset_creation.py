@@ -181,7 +181,7 @@ class FromGeometryTreeToTileset():
 
         # if there is application specific data associated with the features, add it to the batch table
         features_data = [feature.get_batchtable_data() for feature in feature_list]
-        if not all([feature_data is None for feature_data in features_data]):
+        if all([feature_data for feature_data in features_data]):
             # Construct a set of all possible batch table keys
             bt_keys = set()
             for key_subset in [feature_data.keys() for feature_data in features_data]:

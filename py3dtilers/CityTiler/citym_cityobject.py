@@ -37,10 +37,7 @@ class CityMCityObject(Feature):
         Set the gml id of this object. The gml id is kept into the batch table.
         :param gml_id: the id of the object
         """
-        batch_table_data = {
-            'gml_id': gml_id
-        }
-        super().set_batchtable_data(batch_table_data)
+        super().add_batchtable_data('gml_id', gml_id)
 
     def get_gml_id(self):
         """
@@ -81,13 +78,15 @@ class CityMCityObject(Feature):
                         texture_uri = t[3]
                         cityobject.texture_uri = texture_uri
                         associated_data = [uv_as_string]
-                    elif user_arguments.add_color:
+                    else:
                         surface_classname = t[2]
-                        if surface_classname not in material_indexes:
-                            material = feature_list.get_color_config().get_color_by_key(surface_classname)
-                            material_indexes[surface_classname] = len(feature_list.materials)
-                            feature_list.add_materials([material])
-                        cityobject.material_index = material_indexes[surface_classname]
+                        cityobject.add_batchtable_data('citygml::surface_type', surface_classname)
+                        if user_arguments.add_color:
+                            if surface_classname not in material_indexes:
+                                material = feature_list.get_color_config().get_color_by_key(surface_classname)
+                                material_indexes[surface_classname] = len(feature_list.materials)
+                                feature_list.add_materials([material])
+                            cityobject.material_index = material_indexes[surface_classname]
 
                     cityobject.geom = TriangleSoup.from_wkb_multipolygon(geom_as_string, associated_data)
                     if len(cityobject.geom.triangles[0]) > 0:
