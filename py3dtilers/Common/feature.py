@@ -18,7 +18,7 @@ class Feature(object):
         self.geom = TriangleSoup()
 
         # Optional application specific data to be added to the batch table for this object
-        self.batchtable_data = None
+        self.batchtable_data = {}
 
         # A Bounding Volume Box object
         self.box = None
@@ -58,6 +58,14 @@ class Feature(object):
         :return: a dictionary
         """
         return self.batchtable_data
+
+    def add_batchtable_data(self, key, data):
+        """
+        Add an attribute to the batch table data of this feature.
+        :param key: the name of the attribute
+        :param data: the data
+        """
+        self.batchtable_data[key] = data
 
     def get_centroid(self):
         """
