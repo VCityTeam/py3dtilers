@@ -17,11 +17,12 @@ Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtile
 
 ## CLI Features
 
-- [ObjTiler](./py3dtilers/ObjTiler): converts OBJ files to a 3D Tiles tileset
-- [GeojsonTiler](./py3dtilers/GeojsonTiler): converts GeoJson files to a 3D Tiles tileset
-- [IfcTiler](./py3dtilers/IfcTiler): converts IFC files to a 3D Tiles tileset
-- [CityTiler](./py3dtilers/CityTiler): converts CityGML features (e.g buildings, water bodies, terrain...) extracted from a 3dCityDB database to a 3D Tiles tileset
-- [TilesetReader](./py3dtilers/TilesetReader): read, merge or transform 3DTiles tilesets
+- [Common features](./py3dtilers/Common#common-module): features shared by all tilers
+- [ObjTiler](./py3dtilers/ObjTiler#obj-tiler): converts OBJ files to a 3D Tiles tileset
+- [GeojsonTiler](./py3dtilers/GeojsonTiler#geojson-tiler): converts GeoJson files to a 3D Tiles tileset
+- [IfcTiler](./py3dtilers/IfcTiler#ifc-tiler): converts IFC files to a 3D Tiles tileset
+- [CityTiler](./py3dtilers/CityTiler#city-tiler): converts CityGML features (e.g buildings, water bodies, terrain...) extracted from a 3dCityDB database to a 3D Tiles tileset
+- [TilesetReader](./py3dtilers/TilesetReader#tileset-reader): read, merge or transform 3DTiles tilesets
 
 ## Installation from sources
 
@@ -67,6 +68,7 @@ python3.9 -m venv venv
 
 In order to access to the different flavors of tilers, refer to the corresponding readmes to discover their respective usage and features:
 
+- Common features [readme](py3dtilers/Common/README.md)
 - CityTiler [readme](py3dtilers/CityTiler/README.md)
 - GeojsonTiler [readme](py3dtilers/GeojsonTiler/README.md)
 - ObjTiler [readme](py3dtilers/ObjTiler/README.md)
