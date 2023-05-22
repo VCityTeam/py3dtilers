@@ -35,7 +35,7 @@ _See the [CityTiler usage](https://github.com/VCityTeam/py3dtilers/blob/master/p
 To use the Tiler, target your database config file and choose the type `building`:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
 ```
 
 ### Reprojection
@@ -45,7 +45,7 @@ The Tiler allows to change the CRS of the 3DTiles. By default, the CRS of your 3
 In order to change the CRS, you have to specify both __input__ CRS (`--crs_in` flag) and __output__ CRS (`--crs_out` flag). For example, to visualise 3DTiles in Cesium ion (EPSG:4978) with Lyon's CityGML (EPSG:3946), you have to produce 3DTiles with:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
 ```
 
 ### Texture
@@ -53,7 +53,7 @@ citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type
 By default, the 3DTiles are created without texture. To add the texture, just add the flag `--with_texture`:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --with_texture
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --with_texture
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152002003-921dd838-8b51-4901-bcf0-d5819777bb9c.png)  
@@ -70,7 +70,7 @@ Your 3DTiles must be in the __EPSG:4978__ to be viewed in Cesium ion (see [repro
 The tileset is created with the command:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building --crs_in EPSG:3946 --crs_out EPSG:4978
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152802557-6eaa2b1a-ea8f-4ddc-bfb7-6c7545d708e6.png)
@@ -82,7 +82,7 @@ Your 3DTiles can be in any projection (e.g. __EPSG:3946__ or __EPSG:4978__) to b
 The tileset is created with the command:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152807847-c92c1f41-7cc6-46eb-9478-b006ac9b54cd.png)
@@ -94,7 +94,7 @@ Similarly to iTowns, your 3DTiles can be in any projection (e.g. __EPSG:3946__ o
 The tileset is created with the command:
 
 ```bash
-citygml-tiler --db_config_path py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
+citygml-tiler -i py3dtilers/CityTiler/CityTilerDBConfig.yml --type building
 ```
 
 ![image](https://user-images.githubusercontent.com/32875283/152802714-141f0697-3553-4467-b85f-60fb1b7f1312.png)
