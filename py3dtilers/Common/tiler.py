@@ -134,6 +134,11 @@ class Tiler():
                                  type=str,
                                  help='If present, exlude the features which have their ID in the list.')
 
+        self.parser.add_argument('--as_lods',
+                                 dest='as_lods',
+                                 action='store_true',
+                                 help='When used, the inputs are used as LODs.')
+
     def parse_command_line(self):
         self.args = self.parser.parse_args()
 
@@ -231,7 +236,7 @@ class Tiler():
                 print("No feature left, exiting")
                 sys.exit(1)
             print("Distribution of the", len(feature_list), "feature(s)...")
-        groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max()).get_groups_as_list()
+        groups = Groups(feature_list, self.args.loa, self.get_kd_tree_max(), self.args.as_lods).get_groups_as_list()
         feature_list.delete_features_ref()
         return self.create_tileset_from_groups(groups, extension_name)
 
@@ -245,7 +250,10 @@ class Tiler():
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
 
-        tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors, self.args.texture_lods)
+        if self.args.as_lods:
+            tree = LodTree.vertical_hierarchy(groups, geometric_errors)
+        else:
+            tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors, self.args.texture_lods)
 
         self.create_output_directory()
         return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
