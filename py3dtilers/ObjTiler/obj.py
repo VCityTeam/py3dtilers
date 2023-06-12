@@ -59,8 +59,8 @@ class Obj(Feature):
             for i in range(0, length, 9):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i, i + 9, 3)]
                 triangles.append(triangle)
-        # Contains normals and vertex positions
-        elif vertex_format == 'N3F_V3F':
+        # Contains normals and vertex positions or vertex colors and positions
+        elif vertex_format == 'N3F_V3F' or vertex_format == 'C3F_V3F':
             for i in range(0, length, 18):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i + 3, i + 21, 6)]
                 triangles.append(triangle)
@@ -78,6 +78,14 @@ class Obj(Feature):
                 triangles.append(triangle)
                 uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 24, 8)]
                 uvs.append(uv)
+        # Contains colors, vertex positions and normals
+        elif vertex_format == 'C3F_N3F_V3F':
+            for i in range(0, length, 27):
+                triangle = [np.array(vertices[n:n + 3]) for n in range(i + 6, i + 33, 9)]
+                triangles.append(triangle)
+                uv = [np.array([vertices[n], 1 - vertices[n + 1]]) for n in range(i, i + 27, 9)]
+                uvs.append(uv)
+        # Contains texture/vertex positions, colors and normals
         elif vertex_format == 'T2F_C3F_N3F_V3F':
             for i in range(0, length, 33):
                 triangle = [np.array(vertices[n:n + 3]) for n in range(i + 8, i + 41, 11)]
