@@ -14,8 +14,8 @@ and the geometric data in the surface_geometry table
 - the surface_geometry table contains the geometry of all objects
 
 """
-from py3dtiles import TemporalBatchTable, TemporalBoundingVolume
-from py3dtiles import temporal_extract_bounding_dates
+from temporal_extension import TemporalBatchTable, TemporalBoundingVolume
+from temporal_extension import temporal_extract_bounding_dates
 from .citym_cityobject import CityMCityObject, CityMCityObjects
 from .database_accesses_batch_table_hierarchy import create_batch_table_hierarchy
 

@@ -4,7 +4,7 @@ from pathlib import Path
 import psycopg2
 import testing.postgresql
 
-from py3dtiles import TemporalBoundingVolume
+from temporal_extension import TemporalBoundingVolume
 
 from py3dtilers.CityTiler.temporal_graph import TemporalGraph
 from py3dtilers.CityTiler.CityTemporalTiler import CityTemporalTiler
@@ -96,12 +96,12 @@ class Test_Tile(unittest.TestCase):
 
         tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-        tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+        # tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
 
         temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
-        tile_set.add_extension(temporal_tile_set)
+        # tile_set.add_extension(temporal_tile_set)
 
-        tile_set.write_as_json(city_temp_tiler.args.output_dir)
+        tile_set.write_as_json(Path(city_temp_tiler.args.output_dir, 'tileset.json'))
 
 
 if __name__ == '__main__':
