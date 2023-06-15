@@ -156,6 +156,8 @@ class FromGeometryTreeToTileset():
             }
             if with_texture:
                 content['uv'] = feature.geom.getDataArray(0)
+            if feature.has_vertex_colors:
+                content['vertex_color'] = feature.geom.getDataArray(int(with_texture))
             arrays.append(content)
 
         # GlTF uses a y-up coordinate system whereas the geographical data (stored
