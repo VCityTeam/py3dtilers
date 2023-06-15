@@ -30,6 +30,8 @@ class Feature(object):
 
         self.material_index = 0
 
+        self.has_vertex_colors = False
+
         self.set_id(id)
 
     def set_id(self, id):
