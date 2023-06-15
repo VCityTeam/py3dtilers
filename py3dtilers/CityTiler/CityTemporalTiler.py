@@ -1,10 +1,10 @@
 import sys
 
-from py3dtiles import TemporalBoundingVolume
-from py3dtiles import TemporalTileSet
-from py3dtiles import TemporalTransaction
-from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
-from py3dtiles import TriangleSoup
+from temporal_extension import TemporalBoundingVolume
+from temporal_extension import TemporalTileSet
+from temporal_extension import TemporalTransaction
+from temporal_extension import TemporalPrimaryTransaction, TemporalTransactionAggregate
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 
 from .temporal_utils import debug_msg
 from .temporal_graph import TemporalGraph, Edge

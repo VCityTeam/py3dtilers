@@ -1,5 +1,6 @@
 import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
+from py3dtiles.tileset import BoundingVolumeBox
 from typing import List
 from ..Color import ColorConfig
 
@@ -102,7 +103,7 @@ class Feature(object):
         Set the BoundingVolumeBox of this feature from its triangles.
         Also set the centroid.
         """
-        bbox = self.geom.getBbox()
+        bbox = self.geom.get_bbox()
         self.box = BoundingVolumeBox()
         self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
 
