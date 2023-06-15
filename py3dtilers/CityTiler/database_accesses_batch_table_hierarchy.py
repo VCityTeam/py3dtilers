@@ -1,6 +1,6 @@
 import itertools
 
-from py3dtiles import BatchTableHierarchy
+from py3dtiles.tileset.extension import BatchTableHierarchy
 from ..Common import TreeWithChildrenAndParent
 
 

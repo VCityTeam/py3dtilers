@@ -1,7 +1,7 @@
 import string
 import json
 import os
-from py3dtiles import GlTFMaterial
+from py3dtiles.tileset.content.gltf_material import GlTFMaterial
 
 
 class ColorConfig():
@@ -32,8 +32,8 @@ class ColorConfig():
                 self.color_dict = content['color_dict'] if 'color_dict' in content else self.color_dict
             except FileNotFoundError:
                 print("The config file", config_path, "wasn't found.")
-        self.min_color_code = self.to_material(self.min_color).rgba[:3]
-        self.max_color_code = self.to_material(self.max_color).rgba[:3]
+        self.min_color_code = self.to_material(self.min_color).rgb[:3]
+        self.max_color_code = self.to_material(self.max_color).rgb[:3]
 
     def to_material(self, color):
         """
