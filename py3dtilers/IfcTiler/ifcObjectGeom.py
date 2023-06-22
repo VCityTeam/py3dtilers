@@ -181,7 +181,7 @@ class IfcObjectsGeom(FeatureList):
 
         buildings = ifc_file.by_type('IfcBuilding') 
         dictObjByType = dict()
-
+        slabs = ifc_file.by_type('IfcSlab')
         i = 1
 
         for building in buildings:
@@ -194,7 +194,7 @@ class IfcObjectsGeom(FeatureList):
                 logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
                 obj = IfcObjectGeom(element, with_BTH=with_BTH)
                 if obj.hasGeom():
-                    if not (element.is_a() in dictObjByType):
+                    if not (element.is_a()+building.GlobalId in dictObjByType):
                         dictObjByType[element.is_a()+building.GlobalId] = IfcObjectsGeom()
                     if obj.material:
                         obj.material_index = dictObjByType[element.is_a()+building.GlobalId].get_material_index(obj.material)
