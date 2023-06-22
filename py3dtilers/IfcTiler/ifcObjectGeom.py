@@ -7,6 +7,7 @@ from py3dtiles import GlTFMaterial
 from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
 from py3dtiles import BatchTableHierarchy
+import ifcopenshell.util.element
 
 
 class IfcObjectGeom(Feature):
@@ -29,11 +30,9 @@ class IfcObjectGeom(Feature):
     def getParentsInIfc(self, ifcObject):
         self.parents = list()
         while ifcObject:
-            ifcParent = None
-            if hasattr(ifcObject, "ContainedInStructure"):
-                if ifcObject.ContainedInStructure:
-                    ifcParent = ifcObject.ContainedInStructure[0].RelatingStructure
-            elif hasattr(ifcObject, "Decomposes"):
+            ifcParent = ifcopenshell.util.element.get_container(ifcObject)
+
+            if not(ifcParent) and hasattr(ifcObject, "Decomposes"):
                 if len(ifcObject.Decomposes) > 0:
                     ifcParent = ifcObject.Decomposes[0].RelatingObject
 
@@ -180,26 +179,30 @@ class IfcObjectsGeom(FeatureList):
         """
         ifc_file = ifcopenshell.open(path_to_file)
 
-        elements = ifc_file.by_type('IfcElement')
-        nb_element = str(len(elements))
-        logging.info(nb_element + " elements to parse")
-        i = 1
+        buildings = ifc_file.by_type('IfcBuilding') 
         dictObjByType = dict()
-        for element in elements:
-            start_time = time.time()
-            logging.info(str(i) + " / " + nb_element)
-            logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-            obj = IfcObjectGeom(element, with_BTH=with_BTH)
-            if obj.hasGeom():
-                if not (element.is_a() in dictObjByType):
-                    dictObjByType[element.is_a()] = IfcObjectsGeom()
-                if obj.material:
-                    obj.material_index = dictObjByType[element.is_a()].get_material_index(obj.material)
-                else:
-                    obj.material_index = 0
-                dictObjByType[element.is_a()].append(obj)
-            logging.info("--- %s seconds ---" % (time.time() - start_time))
-            i = i + 1
+
+        i = 1
+
+        for building in buildings:
+            elements = ifcopenshell.util.element.get_decomposition(building)
+            nb_element = str(len(elements))
+            logging.info(nb_element + " elements to parse in building :" + building.GlobalId)
+            for element in elements:
+                start_time = time.time()
+                logging.info(str(i) + " / " + nb_element)
+                logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
+                obj = IfcObjectGeom(element, with_BTH=with_BTH)
+                if obj.hasGeom():
+                    if not (element.is_a() in dictObjByType):
+                        dictObjByType[element.is_a()+building.GlobalId] = IfcObjectsGeom()
+                    if obj.material:
+                        obj.material_index = dictObjByType[element.is_a()+building.GlobalId].get_material_index(obj.material)
+                    else:
+                        obj.material_index = 0
+                    dictObjByType[element.is_a()+building.GlobalId].append(obj)
+                logging.info("--- %s seconds ---" % (time.time() - start_time))
+                i = i + 1
         return dictObjByType
 
     @staticmethod
