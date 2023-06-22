@@ -33,7 +33,7 @@ class GeojsonLine(Geojson):
                 else:
                     self.width = GeojsonLine.default_width
             else:
-                print("No propertie called " + width_name + " in feature " + str(Geojson.n_feature) + ". Set width to default value (" + str(Geojson.default_width) + ").")
+                print("No propertie called " + width_name + " in feature " + str(Geojson.n_feature) + ". Set width to default value (" + str(GeojsonLine.default_width) + ").")
                 self.width = GeojsonLine.default_width
 
         if self.is_multi_geom:
@@ -41,6 +41,11 @@ class GeojsonLine(Geojson):
         else:
             coords = self.feature_geometry['coordinates']
 
+        for i in range(0, len(coords) - 1):
+            if(coords[i][0] == coords[i+1][0] and coords[i][1] == coords[i+1][1] and coords[i][2] == coords[i+1][2]):
+                print("Identical value in feature " + str(Geojson.n_feature))
+                return False
+            
         z_name = properties[properties.index('z') + 1]
         self.set_z(coords, z_name)
 
