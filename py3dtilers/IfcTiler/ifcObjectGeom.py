@@ -32,7 +32,7 @@ class IfcObjectGeom(Feature):
         while ifcObject:
             ifcParent = ifcopenshell.util.element.get_container(ifcObject)
 
-            if not(ifcParent) and hasattr(ifcObject, "Decomposes"):
+            if not ifcParent and hasattr(ifcObject, "Decomposes"):
                 if len(ifcObject.Decomposes) > 0:
                     ifcParent = ifcObject.Decomposes[0].RelatingObject
 
@@ -179,9 +179,9 @@ class IfcObjectsGeom(FeatureList):
         """
         ifc_file = ifcopenshell.open(path_to_file)
 
-        buildings = ifc_file.by_type('IfcBuilding') 
+        buildings = ifc_file.by_type('IfcBuilding')
         dictObjByType = dict()
-        slabs = ifc_file.by_type('IfcSlab')
+        _ = ifc_file.by_type('IfcSlab')
         i = 1
 
         for building in buildings:
@@ -194,13 +194,13 @@ class IfcObjectsGeom(FeatureList):
                 logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
                 obj = IfcObjectGeom(element, with_BTH=with_BTH)
                 if obj.hasGeom():
-                    if not (element.is_a()+building.GlobalId in dictObjByType):
-                        dictObjByType[element.is_a()+building.GlobalId] = IfcObjectsGeom()
+                    if not (element.is_a() + building.GlobalId in dictObjByType):
+                        dictObjByType[element.is_a() + building.GlobalId] = IfcObjectsGeom()
                     if obj.material:
-                        obj.material_index = dictObjByType[element.is_a()+building.GlobalId].get_material_index(obj.material)
+                        obj.material_index = dictObjByType[element.is_a() + building.GlobalId].get_material_index(obj.material)
                     else:
                         obj.material_index = 0
-                    dictObjByType[element.is_a()+building.GlobalId].append(obj)
+                    dictObjByType[element.is_a() + building.GlobalId].append(obj)
                 logging.info("--- %s seconds ---" % (time.time() - start_time))
                 i = i + 1
         return dictObjByType
