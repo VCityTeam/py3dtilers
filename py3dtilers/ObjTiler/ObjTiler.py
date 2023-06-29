@@ -22,6 +22,8 @@ class ObjTiler(Tiler):
         Create a tileset from OBJ files.
         :return: a tileset.
         """
+        if self.args.as_lods:
+            self.files.reverse()
         objects = Objs.retrieve_objs(self.files, self.args.with_texture)
 
         return self.create_tileset_from_feature_list(objects)
