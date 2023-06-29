@@ -16,7 +16,7 @@ requirements = (
     'pyyaml',
     'scipy',
     'shapely',
-    'alphashape',
+    'alphashape ==1.2.1',
     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
     'earclip @ git+https://github.com/lionfish0/earclip',
     'Pillow',
