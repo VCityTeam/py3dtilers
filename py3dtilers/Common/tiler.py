@@ -185,7 +185,7 @@ class Tiler():
                             self.files.append(file_path)
             else:
                 self.files.append(path)
-
+        self.files = sorted(self.files)
         if len(self.files) == 0:
             print("No file with supported extensions was found")
             sys.exit(1)
