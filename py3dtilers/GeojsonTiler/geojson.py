@@ -71,8 +71,10 @@ class Geojson(Feature):
             if z.replace('.', '', 1).isdigit():
                 z_value = float(z)
             else:
-                if z in self.feature_properties:
+                if z in self.feature_properties and self.feature_properties[z] is not None:
                     z_value = self.feature_properties[z]
+                elif self.feature_properties[z] is None:
+                    z_value = Geojson.default_z
                 else:
                     print("No propertie called " + z + " in feature " + str(Geojson.n_feature) + ". Set Z to default value (" + str(Geojson.default_z) + ").")
         for coord in coordinates:
