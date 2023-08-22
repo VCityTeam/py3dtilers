@@ -28,7 +28,7 @@ class TilesetMerger():
                             nargs='?',
                             type=str,
                             help='Output directory of the tileset.')
-        args = parser.parse_args()
+        args, _ = parser.parse_known_args()
         if args.output_dir is not None:
             self.output_path = Path(args.output_dir)
         return args.paths

@@ -135,7 +135,7 @@ class Tiler():
                                  help='If present, exlude the features which have their ID in the list.')
 
     def parse_command_line(self):
-        self.args = self.parser.parse_args()
+        self.args, _ = self.parser.parse_known_args()
 
         if self.args.paths is None or len(self.args.paths) == 0:
             if self.default_input_path is not None:
