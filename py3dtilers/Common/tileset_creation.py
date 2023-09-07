@@ -58,6 +58,10 @@ class FromGeometryTreeToTileset():
         :param user_args: the Namespace containing the arguments of the command line.
         :param obj_writer: the writer used to create the OBJ model.
         """
+        if hasattr(user_args, 'height_mult') and user_args.height_mult:
+            for feature_list in node.get_features():
+                feature_list.height_mult_features(user_args.height_mult)
+
         if hasattr(user_args, 'scale') and user_args.scale:
             for feature_list in node.get_features():
                 feature_list.scale_features(user_args.scale, tree_centroid)

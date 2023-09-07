@@ -50,6 +50,12 @@ class Tiler():
                                  nargs='?',
                                  type=float,
                                  help='Scale features by the input factor.')
+        
+        self.parser.add_argument('--height_mult',
+                                 nargs='?',
+                                 type=float,
+                                 default=1.0,
+                                 help='Multipler can be used if height values are in different units. For example, if height is in survey feet, you will need to use 0.3048006096 as multipler.')
 
         self.parser.add_argument('--crs_in',
                                  nargs='?',
