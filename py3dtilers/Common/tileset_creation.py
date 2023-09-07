@@ -19,7 +19,7 @@ class FromGeometryTreeToTileset():
     nb_nodes = 0
 
     @staticmethod
-    def convert_to_tileset(geometry_tree: 'GeometryTree', user_arguments=None, extension_name=None, output_dir=None):
+    def convert_to_tileset(geometry_tree: 'GeometryTree', user_arguments=None, extension_name=None, output_dir=None, with_normals=True):
         """
         Recursively creates a tileset from the nodes of a GeometryTree
         :param geometry_tree: an instance of GeometryTree to transform into 3DTiles.
@@ -39,7 +39,7 @@ class FromGeometryTreeToTileset():
             root_node = geometry_tree.root_nodes[0]
             root_node.set_node_features_geometry(user_arguments)
             offset = FromGeometryTreeToTileset.__transform_node(root_node, user_arguments, tree_centroid, obj_writer=obj_writer)
-            tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, offset, extension_name, output_dir))
+            tileset.add_tile(FromGeometryTreeToTileset.__create_tile(root_node, offset, extension_name, output_dir, with_normals))
             geometry_tree.root_nodes.remove(root_node)
 
         if user_arguments.obj is not None:
@@ -84,7 +84,7 @@ class FromGeometryTreeToTileset():
         return distance if user_args.offset[0] == 'centroid' else offset
 
     @staticmethod
-    def __create_tile(node: 'GeometryNode', transform_offset, extension_name=None, output_dir=None):
+    def __create_tile(node: 'GeometryNode', transform_offset, extension_name=None, output_dir=None, with_normals=True):
         """
         Create a tile from a node. Recursively create tiles from the children of the node.
         :param node: the GeometryNode.
@@ -98,7 +98,7 @@ class FromGeometryTreeToTileset():
         tile = Tile()
         tile.set_geometric_error(node.geometric_error)
 
-        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor)
+        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
         tile.set_content(content_b3dm)
         tile.set_content_uri('tiles/' + f'{FromGeometryTreeToTileset.tile_index}.b3dm')
         tile.write_content(output_dir)
@@ -125,12 +125,12 @@ class FromGeometryTreeToTileset():
 
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
-            tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, [0., 0., 0.], extension_name, output_dir))
+            tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, [0., 0., 0.], extension_name, output_dir, with_normals))
 
         return tile
 
     @staticmethod
-    def __create_tile_content(feature_list: 'FeatureList', extension_name=None, with_texture=False, downsample_factor=1):
+    def __create_tile_content(feature_list: 'FeatureList', extension_name=None, with_texture=False, downsample_factor=1, with_normals=True):
         """
         :param pre_tile: an array containing features of a single tile
 
@@ -174,7 +174,7 @@ class FromGeometryTreeToTileset():
                               0, 1, 0, 0,
                               0, 0, 0, 1])
 
-        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
+        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials, withNormals=with_normals)
 
         # Create a batch table and add the ID of each feature to it
         ids = [feature.get_id() for feature in feature_list]

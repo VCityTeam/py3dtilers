@@ -67,6 +67,11 @@ class Tiler():
                                  dest='with_texture',
                                  action='store_true',
                                  help='Adds texture to 3DTiles when defined')
+        
+        self.parser.add_argument('--no_normals',
+                                 dest='no_normals',
+                                 action='store_true',
+                                 help='If specified, no normals will be written to glTf, useful for Photogrammetry meshes')
 
         self.parser.add_argument('--quality',
                                  nargs='?',
@@ -244,11 +249,12 @@ class Tiler():
         """
         create_loa = self.args.loa is not None
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
+        with_normals = False if self.args.no_normals else True
 
         tree = LodTree(groups, self.args.lod1, create_loa, self.args.with_texture, geometric_errors, self.args.texture_lods)
 
         self.create_output_directory()
-        return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir())
+        return FromGeometryTreeToTileset.convert_to_tileset(tree, self.args, extension_name, self.get_output_dir(), with_normals=with_normals)
 
     def create_output_directory(self):
         """

@@ -178,6 +178,24 @@ Project the features on another CRS. The `crs_in` flag allows to specify the inp
 <tiler> <input> --crs_in EPSG:3946 --crs_out EPSG:4171
 ```
 
+### No Normals
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+Optionally disable creation of normals in 3D tiles:
+
+```bash
+<tiler> <input> --no_normals
+```
+
+This could be very useful for 3D tiles created out Photogrammetry OBJ meshes. If normals are not present, Cesium wil display tiles using flat lighning. 
+
 ### With texture
 
 | Tiler        |                    |
