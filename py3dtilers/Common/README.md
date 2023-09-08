@@ -194,7 +194,25 @@ Optionally disable creation of normals in 3D tiles:
 <tiler> <input> --no_normals
 ```
 
-This could be very useful for 3D tiles created out Photogrammetry OBJ meshes. If normals are not present, Cesium wil display tiles using flat lighning. 
+This could be very useful for 3D tiles created out Photogrammetry OBJ meshes. If normals are not present, Cesium wil display tiles using flat lighning.
+
+### Height units multiplier
+
+| Tiler        |                    |
+| ------------ | ------------------ |
+| CityTiler    | :heavy_check_mark: |
+| ObjTiler     | :heavy_check_mark: |
+| GeojsonTiler | :heavy_check_mark: |
+| IfcTiler     | :heavy_check_mark: |
+| TilesetTiler | :heavy_check_mark: |
+
+Optionally specify units multipler for dataset height values.
+
+```bash
+<tiler> <input> --height_mult 0.3048006096
+```
+
+This is useful if your crs_in is not using meters as units. For example, State Plane coordinate systems in US might use US survey feet as units. Tiling code expects height values to be in meters and all height values in a mesh need to be multiplied by 0.3048006096 to convert meters to US Survey feet.
 
 ### With texture
 
