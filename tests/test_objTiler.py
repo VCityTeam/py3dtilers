@@ -9,7 +9,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None], kd_tree_max=None,
-                     texture_lods=0, keep_ids=[], exclude_ids=[])
+                     texture_lods=0, keep_ids=[], exclude_ids=[], no_normals=False)
 
 
 class Test_Tile(unittest.TestCase):
@@ -19,6 +19,17 @@ class Test_Tile(unittest.TestCase):
         obj_tiler.files = [Path('tests/obj_tiler_data/Cube/cube_1.obj'), Path('tests/obj_tiler_data/Cube/cube_2.obj')]
         obj_tiler.args = get_default_namespace()
         obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/basic_case")
+
+        tileset = obj_tiler.from_obj_directory()
+        if tileset is not None:
+            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+
+    def test_basic_case_no_normals(self):
+        obj_tiler = ObjTiler()
+        obj_tiler.files = [Path('tests/obj_tiler_data/Cube/cube_1.obj'), Path('tests/obj_tiler_data/Cube/cube_2.obj')]
+        obj_tiler.args = get_default_namespace()
+        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/basic_case_no_normals")
+        obj_tiler.args.no_normals = True
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
