@@ -312,6 +312,22 @@ class FeatureList(object):
             feature.set_triangles(new_geom)
             feature.set_box()
 
+    def height_mult_features(self, height_mult):
+        """
+        Converts height to different units by specifing the multiplier
+        :param height_mult: the factor to scale height values
+        """
+        for feature in self.get_features():
+            new_geom = []
+            for triangle in feature.get_geom_as_triangles():
+                scaled_triangle = []
+                for vertex in triangle:
+                    scaled_vertex = np.array([vertex[0], vertex[1], vertex[2] * height_mult])
+                    scaled_triangle.append(scaled_vertex)
+                new_geom.append(scaled_triangle)
+            feature.set_triangles(new_geom)
+            feature.set_box()
+
     def scale_features(self, scale_factor, centroid):
         """
         Rescale the features.

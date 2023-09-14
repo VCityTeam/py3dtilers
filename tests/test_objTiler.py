@@ -35,6 +35,17 @@ class Test_Tile(unittest.TestCase):
         if tileset is not None:
             tileset.write_as_json(Path(obj_tiler.args.output_dir))
 
+    def test_basic_case_height_mult(self):
+        obj_tiler = ObjTiler()
+        obj_tiler.files = [Path('tests/obj_tiler_data/Cube/cube_1.obj'), Path('tests/obj_tiler_data/Cube/cube_2.obj')]
+        obj_tiler.args = get_default_namespace()
+        obj_tiler.args.output_dir = Path("tests/obj_tiler_data/generated_tilesets/basic_case_height_mult")
+        obj_tiler.args.height_mult = 0.3048006096
+
+        tileset = obj_tiler.from_obj_directory()
+        if tileset is not None:
+            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+
     def test_texture(self):
         obj_tiler = ObjTiler()
         obj_tiler.files = [Path('tests/obj_tiler_data/TexturedCube/cube.obj')]
