@@ -50,7 +50,7 @@ class Tiler():
                                  nargs='?',
                                  type=float,
                                  help='Scale features by the input factor.')
-        
+
         self.parser.add_argument('--height_mult',
                                  nargs='?',
                                  type=float,
@@ -73,7 +73,7 @@ class Tiler():
                                  dest='with_texture',
                                  action='store_true',
                                  help='Adds texture to 3DTiles when defined')
-        
+
         self.parser.add_argument('--no_normals',
                                  dest='no_normals',
                                  action='store_true',
