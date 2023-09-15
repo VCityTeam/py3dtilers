@@ -21,6 +21,7 @@ requirements = (
     'earclip @ git+https://github.com/lionfish0/earclip',
     'Pillow',
     'ifcopenshell'
+    'sortedcollections'
 )
 
 dev_requirements = (
