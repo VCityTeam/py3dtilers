@@ -1,5 +1,6 @@
 import numpy as np
 from pyproj import Transformer
+from sortedcollections import OrderedSet
 from py3dtiles import B3dm, BatchTable, BoundingVolumeBox, GlTF, GlTFMaterial
 from py3dtiles import Tile, TileSet
 from ..Texture import Atlas
@@ -189,9 +190,11 @@ class FromGeometryTreeToTileset():
         features_data = [feature.get_batchtable_data() for feature in feature_list]
         if all([feature_data for feature_data in features_data]):
             # Construct a set of all possible batch table keys
-            bt_keys = set()
+            bt_keys = OrderedSet()
             for key_subset in [feature_data.keys() for feature_data in features_data]:
-                bt_keys = bt_keys.union(set(key_subset))
+                for key in key_subset:
+                    bt_keys.add(key)
+
             # add feature data to batch table based on possible keys
             for key in bt_keys:
                 key_data = [feature_data.get(key, None) for feature_data in features_data]
