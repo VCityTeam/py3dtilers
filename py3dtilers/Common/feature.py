@@ -296,7 +296,7 @@ class FeatureList(object):
             feature.set_triangles(new_geom)
             feature.set_box()
 
-    def change_crs(self, transformer, offset = np.array([0, 0, 0])):
+    def change_crs(self, transformer, offset=np.array([0, 0, 0])):
         """
         Project the features into another CRS
         :param transformer: the transformer used to change the crs
