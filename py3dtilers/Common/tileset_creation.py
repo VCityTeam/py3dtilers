@@ -62,6 +62,7 @@ class FromGeometryTreeToTileset():
         if hasattr(user_args, 'height_mult') and user_args.height_mult:
             for feature_list in node.get_features():
                 feature_list.height_mult_features(user_args.height_mult)
+            tree_centroid = np.array([tree_centroid[0], tree_centroid[1], tree_centroid[2] * user_args.height_mult])
 
         if hasattr(user_args, 'scale') and user_args.scale:
             for feature_list in node.get_features():
