@@ -68,23 +68,25 @@ class FromGeometryTreeToTileset():
                 feature_list.scale_features(user_args.scale, tree_centroid)
 
         offset = np.array([0, 0, 0]) if user_args.offset[0] == 'centroid' else np.array(user_args.offset)
+        transform_offset = node.feature_list.get_centroid() + offset
 
         if not user_args.crs_in == user_args.crs_out:
             transformer = Transformer.from_crs(user_args.crs_in, user_args.crs_out)
             tree_centroid = np.array(transformer.transform((tree_centroid + offset)[0], (tree_centroid + offset)[1], (tree_centroid + offset)[2]))
             for feature_list in node.get_features():
                 feature_list.change_crs(transformer, offset)
+            transform_offset = node.feature_list.get_centroid()
 
         distance = node.feature_list.get_centroid() - tree_centroid
 
         for feature_list in node.get_features():
-            feature_list.translate_features(-offset)
+            feature_list.translate_features(-feature_list.get_centroid())
 
         if user_args.obj is not None:
             for leaf in node.get_leaves():
                 # Since the tiles are centered on [0, 0, 0], we use an offset to place the geometries in the OBJ model
                 obj_writer.add_geometries(leaf.feature_list, offset=distance)
-        return distance if user_args.offset[0] == 'centroid' else offset
+        return distance if user_args.offset[0] == 'centroid' else transform_offset
 
     @staticmethod
     def __create_tile(node: 'GeometryNode', transform_offset, extension_name=None, output_dir=None, with_normals=True):
