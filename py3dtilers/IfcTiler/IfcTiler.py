@@ -13,7 +13,7 @@ class IfcTiler(Tiler):
         self.parser.add_argument('--grouped_by',
                                  nargs='?',
                                  default='IfcTypeObject',
-                                 choices=['IfcTypeObject', 'IfcGroup'],
+                                 choices=['IfcTypeObject', 'IfcGroup', 'IfcSpace'],
                                  help='Either IfcTypeObject or IfcGroup (default: %(default)s)'
                                  )
         self.parser.add_argument('--with_BTH',
@@ -41,6 +41,8 @@ class IfcTiler(Tiler):
                 pre_tileset = IfcObjectsGeom.retrievObjByType(ifc_file, with_BTH)
             elif grouped_by == 'IfcGroup':
                 pre_tileset = IfcObjectsGeom.retrievObjByGroup(ifc_file, with_BTH)
+            elif grouped_by == 'IfcSpace':
+                pre_tileset = IfcObjectsGeom.retrievObjBySpace(ifc_file, with_BTH)
 
             objects.extend([objs for objs in pre_tileset.values() if len(objs) > 0])
         groups = Groups(objects).get_groups_as_list()
