@@ -24,7 +24,7 @@ jobs:
         pytest
     - stage: "Markdown link checks"
       language: node_js
-      node_js: 14
+      node_js: 16
       script:
         - npm install --global remark-cli remark-validate-links
         - remark -u validate-links .
