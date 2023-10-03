@@ -73,8 +73,8 @@ class Geojson(Feature):
             else:
                 if z in self.feature_properties:
                     z_value = self.feature_properties[z]
-                else:
-                    print("No propertie called " + z + " in feature " + str(Geojson.n_feature) + ". Set Z to default value (" + str(Geojson.default_z) + ").")
+                # else:
+                #     print("No propertie called " + z + " in feature " + str(Geojson.n_feature) + ". Set Z to default value (" + str(Geojson.default_z) + ").")
         for coord in coordinates:
             if len(coord) < 3:
                 coord.append(z_value)
@@ -106,7 +106,7 @@ class Geojson(Feature):
                 else:
                     self.height = Geojson.default_height
             else:
-                print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
+                # print("No propertie called " + height_name + " in feature " + str(Geojson.n_feature) + ". Set height to default value (" + str(Geojson.default_height) + ").")
                 self.height = Geojson.default_height
 
         if color_attribute[0] in self.feature_properties:
