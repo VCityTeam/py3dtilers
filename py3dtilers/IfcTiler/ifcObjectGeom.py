@@ -11,12 +11,13 @@ import ifcopenshell.util.element
 
 
 class IfcObjectGeom(Feature):
-    def __init__(self, ifcObject, ifcGroup="None", with_BTH=False):
+    def __init__(self, ifcObject, ifcGroup="None", ifcSpace="None", with_BTH=False):
         super().__init__(ifcObject.GlobalId)
         self.ifcClass = ifcObject.is_a()
         self.material = None
         self.ifcGroup = ifcGroup
-        self.setBatchTableData(ifcObject, ifcGroup)
+        self.ifcSpace = ifcSpace
+        self.setBatchTableData(ifcObject, ifcGroup, ifcSpace)
         self.has_geom = self.parse_geom(ifcObject)
         if with_BTH:
             self.getParentsInIfc(ifcObject)
@@ -46,7 +47,7 @@ class IfcObjectGeom(Feature):
             center += np.array([point[0], point[1], 0])
         return center / len(pointList)
 
-    def setBatchTableData(self, ifcObject, ifcGroup):
+    def setBatchTableData(self, ifcObject, ifcGroup, ifcSpace):
         properties = list()
         for prop in ifcObject.IsDefinedBy:
             if hasattr(prop, 'RelatingPropertyDefinition'):
@@ -61,6 +62,7 @@ class IfcObjectGeom(Feature):
         batch_table_data = {
             'classe': self.ifcClass,
             'group': ifcGroup,
+            'space': ifcSpace,
             'name': ifcObject.Name,
             'properties': properties
         }
@@ -249,3 +251,51 @@ class IfcObjectsGeom(FeatureList):
                 obj.material_index = 0
 
         return dictObjByGroup
+
+
+    @staticmethod
+    def retrievObjBySpace(path_to_file, with_BTH):
+        """
+        :param path: a path to an ifc
+        :return: a list of obj grouped by IfcSpace
+        """
+        ifc_file = ifcopenshell.open(path_to_file)
+
+        elements = ifc_file.by_type('IfcElement')
+        nb_element = str(len(elements))
+        logging.info(nb_element + " elements to parse")
+
+        dictObjByIfcSpace = dict()
+        # init a group for objects not in any IfcSpace
+        dictObjByIfcSpace["None"] = IfcObjectsGeom()
+        ifc_spaces = ifc_file.by_type("IFCSPACE")
+        logging.info(f"Found {len(ifc_spaces)} IfcSpace.")
+
+        # init a group for each IfcSpace
+        for s in ifc_spaces:
+            dictObjByIfcSpace[s.id()] = IfcObjectsGeom()
+            obj = IfcObjectGeom(s, with_BTH=with_BTH)
+            if obj.hasGeom():
+                # we put the ifcspace as any other geom in its tile
+                dictObjByIfcSpace[s.id()].append(obj)
+                if obj.material:
+                    obj.material_index = dictObjByIfcSpace[s.id()].get_material_index(obj.material)
+            else:
+                obj.material_index = 0
+
+        # Iterate over all elements, and attribute them to spaces when we can
+        for e in elements:
+            container = ifcopenshell.util.element.get_container(e)
+            if container is None or container.is_a() != 'IfcSpace':
+                ifcspace_id_key = 'None'
+            else:
+                ifcspace_id_key = container.id()
+            obj = IfcObjectGeom(e, with_BTH=with_BTH, ifcSpace=ifcspace_id_key)
+            if obj.hasGeom():
+                group = dictObjByIfcSpace[ifcspace_id_key]
+                group.append(obj)
+                if obj.material:
+                    obj.material_index = group.get_material_index(obj.material)
+            else:
+                obj.material_index = 0
+        return dictObjByIfcSpace
