@@ -8,15 +8,14 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
     'wheel',
-    'networkx',
-    'numpy <1.21,>=1.17',
+    'numpy',
     'psycopg2',
     'pyproj',
     'pywavefront',
     'pyyaml',
-    'scipy ==1.9.3',
+    'scipy==1.9.3',
     'shapely',
-    'alphashape <=1.3.1',
+    'alphashape',
     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
     'earclip @ git+https://github.com/lionfish0/earclip',
     'Pillow',
