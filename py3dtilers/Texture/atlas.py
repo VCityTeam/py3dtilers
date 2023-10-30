@@ -71,8 +71,6 @@ class Atlas():
         while node_root is None:
             node_root = Node(rect)
             axis = it % 2
-            axisX = 1 - axis
-            axisY = 1 - (1 - axis)
             for key, image in textures_sorted:
                 node_root = node_root.insert(image, key)
                 if node_root is None:
@@ -81,8 +79,8 @@ class Atlas():
                     rect = Rectangle(
                         0,
                         0,
-                        int(rect.get_width() + rect.get_width() * 0.5 * axisX),
-                        int(rect.get_height() + rect.get_height() * 0.5 * axisY)
+                        int(rect.get_width() + rect.get_width() * (1 - axis)),
+                        int(rect.get_height() + rect.get_height() * axis)
                     )
                     it += 1
                     break
