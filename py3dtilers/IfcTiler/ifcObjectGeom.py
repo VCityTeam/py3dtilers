@@ -33,11 +33,11 @@ class IfcObjectGeom(Feature):
         while ifcObject:
             ifcParent = ifcopenshell.util.element.get_container(ifcObject)
 
-            if not(ifcParent):
-                if hasattr(ifcObject, "Decomposes") :
+            if not ifcParent:
+                if hasattr(ifcObject, "Decomposes"):
                     if len(ifcObject.Decomposes) > 0:
                         ifcParent = ifcObject.Decomposes[0].RelatingObject
-                if hasattr(ifcObject,"VoidsElements") :
+                if hasattr(ifcObject, "VoidsElements"):
                     if len(ifcObject.VoidsElements) > 0:
                         ifcParent = ifcObject.VoidsElements[0].RelatingBuildingElement
             if ifcParent:
@@ -135,17 +135,17 @@ class IfcObjectsGeom(FeatureList):
             parents = dict()
 
             for obj in objects:
-                if(not any(d.get('name') == obj.ifcClass for d in resulting_bth.attributes['classes'])):
+                if not any(d.get('name') == obj.ifcClass for d in resulting_bth.attributes['classes']):
                     resulting_bth.add_class(obj.ifcClass, {'GUID'})
                 if obj.parents:
                     hierarchy.addNodeToParent(obj.id, obj.parents[0]['id'])
                 i = 1
                 for parent in obj.parents:
-                    if(i<len(obj.parents)):
+                    if i < len(obj.parents):
                         hierarchy.addNodeToParent(obj.parents[i - 1]['id'], obj.parents[i]['id'])
                     if parent['id'] not in parents:
                         parents[parent['id']] = parent
-                    if(not any(d.get('name') == parent['ifcClass'] for d in resulting_bth.attributes['classes'])):
+                    if not any(d.get('name') == parent['ifcClass'] for d in resulting_bth.attributes['classes']):
                         resulting_bth.add_class(parent['ifcClass'], {'GUID'})
                     i += 1
 
@@ -255,7 +255,6 @@ class IfcObjectsGeom(FeatureList):
                 obj.material_index = 0
 
         return dictObjByGroup
-
 
     @staticmethod
     def retrievObjBySpace(path_to_file, with_BTH):
