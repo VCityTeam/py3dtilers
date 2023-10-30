@@ -124,7 +124,10 @@ class Node(object):
         self.fillAtlasImage(atlasImg, features_with_id_key)
         atlas_id = 'ATLAS_' + str(tile_number) + Texture.format
 
-        atlasImg = atlasImg.resize((int(atlasImg.width / downsample_factor), int(atlasImg.height / downsample_factor)))
+        if downsample_factor != 1:
+            width = 1 << (int(atlasImg.width / downsample_factor) - 1).bit_length()
+            height = 1 << (int(atlasImg.height / downsample_factor) - 1).bit_length()
+            atlasImg = atlasImg.resize((width, height))
         atlasImg.save(Path(Texture.folder, 'tiles', atlas_id), quality=Texture.quality, compress_level=Texture.compress_level)
         return atlas_id
 
