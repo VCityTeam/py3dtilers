@@ -65,7 +65,7 @@ class Atlas():
         # where this does not work, since this creates a square.
         sizeOfAtlas = self.multipleOf2(np.sqrt(surfaceAtlas))
 
-        rect = Rectangle(0, 0, (sizeOfAtlas // 2) + 1, (sizeOfAtlas // 2) + 1)
+        rect = Rectangle(0, 0, sizeOfAtlas, sizeOfAtlas)
         node_root = None
         it = 0
         while node_root is None:
