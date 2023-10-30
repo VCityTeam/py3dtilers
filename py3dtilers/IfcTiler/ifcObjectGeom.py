@@ -33,10 +33,13 @@ class IfcObjectGeom(Feature):
         while ifcObject:
             ifcParent = ifcopenshell.util.element.get_container(ifcObject)
 
-            if not ifcParent and hasattr(ifcObject, "Decomposes"):
-                if len(ifcObject.Decomposes) > 0:
-                    ifcParent = ifcObject.Decomposes[0].RelatingObject
-
+            if not ifcParent:
+                if hasattr(ifcObject, "Decomposes"):
+                    if len(ifcObject.Decomposes) > 0:
+                        ifcParent = ifcObject.Decomposes[0].RelatingObject
+                if hasattr(ifcObject, "VoidsElements"):
+                    if len(ifcObject.VoidsElements) > 0:
+                        ifcParent = ifcObject.VoidsElements[0].RelatingBuildingElement
             if ifcParent:
                 self.parents.append({'id': ifcParent.GlobalId, 'ifcClass': ifcParent.is_a()})
             ifcObject = ifcParent
@@ -89,9 +92,7 @@ class IfcObjectGeom(Feature):
         indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
         if shape.geometry.materials:
             ifc_material = shape.geometry.materials[0]
-            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
-                                         alpha=ifc_material.transparency if ifc_material.transparency else 1,
-                                         metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
+            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]])
 
         if indexList.size == 0:
             logging.error("Error while creating geom : No triangles found")
@@ -134,16 +135,19 @@ class IfcObjectsGeom(FeatureList):
             parents = dict()
 
             for obj in objects:
-                resulting_bth.add_class(obj.ifcClass, {'GUID'})
+                if not any(d.get('name') == obj.ifcClass for d in resulting_bth.attributes['classes']):
+                    resulting_bth.add_class(obj.ifcClass, {'GUID'})
                 if obj.parents:
                     hierarchy.addNodeToParent(obj.id, obj.parents[0]['id'])
-                i = 0
+                i = 1
                 for parent in obj.parents:
-                    hierarchy.addNodeToParent(obj.parents[i - 1]['id'], obj.parents[i]['id'])
+                    if i < len(obj.parents):
+                        hierarchy.addNodeToParent(obj.parents[i - 1]['id'], obj.parents[i]['id'])
                     if parent['id'] not in parents:
                         parents[parent['id']] = parent
+                    if not any(d.get('name') == parent['ifcClass'] for d in resulting_bth.attributes['classes']):
                         resulting_bth.add_class(parent['ifcClass'], {'GUID'})
-                    i = i + 1
+                    i += 1
 
             objectPosition = {}
             for i, obj in enumerate(objects):
@@ -251,7 +255,6 @@ class IfcObjectsGeom(FeatureList):
                 obj.material_index = 0
 
         return dictObjByGroup
-
 
     @staticmethod
     def retrievObjBySpace(path_to_file, with_BTH):
