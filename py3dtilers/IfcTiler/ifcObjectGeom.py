@@ -90,11 +90,9 @@ class IfcObjectGeom(Feature):
 
         vertexList = np.reshape(np.array(shape.geometry.verts), (-1, 3))
         indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
-        # if shape.geometry.materials:
-        #     ifc_material = shape.geometry.materials[0]
-        #     self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]],
-        #                                  alpha=ifc_material.transparency if ifc_material.transparency else 1,
-        #                                  metallicFactor=ifc_material.specularity if ifc_material.specularity else 1.)
+        if shape.geometry.materials:
+            ifc_material = shape.geometry.materials[0]
+            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]])
 
         if indexList.size == 0:
             logging.error("Error while creating geom : No triangles found")
