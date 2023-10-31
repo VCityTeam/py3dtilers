@@ -3,6 +3,8 @@
 [![Build Status](https://app.travis-ci.com/VCityTeam/py3dtilers.svg?branch=master)](https://app.travis-ci.com/VCityTeam/py3dtilers)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://vcityteam.github.io/py3dtilers/py3dtilers/index.html)
 
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-3818/) [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3918/) [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-31013/) [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3116/)
+
 Py3DTilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/).
 
 Py3DTilers uses [`py3dtiles` python library](https://github.com/VCityTeam/py3dtiles/tree/Tiler) (forked from [Oslandia's py3dtiles](https://gitlab.com/Oslandia/py3dtiles)) for its in memory representation of tilesets.
@@ -26,9 +28,7 @@ Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtile
 
 ## Installation from sources
 
-Py3DTilers works with **Python 3.9**.
-
-You can use a lower version if you don't plan to work with the IfcTiler. Then, comment the line of the [IfcOpenShell in the setup.py](./setup.py#L23).
+See [supported Python versions](#python-3dtiles-tilers)
 
 ### For Unix
 
@@ -36,7 +36,7 @@ Install binary sub-dependencies with your platform package installer e.g. for Ub
 
 ```bash
 apt-get install -y libpq-dev       # required usage of psycopg2 within py3dtilers
-apt-get install python3.9 python3.9-dev         # Python3 version must be 3.9
+apt-get install python3 python3-dev
 ```
 
 Install Py3DTilers in a safe [python virtual environment](https://docs.python.org/3/tutorial/venv.html) (not mandatory yet quite recommended)
@@ -45,21 +45,19 @@ Install Py3DTilers in a safe [python virtual environment](https://docs.python.or
 apt-get install virtualenv git
 git clone https://github.com/VCityTeam/py3dtilers
 cd py3dtilers
-virtualenv -p python3.9 venv
+virtualenv -p python3 venv
 . venv/bin/activate
 (venv)$ pip install -e .
 ```
 
 ### For Windows
 
-Install **python3.9**.
-
 In order to install Py3DTilers from sources use:
 
 ```bash
 git clone https://github.com/VCityTeam/py3dtilers
 cd py3dtilers
-python3.9 -m venv venv
+python3 -m venv venv
 . venv/Scripts/activate
 (venv)$ pip install -e .
 ```

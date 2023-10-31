@@ -36,6 +36,7 @@ prod_requirements = (
     'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -67,10 +68,15 @@ setup(
     author='Université de Lyon',
     author_email='contact@liris.cnrs.fr',
     license='Apache License Version 2.0',
+    python_requires=">=3.8,<=3.11",
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3.5',
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11"
+
     ],
     packages=find_packages(),
     install_requires=requirements,
@@ -93,9 +99,9 @@ setup(
                  ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/default_config.json']
-                ),
+                 ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/citytiler_config.json']
-                )],
+                 )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )
