@@ -1,7 +1,11 @@
 dist: focal
 
+branches:
+  only:
+    - master
+
 addons:
-  postgresql: "12"
+  postgresql: '12'
   apt:
     update: true
     packages:
@@ -9,20 +13,39 @@ addons:
 
 jobs:
   include:
-    - stage: tests
+    - stage: Test Python 3.8
       language: python
-      python: "3.9"
+      python: '3.8'
       install:
-          ### Proceed with the install of py3dtilers per se.
-          # The extra flag installs the dev dependencies, refer to e.g.
-          # https://stackoverflow.com/questions/30239152/specify-extras-require-with-pip-install-e
         - pip install -e .[dev,prod]
-        - python -c 'import ifcopenshell'  # Just to make sure
       script:
-      - |
-        flake8 .
-        pytest
-    - stage: "Markdown link checks"
+        - pytest
+
+    - stage: Test Python 3.9
+      language: python
+      python: '3.9'
+      install:
+        - pip install -e .[dev,prod]
+      script:
+        - pytest
+
+    - stage: Test Python 3.10
+      language: python
+      python: '3.10'
+      install:
+        - pip install -e .[dev,prod]
+      script:
+        - pytest
+
+    - stage: Test Python 3.11
+      language: python
+      python: '3.11'
+      install:
+        - pip install -e .[dev,prod]
+      script:
+        - pytest
+
+    - stage: Markdown link checks
       language: node_js
       node_js: 16
       script:

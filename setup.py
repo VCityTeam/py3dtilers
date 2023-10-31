@@ -8,15 +8,14 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requirements = (
     'wheel',
-    'networkx',
-    'numpy <1.21,>=1.17',
+    'numpy',
     'psycopg2',
     'pyproj',
     'pywavefront',
     'pyyaml',
-    'scipy ==1.9.3',
+    'scipy==1.9.3',
     'shapely',
-    'alphashape <=1.3.1',
+    'alphashape',
     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
     'earclip @ git+https://github.com/lionfish0/earclip',
     'Pillow',
@@ -36,6 +35,7 @@ dev_requirements = (
 prod_requirements = (
     'testing.postgresql @ git+https://github.com/tk0miya/testing.postgresql'
 )
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -68,10 +68,15 @@ setup(
     author='Université de Lyon',
     author_email='contact@liris.cnrs.fr',
     license='Apache License Version 2.0',
+    python_requires=">=3.8,<=3.11",
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3.5',
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11"
+
     ],
     packages=find_packages(),
     install_requires=requirements,
@@ -94,9 +99,9 @@ setup(
                  ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/default_config.json']
-                ),
+                 ),
                 ('py3dtilers/Color',
                  ['py3dtilers/Color/citytiler_config.json']
-                )],
+                 )],
     zip_safe=False  # zip packaging conflicts with Numba cache (#25)
 )
