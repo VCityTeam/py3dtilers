@@ -83,7 +83,9 @@ Useful tutorials:
 
 ## Develop with Py3DTilers
 
-### Running the tests (optional)
+Before commiting, please [run tests](#running-the-tests) and make sure [coding style](#coding-style) is respected.
+
+### Running the tests
 
 After the installation, if you additionally wish to run unit tests, use
 
