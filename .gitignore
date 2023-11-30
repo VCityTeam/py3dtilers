@@ -109,7 +109,7 @@ tileset_reader_output/
 tileset_merger_output/
 
 # Debug OBJs
-*.obj
+/*.obj
 
 # Tests output
 tests/tiler_test_data/generated_tilesets
