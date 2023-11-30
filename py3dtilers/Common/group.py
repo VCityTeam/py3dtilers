@@ -62,7 +62,7 @@ class Groups():
     # Used to put in a same group the features which are in a same 1000 m^3 cube.
     DEFAULT_CUBE_SIZE = 1000
 
-    def __init__(self, feature_list: FeatureList, polygons_path=None, kd_tree_max=500):
+    def __init__(self, feature_list: FeatureList, polygons_path=None, kd_tree_max=500, as_lods=False):
         """
         Distribute the features contained in feature_list into different Group
         The way to distribute the features depends on the parameters
@@ -77,6 +77,8 @@ class Groups():
             self.materials = feature_list.materials
             if polygons_path is not None:
                 self.group_objects_by_polygons(feature_list, polygons_path)
+            elif as_lods:
+                self.group_feature_list(feature_list)
             else:
                 self.group_objects_with_kdtree(feature_list, kd_tree_max)
             self.set_materials(self.materials)
@@ -102,6 +104,13 @@ class Groups():
         :param feature_lists_array: a list of FeatureList
         """
         self.groups = [Group(feature_list) for feature_list in feature_lists_array]
+
+    def group_feature_list(self, feature_list: FeatureList):
+        """
+        Create one Group per Feature of a FeatureList.
+        :param feature_list: a FeatureList
+        """
+        self.groups = [Group(FeatureList([feature])) for feature in feature_list]
 
     def group_objects_with_kdtree(self, feature_list: FeatureList, kd_tree_max=500):
         """

@@ -12,7 +12,7 @@ def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None], kd_tree_max=None,
-                     texture_lods=0, keep_ids=[], exclude_ids=[], no_normals=False)
+                     texture_lods=0, keep_ids=[], exclude_ids=[], no_normals=False, as_lods=False)
 
 
 triangles = [[np.array([1843366, 5174473, 200]),

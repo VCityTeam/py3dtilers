@@ -18,7 +18,7 @@ def get_default_namespace():
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
                      output_dir=None, geometric_error=[None, None, None],
                      split_surfaces=False, add_color=False, kd_tree_max=None, ids=[], texture_lods=0,
-                     keep_ids=[], exclude_ids=[], no_normals=False)
+                     keep_ids=[], exclude_ids=[], no_normals=False, as_lods=False)
 
 
 class Test_Tile(unittest.TestCase):

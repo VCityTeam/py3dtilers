@@ -148,13 +148,13 @@ class Objs(FeatureList):
         """
         objects = list()
 
+        gltfMaterials = []
+        mesh_index = 1
         for obj_file in files:
             print("Reading " + str(obj_file))
             geom = pywavefront.Wavefront(obj_file, collect_faces=True, create_materials=True)
             if len(geom.vertices) == 0:
                 continue
-            gltfMaterials = []
-            mesh_index = 1
 
             for mesh in geom.mesh_list:
                 for mesh_mat in mesh.materials:
