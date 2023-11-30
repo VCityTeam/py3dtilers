@@ -21,6 +21,22 @@ located within the files, using their filename as ID.
 
 This command should produce a directory named `obj_tilesets`.
 
+### Models as LODs
+
+`--as_lods` allows to create a tileset from several OBJ files, where the first file is the least detailled model and the last file the most detailled. It will create a refinement hierarchy from the least detailled model to the most detailled model.
+
+In this example, `model_0.obj` is the least detailled model:
+
+```bash
+obj-tiler -i model_0.obj model_1.obj model_2.obj --as_lods --geometric_error 1 4 8
+```
+
+If OBJ files are in the correct order in the folder:
+
+```bash
+obj-tiler -i <path>\objs\ --as_lods --geometric_error 1 4 8
+```
+
 ## Shared Tiler features
 
 See [Common module features](../Common/README.md#common-tiler-features).
