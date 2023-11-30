@@ -44,8 +44,7 @@ class LodTree(GeometryTree):
 
     @staticmethod
     def vertical_hierarchy(groups: 'Groups', geometric_errors=[None]):
-        node = GeometryNode(groups[0].feature_list, geometric_errors[0])
-        root_node = node
+        root_node = GeometryNode(groups[0].feature_list, geometric_errors[0])
         for i in range(1, len(groups)):
             geometric_error = geometric_errors[i] if i < len(geometric_errors) else None
             node = GeometryNode(groups[i].feature_list, geometric_error)
