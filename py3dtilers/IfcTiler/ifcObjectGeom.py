@@ -132,12 +132,13 @@ class IfcObjectsGeom(FeatureList):
     def create_batch_table_extension(extension_name, ids, objects):
         if extension_name == "batch_table_hierarchy":
             resulting_bth = BatchTableHierarchy()
+            bth_classes = {}
             hierarchy = TreeWithChildrenAndParent()
             parents = dict()
 
             for obj in objects:
-                if not any(d.get('name') == obj.ifcClass for d in resulting_bth.attributes['classes']):
-                    resulting_bth.add_class(obj.ifcClass, {'GUID'})
+                if obj.ifcClass not in bth_classes:
+                    bth_classes[obj.ifcClass] = resulting_bth.add_class(obj.ifcClass, {'GUID'})
                 if obj.parents:
                     hierarchy.addNodeToParent(obj.id, obj.parents[0]['id'])
                 i = 1
@@ -146,8 +147,8 @@ class IfcObjectsGeom(FeatureList):
                         hierarchy.addNodeToParent(obj.parents[i - 1]['id'], obj.parents[i]['id'])
                     if parent['id'] not in parents:
                         parents[parent['id']] = parent
-                    if not any(d.get('name') == parent['ifcClass'] for d in resulting_bth.attributes['classes']):
-                        resulting_bth.add_class(parent['ifcClass'], {'GUID'})
+                    if parent['ifcClass'] not in bth_classes:
+                        bth_classes[parent['ifcClass']] = resulting_bth.add_class(parent['ifcClass'], {'GUID'})
                     i += 1
 
             objectPosition = {}
@@ -157,16 +158,16 @@ class IfcObjectsGeom(FeatureList):
                 objectPosition[parent] = i + len(objects)
 
             for obj in objects:
-                resulting_bth.add_class_instance(
-                    obj.ifcClass,
+                obj_class = bth_classes[obj.ifcClass]
+                obj_class.add_instance(
                     {
                         'GUID': obj.id
                     },
                     [objectPosition[id_parent] for id_parent in hierarchy.getParents(obj.id)]
                 )
             for parent in parents.items():
-                resulting_bth.add_class_instance(
-                    parent[1]["ifcClass"],
+                parent_class = bth_classes[parent[1]["ifcClass"]]
+                parent_class.add_instance(
                     {
                         'GUID': parent[1]["id"]
                     },
