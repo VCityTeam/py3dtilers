@@ -262,7 +262,7 @@ class FeatureList(object):
         :return: bool
         """
         for mat in self.materials:
-            if (mat.rgba == material.rgba).all():
+            if (mat.rgb == material.rgb).all():
                 return True
         return False
 
@@ -275,7 +275,7 @@ class FeatureList(object):
         """
         i = 0
         for mat in self.materials:
-            if (mat.rgba == material.rgba).all():
+            if (mat.rgb == material.rgb).all():
                 return i
             i = i + 1
         self.add_material(material)

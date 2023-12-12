@@ -150,7 +150,7 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = dict()
         if with_texture:
             tile_atlas = Atlas(feature_list, downsample_factor)
-            materials = [GlTFMaterial(textureUri='./' + tile_atlas.id)]
+            materials = [GlTFMaterial(texture_uri='./' + tile_atlas.id)]
         for feature in feature_list:
             mat_index = feature.material_index
             if mat_index not in seen_mat_indexes and not with_texture:
@@ -165,7 +165,7 @@ class FromGeometryTreeToTileset():
             if with_texture:
                 content['uv'] = feature.geom.get_data_array(0)
             if feature.has_vertex_colors:
-                content['vertex_color'] = feature.geom.getDataArray(int(with_texture))
+                content['vertex_color'] = feature.geom.get_data_array(int(with_texture))
             arrays.append(content)
 
         # GlTF uses a y-up coordinate system whereas the geographical data (stored
@@ -182,7 +182,7 @@ class FromGeometryTreeToTileset():
                               0, 1, 0, 0,
                               0, 0, 0, 1])
 
-        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials, withNormals=with_normals)
+        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
 
         # Create a batch table and add the ID of each feature to it
         ids = [feature.get_id() for feature in feature_list]

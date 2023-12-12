@@ -1,6 +1,7 @@
 import os
 
-from py3dtiles import TriangleSoup, GlTFMaterial
+from py3dtiles.tileset.content.gltf_material import GlTFMaterial
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 from ..Common import FeatureList, Feature
 from ..Texture import Texture
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pywavefront
-from py3dtiles import GlTFMaterial
+from py3dtiles.tileset.content.gltf_material import GlTFMaterial
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -165,7 +165,7 @@ class Objs(FeatureList):
                     mesh_index += 1
                     if obj.parse_geom(mesh_mat, with_texture):
                         objects.append(obj)
-                    material = GlTFMaterial(rgb=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2]], alpha=1. - mesh_mat.diffuse[3], metallicFactor=0.)
+                    material = GlTFMaterial(rgb=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2]], alpha=1. - mesh_mat.diffuse[3], metallic_factor=0.)
                     gltfMaterials.append(material)
 
         fList = Objs(objects)

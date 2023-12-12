@@ -3,10 +3,10 @@ import logging
 import time
 import numpy as np
 import ifcopenshell
-from py3dtiles import GlTFMaterial
+from py3dtiles.tileset.content.gltf_material import GlTFMaterial
 from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
-from py3dtiles import BatchTableHierarchy
+from py3dtiles.tileset.extension import BatchTableHierarchy
 import ifcopenshell.util.element
 
 
