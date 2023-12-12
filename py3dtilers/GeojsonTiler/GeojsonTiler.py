@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 
 from .geojson import Geojson, Geojsons
 from .geojson_line import GeojsonLine
@@ -192,7 +193,7 @@ def main():
     tileset = geojson_tiler.from_geojson_directory(properties, geojson_tiler.args.is_roof, geojson_tiler.args.add_color, geojson_tiler.args.keep_properties)
     if tileset is not None:
         print("Writing tileset in", geojson_tiler.get_output_dir())
-        tileset.write_as_json(geojson_tiler.get_output_dir())
+        tileset.write_as_json(Path(geojson_tiler.get_output_dir(), 'tileset.json'))
 
 
 if __name__ == '__main__':
