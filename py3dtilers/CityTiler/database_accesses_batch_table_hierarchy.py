@@ -117,8 +117,12 @@ def create_batch_table_hierarchy(cursor, buildingIds):
     # and we can proceed with the construction of the BTH
 
     # Within the BTH, create each required classes (as types)
+    bth_classes = {}
     for c in classes:
-        resulting_bth.add_class(classDict[c][0], classDict[c][1])
+        if classDict[c][0] not in bth_classes:
+            print('Adding', classDict[c][0])
+            bth_classes[classDict[c][0]] = resulting_bth.add_class(classDict[c][0], classDict[c][1])
+    print('Classes', bth_classes)
 
     # Build the positioning index within the constructed BatchTableHierarchy
     objectPosition = {}
@@ -134,8 +138,8 @@ def create_batch_table_hierarchy(cursor, buildingIds):
     for obj in itertools.chain(geometricInstances,
                                buildindsAndSubParts):
         object_id = obj['internalId']
-        resulting_bth.add_class_instance(
-            classDict[obj['class']][0],
+        object_class = bth_classes[classDict[obj['class']][0]]
+        object_class.add_instance(
             obj,
             [objectPosition[id] for id in hierarchy.getParents(object_id)])
 
