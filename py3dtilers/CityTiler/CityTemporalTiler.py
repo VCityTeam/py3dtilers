@@ -317,7 +317,7 @@ def main():
     # Construct the temporal tile set
     tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+    tile_set.root_tile.get_bounding_volume().add_extension(TemporalBoundingVolume())
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
