@@ -4,7 +4,7 @@ from pathlib import Path
 
 from py3dtilers.TilesetReader.TilesetReader import TilesetTiler
 from py3dtilers.TilesetReader.TilesetMerger import TilesetMerger
-
+from py3dtilers.TilesetReader.reader_utils import read_tilesets
 
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
@@ -83,7 +83,7 @@ class Test_Tile(unittest.TestCase):
     def test_merger(self):
         merger = TilesetMerger(output_path="tests/tileset_reader_test_data/generated_tilesets/merger/")
         paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
-        tilesets = merger.reader.read_tilesets(paths)
+        tilesets = read_tilesets(paths)
 
         tileset, root_tiles_paths = merger.merge_tilesets(tilesets, paths)
         merger.write_merged_tileset(tileset, root_tiles_paths)
