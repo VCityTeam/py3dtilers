@@ -2,6 +2,8 @@ import os
 
 from py3dtiles.tileset.content.gltf_material import GlTFMaterial
 from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
+
+from .reader_utils import triangle_soup_from_gltf
 from ..Common import FeatureList, Feature
 from ..Texture import Texture
 
@@ -71,7 +73,7 @@ class TileToFeatureList(FeatureList):
                 uri = gltf.header['images'][gltf.header['textures'][index]['source']]['uri']
             else:
                 uri = None
-            gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba, textureUri=uri))
+            gltf_materials.append(GlTFMaterial(metallic_factor, roughness_factor, rgba[:3], rgba[3], texture_uri=uri))
         return gltf_materials
 
     def __convert_triangle_soup(self, triangle_soup, materials):
@@ -118,14 +120,15 @@ class TileToFeatureList(FeatureList):
 
         :return: a FeatureList
         """
-        gltf = tile.get_content().body.glTF
+        content = tile.get_or_fetch_content(self.tileset_path)
+        gltf = content.body.gltf
 
         materials = self.__find_materials(gltf)
-        ts = TriangleSoup.from_glTF(gltf)
+        ts = triangle_soup_from_gltf(gltf)
         feature_list = self.__convert_triangle_soup(ts, materials)
         feature_list.add_materials(materials)
 
-        bt_attributes = tile.get_content().body.batch_table.attributes
+        bt_attributes = content.body.batch_table.header.data
         [feature.set_batchtable_data(bt_attributes) for feature in feature_list]
 
         return feature_list

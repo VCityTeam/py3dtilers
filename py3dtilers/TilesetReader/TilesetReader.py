@@ -2,9 +2,9 @@ import sys
 import os
 from pathlib import Path
 
-from py3dtiles import TilesetReader
 from .tileset_tree import TilesetTree
 from .TilesetMerger import TilesetMerger
+from .reader_utils import read_tilesets
 from ..Common import Tiler, FromGeometryTreeToTileset
 
 
@@ -13,7 +13,6 @@ class TilesetTiler(Tiler):
     def __init__(self):
         super().__init__()
         self.tileset_of_root_tiles = list()
-        self.reader = TilesetReader()
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -65,6 +64,8 @@ class TilesetTiler(Tiler):
         :return: a TileSet
         """
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
+        for tile in tileset.root_tile.children:
+            print(tile.content_uri)
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
         return self.create_tileset_from_feature_list(tileset_tree)
 
@@ -76,7 +77,7 @@ class TilesetTiler(Tiler):
 
         :return: a TileSet
         """
-        tilesets = self.reader.read_tilesets(self.files)
+        tilesets = read_tilesets(self.files)
         tileset, self.tileset_of_root_tiles = TilesetMerger.merge_tilesets(tilesets, self.files)
         return tileset
 
