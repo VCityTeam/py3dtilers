@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 
 from ..Common import Tiler
 from .citym_cityobject import CityMCityObjects
@@ -157,7 +158,7 @@ def main():
     tileset.add_asset_extras(origin)
 
     cursor.close()
-    tileset.write_as_json(city_tiler.get_output_dir())
+    tileset.write_as_json(Path(city_tiler.get_output_dir(), 'tileset.json'))
 
 
 if __name__ == '__main__':

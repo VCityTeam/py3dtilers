@@ -60,7 +60,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_lod1(self):
         feature = Feature("lod1")
@@ -75,7 +75,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_loa(self):
         feature = Feature("loa")
@@ -89,7 +89,7 @@ class Test_Tile(unittest.TestCase):
         tiler.args.loa = Path('tests/tiler_test_data/loa_polygons')
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_change_crs(self):
         feature = Feature("change_crs")
@@ -104,7 +104,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_offset(self):
         feature = Feature("offset")
@@ -119,7 +119,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_offset_centroid(self):
         feature = Feature("offset_centroid")
@@ -134,7 +134,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_scale(self):
         feature = Feature("scale")
@@ -149,7 +149,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_obj(self):
         feature = Feature("obj")
@@ -164,7 +164,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_geometric_error(self):
         feature = Feature("scale")
@@ -181,7 +181,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_kd_tree_max(self):
         features = list()
@@ -199,7 +199,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_with_png_texture(self):
         feature = Feature("with_png_texture")
@@ -219,7 +219,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_with_jpeg_texture(self):
         feature = Feature("with_jpeg_texture")
@@ -239,7 +239,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_texture_lods(self):
         feature = Feature("texture_lods")
@@ -258,7 +258,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_keep_ids(self):
         features = list()
@@ -276,7 +276,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_exclude_ids(self):
         features = list()
@@ -294,7 +294,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.create_tileset_from_feature_list(feature_list)
 
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
 
 if __name__ == '__main__':

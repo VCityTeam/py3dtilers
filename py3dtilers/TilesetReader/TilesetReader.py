@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 
 from py3dtiles import TilesetReader
 from .tileset_tree import TilesetTree
@@ -88,7 +89,7 @@ def main():
     tileset = tiler.read_and_merge_tilesets()
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_as_json(tiler.get_output_dir())
+    tileset.write_as_json(Path(tiler.get_output_dir(), 'tileset.json'))
 
 
 if __name__ == '__main__':

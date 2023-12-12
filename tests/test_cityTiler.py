@@ -60,7 +60,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_basic_case")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_water_basic_case(self):
 
@@ -70,7 +70,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/water_basic_case")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_relief_basic_case(self):
 
@@ -80,7 +80,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/relief_basic_case")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_lod1(self):
 
@@ -91,7 +91,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.lod1 = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_loa(self):
 
@@ -102,7 +102,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.loa = Path("tests/city_tiler_test_data/polygons")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_loa_lod1(self):
 
@@ -114,7 +114,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.lod1 = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_BTH(self):
 
@@ -125,7 +125,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/building_BTH")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
         CityMBuildings.with_bth = False
 
     def test_building_split_surface(self):
@@ -137,7 +137,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.split_surfaces = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_relief_split_surface(self):
 
@@ -148,7 +148,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.split_surfaces = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_water_split_surface(self):
 
@@ -159,7 +159,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.split_surfaces = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_texture(self):
 
@@ -170,7 +170,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.with_texture = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_texture_lods(self):
 
@@ -182,7 +182,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.texture_lods = 5
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_relief_texture(self):
 
@@ -193,7 +193,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.with_texture = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_bridge(self):
 
@@ -203,7 +203,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.output_dir = Path("tests/city_tiler_test_data/generated_tilesets/bridge_basic_case")
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_bridge_split_surface(self):
 
@@ -214,7 +214,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.split_surfaces = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_color(self):
 
@@ -225,7 +225,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.add_color = True
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_building_keep_id(self):
 
@@ -236,7 +236,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.keep_ids = ["BU_69381AS107"]
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_relief_keep_id(self):
 
@@ -247,7 +247,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.keep_ids = ["TIN_8184c814-97b6-4d26-a6f2-03ef4bd6e65d"]
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_waterbody_keep_id(self):
 
@@ -258,7 +258,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.keep_ids = ["a47bd1e2-f63a-450f-b0d4-4ce25798966d"]
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
     def test_bridge_keep_id(self):
 
@@ -269,7 +269,7 @@ class Test_Tile(unittest.TestCase):
         city_tiler.args.keep_ids = ["ID_58ee6b1f-48eb-4907-9c7a-679354adc73f"]
         tileset = city_tiler.from_3dcitydb(self.cursor, objects_type)
 
-        tileset.write_as_json(city_tiler.args.output_dir)
+        tileset.write_as_json(Path(city_tiler.args.output_dir, 'tileset.json'))
 
 
 if __name__ == '__main__':
