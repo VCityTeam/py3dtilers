@@ -317,11 +317,14 @@ def main():
     # Construct the temporal tile set
     tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-    tile_set.root_tile.get_bounding_volume().add_extension(TemporalBoundingVolume())
+    temporal_bv = TemporalBoundingVolume(owner=tile_set.root_tile)
+    temporal_bv.sync_dates()
+    tile_set.root_tile.bounding_volume.extensions[temporal_bv.name] = temporal_bv
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
-    tile_set.add_extension(temporal_tile_set)
+    temporal_tile_set.owner = tile_set
+    tile_set.extensions[temporal_tile_set.name] = temporal_tile_set
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:

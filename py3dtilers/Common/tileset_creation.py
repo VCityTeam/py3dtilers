@@ -106,11 +106,11 @@ class FromGeometryTreeToTileset():
         feature_list = node.feature_list
 
         tile = Tile(geometric_error=node.geometric_error,
-                    content_uri=Path('tiles',f'{FromGeometryTreeToTileset.tile_index}.b3dm'),
+                    content_uri=Path('tiles', f'{FromGeometryTreeToTileset.tile_index}.b3dm'),
                     transform=np.array([[1, 0, 0, 0],
-                            [0, 1, 0, 0],
-                            [0, 0, 1, 0],
-                            [transform_offset[0], transform_offset[1], transform_offset[2], 1]]),
+                                        [0, 1, 0, 0],
+                                        [0, 0, 1, 0],
+                                        [transform_offset[0], transform_offset[1], transform_offset[2], 1]]),
                     refine_mode='REPLACE')
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
@@ -124,8 +124,8 @@ class FromGeometryTreeToTileset():
 
         if extension_name is not None:
             extension = feature_list.__class__.create_bounding_volume_extension(extension_name, None, feature_list)
-            # if extension is not None:
-            #     bounding_box.add_extension(extension)
+            if extension is not None:
+                bounding_box.extensions[extension.name] = extension
 
         tile.bounding_volume = bounding_box
 
@@ -205,8 +205,10 @@ class FromGeometryTreeToTileset():
 
         if extension_name is not None:
             extension = feature_list.__class__.create_batch_table_extension(extension_name, ids, feature_list)
-            # if extension is not None:
-            #     bt.add_extension(extension)
+            if extension is not None:
+                if 'extensions' not in bt.header.data:
+                    bt.header.data['extensions'] = {}
+                bt.header.data['extensions'][extension.name] = extension.to_dict()
 
         # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
