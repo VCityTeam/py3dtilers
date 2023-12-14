@@ -160,7 +160,7 @@ class FromGeometryTreeToTileset():
                 'position': feature.geom.get_position_array(),
                 'normal': feature.geom.get_normal_array(),
                 'bbox': [[float(i) for i in j] for j in feature.geom.get_bbox()],
-                'matIndex': seen_mat_indexes[mat_index] if not with_texture else 0
+                'mat_index': seen_mat_indexes[mat_index] if not with_texture else 0
             }
             if with_texture:
                 content['uv'] = feature.geom.get_data_array(0)
