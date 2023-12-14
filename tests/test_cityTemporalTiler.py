@@ -96,10 +96,13 @@ class Test_Tile(unittest.TestCase):
 
         tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-        # tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+        temporal_bv = TemporalBoundingVolume(owner=tile_set.root_tile)
+        temporal_bv.sync_dates()
+        tile_set.root_tile.bounding_volume.extensions[temporal_bv.name] = temporal_bv
 
         temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
-        # tile_set.add_extension(temporal_tile_set)
+        temporal_tile_set.owner = tile_set
+        tile_set.extensions[temporal_tile_set.name] = temporal_tile_set
 
         tile_set.write_as_json(Path(city_temp_tiler.args.output_dir, 'tileset.json'))
 
