@@ -16,7 +16,7 @@ class TilesetTree(GeometryTree):
 
         root_nodes = list()
         for i, tile in enumerate(root_tile.children):
-            offset = tile.transform[12:15]
+            offset = tile.transform[3][:3]
             root_node, depth = self.tile_to_node(tile, tileset_paths[i], offset, geometric_errors)
             root_nodes.append(root_node)
 
