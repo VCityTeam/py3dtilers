@@ -6,6 +6,7 @@ from py3dtilers.TilesetReader.TilesetReader import TilesetTiler
 from py3dtilers.TilesetReader.TilesetMerger import TilesetMerger
 from py3dtilers.TilesetReader.reader_utils import read_tilesets
 
+
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
                      crs_out='EPSG:3946', offset=[0, 0, 0], with_texture=False, scale=1,
