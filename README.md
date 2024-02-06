@@ -15,7 +15,7 @@ An article that present the tool is available in the ISPRS annals [here](https:/
 
 ## Demo
 
-Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtilers-demo.vcityliris.data.alpha.grandlyon.com/).
+Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtilers.vcityliris.cma.alpha.grandlyon.com/).
 
 ## CLI Features
 
