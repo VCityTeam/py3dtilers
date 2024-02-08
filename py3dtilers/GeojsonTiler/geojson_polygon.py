@@ -33,9 +33,11 @@ class GeojsonPolygon(Geojson):
                 for int_ring in self.feature_geometry["coordinates"][1:]
             ]
 
-            if is_roof:
-                for coord in exterior_ring:
-                    coord[2] -= self.height
+        if is_roof:
+            for coord in exterior_ring:
+                coord[2] -= self.height
+            for coord in interior_rings:
+                coord[2] -= self.height
 
         self.exterior_ring = exterior_ring
         self.interior_rings = interior_rings
