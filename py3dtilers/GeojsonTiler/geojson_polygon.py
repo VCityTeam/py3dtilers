@@ -69,7 +69,6 @@ class GeojsonPolygon(Geojson):
             return polygon[:-1]
 
     def adjust_height(self,ring, height):
-
         """
         Decreases the Z coordinate of each point in a ring by a specified height.
 
