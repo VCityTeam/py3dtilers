@@ -24,6 +24,11 @@ class GeojsonPolygon(Geojson):
                 int_ring[:-1]
                 for int_ring in self.feature_geometry["coordinates"][0][1:]
             ]
+
+            if is_roof:
+                self.adjust_height(exterior_ring, self.height)
+                for int_ring in interior_rings:
+                   self.adjust_height(int_ring, self.height)
         else:
             exterior_ring = self.get_clockwise_polygon(
                 self.feature_geometry["coordinates"][0]
@@ -33,11 +38,12 @@ class GeojsonPolygon(Geojson):
                 for int_ring in self.feature_geometry["coordinates"][1:]
             ]
 
-        if is_roof:
-            for coord in exterior_ring:
-                coord[2] -= self.height
-            for coord in interior_rings:
-                coord[2] -= self.height
+            if is_roof:
+                for coord in exterior_ring:
+                    self.adjust_height(coord, self.height)
+                for coord in interior_rings:
+                    self.adjust_height(coord, self.height)
+
 
         self.exterior_ring = exterior_ring
         self.interior_rings = interior_rings
@@ -61,3 +67,15 @@ class GeojsonPolygon(Geojson):
             return polygon[:-1][::-1]
         else:
             return polygon[:-1]
+
+    def adjust_height(self,ring, height):
+
+        """
+        Decreases the Z coordinate of each point in a ring by a specified height.
+
+        Parameters:
+        - ring: A list of coordinates, with each coordinate being a list of three numbers [x, y, z].
+        - height: The amount to subtract from the Z coordinate .
+        """
+        for coord in ring:
+            coord[2] -= height
