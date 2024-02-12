@@ -56,11 +56,11 @@ class LineBuffer():
 
         po_1_left, po_1_right = self.get_parallel_offset(coordinates[0], coordinates[1], offset=width_offset)
         polygon[0] = [po_1_left[0][0], po_1_left[0][1], coordinates[0][2]]
-        polygon[(len(coordinates) * 2) - 1] = [po_1_right[1][0], po_1_right[1][1], coordinates[0][2]]
+        polygon[(len(coordinates) * 2) - 1] = [po_1_right[0][0], po_1_right[0][1], coordinates[0][2]]
 
         po_2_left, po_2_right = self.get_parallel_offset(coordinates[len(coordinates) - 2], coordinates[len(coordinates) - 1], offset=width_offset)
         polygon[len(coordinates) - 1] = [po_2_left[1][0], po_2_left[1][1], coordinates[len(coordinates) - 1][2]]
-        polygon[len(coordinates)] = [po_2_right[0][0], po_2_right[0][1], coordinates[len(coordinates) - 1][2]]
+        polygon[len(coordinates)] = [po_2_right[1][0], po_2_right[1][1], coordinates[len(coordinates) - 1][2]]
 
         for i in range(0, len(coordinates) - 2):
             po_1_left, po_1_right = self.get_parallel_offset(coordinates[i], coordinates[i + 1], offset=width_offset)
