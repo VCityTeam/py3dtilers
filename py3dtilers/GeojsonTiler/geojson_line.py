@@ -50,6 +50,7 @@ class GeojsonLine(Geojson):
         self.set_z(coords, z_name)
 
         line_buffer = LineBuffer(self.width)
-        self.polygon = line_buffer.buffer_line_string(coords)
+        self.exterior_ring = line_buffer.buffer_line_string(coords)
+        self.interior_rings = []
 
         return True
