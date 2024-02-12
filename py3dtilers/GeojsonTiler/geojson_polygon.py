@@ -28,7 +28,7 @@ class GeojsonPolygon(Geojson):
             if is_roof:
                 self.adjust_height(exterior_ring, self.height)
                 for int_ring in interior_rings:
-                   self.adjust_height(int_ring, self.height)
+                    self.adjust_height(int_ring, self.height)
         else:
             exterior_ring = self.get_clockwise_polygon(
                 self.feature_geometry["coordinates"][0]
@@ -44,7 +44,6 @@ class GeojsonPolygon(Geojson):
                 for coord in interior_rings:
                     self.adjust_height(coord, self.height)
 
-
         self.exterior_ring = exterior_ring
         self.interior_rings = interior_rings
 
@@ -56,7 +55,6 @@ class GeojsonPolygon(Geojson):
         return True
 
     def get_clockwise_polygon(self, polygon):
-    
         """
         Return a clockwise polygon without the last point (the last point is the same as the first one).
 
@@ -68,7 +66,7 @@ class GeojsonPolygon(Geojson):
         else:
             return polygon[:-1]
 
-    def adjust_height(self,ring, height):
+    def adjust_height(self, ring, height):
         """
         Decreases the Z coordinate of each point in a ring by a specified height.
 

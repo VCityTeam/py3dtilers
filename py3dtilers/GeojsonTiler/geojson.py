@@ -187,7 +187,7 @@ class Geojson(Feature):
         It also identifies holes in the geometry if any are present.
 
         Returns:
-            dict: A dictionary containing vertices and segments for triangulation. 
+            dict: A dictionary containing vertices and segments for triangulation.
                 It includes holes if they exist in the geometry.
         """
 
@@ -255,7 +255,7 @@ class Geojson(Feature):
         """
 
         for tri in poly_triangles:
-            upper_tri = [np.array([coord[0], coord[1], coord[2] + self.height]) for coord in tri ]
+            upper_tri = [np.array([coord[0], coord[1], coord[2] + self.height]) for coord in tri]
             triangles.append(upper_tri)
 
     def add_side_triangles(self, wall_vertices, index, length, triangles):
@@ -337,15 +337,15 @@ class Geojson(Feature):
 
     def remove_duplicate_points_within_exterior_ring(self):
         """
-        Prevents segmentation faults in the 'triangle' library by removing 
+        Prevents segmentation faults in the 'triangle' library by removing
         duplicate points from the exterior ring.
 
-        This function is essential when working with the 'triangle' library, as 
-        duplicated points in the exterior ring can cause segmentation faults during 
-        triangulation. By iterating through the exterior ring and removing any 
-        duplicated points, it ensures that each point in the exterior ring is unique. 
+        This function is essential when working with the 'triangle' library, as
+        duplicated points in the exterior ring can cause segmentation faults during
+        triangulation. By iterating through the exterior ring and removing any
+        duplicated points, it ensures that each point in the exterior ring is unique.
 
-        Operates directly on the instance's 'exterior_ring' attribute, modifying 
+        Operates directly on the instance's 'exterior_ring' attribute, modifying
         it in place. After execution, the 'exterior_ring' contains only unique points.
         """
 
@@ -362,18 +362,18 @@ class Geojson(Feature):
 
     def remove_duplicate_points_within_interior_rings(self):
         """
-        Prevents segmentation faults in the 'triangle' library by removing 
+        Prevents segmentation faults in the 'triangle' library by removing
         duplicate points from interior rings.
 
-        This function addresses a critical issue when using the 'triangle' library, 
-        where duplicated points in interior rings can lead to segmentation faults 
-        during triangulation. It iterates through each interior ring of the polygon, 
-        removing any duplicated points to ensure the uniqueness of the points within 
+        This function addresses a critical issue when using the 'triangle' library,
+        where duplicated points in interior rings can lead to segmentation faults
+        during triangulation. It iterates through each interior ring of the polygon,
+        removing any duplicated points to ensure the uniqueness of the points within
         the interior geometry.
 
-        Directly modifies the instance's 'interior_rings' attribute. After this 
-        function is executed, each interior ring in the 'interior_rings' attribute 
-        will only contain unique points, thus preventing potential triangulation 
+        Directly modifies the instance's 'interior_rings' attribute. After this
+        function is executed, each interior ring in the 'interior_rings' attribute
+        will only contain unique points, thus preventing potential triangulation
         issues.
         """
 
