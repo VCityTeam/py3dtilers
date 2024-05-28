@@ -98,17 +98,46 @@ class CityMBuildings(CityMCityObjects):
                 "surface_geometry.geometry)), " + \
                 "objectclass.classname " + \
                 "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
-                "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+                "ON surface_geometry.root_id=thematic_surface.lod4_multi_surface_id " + \
                 "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
                 "JOIN citydb.objectclass ON thematic_surface.objectclass_id = objectclass.id " + \
-                "WHERE building.building_root_id IN " + buildings_ids_arg
+                "WHERE building.building_root_id IN " + buildings_ids_arg + \
+                " UNION " + \
+                "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
+                "surface_geometry.geometry)), " + \
+                "objectclass.classname " + \
+                "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
+                "ON surface_geometry.root_id=thematic_surface.lod4_multi_surface_id " + \
+                "JOIN citydb.room ON thematic_surface.room_id = room.id " + \
+                "JOIN citydb.objectclass ON thematic_surface.objectclass_id = objectclass.id " + \
+                "WHERE room.building_id IN " + buildings_ids_arg + \
+                " UNION " + \
+                "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
+                "surface_geometry.geometry)), " + \
+                "objectclass.classname " + \
+                "FROM citydb.building_furniture JOIN citydb.surface_geometry " + \
+                "ON surface_geometry.root_id=building_furniture.lod4_brep_id " + \
+                "JOIN citydb.objectclass ON building_furniture.objectclass_id=objectclass.id " + \
+                "JOIN citydb.room ON building_furniture.room_id=room.id " + \
+                "WHERE surface_geometry.id != surface_geometry.parent_id " + \
+                "AND room.building_id IN " + buildings_ids_arg+ \
+                " UNION " + \
+                "SELECT surface_geometry.id, ST_AsBinary(ST_Multi( " + \
+                "surface_geometry.geometry)), " + \
+                "objectclass.classname " + \
+                "FROM citydb.building_installation JOIN citydb.surface_geometry " + \
+                "ON surface_geometry.root_id=building_installation.lod4_brep_id " + \
+                "JOIN citydb.objectclass ON building_installation.objectclass_id=objectclass.id " + \
+                "JOIN citydb.room ON building_installation.room_id=room.id " + \
+                "WHERE surface_geometry.id != surface_geometry.parent_id " + \
+                "AND room.building_id IN " + buildings_ids_arg
         else:
             query = \
                 "SELECT building.building_root_id, ST_AsBinary(ST_Multi(ST_Collect( " + \
                 "surface_geometry.geometry))), " + \
                 "objectclass.classname " + \
                 "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
-                "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+                "ON surface_geometry.root_id=thematic_surface.lod4_multi_surface_id " + \
                 "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
                 "JOIN citydb.objectclass ON building.objectclass_id = objectclass.id " + \
                 "WHERE building.building_root_id IN " + buildings_ids_arg + " " + \
@@ -133,7 +162,7 @@ class CityMBuildings(CityMCityObjects):
                  "tex_image_uri AS uri FROM citydb.building JOIN "
                  "citydb.thematic_surface ON building.id=thematic_surface.building_id JOIN "
                  "citydb.surface_geometry ON surface_geometry.root_id="
-                 "thematic_surface.lod2_multi_surface_id JOIN citydb.textureparam ON "
+                 "thematic_surface.lod4_multi_surface_id JOIN citydb.textureparam ON "
                  "textureparam.surface_geometry_id=surface_geometry.id "
                  "JOIN citydb.surface_data ON textureparam.surface_data_id=surface_data.id "
                  "JOIN citydb.tex_image ON surface_data.tex_image_id=tex_image.id "
@@ -156,7 +185,7 @@ class CityMBuildings(CityMCityObjects):
             "ST_Z(ST_3DClosestPoint(ST_Multi(ST_Collect(surface_geometry.geometry)) " + \
             ",ST_Centroid(ST_Multi(ST_Collect(surface_geometry.geometry))))) " + \
             "FROM citydb.surface_geometry JOIN citydb.thematic_surface " + \
-            "ON surface_geometry.root_id=thematic_surface.lod2_multi_surface_id " + \
+            "ON surface_geometry.root_id=thematic_surface.lod4_multi_surface_id " + \
             "JOIN citydb.building ON thematic_surface.building_id = building.id " + \
             "WHERE building.building_root_id = " + str(id) + \
             " GROUP BY building.building_root_id"
