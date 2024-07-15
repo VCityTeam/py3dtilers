@@ -3,7 +3,7 @@ import logging
 import time
 import numpy as np
 import ifcopenshell
-from py3dtiles.tileset.content.gltf_material import GlTFMaterial
+from pygltflib import Material, PbrMetallicRoughness
 from ..Common import Feature, FeatureList, TreeWithChildrenAndParent
 from ifcopenshell import geom
 from py3dtiles.tileset.extension import BatchTableHierarchy
@@ -93,7 +93,7 @@ class IfcObjectGeom(Feature):
         indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
         if shape.geometry.materials:
             ifc_material = shape.geometry.materials[0]
-            self.material = GlTFMaterial(rgb=[ifc_material.diffuse.r(), ifc_material.diffuse.g(), ifc_material.diffuse.b()])
+            self.material = Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=[ifc_material.diffuse.r(), ifc_material.diffuse.g(), ifc_material.diffuse.b(), 1]))
 
         if indexList.size == 0:
             logging.error("Error while creating geom : No triangles found")

@@ -2,9 +2,10 @@ from pathlib import Path
 import numpy as np
 from pyproj import Transformer
 from sortedcollections import OrderedSet
-from py3dtiles.tileset.content import B3dm, GlTF
-from py3dtiles.tileset.content.gltf_material import GlTFMaterial
+from pygltflib import VEC3, FLOAT
+from py3dtiles.tileset.content import B3dm, GltfAttribute, GltfPrimitive
 from py3dtiles.tileset.content.batch_table import BatchTable
+from py3dtiles.tileset.content.b3dm_feature_table import B3dmFeatureTable
 from py3dtiles.tileset import Tile, TileSet, BoundingVolumeBox
 from ..Texture import Atlas
 from ..Common import ObjWriter
@@ -107,10 +108,10 @@ class FromGeometryTreeToTileset():
 
         tile = Tile(geometric_error=node.geometric_error,
                     content_uri=Path('tiles', f'{FromGeometryTreeToTileset.tile_index}.b3dm'),
-                    transform=np.array([[1, 0, 0, 0],
-                                        [0, 1, 0, 0],
-                                        [0, 0, 1, 0],
-                                        [transform_offset[0], transform_offset[1], transform_offset[2], 1]]),
+                    transform=np.array([[1, 0, 0, transform_offset[0]],
+                                        [0, 1, 0, transform_offset[1]],
+                                        [0, 0, 1, transform_offset[2]],
+                                        [0, 0, 0, 1]]),
                     refine_mode='REPLACE')
 
         content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
@@ -144,30 +145,6 @@ class FromGeometryTreeToTileset():
 
         :return: a B3dm tile.
         """
-        # create B3DM content
-        arrays = []
-        materials = []
-        seen_mat_indexes = dict()
-        if with_texture:
-            tile_atlas = Atlas(feature_list, downsample_factor)
-            materials = [GlTFMaterial(texture_uri='./' + tile_atlas.id)]
-        for feature in feature_list:
-            mat_index = feature.material_index
-            if mat_index not in seen_mat_indexes and not with_texture:
-                seen_mat_indexes[mat_index] = len(materials)
-                materials.append(feature_list.get_material(mat_index))
-            content = {
-                'position': feature.geom.get_position_array(),
-                'normal': feature.geom.get_normal_array(),
-                'bbox': [[float(i) for i in j] for j in feature.geom.get_bbox()],
-                'mat_index': seen_mat_indexes[mat_index] if not with_texture else 0
-            }
-            if with_texture:
-                content['uv'] = feature.geom.get_data_array(0)
-            if feature.has_vertex_colors:
-                content['vertex_color'] = feature.geom.get_data_array(int(with_texture))
-            arrays.append(content)
-
         # GlTF uses a y-up coordinate system whereas the geographical data (stored
         # in the 3DCityDB database) uses a z-up coordinate system convention. In
         # order to comply with Gltf we thus need to realize a z-up to y-up
@@ -180,12 +157,14 @@ class FromGeometryTreeToTileset():
         transform = np.array([1, 0, 0, 0,
                               0, 0, -1, 0,
                               0, 1, 0, 0,
-                              0, 0, 0, 1])
+                              0, 0, 0, 1], dtype=np.float32)
 
-        gltf = GlTF.from_binary_arrays(arrays, transform, materials=materials)
+        primitives = FromGeometryTreeToTileset.__group_by_material_index(feature_list, with_texture, downsample_factor, with_normals)
 
         # Create a batch table and add the ID of each feature to it
         ids = [feature.get_id() for feature in feature_list]
+        ft = B3dmFeatureTable()
+        ft.header.data['BATCH_LENGTH'] = len(ids)
         bt = BatchTable()
         bt.add_property_as_json("id", ids)
 
@@ -212,4 +191,48 @@ class FromGeometryTreeToTileset():
 
         # Eventually wrap the features together with the optional
         # BatchTableHierarchy within a B3dm:
-        return B3dm.from_gltf(gltf, bt)
+        return B3dm.from_primitives(primitives, batch_table=bt, feature_table=ft, transform=transform)
+
+    @staticmethod
+    def __group_by_material_index(feature_list: 'FeatureList', with_texture: int, downsample_factor=1, with_normals=True):
+        primitives = {}
+        seen_mat_indexes = []
+        batch_id = 0
+
+        texture_uri= Atlas(feature_list, downsample_factor).id if with_texture else None
+        for feature in feature_list:
+            mat_index = feature.material_index
+
+            if mat_index not in seen_mat_indexes:
+                seen_mat_indexes.append(mat_index)
+                additional_attributes_dict = {}
+                if feature.has_vertex_colors:
+                    additional_attributes_dict['COLOR_0'] = []
+                primitives[mat_index] = {'positions': [], 'normals': [], 'uvs': [] , 'batchids': [], 'texture_uri': texture_uri, 'material': feature_list.get_material(mat_index), 'additional_attributes': additional_attributes_dict}
+
+            primitive = primitives[mat_index]
+
+            positions = np.array(feature.get_geom_as_triangles(), dtype=np.float32).flatten().reshape((-1, 3))
+            primitive['positions'].append(positions)
+            if with_normals:
+                primitive['normals'].append(feature.geom.compute_normals())
+            if with_texture:
+                primitive['uvs'].append(feature.geom.get_data(0))
+            primitive['batchids'].append(np.full(len(positions), batch_id, dtype=np.uint32))
+            if feature.has_vertex_colors:
+                primitive['additional_attributes']['COLOR_0'].append(feature.geom.get_data(int(with_texture)))
+
+            batch_id+=1
+
+        gltf_primitives = []
+        for primitive in primitives.values():
+            additional_attributes = []
+            for attribute in primitive['additional_attributes']:
+                additional_attributes.append(GltfAttribute(attribute, VEC3, FLOAT, np.concatenate(primitive['additional_attributes'][attribute])))
+            points = np.concatenate(primitive['positions'])
+            normals = np.concatenate(primitive['normals'], dtype=np.float32) if with_normals else None
+            uvs = np.concatenate(primitive['uvs'], dtype=np.float32) if with_texture else None
+            batchids = np.concatenate(primitive['batchids'])
+            gltf_primitives.append(GltfPrimitive(points, normals=normals, uvs=uvs, batchids=batchids, additional_attributes=additional_attributes, texture_uri=primitive['texture_uri'], material=primitive['material']))
+            
+        return gltf_primitives

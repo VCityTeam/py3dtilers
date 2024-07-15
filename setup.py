@@ -16,7 +16,7 @@ requirements = (
     'scipy',
     'shapely',
     'alphashape',
-    'py3dtiles @ git+https://gitlab.com/VCityTeam/py3dtiles@Gltf_Material',
+    'py3dtiles @ git+https://gitlab.com/VCityTeam/py3dtiles@gltf_primitives',
     'py3dtiles_temporal_extension @ git+https://gitlab.com/VCityTeam/py3dtiles_temporal_extension',
     'earclip @ git+https://github.com/lionfish0/earclip',
     'Pillow',
