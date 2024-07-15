@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pywavefront
-from py3dtiles.tileset.content.gltf_material import GlTFMaterial
+from pygltflib import Material, PbrMetallicRoughness
 
 from ..Common import Feature, FeatureList
 from ..Texture import Texture
@@ -148,7 +148,7 @@ class Objs(FeatureList):
         """
         objects = list()
 
-        gltfMaterials = []
+        materials = []
         mesh_index = 1
         for obj_file in files:
             print("Reading " + str(obj_file))
@@ -165,10 +165,10 @@ class Objs(FeatureList):
                     mesh_index += 1
                     if obj.parse_geom(mesh_mat, with_texture):
                         objects.append(obj)
-                    material = GlTFMaterial(rgb=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2]], alpha=1. - mesh_mat.diffuse[3], metallic_factor=0.)
-                    gltfMaterials.append(material)
+                    material = Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2], 1. - mesh_mat.diffuse[3]], metallicFactor=0.))
+                    materials.append(material)
 
         fList = Objs(objects)
-        fList.add_materials(gltfMaterials)
+        fList.add_materials(materials)
 
         return fList

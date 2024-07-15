@@ -229,21 +229,21 @@ class FeatureList(object):
     def set_materials(self, materials):
         """
         Set the materials of this object to a new array of materials.
-        :param materials: an array of GlTFMaterial
+        :param materials: an array of Material
         """
         self.materials = materials
 
     def add_materials(self, materials):
         """
         Extend the materials of this object with another array of materials.
-        :param materials: an array of GlTFMaterial
+        :param materials: an array of Material
         """
         self.materials.extend(materials)
 
     def add_material(self, material):
         """
         Extend the materials of this object with a GltF material.
-        :param material: a GlTFMaterial
+        :param material: a Material
         """
         self.materials.append(material)
 
@@ -258,7 +258,7 @@ class FeatureList(object):
     def is_material_registered(self, material):
         """
         Check if a material is already set in materials array
-        :param material: a GlTFMaterial
+        :param material: a Material
         :return: bool
         """
         for mat in self.materials:
@@ -270,7 +270,7 @@ class FeatureList(object):
         """
         Get the index of a given material.
         Add it to the materials array if it is not found
-        :param material: a GlTFMaterial
+        :param material: a Material
         :return: an index as int
         """
         i = 0
