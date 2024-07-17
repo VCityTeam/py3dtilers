@@ -65,13 +65,13 @@ class TilesetMerger():
         :param tileset_path: the path of the original tileset of the tile
         :param index: the index added in the new name of the image
         """
-        header = tile.get_or_fetch_content(tileset_path).body.gltf.header
-        if 'images' in header:
-            for image in header['images']:
-                if 'uri' in image:  # copy only external images (i.e. the one that have a uri)
-                    path = Path(os.path.join(tileset_path, "tiles", image['uri']))
+        gltf = tile.get_or_fetch_content(tileset_path).body.gltf
+        if gltf.images is not None:
+            for image in gltf.images:
+                if image.uri is not None:  # copy only external images (i.e. the one that have a uri)
+                    path = Path(os.path.join(tileset_path, "tiles", image.uri))
                     new_uri = f"{path.stem}_{index}_{path.suffix}"
-                    image['uri'] = new_uri
+                    image.uri = new_uri
                     new_file_path = Path(os.path.join(self.output_path, "tiles"), new_uri)
                     shutil.copyfile(path, new_file_path)
 
