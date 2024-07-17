@@ -1,9 +1,8 @@
 import os
 
-from pygltflib import Material, PbrMetallicRoughness
 from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 
-from .reader_utils import triangle_soup_from_gltf
+from .reader_utils import attributes_from_gltf
 from ..Common import FeatureList, Feature
 from ..Texture import Texture
 
@@ -16,16 +15,18 @@ class TileToFeature(Feature):
         self.geom = triangle_soup
         self.set_box()
 
-    def set_material(self, mat_index, materials, tileset_path=None):
+    def set_material(self, mat_index, materials, images, tileset_path=None):
         """
         Set the material of this geometry.
         :param mat_index: the index of the material
         :param materials: the list of all the materials
+        :param images: the list of all the images
         :param tileset_path: the path to the tileset containing the texture image
         """
         self.material_index = mat_index
-        if materials[mat_index].is_textured():
-            path = os.path.join(tileset_path, "tiles", materials[mat_index].texture_uri)
+        if materials[mat_index].pbrMetallicRoughness.baseColorTexture is not None:
+            image_index = materials[mat_index].pbrMetallicRoughness.baseColorTexture.index
+            path = os.path.join(tileset_path, "tiles", images[image_index].uri)
             texture = Texture(path)
             self.set_texture(texture.get_cropped_texture_image(self.geom.triangles[1]))
 
@@ -58,37 +59,27 @@ class TileToFeatureList(FeatureList):
         Find the materials in the glTF and create Materials.
         :param gltf: the gltf of the tile
 
-        :return: a list of Materials
+        :return: a list of Materials and a list of Images
         """
-        materials = gltf.header['materials']
-        gltf_materials = list()
+        materials = gltf.materials
+        images = gltf.images
         self.mat_offset = len(self.materials)
-        for material in materials:
-            pbr = material['pbrMetallicRoughness']
-            rgba = pbr['baseColorFactor'] if 'baseColorFactor' in pbr else [1, 1, 1, 1]
-            metallic_factor = pbr['metallicFactor'] if 'metallicFactor' in pbr else 1
-            roughness_factor = pbr['roughnessFactor'] if 'roughnessFactor' in pbr else 1
-            if 'baseColorTexture' in pbr:
-                index = pbr['baseColorTexture']['index'] if 'index' in pbr['baseColorTexture'] else 0
-                uri = gltf.header['images'][gltf.header['textures'][index]['source']]['uri']
-            else:
-                uri = None
-            gltf_materials.append(Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=rgba, metallicFactor=metallic_factor, roughnessFactor=roughness_factor)))
-            texture_uri=uri
-        return gltf_materials
+        return materials, images
 
-    def __convert_triangle_soup(self, triangle_soup, materials):
+    def __convert_attributes(self, attributes, materials, images):
         """
         Convert the triangle soup to re-create the features.
-        :param triangle_soup: the triangle soup
+        :param attributes: atributes dict
         :param materials: the materials of the tile
+        :param images: the images of the tile
 
         :return: a FeatureList instance
         """
-        triangles = triangle_soup.triangles[0]
-        vertex_ids = triangle_soup.triangles[1]
-        mat_indexes = triangle_soup.triangles[2]
-        uvs = [] if len(triangle_soup.triangles) <= 3 else triangle_soup.triangles[3]
+        triangles = attributes['positions']
+        vertex_ids = attributes['ids']
+        vertex_colors = attributes['colors']
+        mat_indexes = attributes['mat_indexes']
+        uvs = attributes['uvs']
 
         triangle_dict = dict()
         material_dict = dict()
@@ -102,15 +93,20 @@ class TileToFeatureList(FeatureList):
                 triangle_dict[id].triangles.append(list())
                 if uvs:
                     triangle_dict[id].triangles.append(list())
+                if vertex_colors:
+                    triangle_dict[id].triangles.append(list())
 
             triangle_dict[id].triangles[0].append(triangle)
             if uvs:
                 triangle_dict[id].triangles[1].append(uvs[index])
+            if vertex_colors:
+                triangle_dict[id].triangles[1].append(vertex_colors[index])
 
         objects = []
         for id in triangle_dict:
             feature = TileToFeature(str(int(id)), triangle_dict[id], material_dict[id])
-            feature.set_material(material_dict[id], materials, self.tileset_path)
+            feature.has_vertex_colors = len(vertex_colors) > 0
+            feature.set_material(material_dict[id], materials, images, self.tileset_path)
             objects.append(feature)
         return FeatureList(objects)
 
@@ -124,9 +120,9 @@ class TileToFeatureList(FeatureList):
         content = tile.get_or_fetch_content(self.tileset_path)
         gltf = content.body.gltf
 
-        materials = self.__find_materials(gltf)
-        ts = triangle_soup_from_gltf(gltf)
-        feature_list = self.__convert_triangle_soup(ts, materials)
+        materials, images = self.__find_materials(gltf)
+        attributes = attributes_from_gltf(gltf)
+        feature_list = self.__convert_attributes(attributes, materials, images)
         feature_list.add_materials(materials)
 
         bt_attributes = content.body.batch_table.header.data

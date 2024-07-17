@@ -64,8 +64,6 @@ class TilesetTiler(Tiler):
         :return: a TileSet
         """
         geometric_errors = self.args.geometric_error if hasattr(self.args, 'geometric_error') else [None, None, None]
-        for tile in tileset.root_tile.children:
-            print(tile.content_uri)
         tileset_tree = TilesetTree(tileset, self.tileset_of_root_tiles, geometric_errors)
         return self.create_tileset_from_feature_list(tileset_tree)
 

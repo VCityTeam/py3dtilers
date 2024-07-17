@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 
 from py3dtiles.tileset import TileSet
-from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 
 
 def read_tilesets(paths: list[str]) -> list[TileSet]:
@@ -14,53 +13,66 @@ def read_tilesets(paths: list[str]) -> list[TileSet]:
     return tilesets
 
 
-def triangle_soup_from_gltf(gltf):
-    header = gltf.header
+def attributes_from_gltf(gltf):
     vertices = list()
     uvs = list()
     ids = list()
+    colors = list()
     mat_indexes = list()
-    for mesh_index, mesh in enumerate(header['meshes']):
-        position_index = mesh['primitives'][0]['attributes']['POSITION']
-        buffer_index = header['accessors'][position_index]['bufferView']
-        vertex_count = header['accessors'][position_index]['count']
-        byte_offset = header['bufferViews'][buffer_index]['byteOffset'] + header['accessors'][position_index]['byteOffset']
-        byte_length = vertex_count * 12
-        positions = gltf.body[byte_offset:byte_offset + byte_length]
+    binary_blob = gltf.binary_blob()
+    for mesh in gltf.meshes:
+        for primitive_index, primitive in enumerate(mesh.primitives):
+            position_index = primitive.attributes.POSITION
+            buffer_view_index = gltf.accessors[position_index].bufferView
+            vertex_count = gltf.accessors[position_index].count
+            byte_offset = gltf.bufferViews[buffer_view_index].byteOffset + gltf.accessors[position_index].byteOffset
+            byte_length = vertex_count * 12
+            positions = binary_blob[byte_offset:byte_offset + byte_length]
 
-        for i in range(0, byte_length, 12):
-            vertices.append(np.array(struct.unpack('fff', positions[i:i + 12].tobytes()), dtype=np.float32))
+            for i in range(0, byte_length, 12):
+                vertices.append(np.array(struct.unpack('fff', positions[i:i + 12]), dtype=np.float32))
 
-        if 'TEXCOORD_0' in mesh['primitives'][0]['attributes']:
-            texture_index = mesh['primitives'][0]['attributes']['TEXCOORD_0']
-            buffer_index = header['accessors'][texture_index]['bufferView']
-            tex_count = header['accessors'][texture_index]['count']
-            byte_offset = header['bufferViews'][buffer_index]['byteOffset'] + header['accessors'][texture_index]['byteOffset']
-            byte_length = tex_count * 8
-            tex_coords = gltf.body[byte_offset:byte_offset + byte_length]
+            if primitive.attributes.TEXCOORD_0 is not None:
+                texture_index = primitive.attributes.TEXCOORD_0
+                buffer_view_index = gltf.accessors[texture_index].bufferView
+                tex_count = gltf.accessors[texture_index].count
+                byte_offset = gltf.bufferViews[buffer_view_index].byteOffset + gltf.accessors[texture_index].byteOffset
+                byte_length = tex_count * 8
+                tex_coords = binary_blob[byte_offset:byte_offset + byte_length]
 
-            for i in range(0, byte_length, 8):
-                uvs.append(np.array(struct.unpack('ff', tex_coords[i:i + 8].tobytes()), dtype=np.float32))
+                for i in range(0, byte_length, 8):
+                    uvs.append(np.array(struct.unpack('ff', tex_coords[i:i + 8]), dtype=np.float32))
 
-        if '_BATCHID' in mesh['primitives'][0]['attributes']:
-            batchid_index = mesh['primitives'][0]['attributes']['_BATCHID']
-            buffer_index = header['accessors'][batchid_index]['bufferView']
-            id_count = header['accessors'][batchid_index]['count']
-            byte_offset = header['bufferViews'][buffer_index]['byteOffset'] + header['accessors'][batchid_index]['byteOffset']
-            byte_length = id_count * 4
-            batch_ids = [struct.unpack('f', gltf.body[i:i + 4].tobytes())[0] for i in range(byte_offset, byte_offset + byte_length, 4)]
-        else:
-            batch_ids = [mesh_index for i in range(0, vertex_count)]
-        for id in batch_ids:
-            ids.append(np.array([id, mesh_index], dtype=np.float32))
+            if primitive.attributes.COLOR_0 is not None:
+                color_index = primitive.attributes.COLOR_0
+                buffer_view_index = gltf.accessors[color_index].bufferView
+                vertex_count = gltf.accessors[color_index].count
+                byte_offset = gltf.bufferViews[buffer_view_index].byteOffset + gltf.accessors[color_index].byteOffset
+                byte_length = vertex_count * 12
+                vertex_colors = binary_blob[byte_offset:byte_offset + byte_length]
 
-        mat_indexes.append(mesh['primitives'][0]['material'])
+                for i in range(0, byte_length, 12):
+                    vertices.append(np.array(struct.unpack('fff', vertex_colors[i:i + 12]), dtype=np.float32))
 
-    ts = TriangleSoup()
-    ts.triangles.append([vertices[n:n + 3] for n in range(0, len(vertices), 3)])
-    ts.triangles.append(ids)
-    ts.triangles.append(np.array(mat_indexes, dtype=np.float32))
-    if len(uvs) > 0:
-        ts.triangles.append([uvs[n:n + 3] for n in range(0, len(uvs), 3)])
+            if primitive.attributes._BATCHID is not None:
+                batchid_index = primitive.attributes._BATCHID
+                buffer_view_index = gltf.accessors[batchid_index].bufferView
+                id_count = gltf.accessors[batchid_index].count
+                byte_offset = gltf.bufferViews[buffer_view_index].byteOffset + gltf.accessors[batchid_index].byteOffset
+                byte_length = id_count * 4
+                batch_ids = [struct.unpack('f', binary_blob[i:i + 4])[0] for i in range(byte_offset, byte_offset + byte_length, 4)]
+            else:
+                batch_ids = [primitive_index for _ in range(0, vertex_count)]
+            for id in batch_ids:
+                ids.append(np.array([id, primitive_index], dtype=np.float32))
 
-    return ts
+            mat_indexes.append(primitive.material)
+
+    attributes_dict = {
+        'positions': [vertices[n:n + 3] for n in range(0, len(vertices), 3)],
+        'ids': ids,
+        'mat_indexes': np.array(mat_indexes, dtype=np.float32),
+        'uvs': [uvs[n:n + 3] for n in range(0, len(uvs), 3)],
+        'colors': [colors[n:n + 3] for n in range(0, len(colors), 3)]
+    }
+    return attributes_dict
