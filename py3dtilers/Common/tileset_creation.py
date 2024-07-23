@@ -199,7 +199,7 @@ class FromGeometryTreeToTileset():
         seen_mat_indexes = []
         batch_id = 0
 
-        texture_uri= Atlas(feature_list, downsample_factor).id if with_texture else None
+        texture_uri = Atlas(feature_list, downsample_factor).id if with_texture else None
         for feature in feature_list:
             mat_index = feature.material_index
 
@@ -208,7 +208,7 @@ class FromGeometryTreeToTileset():
                 additional_attributes_dict = {}
                 if feature.has_vertex_colors:
                     additional_attributes_dict['COLOR_0'] = []
-                primitives[mat_index] = {'positions': [], 'normals': [], 'uvs': [] , 'batchids': [], 'texture_uri': texture_uri, 'material': feature_list.get_material(mat_index), 'additional_attributes': additional_attributes_dict}
+                primitives[mat_index] = {'positions': [], 'normals': [], 'uvs': [], 'batchids': [], 'texture_uri': texture_uri, 'material': feature_list.get_material(mat_index), 'additional_attributes': additional_attributes_dict}
 
             primitive = primitives[mat_index]
 
@@ -222,7 +222,7 @@ class FromGeometryTreeToTileset():
             if feature.has_vertex_colors:
                 primitive['additional_attributes']['COLOR_0'].append(feature.geom.get_data(int(with_texture)))
 
-            batch_id+=1
+            batch_id += 1
 
         gltf_primitives = []
         for primitive in primitives.values():
@@ -234,5 +234,5 @@ class FromGeometryTreeToTileset():
             uvs = np.concatenate(primitive['uvs'], dtype=np.float32) if with_texture else None
             batchids = np.concatenate(primitive['batchids'])
             gltf_primitives.append(GltfPrimitive(points, normals=normals, uvs=uvs, batchids=batchids, additional_attributes=additional_attributes, texture_uri=primitive['texture_uri'], material=primitive['material']))
-            
+
         return gltf_primitives
