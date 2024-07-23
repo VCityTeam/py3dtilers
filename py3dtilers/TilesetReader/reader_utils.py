@@ -71,7 +71,7 @@ def attributes_from_gltf(gltf):
     attributes_dict = {
         'positions': [vertices[n:n + 3] for n in range(0, len(vertices), 3)],
         'ids': ids,
-        'mat_indexes': np.array(mat_indexes, dtype=np.float32),
+        'mat_indexes': mat_indexes,
         'uvs': [uvs[n:n + 3] for n in range(0, len(uvs), 3)],
         'colors': [colors[n:n + 3] for n in range(0, len(colors), 3)]
     }

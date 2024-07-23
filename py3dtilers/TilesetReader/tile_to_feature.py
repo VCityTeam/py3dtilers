@@ -53,6 +53,7 @@ class TileToFeatureList(FeatureList):
         self.tileset_path = tileset_path
         feature_list = self.__convert_tile(tile)
         super().__init__(feature_list)
+        self.set_materials(feature_list.materials)
 
     def __find_materials(self, gltf):
         """
@@ -123,7 +124,7 @@ class TileToFeatureList(FeatureList):
         materials, images = self.__find_materials(gltf)
         attributes = attributes_from_gltf(gltf)
         feature_list = self.__convert_attributes(attributes, materials, images)
-        feature_list.add_materials(materials)
+        feature_list.set_materials(materials)
 
         bt_attributes = content.body.batch_table.header.data
         [feature.set_batchtable_data(bt_attributes) for feature in feature_list]
