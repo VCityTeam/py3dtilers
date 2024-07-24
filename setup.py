@@ -13,7 +13,7 @@ requirements = (
     'pyproj',
     'pywavefront',
     'pyyaml',
-    'scipy==1.9.3',
+    'scipy',
     'shapely',
     'alphashape',
     'py3dtiles @ git+https://github.com/VCityTeam/py3dtiles@Tiler',
@@ -69,14 +69,14 @@ setup(
     author='Université de Lyon',
     author_email='contact@liris.cnrs.fr',
     license='Apache License Version 2.0',
-    python_requires=">=3.8,<=3.11",
+    python_requires=">3.8,<3.13",
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11"
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
 
     ],
     packages=find_packages(),

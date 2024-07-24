@@ -31,8 +31,8 @@ class Geojson(Feature):
 
     # Those values are used to set the color of the features
     attribute_values = list()  # Contains all the values of a semantic attribute
-    attribute_min = np.Inf  # Contains the min value of a numeric attribute
-    attribute_max = np.NINF  # Contains the max value of a numeric attribute
+    attribute_min = np.inf  # Contains the min value of a numeric attribute
+    attribute_max = -np.inf  # Contains the max value of a numeric attribute
 
     def __init__(self, id=None, feature_properties=None, feature_geometry=None):
         super().__init__(id)
