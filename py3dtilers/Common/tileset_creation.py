@@ -114,10 +114,9 @@ class FromGeometryTreeToTileset():
                                         [0, 0, 0, 1]]),
                     refine_mode='REPLACE')
 
-        content_b3dm = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
-        tile.tile_content = content_b3dm
+        tile.tile_content = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
         tile.write_content(output_dir)
-        # del tile.attributes["content"].body  # Delete the binary body of the tile once writen on disk to free the memory
+        del tile.tile_content.body  # Delete the binary body of the tile once writen on disk to free the memory
 
         bounding_box = BoundingVolumeBox()
         for feature in feature_list:
