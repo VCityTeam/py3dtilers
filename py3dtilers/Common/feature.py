@@ -262,7 +262,7 @@ class FeatureList(object):
         :return: bool
         """
         for mat in self.materials:
-            if (mat.rgb == material.rgb).all():
+            if mat.pbrMetallicRoughness.baseColorFactor == material.pbrMetallicRoughness.baseColorFactor:
                 return True
         return False
 
@@ -273,13 +273,11 @@ class FeatureList(object):
         :param material: a Material
         :return: an index as int
         """
-        i = 0
-        for mat in self.materials:
-            if (mat.rgb == material.rgb).all():
+        for i, mat in enumerate(self.materials):
+            if mat.pbrMetallicRoughness.baseColorFactor == material.pbrMetallicRoughness.baseColorFactor:
                 return i
-            i = i + 1
         self.add_material(material)
-        return i
+        return len(self.materials) - 1
 
     def translate_features(self, offset):
         """
