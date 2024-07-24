@@ -1,4 +1,4 @@
-dist: focal
+dist: noble
 
 branches:
   only:
@@ -13,14 +13,6 @@ addons:
 
 jobs:
   include:
-    - stage: Test Python 3.8
-      language: python
-      python: '3.8'
-      install:
-        - pip install -e .[dev,prod]
-      script:
-        - pytest
-
     - stage: Test Python 3.9
       language: python
       python: '3.9'
@@ -40,6 +32,14 @@ jobs:
     - stage: Test Python 3.11
       language: python
       python: '3.11'
+      install:
+        - pip install -e .[dev,prod]
+      script:
+        - pytest
+
+    - stage: Test Python 3.12
+      language: python
+      python: '3.12'
       install:
         - pip install -e .[dev,prod]
       script:

@@ -34,12 +34,12 @@ class ExtrudedPolygon(Feature):
             geom_triangles.extend(feature.get_geom_as_triangles())
 
         points = list()
-        minZ = np.Inf
+        minZ = np.inf
         average_maxZ = 0
 
         # Compute the footprint of the geometry
         for triangle in geom_triangles:
-            maxZ = np.NINF
+            maxZ = -np.inf
             for point in triangle:
                 if len(point) >= 3:
                     points.append([point[0], point[1]])
