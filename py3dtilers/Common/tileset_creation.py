@@ -220,7 +220,7 @@ class FromGeometryTreeToTileset():
                 primitive['uvs'].append(feature.geom.get_data(0).astype(np.float32))
             primitive['batchids'].append(np.full(len(positions), batch_id, dtype=np.uint32))
             if feature.has_vertex_colors:
-                primitive['additional_attributes']['COLOR_0'].append(feature.geom.get_data(int(with_texture)))
+                primitive['additional_attributes']['COLOR_0'].append(feature.geom.get_data(int(with_texture)).astype(np.float32))
 
             batch_id += 1
 
