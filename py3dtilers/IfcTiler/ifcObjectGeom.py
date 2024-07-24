@@ -81,7 +81,8 @@ class IfcObjectGeom(Feature):
         try:
             settings = geom.settings()
             settings.set(settings.USE_WORLD_COORDS, True)  # Translates and rotates the points to their world coordinates
-            settings.set(settings.SEW_SHELLS, True)
+            if hasattr(settings, 'SEW_SHELLS'):
+                settings.set(settings.SEW_SHELLS, True)
             settings.set(settings.APPLY_DEFAULT_MATERIALS, False)
             shape = geom.create_shape(settings, ifcObject)
         except RuntimeError:
@@ -92,7 +93,7 @@ class IfcObjectGeom(Feature):
         indexList = np.reshape(np.array(shape.geometry.faces), (-1, 3))
         if shape.geometry.materials:
             ifc_material = shape.geometry.materials[0]
-            self.material = GlTFMaterial(rgb=[ifc_material.diffuse[0], ifc_material.diffuse[1], ifc_material.diffuse[2]])
+            self.material = GlTFMaterial(rgb=[ifc_material.diffuse.r(), ifc_material.diffuse.g(), ifc_material.diffuse.b()])
 
         if indexList.size == 0:
             logging.error("Error while creating geom : No triangles found")
