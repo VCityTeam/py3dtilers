@@ -1,4 +1,4 @@
-dist: noble
+dist: windows
 
 branches:
   only:
