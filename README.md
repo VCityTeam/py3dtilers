@@ -1,17 +1,17 @@
-# Python 3DTiles Tilers
+# Py3DTilers: an open-source toolkit to create 3DTiles
 
 [![Build Status](https://app.travis-ci.com/VCityTeam/py3dtilers.svg?branch=master)](https://app.travis-ci.com/VCityTeam/py3dtilers)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://vcityteam.github.io/py3dtilers/py3dtilers/index.html)
 
-[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3918/) [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-31013/) [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3116/) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3124/) 
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-3918/) [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-31013/) [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3116/) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3124/)
 
-Py3DTilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/AnalyticalGraphicsInc/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3dCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/).
+Py3DTilers is a Python tool and library allowing to build [`3D Tiles`](https://github.com/CesiumGS/3d-tiles) tilesets out of various geometrical formats e.g. [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file), [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [IFC](https://en.wikipedia.org/wiki/Industry_Foundation_Classes) or [CityGML](https://en.wikipedia.org/wiki/CityGML) through [3DCityDB databases](https://3dcitydb-docs.readthedocs.io/en/release-v4.2.3/).
 
-Py3DTilers uses [`py3dtiles` python library](https://github.com/VCityTeam/py3dtiles/tree/Tiler) (forked from [Oslandia's py3dtiles](https://gitlab.com/Oslandia/py3dtiles)) for its in memory representation of tilesets.
+Py3DTilers uses [`Py3DTiles` python library](https://gitlab.com/py3dtiles/py3dtiles) for its in memory representation of tilesets.
 
-Py3DTilers can only produce [`Batched 3D Models (B3DM)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/Batched3DModel/README.md). If you want to produce [`Point Clouds (PNTS)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/PointCloud/README.md), see [Oslandia's py3dtiles CLI](https://gitlab.com/Oslandia/py3dtiles/-/blob/master/docs/cli.rst).
+Py3DTilers can only produce [`Batched 3D Models (B3DM)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/Batched3DModel/README.md). If you want to produce [`Point Clouds (PNTS)`](https://github.com/CesiumGS/3d-tiles/blob/main/specification/TileFormats/PointCloud/README.md), see [Py3DTiles CLI](https://gitlab.com/py3dtiles/py3dtiles/-/blob/master/docs/cli.rst).
 
-An article that present the tool is available in the ISPRS annals [here](https://hal.science/hal-03852828/).  
+An article that presents the tool is available in the ISPRS annals [here](https://hal.science/hal-03852828/).  
 
 ## Demo
 
@@ -28,7 +28,7 @@ Find 3D Tiles created with Py3DTilers in [**this online demo**](https://py3dtile
 
 ## Installation from sources
 
-See [supported Python versions](#python-3dtiles-tilers)
+See [supported Python versions](#py3dtilers-an-open-source-toolkit-to-create-3dtiles)
 
 ### For Unix
 
