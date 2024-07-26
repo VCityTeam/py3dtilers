@@ -4,6 +4,7 @@ from pathlib import Path
 
 from py3dtilers.TilesetReader.TilesetReader import TilesetTiler
 from py3dtilers.TilesetReader.TilesetMerger import TilesetMerger
+from py3dtilers.TilesetReader.reader_utils import read_tilesets
 
 
 def get_default_namespace():
@@ -23,7 +24,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_merge(self):
         tiler = TilesetTiler()
@@ -33,7 +34,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_texture(self):
         tiler = TilesetTiler()
@@ -44,7 +45,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_transform(self):
         tiler = TilesetTiler()
@@ -56,7 +57,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_obj(self):
         tiler = TilesetTiler()
@@ -67,7 +68,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_geometric_error(self):
         tiler = TilesetTiler()
@@ -78,12 +79,12 @@ class Test_Tile(unittest.TestCase):
 
         tileset = tiler.read_and_merge_tilesets()
         tileset = tiler.transform_tileset(tileset)
-        tileset.write_as_json(tiler.args.output_dir)
+        tileset.write_as_json(Path(tiler.args.output_dir, 'tileset.json'))
 
     def test_merger(self):
         merger = TilesetMerger(output_path="tests/tileset_reader_test_data/generated_tilesets/merger/")
         paths = [Path("tests/tileset_reader_test_data/white_buildings/"), Path("tests/tileset_reader_test_data/textured_cube/")]
-        tilesets = merger.reader.read_tilesets(paths)
+        tilesets = read_tilesets(paths)
 
         tileset, root_tiles_paths = merger.merge_tilesets(tilesets, paths)
         merger.write_merged_tileset(tileset, root_tiles_paths)

@@ -1,5 +1,6 @@
 import logging
 import time
+from pathlib import Path
 from ..Common import Tiler, Groups
 from .ifcObjectGeom import IfcObjectsGeom
 
@@ -65,7 +66,7 @@ def main():
     tileset = ifc_tiler.from_ifc(args.grouped_by, args.with_BTH)
 
     if tileset is not None:
-        tileset.write_as_json(ifc_tiler.get_output_dir())
+        tileset.write_as_json(Path(ifc_tiler.get_output_dir(), 'tileset.json'))
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 

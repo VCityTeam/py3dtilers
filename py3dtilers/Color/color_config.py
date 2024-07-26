@@ -1,7 +1,7 @@
 import string
 import json
 import os
-from py3dtiles import GlTFMaterial
+from pygltflib import Material, PbrMetallicRoughness
 
 
 class ColorConfig():
@@ -32,29 +32,30 @@ class ColorConfig():
                 self.color_dict = content['color_dict'] if 'color_dict' in content else self.color_dict
             except FileNotFoundError:
                 print("The config file", config_path, "wasn't found.")
-        self.min_color_code = self.to_material(self.min_color).rgba[:3]
-        self.max_color_code = self.to_material(self.max_color).rgba[:3]
+        self.min_color_code = self.to_material(self.min_color).pbrMetallicRoughness.baseColorFactor[:3]
+        self.max_color_code = self.to_material(self.max_color).pbrMetallicRoughness.baseColorFactor[:3]
 
     def to_material(self, color):
         """
-        Create a GlTFMaterial from a color code.
+        Create a Material from a color code.
         :param color: a color code (rgb or hexa)
 
-        :return: a GlTFMaterial
+        :return: a Material
         """
         if isinstance(color, list):
-            return GlTFMaterial(rgb=color)
+            color.append(1)
         elif all(c in string.hexdigits for c in color.replace('#', '').replace('0x', '')):
-            return GlTFMaterial.from_hexa(color)
-        else:
-            return GlTFMaterial()
+            hex = color.replace('#', '').replace('0x', '')
+            length = min(len(hex), 8)
+            color = [round(int(hex[i:i + 2], 16) / 255, 4) for i in range(0, length, 2)]
+        return Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=color), emissiveFactor=None)
 
     def get_color_by_key(self, key):
         """
         Get the color corresponding to the key.
         :param key: the key in the color dictionary
 
-        :return: a GlTFMaterial
+        :return: a Material
         """
         if key in self.color_dict:
             return self.to_material(self.color_dict[key])
@@ -68,13 +69,13 @@ class ColorConfig():
         Get a color by interpolation between two colors (min and max colors).
         :param float factor: the lerp factor
 
-        :return: a GlTFMaterial
+        :return: a Material
         """
         return self.to_material([(max - min) * factor + min for min, max in zip(self.min_color_code, self.max_color_code)])
 
     def get_default_color(self):
         """
         Get the default color.
-        :return: a GlTFMaterial
+        :return: a Material
         """
         return self.to_material(self.default_color)

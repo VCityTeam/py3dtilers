@@ -1,10 +1,11 @@
 import sys
+from pathlib import Path
 
-from py3dtiles import TemporalBoundingVolume
-from py3dtiles import TemporalTileSet
-from py3dtiles import TemporalTransaction
-from py3dtiles import TemporalPrimaryTransaction, TemporalTransactionAggregate
-from py3dtiles import TriangleSoup
+from temporal_extension import TemporalBoundingVolume
+from temporal_extension import TemporalTileSet
+from temporal_extension import TemporalTransaction
+from temporal_extension import TemporalPrimaryTransaction, TemporalTransactionAggregate
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 
 from .temporal_utils import debug_msg
 from .temporal_graph import TemporalGraph, Edge
@@ -316,11 +317,14 @@ def main():
     # Construct the temporal tile set
     tile_set = city_temp_tiler.from_3dcitydb(time_stamped_cursors, all_buildings)
 
-    tile_set.get_root_tile().get_bounding_volume().add_extension(TemporalBoundingVolume())
+    temporal_bv = TemporalBoundingVolume(owner=tile_set.root_tile)
+    temporal_bv.sync_dates()
+    tile_set.root_tile.bounding_volume.extensions[temporal_bv.name] = temporal_bv
 
     # Build and attach a TemporalTileSet extension
     temporal_tile_set = city_temp_tiler.build_temporal_tile_set(graph)
-    tile_set.add_extension(temporal_tile_set)
+    temporal_tile_set.owner = tile_set
+    tile_set.extensions[temporal_tile_set.name] = temporal_tile_set
 
     # A shallow attempt at providing some traceability on where the resulting
     # data set comes from:
@@ -337,7 +341,7 @@ def main():
 
     [cursor.close() for cursor in cursors]  # We are done with the databases
 
-    tile_set.write_as_json(city_temp_tiler.get_output_dir())
+    tile_set.write_as_json(Path(city_temp_tiler.get_output_dir(), 'tileset.json'))
 
 
 if __name__ == '__main__':
