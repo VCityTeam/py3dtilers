@@ -2,8 +2,6 @@ import unittest
 from argparse import Namespace
 from pathlib import Path
 
-from py3dtilers.IfcTiler.IfcTiler import IfcTiler
-
 
 def get_default_namespace():
     return Namespace(obj=None, loa=None, lod1=False, crs_in='EPSG:3946',
@@ -15,6 +13,11 @@ def get_default_namespace():
 class Test_Tile(unittest.TestCase):
 
     def test_IFC4_case(self):
+        try:
+            from py3dtilers.IfcTiler.IfcTiler import IfcTiler
+        except ImportError as e:
+            print(e)
+            self.skipTest('Error when importing IfcOpenShell')
         ifc_tiler = IfcTiler()
         ifc_tiler.files = [Path('tests/ifc_tiler_test_data/FZK.ifc')]
         ifc_tiler.args = get_default_namespace()
