@@ -1,21 +1,28 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from ..Common import GeometryNode, GeometryTree
 from .tile_to_feature import TileToFeatureList
+
+if TYPE_CHECKING:
+    from py3dtiles.tileset import TileSet, Tile
 
 
 class TilesetTree(GeometryTree):
 
-    def __init__(self, tileset, tileset_paths, geometric_errors=[None, None, None]):
-        root_tile = tileset.get_root_tile()
+    def __init__(self, tileset: TileSet, tileset_paths, geometric_errors=[None, None, None]):
+        root_tile = tileset.root_tile
 
         root_nodes = list()
-        for i, tile in enumerate(root_tile.attributes['children']):
-            offset = tile.get_transform()[12:15]
+        for i, tile in enumerate(root_tile.children):
+            offset = [tile.transform[0][3], tile.transform[1][3], tile.transform[2][3]]
             root_node, depth = self.tile_to_node(tile, tileset_paths[i], offset, geometric_errors)
             root_nodes.append(root_node)
 
         super().__init__(root_nodes)
 
-    def tile_to_node(self, tile, tileset_path, offset, geometric_errors=[None, None, None]):
+    def tile_to_node(self, tile: Tile, tileset_path, offset, geometric_errors=[None, None, None]):
         """
         Create a GeometryNode and its children from tiles.
         The geometric error of the nodes depends on their depth in the tileset hierarchy.
@@ -30,14 +37,14 @@ class TilesetTree(GeometryTree):
         """
         children_depth = 0
         children = list()
-        if 'children' in tile.attributes and len(tile.attributes['children']) > 0:
-            for child in tile.attributes['children']:
+        if len(tile.children) > 0:
+            for child in tile.children:
                 child, child_depth = self.tile_to_node(child, tileset_path, offset, geometric_errors)
                 children.append(child)
                 children_depth = child_depth if child_depth > children_depth else children_depth
 
         i = children_depth if children_depth < len(geometric_errors) else len(geometric_errors) - 1
-        geometric_error = tile.attributes["geometricError"] if geometric_errors[i] is None else geometric_errors[i]
+        geometric_error = tile.geometric_error if geometric_errors[i] is None else geometric_errors[i]
 
         feature_list = TileToFeatureList(tile, tileset_path)
         feature_list.translate_features(offset)

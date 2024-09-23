@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
-from py3dtiles import TriangleSoup
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
 import os
 
 from ..Common import Feature, FeatureList

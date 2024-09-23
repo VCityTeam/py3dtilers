@@ -1,5 +1,6 @@
 import numpy as np
-from py3dtiles import BoundingVolumeBox, TriangleSoup
+from py3dtiles.tilers.b3dm.wkb_utils import TriangleSoup
+from py3dtiles.tileset import BoundingVolumeBox
 from typing import List
 from ..Color import ColorConfig
 
@@ -102,7 +103,7 @@ class Feature(object):
         Set the BoundingVolumeBox of this feature from its triangles.
         Also set the centroid.
         """
-        bbox = self.geom.getBbox()
+        bbox = self.geom.get_bbox()
         self.box = BoundingVolumeBox()
         self.box.set_from_mins_maxs(np.append(bbox[0], bbox[1]))
 
@@ -228,21 +229,21 @@ class FeatureList(object):
     def set_materials(self, materials):
         """
         Set the materials of this object to a new array of materials.
-        :param materials: an array of GlTFMaterial
+        :param materials: an array of Material
         """
         self.materials = materials
 
     def add_materials(self, materials):
         """
         Extend the materials of this object with another array of materials.
-        :param materials: an array of GlTFMaterial
+        :param materials: an array of Material
         """
         self.materials.extend(materials)
 
     def add_material(self, material):
         """
         Extend the materials of this object with a GltF material.
-        :param material: a GlTFMaterial
+        :param material: a Material
         """
         self.materials.append(material)
 
@@ -257,11 +258,11 @@ class FeatureList(object):
     def is_material_registered(self, material):
         """
         Check if a material is already set in materials array
-        :param material: a GlTFMaterial
+        :param material: a Material
         :return: bool
         """
         for mat in self.materials:
-            if (mat.rgba == material.rgba).all():
+            if mat.pbrMetallicRoughness.baseColorFactor == material.pbrMetallicRoughness.baseColorFactor:
                 return True
         return False
 
@@ -269,16 +270,14 @@ class FeatureList(object):
         """
         Get the index of a given material.
         Add it to the materials array if it is not found
-        :param material: a GlTFMaterial
+        :param material: a Material
         :return: an index as int
         """
-        i = 0
-        for mat in self.materials:
-            if (mat.rgba == material.rgba).all():
+        for i, mat in enumerate(self.materials):
+            if mat.pbrMetallicRoughness.baseColorFactor == material.pbrMetallicRoughness.baseColorFactor:
                 return i
-            i = i + 1
         self.add_material(material)
-        return i
+        return len(self.materials) - 1
 
     def translate_features(self, offset):
         """

@@ -22,7 +22,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
     def test_basic_case_no_normals(self):
         obj_tiler = ObjTiler()
@@ -33,7 +33,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
     def test_basic_case_height_mult(self):
         obj_tiler = ObjTiler()
@@ -44,7 +44,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
     def test_texture(self):
         obj_tiler = ObjTiler()
@@ -57,7 +57,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
     def test_texture_lods(self):
         obj_tiler = ObjTiler()
@@ -71,7 +71,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
     def test_model_lods(self):
         obj_tiler = ObjTiler()
@@ -86,7 +86,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = obj_tiler.from_obj_directory()
         if tileset is not None:
-            tileset.write_as_json(Path(obj_tiler.args.output_dir))
+            tileset.write_as_json(Path(obj_tiler.args.output_dir, 'tileset.json'))
 
 
 if __name__ == '__main__':

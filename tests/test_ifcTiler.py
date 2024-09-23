@@ -25,7 +25,7 @@ class Test_Tile(unittest.TestCase):
 
         tileset = ifc_tiler.from_ifc(ifc_tiler.args.grouped_by, with_BTH=False)
         if tileset is not None:
-            tileset.write_as_json(ifc_tiler.args.output_dir)
+            tileset.write_as_json(Path(ifc_tiler.args.output_dir, 'tileset.json'))
 
 
 if __name__ == '__main__':

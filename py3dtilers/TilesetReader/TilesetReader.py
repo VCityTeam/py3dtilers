@@ -1,9 +1,10 @@
 import sys
 import os
+from pathlib import Path
 
-from py3dtiles import TilesetReader
 from .tileset_tree import TilesetTree
 from .TilesetMerger import TilesetMerger
+from .reader_utils import read_tilesets
 from ..Common import Tiler, FromGeometryTreeToTileset
 
 
@@ -12,7 +13,6 @@ class TilesetTiler(Tiler):
     def __init__(self):
         super().__init__()
         self.tileset_of_root_tiles = list()
-        self.reader = TilesetReader()
 
     def parse_command_line(self):
         super().parse_command_line()
@@ -75,7 +75,7 @@ class TilesetTiler(Tiler):
 
         :return: a TileSet
         """
-        tilesets = self.reader.read_tilesets(self.files)
+        tilesets = read_tilesets(self.files)
         tileset, self.tileset_of_root_tiles = TilesetMerger.merge_tilesets(tilesets, self.files)
         return tileset
 
@@ -88,7 +88,7 @@ def main():
     tileset = tiler.read_and_merge_tilesets()
 
     tileset = tiler.transform_tileset(tileset)
-    tileset.write_as_json(tiler.get_output_dir())
+    tileset.write_as_json(Path(tiler.get_output_dir(), 'tileset.json'))
 
 
 if __name__ == '__main__':
