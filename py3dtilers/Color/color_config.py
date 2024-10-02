@@ -48,7 +48,7 @@ class ColorConfig():
             hex = color.replace('#', '').replace('0x', '')
             length = min(len(hex), 8)
             color = [round(int(hex[i:i + 2], 16) / 255, 4) for i in range(0, length, 2)]
-        return Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=color), emissiveFactor=None)
+        return Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=color, metallicFactor=0), emissiveFactor=None)
 
     def get_color_by_key(self, key):
         """
