@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pywavefront
-from pygltflib import Material, PbrMetallicRoughness
 
 from ..Common import Feature, FeatureList
+from ..Color import ColorConfig
 from ..Texture import Texture
 
 
@@ -165,7 +165,8 @@ class Objs(FeatureList):
                     mesh_index += 1
                     if obj.parse_geom(mesh_mat, with_texture):
                         objects.append(obj)
-                    material = Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=[mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2], 1. - mesh_mat.diffuse[3]], metallicFactor=0.))
+                    color = [mesh_mat.diffuse[0], mesh_mat.diffuse[1], mesh_mat.diffuse[2], 1. - mesh_mat.diffuse[3]]
+                    material = ColorConfig().to_material(color)
                     materials.append(material)
 
         fList = Objs(objects)

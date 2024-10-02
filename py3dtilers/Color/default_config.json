@@ -7,5 +7,9 @@
 
     "color_dict": {
         "default": [1, 1, 1]
-    }
+    },
+
+    "double_sided": true,
+    "metallic_factor": 0,
+    "roughness_factor": 1
 }

@@ -20,6 +20,10 @@ class ColorConfig():
         'default': [1, 1, 1]
     }
 
+    double_sided = True
+    metallic_factor = 0
+    roughness_factor = 1
+
     def __init__(self, config_path=os.path.join(os.path.dirname(__file__), "default_config.json")):
         if config_path is not None:
             try:
@@ -30,6 +34,9 @@ class ColorConfig():
                 self.max_color = content['max_color'] if 'max_color' in content else self.max_color
                 self.nb_colors = content['nb_colors'] if 'nb_colors' in content else self.nb_colors
                 self.color_dict = content['color_dict'] if 'color_dict' in content else self.color_dict
+                self.double_sided = content['double_sided'] if 'double_sided' in content else self.double_sided
+                self.metallic_factor = content['metallic_factor'] if 'metallic_factor' in content else self.metallic_factor
+                self.roughness_factor = content['roughness_factor'] if 'roughness_factor' in content else self.roughness_factor
             except FileNotFoundError:
                 print("The config file", config_path, "wasn't found.")
         self.min_color_code = self.to_material(self.min_color).pbrMetallicRoughness.baseColorFactor[:3]
@@ -43,12 +50,13 @@ class ColorConfig():
         :return: a Material
         """
         if isinstance(color, list):
-            color.append(1)
+            if len(color) < 4:
+                color.append(1)
         elif all(c in string.hexdigits for c in color.replace('#', '').replace('0x', '')):
             hex = color.replace('#', '').replace('0x', '')
             length = min(len(hex), 8)
             color = [round(int(hex[i:i + 2], 16) / 255, 4) for i in range(0, length, 2)]
-        return Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=color, metallicFactor=0), emissiveFactor=None)
+        return Material(pbrMetallicRoughness=PbrMetallicRoughness(baseColorFactor=color, metallicFactor=self.metallic_factor, roughnessFactor=self.roughness_factor), emissiveFactor=None, doubleSided=self.double_sided)
 
     def get_color_by_key(self, key):
         """
