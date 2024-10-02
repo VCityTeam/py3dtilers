@@ -174,7 +174,8 @@ class Tiler():
                 self.args.offset[i] = float(val)
 
         for i, val in enumerate(self.args.geometric_error):
-            self.args.geometric_error[i] = int(val) if val is not None and val.isnumeric() else None
+            self.args.geometric_error[i] = float(val) if val is not None and val.lstrip('-').replace('.', '', 1).isdigit() else None
+            print(val, self.args.geometric_error[i])
         [self.args.geometric_error.append(None) for _ in range(len(self.args.geometric_error), 3)]
 
         if self.args.quality is not None:
