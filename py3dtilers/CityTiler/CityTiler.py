@@ -146,17 +146,6 @@ def main():
 
     tileset = city_tiler.from_3dcitydb(cursor, objects_type)
 
-    # A shallow attempt at providing some traceability on where the resulting
-    # data set comes from:
-    cursor.execute('SELECT inet_client_addr()')
-    server_ip = cursor.fetchone()[0]
-    cursor.execute('SELECT current_database()')
-    database_name = cursor.fetchone()[0]
-    origin = f'This tileset is the result of Py3DTiles {__file__} script '
-    origin += f'run with data extracted from database {database_name} '
-    origin += f' obtained from server {server_ip}.'
-    tileset.add_asset_extras(origin)
-
     cursor.close()
     tileset.write_as_json(Path(city_tiler.get_output_dir(), 'tileset.json'))
 
