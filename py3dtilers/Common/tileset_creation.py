@@ -108,10 +108,6 @@ class FromGeometryTreeToTileset():
 
         tile = Tile(geometric_error=node.geometric_error,
                     content_uri=Path('tiles', f'{FromGeometryTreeToTileset.tile_index}.b3dm'),
-                    transform=np.array([[1, 0, 0, transform_offset[0]],
-                                        [0, 1, 0, transform_offset[1]],
-                                        [0, 0, 1, transform_offset[2]],
-                                        [0, 0, 0, 1]]),
                     refine_mode='REPLACE')
 
         tile.tile_content = FromGeometryTreeToTileset.__create_tile_content(feature_list, extension_name, node.has_texture(), node.downsample_factor, with_normals)
@@ -134,6 +130,11 @@ class FromGeometryTreeToTileset():
         FromGeometryTreeToTileset.tile_index += 1
         for child_node in node.child_nodes:
             tile.add_child(FromGeometryTreeToTileset.__create_tile(child_node, [0., 0., 0.], extension_name, output_dir, with_normals))
+
+        tile.transform = np.array([[1, 0, 0, transform_offset[0]],
+                                   [0, 1, 0, transform_offset[1]],
+                                   [0, 0, 1, transform_offset[2]],
+                                   [0, 0, 0, 1]])
 
         return tile
 
