@@ -47,7 +47,7 @@ jobs:
 
     - stage: Markdown link checks
       language: node_js
-      node_js: 16
+      node_js: 18
       script:
         - npm install --global remark-cli remark-validate-links
         - remark -u validate-links .
