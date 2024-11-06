@@ -1,7 +1,6 @@
 # Py3DTilers: an open-source toolkit to create 3DTiles
 
-## Arrested development
-:warning:
+## :warning: Arrested development :warning:
 
 Alas, starting on January 2025, the current Py3dTilers development team will move on to new projects. Py3dTilers will thus no longer be developed nor maintained.
 The **current repository owners are thus looking for a community** (a set of individuals, teams or corporations) that would be willing to adopt py3dTilers in order to pursue the development activity.
@@ -13,7 +12,7 @@ maintaining/developing py3dTilers, please provide [in this issue](https://github
 
 Deciding the actual form of transmission will be based on the result of the public discussion happening [in this issue](https://github.com/VCityTeam/py3dtilers/issues/196).
 
-:warning:
+---
 
 [![Build Status](https://app.travis-ci.com/VCityTeam/py3dtilers.svg?branch=master)](https://app.travis-ci.com/VCityTeam/py3dtilers)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://vcityteam.github.io/py3dtilers/py3dtilers/index.html)
