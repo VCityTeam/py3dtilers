@@ -1,5 +1,6 @@
 # Py3DTilers: an open-source toolkit to create 3DTiles
 
+## Arrested development
 :warning:
 
 Alas, starting on January 2025, the current Py3dTilers development team will move on to new projects. Py3dTilers will thus no longer be developed nor maintained.
