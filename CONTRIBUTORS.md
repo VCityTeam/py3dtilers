@@ -1,5 +1,5 @@
 
-## LIRIS labs
+## [LIRIS labs](https://liris.cnrs.fr/)
 
 - Lorenzo MARNAT (software engineer)
 - Eric BOIX (software engineer)
@@ -11,8 +11,10 @@
 
 ## Other organisations
 
-- Christophe TRIQUET
-- Augustin TRANCART
+- Vincent Jaillot ([Ciril Group](https://www.cirilgroup.com/en/))
+- Clément COLIN ([Carl Software/Berger Levrault](https://www.carl-software.com/))
+- Christophe TRIQUET ([CNES](https://cnes.fr/en))
+- Augustin TRANCART ([Oslandia](https://oslandia.com/en/))
 - charly-perspectives
 - andreiveselov
 
