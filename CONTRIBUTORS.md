@@ -13,7 +13,8 @@
 
 - Vincent Jaillot ([Ciril Group](https://www.cirilgroup.com/en/))
 - Clément COLIN ([Carl Software/Berger Levrault](https://www.carl-software.com/))
-- Christophe TRIQUET ([CNES](https://cnes.fr/en))
+- Christophe TRIQUET ([CS GROUP](https://www.csgroup.eu/en/))
+- Fabien PUECH ([CS GROUP](https://www.csgroup.eu/en/))
 - Augustin TRANCART ([Oslandia](https://oslandia.com/en/))
 - charly-perspectives
 - andreiveselov
