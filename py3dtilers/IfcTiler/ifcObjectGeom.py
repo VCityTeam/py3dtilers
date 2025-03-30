@@ -180,7 +180,7 @@ class IfcObjectsGeom(FeatureList):
             return None
 
     @staticmethod
-    def retrievObjByType(path_to_file, with_BTH):
+    def retrievObjByType(path_to_file, with_BTH,class_filter):
         """
         :param path: a path to a directory
 
@@ -190,28 +190,27 @@ class IfcObjectsGeom(FeatureList):
 
         buildings = ifc_file.by_type('IfcBuilding')
         dictObjByType = dict()
-        _ = ifc_file.by_type('IfcSlab')
         i = 1
-
         for building in buildings:
             elements = ifcopenshell.util.element.get_decomposition(building)
             nb_element = str(len(elements))
             logging.info(nb_element + " elements to parse in building :" + building.GlobalId)
             for element in elements:
-                start_time = time.time()
-                logging.info(str(i) + " / " + nb_element)
-                logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
-                obj = IfcObjectGeom(element, with_BTH=with_BTH)
-                if obj.hasGeom():
-                    if not (element.is_a() + building.GlobalId in dictObjByType):
-                        dictObjByType[element.is_a() + building.GlobalId] = IfcObjectsGeom()
-                    if obj.material:
-                        obj.material_index = dictObjByType[element.is_a() + building.GlobalId].get_material_index(obj.material)
-                    else:
-                        obj.material_index = 0
-                    dictObjByType[element.is_a() + building.GlobalId].append(obj)
-                logging.info("--- %s seconds ---" % (time.time() - start_time))
-                i = i + 1
+                if(not(class_filter) or element.is_a() in class_filter):
+                    start_time = time.time()
+                    logging.info(str(i) + " / " + nb_element)
+                    logging.info("Parsing " + element.GlobalId + ", " + element.is_a())
+                    obj = IfcObjectGeom(element, with_BTH=with_BTH)
+                    if obj.hasGeom():
+                        if not (element.is_a() + building.GlobalId in dictObjByType):
+                            dictObjByType[element.is_a() + building.GlobalId] = IfcObjectsGeom()
+                        if obj.material:
+                            obj.material_index = dictObjByType[element.is_a() + building.GlobalId].get_material_index(obj.material)
+                        else:
+                            obj.material_index = 0
+                        dictObjByType[element.is_a() + building.GlobalId].append(obj)
+                    logging.info("--- %s seconds ---" % (time.time() - start_time))
+                    i = i + 1
         return dictObjByType
 
     @staticmethod
