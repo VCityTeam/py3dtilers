@@ -91,7 +91,7 @@ class CityTiler(Tiler):
                 id = cityobject.get_database_id()
                 cursor.execute(objects_type.sql_query_centroid(id))
                 centroid = cursor.fetchall()
-                if centroid is not None:
+                if centroid is not None and len(centroid) > 0:
                     cityobject.centroid = np.array([centroid[0][0], centroid[0][1], centroid[0][2]])
                     cityobjects_with_centroid.append(cityobject)
             except AttributeError:
